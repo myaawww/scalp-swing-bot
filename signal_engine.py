@@ -42,6 +42,7 @@ WATCHLIST = [
     "XLMUSDT",
     "ASTERUSDT",
     "VVVUSDT",
+    "WLDUSDT",
 ]
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
