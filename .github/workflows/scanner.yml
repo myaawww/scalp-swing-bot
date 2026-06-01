@@ -28,15 +28,20 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y cloudflare-warp
 
-      - name: Connect WARP
+      - name: Connect WARP (proxy mode)
         run: |
           sudo warp-svc &
-          sleep 5
+          sleep 8
           warp-cli --accept-tos registration new
           warp-cli --accept-tos mode proxy
+          warp-cli --accept-tos proxy port 40000
           warp-cli --accept-tos connect
-          sleep 5
+          sleep 8
           warp-cli --accept-tos status
+          echo "--- Egress IP via WARP proxy ---"
+          curl -sx socks5h://127.0.0.1:40000 https://ifconfig.me && echo ""
+          echo "--- Direct egress IP (no proxy) ---"
+          curl -s https://ifconfig.me && echo ""
 
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
