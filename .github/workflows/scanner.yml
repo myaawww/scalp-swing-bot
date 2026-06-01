@@ -18,6 +18,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
 
+      - name: Install Cloudflare WARP
+        run: |
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg \
+            | sudo gpg --yes --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] \
+            https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update -qq
+          sudo apt-get install -y cloudflare-warp
+
+      - name: Connect WARP
+        run: |
+          sudo warp-svc &
+          sleep 5
+          warp-cli --accept-tos registration new
+          warp-cli --accept-tos mode proxy
+          warp-cli --accept-tos connect
+          sleep 5
+          warp-cli --accept-tos status
+
       - name: Set up Python
         uses: actions/setup-python@v5.6.0
         with:
@@ -31,6 +51,8 @@ jobs:
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
+          HTTPS_PROXY:  "socks5h://127.0.0.1:40000"
+          HTTP_PROXY:   "socks5h://127.0.0.1:40000"
         run: python signal_engine.py
 
       - name: Persist cooldown state
