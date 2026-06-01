@@ -1,18 +1,21 @@
-name: Scalp Swing Scanner
+name: Telegram Command Listener
+
+# Runs every 5 minutes (GitHub's minimum cron interval) to check
+# for /scan commands and dispatch the scanner workflow on demand.
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  scan:
+  listen:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write   # needed to git-push the updated tg_offset.json
 
     steps:
       - name: Checkout repository
@@ -27,17 +30,20 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run signal scanner
+      - name: Poll Telegram for commands
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
-        run: python signal_engine.py
+          GH_PAT:       ${{ secrets.GH_PAT }}
+          GH_REPO:      ${{ github.repository }}
+          GH_BRANCH:    ${{ github.ref_name }}
+        run: python telegram_listener.py
 
-      - name: Persist cooldown state
+      - name: Persist update offset
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin ${{ github.ref_name }} || true
-          git add state.json || true
-          git diff --staged --quiet || git commit -m "chore: update scanner state [skip ci]"
+          git add tg_offset.json || true
+          git diff --staged --quiet || git commit -m "chore: update telegram offset [skip ci]"
           git push || true
