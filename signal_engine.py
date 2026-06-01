@@ -54,7 +54,7 @@ MIN_DAILY_ADX        = 20.0
 PULL_REQUIRES_4H     = True
 
 # ── VOLUME FILTER ─────────────────────────────────────────────────
-MIN_24H_VOLUME_USD = 10_000_000   # 10M USD / 24h
+MIN_24H_VOLUME_USD = 5_000_000   # 5M USD / 24h
 
 # ── HYPERLIQUID ENDPOINTS ─────────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
