@@ -1,6 +1,6 @@
 """
 Scalp Swing Bot v10 – Python Signal Engine
-Binance Spot edition
+Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
@@ -11,11 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ── CONFIG ───────────────────────────────────────────────────
-TG_BOT_TOKEN  = os.environ["TG_BOT_TOKEN"]
-TG_CHAT_ID    = os.environ["TG_CHAT_ID"]
-STATE_FILE    = "state.json"
+TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
+TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
+STATE_FILE   = "state.json"
 
 # ── HARDCODED WATCHLIST ───────────────────────────────────────
+# Format: standard USDT pairs — hl_coin() strips the suffix automatically
 WATCHLIST = [
     "BTCUSDT",
     "ETHUSDT",
@@ -42,16 +43,16 @@ WATCHLIST = [
 ]
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
-FAST_LEN   = 21
-SLOW_LEN   = 50
-TREND_LEN  = 200
-RSI_LEN    = 14
-ATR_LEN    = 14
-ADX_LEN    = 14
-BB_LEN     = 20
-BB_MULT    = 2.0
-VOL_LEN    = 20
-OBV_LEN    = 3
+FAST_LEN  = 21
+SLOW_LEN  = 50
+TREND_LEN = 200
+RSI_LEN   = 14
+ATR_LEN   = 14
+ADX_LEN   = 14
+BB_LEN    = 20
+BB_MULT   = 2.0
+VOL_LEN   = 20
+OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
 MIN_SCORE       = 4
@@ -73,27 +74,44 @@ WICK_FILTER     = 0.45
 RANGE_PCT_BREAK = 0.30
 PULL_ZONE_MULT  = 0.25
 TREND_HOLD_BARS = 2
-USE_ROLLING_VWAP     = True
-ROLLING_VWAP_LEN     = 16
-USE_D200_FILTER      = True
-USE_DAILY_ADX        = True
-MIN_DAILY_ADX        = 20.0
-PULL_REQUIRES_4H     = True
+USE_ROLLING_VWAP  = True
+ROLLING_VWAP_LEN  = 16
+USE_D200_FILTER   = True
+USE_DAILY_ADX     = True
+MIN_DAILY_ADX     = 20.0
+PULL_REQUIRES_4H  = True
 
-# ── BINANCE SPOT ENDPOINT ─────────────────────────────────────
-BINANCE_API = "https://data-api.binance.vision"
+# ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
+HL_INFO_URL = "https://api.hyperliquid.xyz/info"
+
+# Interval → milliseconds (for startTime calculation)
+INTERVAL_MS = {
+    "15m": 15 * 60 * 1000,
+    "1h":  60 * 60 * 1000,
+    "4h":  4  * 60 * 60 * 1000,
+    "1d":  24 * 60 * 60 * 1000,
+}
 
 
 # ═══════════════════════════════════════════════════════════════
-# BINANCE DATA FETCHING
+# HYPERLIQUID DATA FETCHING
 # ═══════════════════════════════════════════════════════════════
 
-def binance_get(path: str, params: dict = None) -> any:
-    """GET from Binance Spot API (data-api.binance.vision) with retry."""
-    url = BINANCE_API + path
+def hl_coin(symbol: str) -> str:
+    """Convert BTCUSDT → BTC (Hyperliquid perp coin name)."""
+    return symbol.replace("USDT", "")
+
+
+def hl_post(payload: dict) -> any:
+    """POST to Hyperliquid /info with retry."""
     for attempt in range(3):
         try:
-            r = requests.get(url, params=params, timeout=15)
+            r = requests.post(
+                HL_INFO_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=15,
+            )
             r.raise_for_status()
             return r.json()
         except Exception as e:
@@ -104,27 +122,40 @@ def binance_get(path: str, params: dict = None) -> any:
 
 def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     """
-    Fetch last n closed candles for symbol on interval.
-    interval examples: "15m", "1h", "4h", "1d"
+    Fetch last n closed candles for symbol on interval via Hyperliquid.
     Returns list of dicts: {t, o, h, l, c, v}  newest last.
+    Hyperliquid candleSnapshot supports up to 5000 candles.
     """
-    limit = min(n + 2, 1000)
-    raw = binance_get("/api/v3/klines", {
-        "symbol":   symbol,
-        "interval": interval,
-        "limit":    limit,
-    })
+    coin      = hl_coin(symbol)
+    iv_ms     = INTERVAL_MS.get(interval, 60 * 60 * 1000)
+    end_ms    = int(time.time() * 1000)
+    start_ms  = end_ms - iv_ms * (n + 10)   # fetch a bit extra for safety
+
+    payload = {
+        "type": "candleSnapshot",
+        "req": {
+            "coin":      coin,
+            "interval":  interval,
+            "startTime": start_ms,
+            "endTime":   end_ms,
+        },
+    }
+
+    raw = hl_post(payload)
+
     candles = []
     for c in raw:
         candles.append({
-            "t": int(c[0]),
-            "o": float(c[1]),
-            "h": float(c[2]),
-            "l": float(c[3]),
-            "c": float(c[4]),
-            "v": float(c[5]),
-            "qv": float(c[7]),
+            "t":  int(c["t"]),
+            "o":  float(c["o"]),
+            "h":  float(c["h"]),
+            "l":  float(c["l"]),
+            "c":  float(c["c"]),
+            "v":  float(c["v"]),
+            "qv": float(c["v"]),   # HL returns base volume; reuse for qv
         })
+
+    # Drop the last (possibly still-open) candle, return the most recent n
     return candles[:-1][-n:]
 
 
@@ -171,9 +202,11 @@ def rsi(closes: list[float], period: int) -> list[float]:
 def atr(highs, lows, closes, period: int) -> list[float]:
     trs = [float("nan")]
     for i in range(1, len(closes)):
-        tr = max(highs[i] - lows[i],
-                 abs(highs[i] - closes[i - 1]),
-                 abs(lows[i]  - closes[i - 1]))
+        tr = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i - 1]),
+            abs(lows[i]  - closes[i - 1]),
+        )
         trs.append(tr)
     result = [float("nan")] * len(closes)
     if len(trs) < period + 1:
@@ -206,11 +239,13 @@ def adx_dmi(highs, lows, closes, period: int):
     for i in range(1, n):
         up   = highs[i]    - highs[i - 1]
         down = lows[i - 1] - lows[i]
-        plus_dm[i]  = up   if (up > down   and up > 0)   else 0
-        minus_dm[i] = down if (down > up   and down > 0) else 0
-        tr_arr[i]   = max(highs[i] - lows[i],
-                          abs(highs[i] - closes[i - 1]),
-                          abs(lows[i]  - closes[i - 1]))
+        plus_dm[i]  = up   if (up > down  and up > 0)   else 0
+        minus_dm[i] = down if (down > up  and down > 0) else 0
+        tr_arr[i]   = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i - 1]),
+            abs(lows[i]  - closes[i - 1]),
+        )
 
     def wilder_smooth(arr):
         res = [0.0] * n
@@ -311,22 +346,21 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     res = SignalResult()
 
     def arrays(candles):
-        o  = [c["o"]  for c in candles]
-        h  = [c["h"]  for c in candles]
-        l  = [c["l"]  for c in candles]
-        cl = [c["c"]  for c in candles]
-        v  = [c["v"]  for c in candles]
+        o  = [c["o"] for c in candles]
+        h  = [c["h"] for c in candles]
+        l  = [c["l"] for c in candles]
+        cl = [c["c"] for c in candles]
+        v  = [c["v"] for c in candles]
         return o, h, l, cl, v
 
     # ── 15m ──────────────────────────────────────────────────
     o15, h15, l15, c15, v15 = arrays(candles_15m)
     ema_f15 = ema(c15, FAST_LEN);  ef15 = safe(ema_f15[-1])
     ema_s15 = ema(c15, SLOW_LEN);  es15 = safe(ema_s15[-1])
-    ema_t15 = ema(c15, TREND_LEN)
     rsi15   = rsi(c15, RSI_LEN);   r15  = safe(rsi15[-1])
     atr15   = atr(h15, l15, c15, ATR_LEN); a15 = safe(atr15[-1])
     _, _, adx15_arr = adx_dmi(h15, l15, c15, ADX_LEN)
-    adx15   = safe(adx15_arr[-1], 25.0)
+    adx15    = safe(adx15_arr[-1], 25.0)
     bb_b15, _, _ = bollinger(c15, BB_LEN, BB_MULT)
     bb_basis = safe(bb_b15[-1])
     vol_ma15 = sma(v15, VOL_LEN);  vm15 = safe(vol_ma15[-1])
@@ -371,7 +405,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     ema_s4h = ema(c4h, SLOW_LEN)
     ef4h = safe(ema_f4h[-1]); es4h = safe(ema_s4h[-1])
     _, _, adx4h_arr = adx_dmi(h4h, l4h, c4h, ADX_LEN)
-    adx4h = safe(adx4h_arr[-1], 25.0)
+    adx4h  = safe(adx4h_arr[-1], 25.0)
     d_bull = ef4h > es4h
     d_bear = ef4h < es4h
 
@@ -571,8 +605,8 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
     ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     def fmt(v):
-        if v >= 1000:  return f"{v:,.2f}"
-        if v >= 1:     return f"{v:.4f}"
+        if v >= 1000: return f"{v:,.2f}"
+        if v >= 1:    return f"{v:.4f}"
         return f"{v:.6f}"
 
     return (
@@ -584,7 +618,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Binance Spot (data-api.binance.vision) • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -594,7 +628,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
-    print(f"Watchlist ({len(WATCHLIST)} pairs): {WATCHLIST}")
+    print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
 
     bar_index_now = int(time.time() // (15 * 60))
     state         = load_state()
@@ -602,7 +636,8 @@ def main():
 
     for symbol in WATCHLIST:
         try:
-            print(f"  Processing {symbol}…")
+            coin = hl_coin(symbol)
+            print(f"  Processing {coin}…")
 
             n = max(300, TREND_LEN + 50)
 
@@ -612,7 +647,7 @@ def main():
             candles_d   = get_candles(symbol, "1d",  n)
 
             if len(candles_15m) < 50:
-                print(f"    Skipping {symbol}: insufficient candles")
+                print(f"    Skipping {coin}: insufficient candles ({len(candles_15m)})")
                 continue
 
             sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
@@ -620,16 +655,16 @@ def main():
             if sig.fire_long or sig.fire_short:
                 direction = "long" if sig.fire_long else "short"
                 if not check_cooldown(state, symbol, direction, bar_index_now):
-                    print(f"    {symbol} signal suppressed by cooldown")
+                    print(f"    {coin} signal suppressed by cooldown")
                     continue
                 msg = format_signal(symbol, sig)
-                print(f"    🚀 SIGNAL: {symbol} {direction.upper()} [{sig.signal_type}] score={sig.score}")
+                print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
                 send_telegram(msg)
                 update_cooldown(state, symbol, direction, bar_index_now)
                 signals_fired += 1
-                time.sleep(1)
+                time.sleep(0.5)   # gentle rate limiting between TG sends
             else:
-                print(f"    {symbol}: no signal")
+                print(f"    {coin}: no signal")
 
         except Exception as e:
             print(f"    ERROR processing {symbol}: {e}")
