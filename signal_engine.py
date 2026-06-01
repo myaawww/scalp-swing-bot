@@ -1,6 +1,6 @@
 """
 Scalp Swing Bot v10 – Python Signal Engine
-Binance USDM Futures edition
+Bybit USDT Perpetual Futures edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
@@ -57,22 +57,35 @@ PULL_REQUIRES_4H     = True
 # ── VOLUME FILTER ─────────────────────────────────────────────
 MIN_24H_VOLUME_USD = 10_000_000   # 10M USDT / 24h
 
-# ── BINANCE FUTURES ENDPOINTS ─────────────────────────────────
-BINANCE_FAPI = "https://fapi.binance.com"
+# ── BYBIT V5 ENDPOINTS ────────────────────────────────────────
+BYBIT_BASE = "https://api.bybit.com"
+
+INTERVAL_MAP = {
+    "15m": "15",
+    "1h":  "60",
+    "4h":  "240",
+    "1d":  "D",
+}
 
 
 # ═══════════════════════════════════════════════════════════════
-# BINANCE DATA FETCHING
+# BYBIT DATA FETCHING
 # ═══════════════════════════════════════════════════════════════
 
-def binance_get(path: str, params: dict = None) -> any:
-    """GET from Binance Futures with retry."""
-    url = BINANCE_FAPI + path
+def bybit_get(path: str, params: dict = None) -> dict:
+    """GET from Bybit V5 with retry."""
+    url = BYBIT_BASE + path
     for attempt in range(3):
         try:
             r = requests.get(url, params=params, timeout=15)
             r.raise_for_status()
-            return r.json()
+            data = r.json()
+            ret_code = data.get("retCode", -1)
+            if ret_code != 0:
+                raise RuntimeError(
+                    f"Bybit API error {ret_code}: {data.get('retMsg', 'unknown')}"
+                )
+            return data
         except Exception as e:
             if attempt == 2:
                 raise
@@ -81,17 +94,20 @@ def binance_get(path: str, params: dict = None) -> any:
 
 def get_filtered_coins() -> list[str]:
     """
-    Return USDT-margined perpetual symbols with
+    Return USDT linear perpetual symbols with
     24h quote volume >= MIN_24H_VOLUME_USD.
+    Bybit endpoint: GET /v5/market/tickers?category=linear
     """
-    tickers = binance_get("/fapi/v1/ticker/24hr")
+    data    = bybit_get("/v5/market/tickers", {"category": "linear"})
+    tickers = data["result"]["list"]
     result  = []
     for t in tickers:
         symbol = t["symbol"]
-        # Only USDT perpetuals, skip quarterly/delivery contracts
+        # Only USDT perpetuals, skip inverse / quarterly contracts
         if not symbol.endswith("USDT"):
             continue
-        vol_usd = float(t.get("quoteVolume", 0))
+        # turnover24h is the 24h quote (USDT) volume on Bybit
+        vol_usd = float(t.get("turnover24h", 0))
         if vol_usd >= MIN_24H_VOLUME_USD:
             result.append(symbol)
     result.sort()
@@ -102,32 +118,51 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     """
     Fetch last n closed candles for symbol on interval.
     interval examples: "15m", "1h", "4h", "1d"
-    Returns list of dicts: {t, o, h, l, c, v}  newest last.
-    Binance returns max 1500 candles per request.
+    Returns list of dicts: {t, o, h, l, c, v, qv}  newest last.
+
+    Bybit V5 kline endpoint: GET /v5/market/kline
+      - category=linear for USDT perpetuals
+      - interval uses the INTERVAL_MAP above
+      - limit max = 1000 per request
+      - Bybit returns bars newest-first, so we reverse them
     """
-    limit = min(n + 2, 1500)  # +2 buffer, Binance max 1500
-    raw = binance_get("/fapi/v1/klines", {
+    bybit_interval = INTERVAL_MAP.get(interval)
+    if bybit_interval is None:
+        raise ValueError(f"Unsupported interval: {interval}")
+
+    limit = min(n + 2, 1000)   # +2 buffer; Bybit max 1000
+    data  = bybit_get("/v5/market/kline", {
+        "category": "linear",
         "symbol":   symbol,
-        "interval": interval,
+        "interval": bybit_interval,
         "limit":    limit,
     })
+
+    # Bybit kline row format (each element is a list):
+    # [startTime, open, high, low, close, volume, turnover]
+    raw = data["result"]["list"]
+
     candles = []
-    for c in raw:
+    for row in raw:
         candles.append({
-            "t": int(c[0]),
-            "o": float(c[1]),
-            "h": float(c[2]),
-            "l": float(c[3]),
-            "c": float(c[4]),
-            "v": float(c[5]),   # base asset volume
-            "qv": float(c[7]),  # quote (USDT) volume
+            "t":  int(row[0]),
+            "o":  float(row[1]),
+            "h":  float(row[2]),
+            "l":  float(row[3]),
+            "c":  float(row[4]),
+            "v":  float(row[5]),   # base asset volume
+            "qv": float(row[6]),   # quote (USDT) turnover
         })
-    # Drop last bar (may be open/incomplete), return last n
+
+    # Bybit returns newest first — reverse to get chronological order
+    candles.reverse()
+
+    # Drop the last bar (may still be open), return the last n closed bars
     return candles[:-1][-n:]
 
 
 # ═══════════════════════════════════════════════════════════════
-# INDICATOR MATH
+# INDICATOR MATH  (unchanged from Binance version)
 # ═══════════════════════════════════════════════════════════════
 
 def ema(values: list[float], period: int) -> list[float]:
@@ -290,7 +325,7 @@ def safe(v, fallback=0.0):
 
 
 # ═══════════════════════════════════════════════════════════════
-# SIGNAL LOGIC
+# SIGNAL LOGIC  (unchanged from Binance version)
 # ═══════════════════════════════════════════════════════════════
 
 class SignalResult:
@@ -582,7 +617,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Binance Futures • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Bybit Futures • {ts}</i>"
     )
 
 
@@ -593,7 +628,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
 
-    print("Fetching 24h volume data from Binance Futures…")
+    print("Fetching 24h volume data from Bybit…")
     symbols = get_filtered_coins()
     print(f"Pairs passing >{MIN_24H_VOLUME_USD/1e6:.0f}M USDT volume filter: {len(symbols)}")
     print(symbols)
