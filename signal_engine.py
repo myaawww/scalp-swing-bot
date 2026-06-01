@@ -1,6 +1,6 @@
 """
 Scalp Swing Bot v10 – Python Signal Engine
-Binance USDM Futures edition
+Binance Spot edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
@@ -14,6 +14,32 @@ from pathlib import Path
 TG_BOT_TOKEN  = os.environ["TG_BOT_TOKEN"]
 TG_CHAT_ID    = os.environ["TG_CHAT_ID"]
 STATE_FILE    = "state.json"
+
+# ── HARDCODED WATCHLIST ───────────────────────────────────────
+WATCHLIST = [
+    "BTCUSDT",
+    "ETHUSDT",
+    "HYPEUSDT",
+    "ZECUSDT",
+    "NEARUSDT",
+    "ONDOUSDT",
+    "SUIUSDT",
+    "PUMPUSDT",
+    "PENGUUSDT",
+    "BNBUSDT",
+    "SOLUSDT",
+    "TRXUSDT",
+    "TONUSDT",
+    "DOGEUSDT",
+    "ADAUSDT",
+    "DOTUSDT",
+    "TAOUSDT",
+    "AVAXUSDT",
+    "LINKUSDT",
+    "AAVEUSDT",
+    "XRPUSDT",
+    "XLMUSDT",
+]
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
 FAST_LEN   = 21
@@ -54,11 +80,8 @@ USE_DAILY_ADX        = True
 MIN_DAILY_ADX        = 20.0
 PULL_REQUIRES_4H     = True
 
-# ── VOLUME FILTER ─────────────────────────────────────────────
-MIN_24H_VOLUME_USD = 10_000_000   # 10M USDT / 24h
-
-# ── BINANCE FUTURES ENDPOINTS ─────────────────────────────────
-BINANCE_FAPI = "https://fapi.binance.com"
+# ── BINANCE SPOT ENDPOINT ─────────────────────────────────────
+BINANCE_API = "https://api.binance.com"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -66,13 +89,11 @@ BINANCE_FAPI = "https://fapi.binance.com"
 # ═══════════════════════════════════════════════════════════════
 
 def binance_get(path: str, params: dict = None) -> any:
-    """GET from Binance Futures with retry and optional proxy (set HTTPS_PROXY env var)."""
-    url = BINANCE_FAPI + path
-    proxy_url = os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
-    proxies   = {"https": proxy_url, "http": proxy_url} if proxy_url else None
+    """GET from Binance Spot API with retry."""
+    url = BINANCE_API + path
     for attempt in range(3):
         try:
-            r = requests.get(url, params=params, timeout=15, proxies=proxies)
+            r = requests.get(url, params=params, timeout=15)
             r.raise_for_status()
             return r.json()
         except Exception as e:
@@ -81,32 +102,14 @@ def binance_get(path: str, params: dict = None) -> any:
             time.sleep(2 ** attempt)
 
 
-def get_filtered_coins() -> list[str]:
-    """
-    Return USDT-margined perpetual symbols with
-    24h quote volume >= MIN_24H_VOLUME_USD.
-    """
-    tickers = binance_get("/fapi/v1/ticker/24hr")
-    result  = []
-    for t in tickers:
-        symbol = t["symbol"]
-        if not symbol.endswith("USDT"):
-            continue
-        vol_usd = float(t.get("quoteVolume", 0))
-        if vol_usd >= MIN_24H_VOLUME_USD:
-            result.append(symbol)
-    result.sort()
-    return result
-
-
 def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     """
     Fetch last n closed candles for symbol on interval.
     interval examples: "15m", "1h", "4h", "1d"
     Returns list of dicts: {t, o, h, l, c, v}  newest last.
     """
-    limit = min(n + 2, 1500)
-    raw = binance_get("/fapi/v1/klines", {
+    limit = min(n + 2, 1000)
+    raw = binance_get("/api/v3/klines", {
         "symbol":   symbol,
         "interval": interval,
         "limit":    limit,
@@ -581,7 +584,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Binance Futures • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Binance Spot • {ts}</i>"
     )
 
 
@@ -591,21 +594,13 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
-
-    print("Fetching 24h volume data from Binance Futures…")
-    symbols = get_filtered_coins()
-    print(f"Pairs passing >{MIN_24H_VOLUME_USD/1e6:.0f}M USDT volume filter: {len(symbols)}")
-    print(symbols)
-
-    if not symbols:
-        print("No pairs pass volume filter. Exiting.")
-        return
+    print(f"Watchlist ({len(WATCHLIST)} pairs): {WATCHLIST}")
 
     bar_index_now = int(time.time() // (15 * 60))
     state         = load_state()
     signals_fired = 0
 
-    for symbol in symbols:
+    for symbol in WATCHLIST:
         try:
             print(f"  Processing {symbol}…")
 
