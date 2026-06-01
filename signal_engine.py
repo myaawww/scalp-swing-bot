@@ -26,6 +26,7 @@ v2 FIXES (aligned to Pine Script v10 logic)
 """
 
 import os, json, time, math, requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -100,6 +101,15 @@ USE_DAILY_ADX     = True
 MIN_DAILY_ADX     = 20.0
 PULL_REQUIRES_4H  = True
 
+# ── CANDLE COUNTS PER TIMEFRAME ──────────────────────────────
+# 15m: full 300 needed for indicators (ADX, BB, OBV, EMA200 not used here)
+# 1H/4H: only need EMA21/50 + ADX14 — 60 candles is plenty
+# Daily: needs EMA200 + small buffer
+N_15M = 300
+N_1H  = 60
+N_4H  = 60
+N_1D  = 210
+
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
 
@@ -136,7 +146,7 @@ def hl_post(payload: dict) -> any:
         except Exception as e:
             if attempt == 2:
                 raise
-            time.sleep(2 ** attempt)
+            time.sleep(1.5 ** attempt)
 
 
 def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
@@ -177,9 +187,33 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     # Drop the last (possibly still-open) candle, return the most recent n
     return candles[:-1][-n:]
 
+def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
+    """
+    Fetch all 4 timeframes concurrently for one symbol.
+    Returns (candles_15m, candles_1h, candles_4h, candles_d)
+    or None if 15m data is insufficient.
+    """
+    # First fetch 15m alone so we can bail early without wasting the other 3 calls
+    candles_15m = get_candles(symbol, "15m", N_15M)
+    if len(candles_15m) < 50:
+        return None
 
-# ═══════════════════════════════════════════════════════════════
-# INDICATOR MATH
+    # Now fetch the remaining 3 TFs in parallel
+    results = {}
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        futures = {
+            ex.submit(get_candles, symbol, "1h",  N_1H): "1h",
+            ex.submit(get_candles, symbol, "4h",  N_4H): "4h",
+            ex.submit(get_candles, symbol, "1d",  N_1D): "1d",
+        }
+        for fut in as_completed(futures):
+            tf = futures[fut]
+            results[tf] = fut.result()   # propagates exceptions naturally
+
+    return candles_15m, results["1h"], results["4h"], results["1d"]
+
+
+
 # ═══════════════════════════════════════════════════════════════
 
 def ema(values: list[float], period: int) -> list[float]:
@@ -665,6 +699,33 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 # MAIN
 # ═══════════════════════════════════════════════════════════════
 
+def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> tuple[str, str] | None:
+    """
+    Scan a single symbol. Returns (symbol, formatted_msg) if a signal fires
+    and cooldown passes, else None. Raises on fetch/compute errors.
+    """
+    coin = hl_coin(symbol)
+    data = fetch_all_candles(symbol)
+    if data is None:
+        print(f"    Skipping {coin}: insufficient candles")
+        return None
+
+    candles_15m, candles_1h, candles_4h, candles_d = data
+    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
+
+    if not (sig.fire_long or sig.fire_short):
+        print(f"    {coin}: no signal")
+        return None
+
+    direction = "long" if sig.fire_long else "short"
+    if not check_cooldown(state, symbol, direction, bar_index_now):
+        print(f"    {coin} signal suppressed by cooldown")
+        return None
+
+    print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
+    return symbol, format_signal(symbol, sig), direction, sig
+
+
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
@@ -673,44 +734,31 @@ def main():
     state         = load_state()
     signals_fired = 0
 
-    for symbol in WATCHLIST:
-        try:
-            coin = hl_coin(symbol)
-            print(f"  Processing {coin}…")
+    # Scan all symbols in parallel — up to 10 concurrent workers
+    # (each worker fetches 15m first, then 3 TFs in parallel, so peak ≈ 40 connections)
+    pending_signals = []
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        futures = {ex.submit(scan_symbol, sym, state, bar_index_now): sym
+                   for sym in WATCHLIST}
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                result = fut.result()
+                if result is not None:
+                    pending_signals.append(result)
+            except Exception as e:
+                print(f"    ERROR processing {sym}: {e}")
 
-            n = max(300, TREND_LEN + 50)
-
-            candles_15m = get_candles(symbol, "15m", n)
-            candles_1h  = get_candles(symbol, "1h",  n)
-            candles_4h  = get_candles(symbol, "4h",  n)
-            candles_d   = get_candles(symbol, "1d",  n)
-
-            if len(candles_15m) < 50:
-                print(f"    Skipping {coin}: insufficient candles ({len(candles_15m)})")
-                continue
-
-            sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
-
-            if sig.fire_long or sig.fire_short:
-                direction = "long" if sig.fire_long else "short"
-                if not check_cooldown(state, symbol, direction, bar_index_now):
-                    print(f"    {coin} signal suppressed by cooldown")
-                    continue
-                msg = format_signal(symbol, sig)
-                print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
-                send_telegram(msg)
-                update_cooldown(state, symbol, direction, bar_index_now)
-                signals_fired += 1
-                time.sleep(0.5)   # gentle rate limiting between TG sends
-            else:
-                print(f"    {coin}: no signal")
-
-        except Exception as e:
-            print(f"    ERROR processing {symbol}: {e}")
-            continue
+    # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
+    for symbol, msg, direction, sig in pending_signals:
+        send_telegram(msg)
+        update_cooldown(state, symbol, direction, bar_index_now)
+        signals_fired += 1
+        time.sleep(0.5)   # gentle rate limiting between TG sends
 
     save_state(state)
     print(f"Scan complete. {signals_fired} signal(s) fired.")
+
 
 
 if __name__ == "__main__":
