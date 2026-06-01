@@ -81,7 +81,7 @@ MIN_DAILY_ADX        = 20.0
 PULL_REQUIRES_4H     = True
 
 # ── BINANCE SPOT ENDPOINT ─────────────────────────────────────
-BINANCE_API = "https://api.binance.com"
+BINANCE_API = "https://data-api.binance.vision"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -89,7 +89,7 @@ BINANCE_API = "https://api.binance.com"
 # ═══════════════════════════════════════════════════════════════
 
 def binance_get(path: str, params: dict = None) -> any:
-    """GET from Binance Spot API with retry."""
+    """GET from Binance Spot API (data-api.binance.vision) with retry."""
     url = BINANCE_API + path
     for attempt in range(3):
         try:
@@ -584,7 +584,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Binance Spot • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Binance Spot (data-api.binance.vision) • {ts}</i>"
     )
 
 
