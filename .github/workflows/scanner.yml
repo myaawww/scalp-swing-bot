@@ -25,6 +25,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+
       - name: Run signal scanner
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
@@ -35,7 +36,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin ${{ github.ref_name }} || true
           git add state.json || true
           git diff --staged --quiet || git commit -m "chore: update scanner state [skip ci]"
           git push || true
