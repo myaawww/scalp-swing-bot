@@ -30,6 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 import signal_engine_adaptive as engine_v6
+import signal_engine_swing as engine_swing
 
 # ── CONFIG ───────────────────────────────────────────────────
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
@@ -745,9 +746,10 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
     # v6 needs 5m confirmation stream; fetch it once here.
     candles_5m = get_candles(symbol, "5m", N_5M)
     sig_v6 = engine_v6.compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
+    sig_swing = engine_swing.compute_signals(symbol, candles_1h, candles_4h, candles_d)
 
     results = []
-    for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6)):
+    for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6), ("SWING", sig_swing)):
         if not (sig.fire_long or sig.fire_short):
             continue
 
