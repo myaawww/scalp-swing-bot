@@ -31,8 +31,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ── CONFIG ───────────────────────────────────────────────────
-TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
-TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
+# When imported as a library (from `signal_engine.py`), we don't want
+# to hard-require Telegram env vars just to compute signals.
+TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "")
+TG_CHAT_ID   = os.getenv("TG_CHAT_ID", "")
 STATE_FILE   = "state.json"
 SIGNAL_LOG_FILE = "signal_log.jsonl"
 
@@ -841,6 +843,9 @@ def stars(score: int) -> str:
 
 
 def send_telegram(text: str):
+    if not TG_BOT_TOKEN or not TG_CHAT_ID:
+        print("[TG] Missing TG_BOT_TOKEN/TG_CHAT_ID; skipping send.")
+        return
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
     for attempt in range(3):
         try:
@@ -860,7 +865,7 @@ def send_telegram(text: str):
 def format_signal(symbol: str, sig: SignalResult) -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     emoji     = "🟢" if sig.fire_long else "🔴"
-   
+    ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     def fmt(v):
         if v >= 1000: return f"{v:,.2f}"
@@ -879,8 +884,8 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>R:R (TP2/SL):</b> 1:{sig.rr:.2f}  |  <b>SL%:</b> {sig.sl_pct:.2f}%\n"
         f"<b>Regime:</b> {sig.regime}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}"
-       
+        f"<b>Gates:</b> {sig.v10_gates}\n"
+        f"<i>Scalp Swing v10 [H4/H1/M15+M5] • Hyperliquid Perps • {ts}</i>"
     )
 
 
