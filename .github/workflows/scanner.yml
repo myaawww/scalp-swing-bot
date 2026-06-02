@@ -31,11 +31,6 @@ jobs:
           TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
         run: python signal_engine.py
         
-      - name: Run signal scanner V5
-        env:
-          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
-        run: python signal_engine_v5.py
 
       - name: Persist cooldown state
         run: |
