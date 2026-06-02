@@ -688,7 +688,6 @@ def send_telegram(text: str):
 def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     emoji     = "🟢" if sig.fire_long else "🔴"
-    ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     def fmt(v):
         if v >= 1000: return f"{v:,.2f}"
@@ -720,8 +719,8 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<b>Gates:</b> {sig.v10_gates}"
+        
     )
 
 
