@@ -729,10 +729,10 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
 # MAIN
 # ═══════════════════════════════════════════════════════════════
 
-def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, str, SignalResult]]:
+def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, list[str], SignalResult]]:
     """
     Scan a single symbol and evaluate both v5 + v6 engines.
-    Returns list of (symbol, formatted_msg, direction, engine_tag, sig).
+    Returns list of (symbol, formatted_msg, direction, engine_tags, sig).
     """
     coin = hl_coin(symbol)
     data = fetch_all_candles(symbol)
@@ -748,7 +748,7 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
     sig_v6 = engine_v6.compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
     sig_swing = engine_swing.compute_signals(symbol, candles_1h, candles_4h, candles_d)
 
-    results = []
+    raw_results: list[tuple[str, str, str, str, SignalResult]] = []
     for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6), ("SWING", sig_swing)):
         if not (sig.fire_long or sig.fire_short):
             continue
@@ -761,10 +761,40 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
             continue
 
         print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] {engine_tag} score={sig.score}")
-        results.append((symbol, format_signal(symbol, sig, engine_tag), direction, engine_tag, sig))
+        raw_results.append((symbol, format_signal(symbol, sig, engine_tag), direction, engine_tag, sig))
 
-    if not results:
+    if not raw_results:
         print(f"    {coin}: no signal")
+        return []
+
+    # If CORE + ADAPTIVE fire the exact same call on the same pair, only alert once.
+    # We still advance cooldown for both engines so the dedupe doesn't cause re-alerts.
+    core = next((r for r in raw_results if r[3] == "CORE"), None)
+    adaptive = next((r for r in raw_results if r[3] == "ADAPTIVE"), None)
+    swing = [r for r in raw_results if r[3] == "SWING"]
+
+    results: list[tuple[str, str, str, list[str], SignalResult]] = []
+    if core and adaptive:
+        _, _, dir_c, _, sig_c = core
+        _, _, dir_a, _, sig_a = adaptive
+        if dir_c == dir_a and sig_c.signal_type == sig_a.signal_type:
+            chosen = core if (sig_c.score, sig_c.atr_pct) >= (sig_a.score, sig_a.atr_pct) else adaptive
+            symbol2, _msg2, direction2, _engine2, sig2 = chosen
+            results.append((symbol2, format_signal(symbol2, sig2, "CORE+ADAPTIVE"), direction2, ["CORE", "ADAPTIVE"], sig2))
+        else:
+            sym, msg, direction, _engine, sig = core
+            results.append((sym, msg, direction, ["CORE"], sig))
+            sym, msg, direction, _engine, sig = adaptive
+            results.append((sym, msg, direction, ["ADAPTIVE"], sig))
+    else:
+        for sym, msg, direction, engine_tag, sig in raw_results:
+            if engine_tag in ("CORE", "ADAPTIVE"):
+                results.append((sym, msg, direction, [engine_tag], sig))
+
+    # SWING is left independent by design.
+    for sym, msg, direction, _engine, sig in swing:
+        results.append((sym, msg, direction, ["SWING"], sig))
+
     return results
 
 
@@ -792,9 +822,10 @@ def main():
                 print(f"    ERROR processing {sym}: {e}")
 
     # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
-    for symbol, msg, direction, engine_tag, sig in pending_signals:
+    for symbol, msg, direction, engine_tags, sig in pending_signals:
         send_telegram(msg)
-        update_cooldown(state, f"{symbol}_{engine_tag}", direction, bar_index_now)
+        for engine_tag in engine_tags:
+            update_cooldown(state, f"{symbol}_{engine_tag}", direction, bar_index_now)
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
