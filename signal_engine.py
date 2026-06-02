@@ -25,7 +25,7 @@ v2 FIXES (aligned to Pine Script v10 logic)
         consistency with Pine's obvVal > obvVal[obvLen].
 """
 
-import os, json, time, math, requests
+import os, json, time, math, random, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,6 +36,7 @@ import signal_engine_swing as engine_swing
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
 TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
 STATE_FILE   = "state.json"
+SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "3"))
 
 # ── HARDCODED WATCHLIST ───────────────────────────────────────
 # Format: standard USDT pairs — hl_coin() strips the suffix automatically
@@ -135,8 +136,10 @@ def hl_coin(symbol: str) -> str:
 
 
 def hl_post(payload: dict) -> any:
-    """POST to Hyperliquid /info with retry."""
-    for attempt in range(3):
+    """POST to Hyperliquid /info with retry + 429 backoff."""
+    max_attempts = 8
+    base_sleep_s = 1.25
+    for attempt in range(max_attempts):
         try:
             r = requests.post(
                 HL_INFO_URL,
@@ -144,12 +147,23 @@ def hl_post(payload: dict) -> any:
                 headers={"Content-Type": "application/json"},
                 timeout=15,
             )
+            if r.status_code == 429:
+                retry_after = r.headers.get("Retry-After")
+                try:
+                    retry_after_s = float(retry_after) if retry_after is not None else None
+                except ValueError:
+                    retry_after_s = None
+                sleep_s = retry_after_s if retry_after_s is not None else (base_sleep_s * (2 ** attempt))
+                sleep_s = min(60.0, max(base_sleep_s, sleep_s)) + random.uniform(0.0, 0.75)
+                time.sleep(sleep_s)
+                continue
             r.raise_for_status()
             return r.json()
         except Exception as e:
-            if attempt == 2:
+            if attempt == max_attempts - 1:
                 raise
-            time.sleep(1.5 ** attempt)
+            sleep_s = min(60.0, base_sleep_s * (2 ** attempt)) + random.uniform(0.0, 0.5)
+            time.sleep(sleep_s)
 
 
 def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
@@ -688,6 +702,7 @@ def send_telegram(text: str):
 def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     emoji     = "🟢" if sig.fire_long else "🔴"
+    ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
     def fmt(v):
         if v >= 1000: return f"{v:,.2f}"
@@ -719,8 +734,8 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
         f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}"
-        
+        f"<b>Gates:</b> {sig.v10_gates}\n"
+        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -805,10 +820,9 @@ def main():
     state         = load_state()
     signals_fired = 0
 
-    # Scan all symbols in parallel — up to 10 concurrent workers
-    # (each worker fetches 15m first, then 3 TFs in parallel, so peak ≈ 40 connections)
+    # Scan all symbols in parallel (keep this conservative to avoid 429 rate-limits).
     pending_signals = []
-    with ThreadPoolExecutor(max_workers=10) as ex:
+    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
         futures = {ex.submit(scan_symbol, sym, state, bar_index_now): sym
                    for sym in WATCHLIST}
         for fut in as_completed(futures):
