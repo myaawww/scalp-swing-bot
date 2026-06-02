@@ -29,8 +29,6 @@ import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-import signal_engine_adaptive as engine_v6
-import signal_engine_swing as engine_swing
 
 # ── CONFIG ───────────────────────────────────────────────────
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
@@ -121,7 +119,6 @@ N_15M = 300
 N_1H  = 60
 N_4H  = 60
 N_1D  = 210
-N_5M  = 300
 
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
@@ -774,10 +771,10 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
 # MAIN
 # ═══════════════════════════════════════════════════════════════
 
-def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, list[str], SignalResult]]:
+def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, SignalResult]]:
     """
-    Scan a single symbol and evaluate both v5 + v6 engines.
-    Returns list of (symbol, formatted_msg, direction, engine_tags, sig).
+    Scan a single symbol using the core engine only.
+    Returns list of (symbol, formatted_msg, direction, sig).
     """
     coin = hl_coin(symbol)
     data = fetch_all_candles(symbol)
@@ -786,61 +783,19 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
         return []
 
     candles_15m, candles_1h, candles_4h, candles_d = data
-    sig_v5 = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
-
-    # v6 needs 5m confirmation stream; fetch it once here.
-    candles_5m = get_candles(symbol, "5m", N_5M)
-    sig_v6 = engine_v6.compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
-    sig_swing = engine_swing.compute_signals(symbol, candles_1h, candles_4h, candles_d)
-
-    raw_results: list[tuple[str, str, str, str, SignalResult]] = []
-    for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6), ("SWING", sig_swing)):
-        if not (sig.fire_long or sig.fire_short):
-            continue
-
-        direction = "long" if sig.fire_long else "short"
-        # Keep independent cooldown per engine so one engine doesn't suppress the other.
-        cooldown_key = f"{symbol}_{engine_tag}"
-        if not check_cooldown(state, cooldown_key, direction, bar_index_now):
-            print(f"    {coin} {engine_tag} signal suppressed by cooldown")
-            continue
-
-        print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] {engine_tag} score={sig.score}")
-        raw_results.append((symbol, format_signal(symbol, sig, engine_tag), direction, engine_tag, sig))
-
-    if not raw_results:
+    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
+    if not (sig.fire_long or sig.fire_short):
         print(f"    {coin}: no signal")
         return []
 
-    # If CORE + ADAPTIVE fire the exact same call on the same pair, only alert once.
-    # We still advance cooldown for both engines so the dedupe doesn't cause re-alerts.
-    core = next((r for r in raw_results if r[3] == "CORE"), None)
-    adaptive = next((r for r in raw_results if r[3] == "ADAPTIVE"), None)
-    swing = [r for r in raw_results if r[3] == "SWING"]
+    direction = "long" if sig.fire_long else "short"
+    cooldown_key = symbol
+    if not check_cooldown(state, cooldown_key, direction, bar_index_now):
+        print(f"    {coin} signal suppressed by cooldown")
+        return []
 
-    results: list[tuple[str, str, str, list[str], SignalResult]] = []
-    if core and adaptive:
-        _, _, dir_c, _, sig_c = core
-        _, _, dir_a, _, sig_a = adaptive
-        if dir_c == dir_a and sig_c.signal_type == sig_a.signal_type:
-            chosen = core if (sig_c.score, sig_c.atr_pct) >= (sig_a.score, sig_a.atr_pct) else adaptive
-            symbol2, _msg2, direction2, _engine2, sig2 = chosen
-            results.append((symbol2, format_signal(symbol2, sig2, "CORE+ADAPTIVE"), direction2, ["CORE", "ADAPTIVE"], sig2))
-        else:
-            sym, msg, direction, _engine, sig = core
-            results.append((sym, msg, direction, ["CORE"], sig))
-            sym, msg, direction, _engine, sig = adaptive
-            results.append((sym, msg, direction, ["ADAPTIVE"], sig))
-    else:
-        for sym, msg, direction, engine_tag, sig in raw_results:
-            if engine_tag in ("CORE", "ADAPTIVE"):
-                results.append((sym, msg, direction, [engine_tag], sig))
-
-    # SWING is left independent by design.
-    for sym, msg, direction, _engine, sig in swing:
-        results.append((sym, msg, direction, ["SWING"], sig))
-
-    return results
+    print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
+    return [(symbol, format_signal(symbol, sig, "CORE"), direction, sig)]
 
 
 def main():
@@ -866,10 +821,9 @@ def main():
                 print(f"    ERROR processing {sym}: {e}")
 
     # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
-    for symbol, msg, direction, engine_tags, sig in pending_signals:
+    for symbol, msg, direction, sig in pending_signals:
         send_telegram(msg)
-        for engine_tag in engine_tags:
-            update_cooldown(state, f"{symbol}_{engine_tag}", direction, bar_index_now)
+        update_cooldown(state, symbol, direction, bar_index_now)
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
