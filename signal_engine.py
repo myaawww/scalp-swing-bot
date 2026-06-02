@@ -1,7 +1,7 @@
 """
-Scalp Swing Bot v10 – Python Signal Engine  (v3 — execution/risk upgrades)
+Scalp Swing Bot v10 – Python Signal Engine  (v2 — Pine parity fixes)
 Hyperliquid Perpetuals edition
-Timeframe map: 4H bias / 1H middle / 15m + 5m execution
+Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
 
@@ -34,7 +34,6 @@ from pathlib import Path
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
 TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
 STATE_FILE   = "state.json"
-SIGNAL_LOG_FILE = "signal_log.jsonl"
 
 # ── HARDCODED WATCHLIST ───────────────────────────────────────
 # Format: standard USDT pairs — hl_coin() strips the suffix automatically
@@ -82,8 +81,6 @@ TP2_MULT        = 1.5
 SL_MULT         = 1.0
 COOLDOWN_BARS   = 32
 GLOBAL_COOLDOWN = 16
-MIN_RR          = 1.30
-MIN_SL_PCT      = 0.20
 
 # ── FILTERS ──────────────────────────────────────────────────
 ADX_BREAK_GATE  = 20.0
@@ -103,17 +100,12 @@ USE_D200_FILTER   = True
 USE_DAILY_ADX     = True
 MIN_DAILY_ADX     = 20.0
 PULL_REQUIRES_4H  = True
-USE_M5_CONFIRM    = True
-USE_SESSION_FILTER = True
-SESSION_UTC_START  = 0
-SESSION_UTC_END    = 23
 
 # ── CANDLE COUNTS PER TIMEFRAME ──────────────────────────────
 # 15m: full 300 needed for indicators (ADX, BB, OBV, EMA200 not used here)
 # 1H/4H: only need EMA21/50 + ADX14 — 60 candles is plenty
 # Daily: needs EMA200 + small buffer
 N_15M = 300
-N_5M  = 300
 N_1H  = 60
 N_4H  = 60
 N_1D  = 210
@@ -123,7 +115,6 @@ HL_INFO_URL = "https://api.hyperliquid.xyz/info"
 
 # Interval → milliseconds (for startTime calculation)
 INTERVAL_MS = {
-    "5m":   5 * 60 * 1000,
     "15m": 15 * 60 * 1000,
     "1h":  60 * 60 * 1000,
     "4h":  4  * 60 * 60 * 1000,
@@ -180,34 +171,26 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     }
 
     raw = hl_post(payload)
-    if not isinstance(raw, list):
-        raise ValueError(f"Unexpected candle response for {symbol} {interval}: {type(raw).__name__}")
 
     candles = []
     for c in raw:
-        try:
-            candles.append({
-                "t":  int(c["t"]),
-                "o":  float(c["o"]),
-                "h":  float(c["h"]),
-                "l":  float(c["l"]),
-                "c":  float(c["c"]),
-                "v":  float(c["v"]),
-                "qv": float(c["v"]),   # HL returns base volume; reuse for qv
-            })
-        except (KeyError, TypeError, ValueError):
-            continue
+        candles.append({
+            "t":  int(c["t"]),
+            "o":  float(c["o"]),
+            "h":  float(c["h"]),
+            "l":  float(c["l"]),
+            "c":  float(c["c"]),
+            "v":  float(c["v"]),
+            "qv": float(c["v"]),   # HL returns base volume; reuse for qv
+        })
 
     # Drop the last (possibly still-open) candle, return the most recent n
-    closed = candles[:-1][-n:]
-    if len(closed) < max(30, n // 4):
-        raise ValueError(f"Insufficient valid candles for {symbol} {interval}: got {len(closed)}")
-    return closed
+    return candles[:-1][-n:]
 
-def fetch_all_candles(symbol: str) -> tuple[list, list, list, list, list] | None:
+def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
     """
     Fetch all 4 timeframes concurrently for one symbol.
-    Returns (candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
+    Returns (candles_15m, candles_1h, candles_4h, candles_d)
     or None if 15m data is insufficient.
     """
     # First fetch 15m alone so we can bail early without wasting the other 3 calls
@@ -219,7 +202,6 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list, list] | None
     results = {}
     with ThreadPoolExecutor(max_workers=3) as ex:
         futures = {
-            ex.submit(get_candles, symbol, "5m",  N_5M): "5m",
             ex.submit(get_candles, symbol, "1h",  N_1H): "1h",
             ex.submit(get_candles, symbol, "4h",  N_4H): "4h",
             ex.submit(get_candles, symbol, "1d",  N_1D): "1d",
@@ -228,7 +210,7 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list, list] | None
             tf = futures[fut]
             results[tf] = fut.result()   # propagates exceptions naturally
 
-    return candles_15m, results["5m"], results["1h"], results["4h"], results["1d"]
+    return candles_15m, results["1h"], results["4h"], results["1d"]
 
 
 
@@ -410,16 +392,12 @@ class SignalResult:
         self.entry = self.tp1 = self.tp2 = self.sl = 0.0
         self.entry_low = self.entry_high = 0.0
         self.atr_pct = 0.0
-        self.sl_pct = 0.0
-        self.rr = 0.0
-        self.leverage_hint = ""
-        self.regime = ""
         self.atr_val  = 0.0
         self.breakdown = ""
         self.v10_gates = ""
 
 
-def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d) -> SignalResult:
+def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> SignalResult:
     res = SignalResult()
 
     def arrays(candles):
@@ -438,7 +416,7 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
     atr15   = atr(h15, l15, c15, ATR_LEN); a15 = safe(atr15[-1])
     _, _, adx15_arr = adx_dmi(h15, l15, c15, ADX_LEN)
     adx15    = safe(adx15_arr[-1], 25.0)
-    bb_b15, bb_u15, bb_l15 = bollinger(c15, BB_LEN, BB_MULT)
+    bb_b15, _, _ = bollinger(c15, BB_LEN, BB_MULT)
     bb_basis = safe(bb_b15[-1])
     vol_ma15 = sma(v15, VOL_LEN);  vm15 = safe(vol_ma15[-1])
     obv15    = obv(c15, v15)
@@ -487,17 +465,6 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
     es1h = safe(ema_s1h[-2])
     h1_bull = ef1h > es1h
     h1_bear = ef1h < es1h
-
-    # ── 5M ───────────────────────────────────────────────────
-    o5m, h5m, l5m, c5m, v5m = arrays(candles_5m)
-    ema_f5m = ema(c5m, FAST_LEN)
-    ema_s5m = ema(c5m, SLOW_LEN)
-    rsi5m   = rsi(c5m, RSI_LEN)
-    ef5m = safe(ema_f5m[-2])
-    es5m = safe(ema_s5m[-2])
-    r5m  = safe(rsi5m[-2], 50.0)
-    m5_bull = ef5m > es5m and r5m >= 45
-    m5_bear = ef5m < es5m and r5m <= 55
 
     # ── 4H ───────────────────────────────────────────────────
     o4h, h4h, l4h, c4h, v4h = arrays(candles_4h)
@@ -582,18 +549,6 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
     pull_bull_bar      = cur_c > cur_o and clean_bull_bar()
     pull_bear_bar      = cur_c < cur_o and clean_bear_bar()
 
-    bb_width_pct = ((safe(bb_u15[-1]) - safe(bb_l15[-1])) / max(cur_c, 1e-10)) * 100.0
-    adx_rising = adx15 > safe(adx15_arr[-2], adx15)
-    if adx15 >= 25 and bb_width_pct >= 1.00 and adx_rising:
-        regime = "TRENDING"
-    elif adx15 < 18 and bb_width_pct < 0.80:
-        regime = "RANGING"
-    else:
-        regime = "MIXED"
-
-    break_regime_ok = regime in ("TRENDING", "MIXED")
-    pull_regime_ok  = regime in ("RANGING", "MIXED")
-
     long_score = sum([
         bb_long,
         d_bull and d_trend_held_bull,
@@ -609,9 +564,6 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
         vol_score_ok,
     ])
 
-    m5_long_ok  = m5_bull if USE_M5_CONFIRM else True
-    m5_short_ok = m5_bear if USE_M5_CONFIRM else True
-
     long_break  = (macro_long  and daily_adx_ok and full_long_align  and break_bull_bar
                    and adx_break_ok and vwap_long  and rsi_long  and long_score  >= MIN_SCORE and market_ok)
     short_break = (macro_short and daily_adx_ok and full_short_align and break_bear_bar
@@ -624,43 +576,8 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
                   and pull_recover_short and pull_bear_bar and vwap_short and rsi_short
                   and short_score >= MIN_SCORE and market_ok)
 
-    long_break  = long_break and break_regime_ok and m5_long_ok
-    short_break = short_break and break_regime_ok and m5_short_ok
-    long_pull   = long_pull and pull_regime_ok and m5_long_ok
-    short_pull  = short_pull and pull_regime_ok and m5_short_ok
-
-    long_sig  = long_break or long_pull
+    long_sig  = long_break  or long_pull
     short_sig = short_break or short_pull
-
-    def dynamic_multipliers(local_atr_pct: float, local_regime: str, is_break: bool):
-        if local_regime == "TRENDING":
-            if local_atr_pct <= 1.2:
-                return (1.2, 1.9, 0.9) if is_break else (1.0, 1.5, 0.85)
-            return (1.0, 1.5, 1.0) if is_break else (0.8, 1.2, 0.95)
-        if local_regime == "RANGING":
-            return (0.8, 1.2, 0.8)
-        return (TP1_MULT, TP2_MULT, SL_MULT)
-
-    def rr_ok(entry: float, tp2: float, sl: float):
-        sl_dist = abs(entry - sl)
-        if sl_dist <= 1e-10:
-            return False, 0.0, 0.0
-        rr = abs(tp2 - entry) / sl_dist
-        sl_pct = sl_dist / max(entry, 1e-10) * 100.0
-        return rr >= MIN_RR and sl_pct >= MIN_SL_PCT, rr, sl_pct
-
-    def leverage_hint(local_atr_pct: float, score: int) -> str:
-        if local_atr_pct <= 0.60:
-            low, high = 8, 12
-        elif local_atr_pct <= 1.20:
-            low, high = 5, 10
-        elif local_atr_pct <= 2.00:
-            low, high = 3, 7
-        else:
-            low, high = 2, 5
-        if score == 4:
-            high = max(low, high - 2)
-        return f"{low}x - {high}x"
 
     def make_breakdown(is_long):
         bb_s  = "BB✓"  if (bb_long  if is_long else bb_short)  else "BB✗"
@@ -673,33 +590,23 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
     def make_gates(is_long):
         macro = macro_long if is_long else macro_short
         h1    = h1_bull    if is_long else h1_bear
-        m5 = m5_bull if is_long else m5_bear
         return (f"D200:{'✓' if macro else '✗'} "
                 f"4HADX:{'✓' if daily_adx_ok else '✗'} "
-                f"1H:{'✓' if h1 else '✗'} "
-                f"5M:{'✓' if m5 else '✗'}")
+                f"1H:{'✓' if h1 else '✗'}")
 
     if long_sig:
         res.fire_long    = True
         res.signal_type  = "BREAK" if long_break else "PULL"
         res.score        = long_score
         res.entry        = cur_c
-        tp1_m, tp2_m, sl_m = dynamic_multipliers(atr_pct, regime, long_break)
         zone_half_width  = atr_val * PULL_ZONE_MULT
         res.entry_low    = cur_c - zone_half_width
         res.entry_high   = cur_c + zone_half_width
-        res.tp1          = cur_c + atr_val * tp1_m
-        res.tp2          = cur_c + atr_val * tp2_m
-        res.sl           = cur_c - atr_val * sl_m
+        res.tp1          = cur_c + atr_val * TP1_MULT
+        res.tp2          = cur_c + atr_val * TP2_MULT
+        res.sl           = cur_c - atr_val * SL_MULT
         res.atr_val      = atr_val
         res.atr_pct      = atr_pct
-        ok_quality, rr, sl_pct = rr_ok(res.entry, res.tp2, res.sl)
-        if not ok_quality:
-            return SignalResult()
-        res.rr           = rr
-        res.sl_pct       = sl_pct
-        res.leverage_hint = leverage_hint(atr_pct, long_score)
-        res.regime       = regime
         res.breakdown    = make_breakdown(True)
         res.v10_gates    = make_gates(True)
     elif short_sig:
@@ -707,22 +614,14 @@ def compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, can
         res.signal_type  = "BREAK" if short_break else "PULL"
         res.score        = short_score
         res.entry        = cur_c
-        tp1_m, tp2_m, sl_m = dynamic_multipliers(atr_pct, regime, short_break)
         zone_half_width  = atr_val * PULL_ZONE_MULT
         res.entry_low    = cur_c - zone_half_width
         res.entry_high   = cur_c + zone_half_width
-        res.tp1          = cur_c - atr_val * tp1_m
-        res.tp2          = cur_c - atr_val * tp2_m
-        res.sl           = cur_c + atr_val * sl_m
+        res.tp1          = cur_c - atr_val * TP1_MULT
+        res.tp2          = cur_c - atr_val * TP2_MULT
+        res.sl           = cur_c + atr_val * SL_MULT
         res.atr_val      = atr_val
         res.atr_pct      = atr_pct
-        ok_quality, rr, sl_pct = rr_ok(res.entry, res.tp2, res.sl)
-        if not ok_quality:
-            return SignalResult()
-        res.rr           = rr
-        res.sl_pct       = sl_pct
-        res.leverage_hint = leverage_hint(atr_pct, short_score)
-        res.regime       = regime
         res.breakdown    = make_breakdown(False)
         res.v10_gates    = make_gates(False)
 
@@ -746,83 +645,16 @@ def save_state(state: dict):
     Path(STATE_FILE).write_text(json.dumps(state, indent=2))
 
 
-def check_cooldown(state, coin, direction, bar_index, score: int) -> bool:
+def check_cooldown(state, coin, direction, bar_index) -> bool:
     last_dir    = state.get(f"{coin}_{direction}", -9999)
     last_global = state.get(f"{coin}_any",         -9999)
-    loss_streak = state.get(f"{coin}_loss_streak", 0)
-    penalty = loss_streak * 8
-    quality_bonus = -4 if score >= 5 else 0
-    req_dir = max(8, COOLDOWN_BARS + penalty + quality_bonus)
-    req_global = max(4, GLOBAL_COOLDOWN + (penalty // 2) + (quality_bonus // 2))
-    return (bar_index - last_dir    >= req_dir and
-            bar_index - last_global >= req_global)
+    return (bar_index - last_dir    >= COOLDOWN_BARS and
+            bar_index - last_global >= GLOBAL_COOLDOWN)
 
 
 def update_cooldown(state, coin, direction, bar_index):
     state[f"{coin}_{direction}"] = bar_index
     state[f"{coin}_any"]         = bar_index
-
-
-def append_jsonl(path: str, obj: dict):
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(obj, separators=(",", ":")) + "\n")
-
-
-def settle_open_trades(state: dict, symbol: str, last_candle: dict):
-    open_trades = state.get("open_trades", [])
-    if not open_trades:
-        return
-
-    remaining = []
-    for tr in open_trades:
-        if tr.get("symbol") != symbol:
-            remaining.append(tr)
-            continue
-
-        direction = tr["direction"]
-        sl = float(tr["sl"])
-        tp2 = float(tr["tp2"])
-        low = float(last_candle["l"])
-        high = float(last_candle["h"])
-        hit = None
-
-        # Conservative tie-break: SL first if both touched in one candle.
-        if direction == "long":
-            if low <= sl:
-                hit = "SL"
-            elif high >= tp2:
-                hit = "TP2"
-        else:
-            if high >= sl:
-                hit = "SL"
-            elif low <= tp2:
-                hit = "TP2"
-
-        if hit is None:
-            remaining.append(tr)
-            continue
-
-        won = hit == "TP2"
-        if won:
-            state[f"{symbol}_loss_streak"] = 0
-        else:
-            state[f"{symbol}_loss_streak"] = state.get(f"{symbol}_loss_streak", 0) + 1
-
-        append_jsonl(SIGNAL_LOG_FILE, {
-            "event": "trade_closed",
-            "time_utc": datetime.now(timezone.utc).isoformat(),
-            "symbol": symbol,
-            "direction": direction,
-            "opened_at": tr.get("opened_at"),
-            "entry": tr.get("entry"),
-            "tp2": tp2,
-            "sl": sl,
-            "close_reason": hit,
-            "close_price_hint": float(last_candle["c"]),
-            "loss_streak_after": state.get(f"{symbol}_loss_streak", 0),
-        })
-
-    state["open_trades"] = remaining
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -860,6 +692,21 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         if v >= 1:    return f"{v:.4f}"
         return f"{v:.6f}"
 
+    def recommended_leverage(atr_pct: float, score: int) -> str:
+        # Higher ATR% means more volatility; reduce leverage accordingly.
+        if atr_pct <= 0.60:
+            low, high = 8, 12
+        elif atr_pct <= 1.20:
+            low, high = 5, 10
+        elif atr_pct <= 2.00:
+            low, high = 3, 7
+        else:
+            low, high = 2, 5
+
+        if score == 4:
+            high = max(low, high - 2)
+        return f"{low}x - {high}x"
+
     return (
         f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
         f"<b>Pair:</b>  {symbol}\n"
@@ -868,12 +715,10 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>TP1:</b>   {fmt(sig.tp1)}\n"
         f"<b>TP2:</b>   {fmt(sig.tp2)}\n"
         f"<b>SL:</b>    {fmt(sig.sl)}\n"
-        f"<b>Leverage:</b> {sig.leverage_hint}\n"
-        f"<b>R:R (TP2/SL):</b> 1:{sig.rr:.2f}  |  <b>SL%:</b> {sig.sl_pct:.2f}%\n"
-        f"<b>Regime:</b> {sig.regime}\n"
+        f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing v10 [H4/H1/M15+M5] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -892,16 +737,15 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> tuple[str, str]
         print(f"    Skipping {coin}: insufficient candles")
         return None
 
-    candles_15m, candles_5m, candles_1h, candles_4h, candles_d = data
-    settle_open_trades(state, symbol, candles_15m[-1])
-    sig = compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
+    candles_15m, candles_1h, candles_4h, candles_d = data
+    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
 
     if not (sig.fire_long or sig.fire_short):
         print(f"    {coin}: no signal")
         return None
 
     direction = "long" if sig.fire_long else "short"
-    if not check_cooldown(state, symbol, direction, bar_index_now, sig.score):
+    if not check_cooldown(state, symbol, direction, bar_index_now):
         print(f"    {coin} signal suppressed by cooldown")
         return None
 
@@ -914,13 +758,7 @@ def main():
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
 
     bar_index_now = int(time.time() // (15 * 60))
-    now_hour_utc = datetime.now(timezone.utc).hour
-    if USE_SESSION_FILTER and not (SESSION_UTC_START <= now_hour_utc <= SESSION_UTC_END):
-        print(f"Outside active session window UTC {SESSION_UTC_START:02d}:00-{SESSION_UTC_END:02d}:59. Skipping scan.")
-        return
-
     state         = load_state()
-    state.setdefault("open_trades", [])
     signals_fired = 0
 
     # Scan all symbols in parallel — up to 10 concurrent workers
@@ -942,35 +780,6 @@ def main():
     for symbol, msg, direction, sig in pending_signals:
         send_telegram(msg)
         update_cooldown(state, symbol, direction, bar_index_now)
-        state["open_trades"].append({
-            "symbol": symbol,
-            "direction": direction,
-            "entry": sig.entry,
-            "tp2": sig.tp2,
-            "sl": sig.sl,
-            "opened_at": datetime.now(timezone.utc).isoformat(),
-            "score": sig.score,
-            "signal_type": sig.signal_type,
-            "regime": sig.regime,
-        })
-        append_jsonl(SIGNAL_LOG_FILE, {
-            "event": "signal_opened",
-            "time_utc": datetime.now(timezone.utc).isoformat(),
-            "symbol": symbol,
-            "direction": direction,
-            "signal_type": sig.signal_type,
-            "entry": sig.entry,
-            "entry_zone": [sig.entry_low, sig.entry_high],
-            "tp1": sig.tp1,
-            "tp2": sig.tp2,
-            "sl": sig.sl,
-            "score": sig.score,
-            "regime": sig.regime,
-            "rr": sig.rr,
-            "sl_pct": sig.sl_pct,
-            "atr_pct": sig.atr_pct,
-            "leverage": sig.leverage_hint,
-        })
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
