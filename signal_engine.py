@@ -37,11 +37,15 @@ TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
 TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
 STATE_FILE   = "state.json"
 SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "2"))
-HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.28"))
-HL_TF_WORKERS      = int(os.getenv("HL_TF_WORKERS", "2"))
+HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.18"))
+HL_MIN_INTERVAL_MAX_S = float(os.getenv("HL_MIN_INTERVAL_MAX_S", "0.60"))
+HL_TF_WORKERS      = int(os.getenv("HL_TF_WORKERS", "1"))
 
 _hl_request_lock = threading.Lock()
 _hl_last_request_ts = 0.0
+_hl_min_interval_s = HL_MIN_INTERVAL_S
+
+_hl_session = requests.Session()
 
 # ── HARDCODED WATCHLIST ───────────────────────────────────────
 # Format: standard USDT pairs — hl_coin() strips the suffix automatically
@@ -147,24 +151,29 @@ def hl_post(payload: dict) -> any:
     for attempt in range(max_attempts):
         try:
             global _hl_last_request_ts
+            global _hl_min_interval_s
             # Global rate limiter across all threads.
             # This avoids request bursts that trigger Hyperliquid 429s.
             with _hl_request_lock:
                 now = time.time()
                 elapsed = now - _hl_last_request_ts
-                wait_s = HL_MIN_INTERVAL_S - elapsed
+                wait_s = _hl_min_interval_s - elapsed
                 if wait_s > 0:
                     time.sleep(wait_s)
                 # Mark request time immediately so other threads respect spacing.
                 _hl_last_request_ts = time.time()
 
-            r = requests.post(
+            r = _hl_session.post(
                 HL_INFO_URL,
                 json=payload,
                 headers={"Content-Type": "application/json"},
                 timeout=15,
             )
             if r.status_code == 429:
+                # If we hit rate-limit, slow down the global throttle immediately.
+                with _hl_request_lock:
+                    _hl_min_interval_s = min(HL_MIN_INTERVAL_MAX_S, _hl_min_interval_s * 1.25 + 0.02)
+
                 retry_after = r.headers.get("Retry-After")
                 try:
                     retry_after_s = float(retry_after) if retry_after is not None else None
@@ -176,6 +185,10 @@ def hl_post(payload: dict) -> any:
                 time.sleep(sleep_s)
                 continue
             r.raise_for_status()
+
+            # On success, cautiously speed up over time (only a tiny amount each success).
+            with _hl_request_lock:
+                _hl_min_interval_s = max(HL_MIN_INTERVAL_S, _hl_min_interval_s - 0.0025)
             return r.json()
         except Exception as e:
             if attempt == max_attempts - 1:
