@@ -31,7 +31,6 @@ jobs:
           TG_CHAT_ID:   ${{ secrets.TG_CHAT_ID }}
         run: python signal_engine.py
         
-
       - name: Persist cooldown state
         run: |
           git config user.name  "github-actions[bot]"
