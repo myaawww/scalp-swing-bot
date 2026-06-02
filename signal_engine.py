@@ -753,7 +753,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
         return f"{low}x - {high}x"
 
     return (
-        f"{emoji} <b>{direction} [{sig.signal_type}] [{engine_tag}]</b>  {stars(sig.score)}\n"
+        f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
         f"<b>Pair:</b>  {symbol}\n"
         f"<b>Entry:</b> {fmt(sig.entry)}\n"
         f"<b>Entry Zone:</b> {fmt(sig.entry_low)} - {fmt(sig.entry_high)}\n"
