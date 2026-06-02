@@ -1,7 +1,7 @@
 """
 Scalp Swing Bot v10 – Python Signal Engine  (v2 — Pine parity fixes)
 Hyperliquid Perpetuals edition
-Timeframe map: 1D bias / 4H middle / 1H execution
+Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
 
@@ -29,6 +29,8 @@ import os, json, time, math, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
+import signal_engine_adaptive as engine_v6
+import signal_engine_swing as engine_swing
 
 # ── CONFIG ───────────────────────────────────────────────────
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
@@ -102,18 +104,21 @@ MIN_DAILY_ADX     = 20.0
 PULL_REQUIRES_4H  = True
 
 # ── CANDLE COUNTS PER TIMEFRAME ──────────────────────────────
-# 1H: execution TF needs full history for ATR/ADX/BB/OBV/VWAP
-# 4H: medium TF trend structure
-# 1D: high TF macro + ADX + EMA200
-N_1H  = 300
-N_4H  = 120
-N_1D  = 260
+# 15m: full 300 needed for indicators (ADX, BB, OBV, EMA200 not used here)
+# 1H/4H: only need EMA21/50 + ADX14 — 60 candles is plenty
+# Daily: needs EMA200 + small buffer
+N_15M = 300
+N_1H  = 60
+N_4H  = 60
+N_1D  = 210
+N_5M  = 300
 
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
 
 # Interval → milliseconds (for startTime calculation)
 INTERVAL_MS = {
+    "15m": 15 * 60 * 1000,
     "1h":  60 * 60 * 1000,
     "4h":  4  * 60 * 60 * 1000,
     "1d":  24 * 60 * 60 * 1000,
@@ -185,21 +190,22 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     # Drop the last (possibly still-open) candle, return the most recent n
     return candles[:-1][-n:]
 
-def fetch_all_candles(symbol: str) -> tuple[list, list, list] | None:
+def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
     """
-    Fetch all 3 timeframes for one symbol.
-    Returns (candles_1h, candles_4h, candles_d)
-    or None if 1H data is insufficient.
+    Fetch all 4 timeframes concurrently for one symbol.
+    Returns (candles_15m, candles_1h, candles_4h, candles_d)
+    or None if 15m data is insufficient.
     """
-    # First fetch 1H alone so we can bail early without wasting other calls
-    candles_1h = get_candles(symbol, "1h", N_1H)
-    if len(candles_1h) < 80:
+    # First fetch 15m alone so we can bail early without wasting the other 3 calls
+    candles_15m = get_candles(symbol, "15m", N_15M)
+    if len(candles_15m) < 50:
         return None
 
-    # Now fetch the remaining 2 TFs in parallel
+    # Now fetch the remaining 3 TFs in parallel
     results = {}
-    with ThreadPoolExecutor(max_workers=2) as ex:
+    with ThreadPoolExecutor(max_workers=3) as ex:
         futures = {
+            ex.submit(get_candles, symbol, "1h",  N_1H): "1h",
             ex.submit(get_candles, symbol, "4h",  N_4H): "4h",
             ex.submit(get_candles, symbol, "1d",  N_1D): "1d",
         }
@@ -207,7 +213,7 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list] | None:
             tf = futures[fut]
             results[tf] = fut.result()   # propagates exceptions naturally
 
-    return candles_1h, results["4h"], results["1d"]
+    return candles_15m, results["1h"], results["4h"], results["1d"]
 
 
 
@@ -394,7 +400,7 @@ class SignalResult:
         self.v10_gates = ""
 
 
-def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
+def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> SignalResult:
     res = SignalResult()
 
     def arrays(candles):
@@ -405,49 +411,65 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
         v  = [c["v"] for c in candles]
         return o, h, l, cl, v
 
-    # ── 1H (execution) ───────────────────────────────────────
-    o1h, h1h, l1h, c1h, v1h = arrays(candles_1h)
-    ema_f1h = ema(c1h, FAST_LEN);  ef1h = safe(ema_f1h[-1])
-    ema_s1h = ema(c1h, SLOW_LEN);  es1h = safe(ema_s1h[-1])
-    rsi1h   = rsi(c1h, RSI_LEN);   r1h  = safe(rsi1h[-1])
-    atr1h   = atr(h1h, l1h, c1h, ATR_LEN); a1h = safe(atr1h[-1])
-    _, _, adx1h_arr = adx_dmi(h1h, l1h, c1h, ADX_LEN)
-    adx1h    = safe(adx1h_arr[-1], 25.0)
-    bb_b1h, _, _ = bollinger(c1h, BB_LEN, BB_MULT)
-    bb_basis = safe(bb_b1h[-1])
-    vol_ma1h = sma(v1h, VOL_LEN);  vm1h = safe(vol_ma1h[-1])
-    obv1h    = obv(c1h, v1h)
-    rvwap1h  = rolling_vwap(c1h, v1h, ROLLING_VWAP_LEN)
+    # ── 15m ──────────────────────────────────────────────────
+    o15, h15, l15, c15, v15 = arrays(candles_15m)
+    ema_f15 = ema(c15, FAST_LEN);  ef15 = safe(ema_f15[-1])
+    ema_s15 = ema(c15, SLOW_LEN);  es15 = safe(ema_s15[-1])
+    rsi15   = rsi(c15, RSI_LEN);   r15  = safe(rsi15[-1])
+    atr15   = atr(h15, l15, c15, ATR_LEN); a15 = safe(atr15[-1])
+    _, _, adx15_arr = adx_dmi(h15, l15, c15, ADX_LEN)
+    adx15    = safe(adx15_arr[-1], 25.0)
+    bb_b15, _, _ = bollinger(c15, BB_LEN, BB_MULT)
+    bb_basis = safe(bb_b15[-1])
+    vol_ma15 = sma(v15, VOL_LEN);  vm15 = safe(vol_ma15[-1])
+    obv15    = obv(c15, v15)
+    rvwap15  = rolling_vwap(c15, v15, ROLLING_VWAP_LEN)
 
-    cur_c = c1h[-1]; cur_o = o1h[-1]
-    cur_h = h1h[-1]; cur_l = l1h[-1]
-    cur_v = v1h[-1]
-    prev_l = l1h[-2]; prev_h = h1h[-2]
-    ef1h_prev = safe(ema_f1h[-2])
+    # ── Execution-bar values (Pine: h1C/h1O/h1H/h1L via request.security close[1]) ──
+    # get_candles() drops the still-open candle, so [-1] IS the last confirmed close.
+    # Pine's HTF security call with lookahead_off returns the PREVIOUS HTF bar's close,
+    # but the execution TF IS 15m (same as the chart), so h1C == close[1] on the NEXT bar.
+    # To stay consistent: cur_* are the signal-bar values (confirmed close we evaluate now).
+    cur_c = c15[-1]; cur_o = o15[-1]
+    cur_h = h15[-1]; cur_l = l15[-1]
+    cur_v = v15[-1]
+    prev_l = l15[-2]; prev_h = h15[-2]
+    ef15_prev = safe(ema_f15[-2])   # Pine: localEMAf[1] — previous bar's fast EMA
 
-    atr_val  = a1h if a1h > 0 else (cur_c * 0.03 / 100)
+    atr_val  = a15 if a15 > 0 else (cur_c * 0.03 / 100)
     atr_pct  = atr_val / cur_c * 100
     market_ok = MIN_ATR_PCT <= atr_pct <= MAX_ATR_PCT
 
-    rv = safe(rvwap1h[-1])
+    rv = safe(rvwap15[-1])
     vwap_long  = cur_c > rv if USE_ROLLING_VWAP else True
     vwap_short = cur_c < rv if USE_ROLLING_VWAP else True
 
-    rsi_long  = RSI_LONG_MIN  <= r1h <= RSI_LONG_MAX
-    rsi_short = RSI_SHORT_MIN <= r1h <= RSI_SHORT_MAX
+    rsi_long  = RSI_LONG_MIN  <= r15 <= RSI_LONG_MAX
+    rsi_short = RSI_SHORT_MIN <= r15 <= RSI_SHORT_MAX
 
     bb_long  = cur_c > bb_basis
     bb_short = cur_c < bb_basis
 
     # OBV slope: Pine uses obvVal > obvVal[obvLen] on the current (confirmed) bar
     # get_candles() already strips the open candle, so [-1] is the last closed bar
-    obv_slope_long  = obv1h[-1] > obv1h[-(1 + OBV_LEN)]
-    obv_slope_short = obv1h[-1] < obv1h[-(1 + OBV_LEN)]
+    obv_slope_long  = obv15[-1] > obv15[-(1 + OBV_LEN)]
+    obv_slope_short = obv15[-1] < obv15[-(1 + OBV_LEN)]
 
-    adx_score_ok = adx1h >= ADX_SCORE_MIN
-    vol_score_ok = True if vm1h == 0 else (cur_v >= vm1h * VOL_SCORE_MULT)
+    adx_score_ok = adx15 >= ADX_SCORE_MIN
+    vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
 
-    # ── 4H (medium structure) ────────────────────────────────
+    # ── 1H ───────────────────────────────────────────────────
+    o1h, h1h, l1h, c1h, v1h = arrays(candles_1h)
+    ema_f1h = ema(c1h, FAST_LEN)
+    ema_s1h = ema(c1h, SLOW_LEN)
+    # Pine fetches HTF with lookahead_off → uses close[1] (last confirmed bar)
+    # In Python: [-2] is the last fully closed 1H candle, [-1] may still be open
+    ef1h = safe(ema_f1h[-2])
+    es1h = safe(ema_s1h[-2])
+    h1_bull = ef1h > es1h
+    h1_bear = ef1h < es1h
+
+    # ── 4H ───────────────────────────────────────────────────
     o4h, h4h, l4h, c4h, v4h = arrays(candles_4h)
     ema_f4h = ema(c4h, FAST_LEN)
     ema_s4h = ema(c4h, SLOW_LEN)
@@ -455,8 +477,8 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
     ef4h = safe(ema_f4h[-2]); es4h = safe(ema_s4h[-2])
     _, _, adx4h_arr = adx_dmi(h4h, l4h, c4h, ADX_LEN)
     adx4h  = safe(adx4h_arr[-2], 25.0)   # confirmed 4H ADX value
-    m_bull = ef4h > es4h
-    m_bear = ef4h < es4h
+    d_bull = ef4h > es4h
+    d_bear = ef4h < es4h
 
     def trend_held(ef_arr, es_arr, bull: bool) -> bool:
         # Pine: nz(ef[1])>nz(es[1]) ... nz(ef[N])>nz(es[N])
@@ -473,40 +495,36 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
                     return False
         return True
 
-    m_trend_held_bull = trend_held(ema_f4h, ema_s4h, True)
-    m_trend_held_bear = trend_held(ema_f4h, ema_s4h, False)
+    d_trend_held_bull = trend_held(ema_f4h, ema_s4h, True)
+    d_trend_held_bear = trend_held(ema_f4h, ema_s4h, False)
 
-    # ── 1D (high macro) ───────────────────────────────────────
-    _, h1d, l1d, c_d, _ = arrays(candles_d)
-    ema_f1d = ema(c_d, FAST_LEN)
-    ema_s1d = ema(c_d, SLOW_LEN)
-    ef1d = safe(ema_f1d[-2])
-    es1d = safe(ema_s1d[-2])
-    htf_bull = ef1d > es1d
-    htf_bear = ef1d < es1d
-
-    _, _, adx1d_arr = adx_dmi(h1d, l1d, c_d, ADX_LEN)
-    adx1d = safe(adx1d_arr[-2], 25.0)
-
+    # ── Daily 200 EMA ─────────────────────────────────────────
     if candles_d and len(candles_d) >= TREND_LEN:
+        _, _, _, c_d, _ = arrays(candles_d)
         ema_d200 = ema(c_d, TREND_LEN)
+        # Pine: lookahead_off → close[1]; use [-2] (last confirmed daily close)
         d200 = safe(ema_d200[-2])
     else:
         d200 = cur_c
     macro_long  = cur_c > d200 if USE_D200_FILTER else True
     macro_short = cur_c < d200 if USE_D200_FILTER else True
 
-    daily_adx_ok = adx1d >= MIN_DAILY_ADX if USE_DAILY_ADX else True
+    daily_adx_ok = adx4h >= MIN_DAILY_ADX if USE_DAILY_ADX else True
 
-    full_long_align  = htf_bull and m_bull and m_trend_held_bull and (ef1h > es1h)
-    full_short_align = htf_bear and m_bear and m_trend_held_bear and (ef1h < es1h)
+    # h4_bull / h4_bear: sourced from actual 4H EMA alignment
+    # (was incorrectly aliased to h1_bull / h1_bear — BUG FIX)
+    h4_bull = ef4h > es4h
+    h4_bear = ef4h < es4h
 
-    pull_long_align  = (htf_bull and m_bull and m_trend_held_bull and (ef1h > es1h)) \
+    full_long_align  = d_bull and d_trend_held_bull and h4_bull and h1_bull
+    full_short_align = d_bear and d_trend_held_bear and h4_bear and h1_bear
+
+    pull_long_align  = (d_bull and d_trend_held_bull and h4_bull and h1_bull) \
                         if PULL_REQUIRES_4H else \
-                       (htf_bull and m_bull and m_trend_held_bull)
-    pull_short_align = (htf_bear and m_bear and m_trend_held_bear and (ef1h < es1h)) \
+                       (d_bull and d_trend_held_bull and h1_bull)
+    pull_short_align = (d_bear and d_trend_held_bear and h4_bear and h1_bear) \
                         if PULL_REQUIRES_4H else \
-                       (htf_bear and m_bear and m_trend_held_bear)
+                       (d_bear and d_trend_held_bear and h1_bear)
 
     rng = cur_h - cur_l + 1e-10
 
@@ -522,28 +540,28 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
     def close_in_bot_range():
         return (cur_c - cur_l) / rng <= RANGE_PCT_BREAK
 
-    adx_break_ok   = adx1h >= ADX_BREAK_GATE
+    adx_break_ok   = adx15 >= ADX_BREAK_GATE
     break_bull_bar = cur_c > cur_o and clean_bull_bar() and close_in_top_range()
     break_bear_bar = cur_c < cur_o and clean_bear_bar() and close_in_bot_range()
 
     pull_zone          = atr_val * PULL_ZONE_MULT
-    pull_touched_long  = prev_l <= ef1h_prev + pull_zone
-    pull_touched_short = prev_h >= ef1h_prev - pull_zone
-    pull_recover_long  = cur_c > ef1h and cur_c > cur_o
-    pull_recover_short = cur_c < ef1h and cur_c < cur_o
+    pull_touched_long  = prev_l <= ef15_prev + pull_zone   # Pine: low[1] <= localEMAf[1] + zone
+    pull_touched_short = prev_h >= ef15_prev - pull_zone   # Pine: high[1] >= localEMAf[1] - zone
+    pull_recover_long  = cur_c > ef15 and cur_c > cur_o
+    pull_recover_short = cur_c < ef15 and cur_c < cur_o
     pull_bull_bar      = cur_c > cur_o and clean_bull_bar()
     pull_bear_bar      = cur_c < cur_o and clean_bear_bar()
 
     long_score = sum([
         bb_long,
-        htf_bull and m_bull and m_trend_held_bull,
+        d_bull and d_trend_held_bull,
         adx_score_ok,
         obv_slope_long,
         vol_score_ok,
     ])
     short_score = sum([
         bb_short,
-        htf_bear and m_bear and m_trend_held_bear,
+        d_bear and d_trend_held_bear,
         adx_score_ok,
         obv_slope_short,
         vol_score_ok,
@@ -566,7 +584,7 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
 
     def make_breakdown(is_long):
         bb_s  = "BB✓"  if (bb_long  if is_long else bb_short)  else "BB✗"
-        d_s   = "4H✓"  if (m_bull and m_trend_held_bull if is_long else m_bear and m_trend_held_bear) else "4H✗"
+        d_s   = "4H✓"  if (d_bull and d_trend_held_bull if is_long else d_bear and d_trend_held_bear) else "4H✗"
         adx_s = "ADX✓" if adx_score_ok  else "ADX✗"
         obv_s = "OBV✓" if (obv_slope_long if is_long else obv_slope_short) else "OBV✗"
         vol_s = "VOL✓" if vol_score_ok   else "VOL✗"
@@ -574,11 +592,9 @@ def compute_signals(symbol, candles_1h, candles_4h, candles_d) -> SignalResult:
 
     def make_gates(is_long):
         macro = macro_long if is_long else macro_short
-        h1    = (ef1h > es1h) if is_long else (ef1h < es1h)
-        htf   = htf_bull if is_long else htf_bear
+        h1    = h1_bull    if is_long else h1_bear
         return (f"D200:{'✓' if macro else '✗'} "
-                f"1D:{'✓' if htf else '✗'} "
-                f"1DADX:{'✓' if daily_adx_ok else '✗'} "
+                f"4HADX:{'✓' if daily_adx_ok else '✗'} "
                 f"1H:{'✓' if h1 else '✗'}")
 
     if long_sig:
@@ -669,7 +685,7 @@ def send_telegram(text: str):
             time.sleep(2)
 
 
-def format_signal(symbol: str, sig: SignalResult) -> str:
+def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     emoji     = "🟢" if sig.fire_long else "🔴"
     ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -695,7 +711,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         return f"{low}x - {high}x"
 
     return (
-        f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
+        f"{emoji} <b>{direction} [{sig.signal_type}] [{engine_tag}]</b>  {stars(sig.score)}\n"
         f"<b>Pair:</b>  {symbol}\n"
         f"<b>Entry:</b> {fmt(sig.entry)}\n"
         f"<b>Entry Zone:</b> {fmt(sig.entry_low)} - {fmt(sig.entry_high)}\n"
@@ -705,7 +721,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"<i>Scalp Swing Core [1D/4H/1H] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -713,43 +729,85 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 # MAIN
 # ═══════════════════════════════════════════════════════════════
 
-def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> tuple[str, str] | None:
+def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, list[str], SignalResult]]:
     """
-    Scan a single symbol. Returns (symbol, formatted_msg) if a signal fires
-    and cooldown passes, else None. Raises on fetch/compute errors.
+    Scan a single symbol and evaluate both v5 + v6 engines.
+    Returns list of (symbol, formatted_msg, direction, engine_tags, sig).
     """
     coin = hl_coin(symbol)
     data = fetch_all_candles(symbol)
     if data is None:
         print(f"    Skipping {coin}: insufficient candles")
-        return None
+        return []
 
-    candles_1h, candles_4h, candles_d = data
-    sig = compute_signals(symbol, candles_1h, candles_4h, candles_d)
+    candles_15m, candles_1h, candles_4h, candles_d = data
+    sig_v5 = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
 
-    if not (sig.fire_long or sig.fire_short):
+    # v6 needs 5m confirmation stream; fetch it once here.
+    candles_5m = get_candles(symbol, "5m", N_5M)
+    sig_v6 = engine_v6.compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
+    sig_swing = engine_swing.compute_signals(symbol, candles_1h, candles_4h, candles_d)
+
+    raw_results: list[tuple[str, str, str, str, SignalResult]] = []
+    for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6), ("SWING", sig_swing)):
+        if not (sig.fire_long or sig.fire_short):
+            continue
+
+        direction = "long" if sig.fire_long else "short"
+        # Keep independent cooldown per engine so one engine doesn't suppress the other.
+        cooldown_key = f"{symbol}_{engine_tag}"
+        if not check_cooldown(state, cooldown_key, direction, bar_index_now):
+            print(f"    {coin} {engine_tag} signal suppressed by cooldown")
+            continue
+
+        print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] {engine_tag} score={sig.score}")
+        raw_results.append((symbol, format_signal(symbol, sig, engine_tag), direction, engine_tag, sig))
+
+    if not raw_results:
         print(f"    {coin}: no signal")
-        return None
+        return []
 
-    direction = "long" if sig.fire_long else "short"
-    if not check_cooldown(state, symbol, direction, bar_index_now):
-        print(f"    {coin} signal suppressed by cooldown")
-        return None
+    # If CORE + ADAPTIVE fire the exact same call on the same pair, only alert once.
+    # We still advance cooldown for both engines so the dedupe doesn't cause re-alerts.
+    core = next((r for r in raw_results if r[3] == "CORE"), None)
+    adaptive = next((r for r in raw_results if r[3] == "ADAPTIVE"), None)
+    swing = [r for r in raw_results if r[3] == "SWING"]
 
-    print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
-    return symbol, format_signal(symbol, sig), direction, sig
+    results: list[tuple[str, str, str, list[str], SignalResult]] = []
+    if core and adaptive:
+        _, _, dir_c, _, sig_c = core
+        _, _, dir_a, _, sig_a = adaptive
+        if dir_c == dir_a and sig_c.signal_type == sig_a.signal_type:
+            chosen = core if (sig_c.score, sig_c.atr_pct) >= (sig_a.score, sig_a.atr_pct) else adaptive
+            symbol2, _msg2, direction2, _engine2, sig2 = chosen
+            results.append((symbol2, format_signal(symbol2, sig2, "CORE+ADAPTIVE"), direction2, ["CORE", "ADAPTIVE"], sig2))
+        else:
+            sym, msg, direction, _engine, sig = core
+            results.append((sym, msg, direction, ["CORE"], sig))
+            sym, msg, direction, _engine, sig = adaptive
+            results.append((sym, msg, direction, ["ADAPTIVE"], sig))
+    else:
+        for sym, msg, direction, engine_tag, sig in raw_results:
+            if engine_tag in ("CORE", "ADAPTIVE"):
+                results.append((sym, msg, direction, [engine_tag], sig))
+
+    # SWING is left independent by design.
+    for sym, msg, direction, _engine, sig in swing:
+        results.append((sym, msg, direction, ["SWING"], sig))
+
+    return results
 
 
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
 
-    bar_index_now = int(time.time() // (60 * 60))
+    bar_index_now = int(time.time() // (15 * 60))
     state         = load_state()
     signals_fired = 0
 
     # Scan all symbols in parallel — up to 10 concurrent workers
-    # (each worker fetches 1H first, then 2 TFs in parallel, so peak is controlled)
+    # (each worker fetches 15m first, then 3 TFs in parallel, so peak ≈ 40 connections)
     pending_signals = []
     with ThreadPoolExecutor(max_workers=10) as ex:
         futures = {ex.submit(scan_symbol, sym, state, bar_index_now): sym
@@ -758,15 +816,16 @@ def main():
             sym = futures[fut]
             try:
                 result = fut.result()
-                if result is not None:
-                    pending_signals.append(result)
+                if result:
+                    pending_signals.extend(result)
             except Exception as e:
                 print(f"    ERROR processing {sym}: {e}")
 
     # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
-    for symbol, msg, direction, sig in pending_signals:
+    for symbol, msg, direction, engine_tags, sig in pending_signals:
         send_telegram(msg)
-        update_cooldown(state, symbol, direction, bar_index_now)
+        for engine_tag in engine_tags:
+            update_cooldown(state, f"{symbol}_{engine_tag}", direction, bar_index_now)
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
