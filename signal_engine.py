@@ -25,7 +25,7 @@ v2 FIXES (aligned to Pine Script v10 logic)
         consistency with Pine's obvVal > obvVal[obvLen].
 """
 
-import os, json, time, math, random, requests
+import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -36,7 +36,12 @@ import signal_engine_swing as engine_swing
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
 TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
 STATE_FILE   = "state.json"
-SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "3"))
+SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "2"))
+HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.28"))
+HL_TF_WORKERS      = int(os.getenv("HL_TF_WORKERS", "2"))
+
+_hl_request_lock = threading.Lock()
+_hl_last_request_ts = 0.0
 
 # ── HARDCODED WATCHLIST ───────────────────────────────────────
 # Format: standard USDT pairs — hl_coin() strips the suffix automatically
@@ -137,10 +142,22 @@ def hl_coin(symbol: str) -> str:
 
 def hl_post(payload: dict) -> any:
     """POST to Hyperliquid /info with retry + 429 backoff."""
-    max_attempts = 8
-    base_sleep_s = 1.25
+    max_attempts = int(os.getenv("HL_MAX_ATTEMPTS", "6"))
+    base_sleep_s = float(os.getenv("HL_BASE_SLEEP_S", "0.75"))
     for attempt in range(max_attempts):
         try:
+            global _hl_last_request_ts
+            # Global rate limiter across all threads.
+            # This avoids request bursts that trigger Hyperliquid 429s.
+            with _hl_request_lock:
+                now = time.time()
+                elapsed = now - _hl_last_request_ts
+                wait_s = HL_MIN_INTERVAL_S - elapsed
+                if wait_s > 0:
+                    time.sleep(wait_s)
+                # Mark request time immediately so other threads respect spacing.
+                _hl_last_request_ts = time.time()
+
             r = requests.post(
                 HL_INFO_URL,
                 json=payload,
@@ -154,7 +171,8 @@ def hl_post(payload: dict) -> any:
                 except ValueError:
                     retry_after_s = None
                 sleep_s = retry_after_s if retry_after_s is not None else (base_sleep_s * (2 ** attempt))
-                sleep_s = min(60.0, max(base_sleep_s, sleep_s)) + random.uniform(0.0, 0.75)
+                # Cap 429 delay so the workflow doesn't run for too long.
+                sleep_s = min(20.0, max(base_sleep_s, sleep_s)) + random.uniform(0.0, 0.35)
                 time.sleep(sleep_s)
                 continue
             r.raise_for_status()
@@ -162,7 +180,7 @@ def hl_post(payload: dict) -> any:
         except Exception as e:
             if attempt == max_attempts - 1:
                 raise
-            sleep_s = min(60.0, base_sleep_s * (2 ** attempt)) + random.uniform(0.0, 0.5)
+            sleep_s = min(20.0, base_sleep_s * (2 ** attempt)) + random.uniform(0.0, 0.25)
             time.sleep(sleep_s)
 
 
@@ -217,7 +235,7 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
 
     # Now fetch the remaining 3 TFs in parallel
     results = {}
-    with ThreadPoolExecutor(max_workers=3) as ex:
+    with ThreadPoolExecutor(max_workers=max(1, HL_TF_WORKERS)) as ex:
         futures = {
             ex.submit(get_candles, symbol, "1h",  N_1H): "1h",
             ex.submit(get_candles, symbol, "4h",  N_4H): "4h",
