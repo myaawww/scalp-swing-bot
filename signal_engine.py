@@ -29,6 +29,7 @@ import os, json, time, math, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
+import signal_engine_adaptive as engine_v6
 
 # ── CONFIG ───────────────────────────────────────────────────
 TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
@@ -109,6 +110,7 @@ N_15M = 300
 N_1H  = 60
 N_4H  = 60
 N_1D  = 210
+N_5M  = 300
 
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
@@ -682,7 +684,7 @@ def send_telegram(text: str):
             time.sleep(2)
 
 
-def format_signal(symbol: str, sig: SignalResult) -> str:
+def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     emoji     = "🟢" if sig.fire_long else "🔴"
     ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -708,7 +710,7 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
         return f"{low}x - {high}x"
 
     return (
-        f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
+        f"{emoji} <b>{direction} [{sig.signal_type}] [{engine_tag}]</b>  {stars(sig.score)}\n"
         f"<b>Pair:</b>  {symbol}\n"
         f"<b>Entry:</b> {fmt(sig.entry)}\n"
         f"<b>Entry Zone:</b> {fmt(sig.entry_low)} - {fmt(sig.entry_high)}\n"
@@ -726,31 +728,42 @@ def format_signal(symbol: str, sig: SignalResult) -> str:
 # MAIN
 # ═══════════════════════════════════════════════════════════════
 
-def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> tuple[str, str] | None:
+def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, str, SignalResult]]:
     """
-    Scan a single symbol. Returns (symbol, formatted_msg) if a signal fires
-    and cooldown passes, else None. Raises on fetch/compute errors.
+    Scan a single symbol and evaluate both v5 + v6 engines.
+    Returns list of (symbol, formatted_msg, direction, engine_tag, sig).
     """
     coin = hl_coin(symbol)
     data = fetch_all_candles(symbol)
     if data is None:
         print(f"    Skipping {coin}: insufficient candles")
-        return None
+        return []
 
     candles_15m, candles_1h, candles_4h, candles_d = data
-    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
+    sig_v5 = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d)
 
-    if not (sig.fire_long or sig.fire_short):
+    # v6 needs 5m confirmation stream; fetch it once here.
+    candles_5m = get_candles(symbol, "5m", N_5M)
+    sig_v6 = engine_v6.compute_signals(symbol, candles_15m, candles_5m, candles_1h, candles_4h, candles_d)
+
+    results = []
+    for engine_tag, sig in (("CORE", sig_v5), ("ADAPTIVE", sig_v6)):
+        if not (sig.fire_long or sig.fire_short):
+            continue
+
+        direction = "long" if sig.fire_long else "short"
+        # Keep independent cooldown per engine so one engine doesn't suppress the other.
+        cooldown_key = f"{symbol}_{engine_tag}"
+        if not check_cooldown(state, cooldown_key, direction, bar_index_now):
+            print(f"    {coin} {engine_tag} signal suppressed by cooldown")
+            continue
+
+        print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] {engine_tag} score={sig.score}")
+        results.append((symbol, format_signal(symbol, sig, engine_tag), direction, engine_tag, sig))
+
+    if not results:
         print(f"    {coin}: no signal")
-        return None
-
-    direction = "long" if sig.fire_long else "short"
-    if not check_cooldown(state, symbol, direction, bar_index_now):
-        print(f"    {coin} signal suppressed by cooldown")
-        return None
-
-    print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
-    return symbol, format_signal(symbol, sig), direction, sig
+    return results
 
 
 def main():
@@ -771,15 +784,15 @@ def main():
             sym = futures[fut]
             try:
                 result = fut.result()
-                if result is not None:
-                    pending_signals.append(result)
+                if result:
+                    pending_signals.extend(result)
             except Exception as e:
                 print(f"    ERROR processing {sym}: {e}")
 
     # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
-    for symbol, msg, direction, sig in pending_signals:
+    for symbol, msg, direction, engine_tag, sig in pending_signals:
         send_telegram(msg)
-        update_cooldown(state, symbol, direction, bar_index_now)
+        update_cooldown(state, f"{symbol}_{engine_tag}", direction, bar_index_now)
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
