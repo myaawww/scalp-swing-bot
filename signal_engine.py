@@ -55,7 +55,6 @@ WATCHLIST = [
     "NEARUSDT",
     "ONDOUSDT",
     "SUIUSDT",
-    "PUMPUSDT",
     "PENGUUSDT",
     "BNBUSDT",
     "SOLUSDT",
@@ -70,13 +69,6 @@ WATCHLIST = [
     "AAVEUSDT",
     "XRPUSDT",
     "XLMUSDT",
-    "WLDUSDT",
-    "LITUSDT",
-    "ASTERUSDT",
-    "XMRUSDT",
-    "VVVUSDT",
-    "FETUSDT",
-    "INJUSDT",
 ]
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
