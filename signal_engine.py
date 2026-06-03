@@ -69,6 +69,10 @@ WATCHLIST = [
     "AAVEUSDT",
     "XRPUSDT",
     "XLMUSDT",
+    "UNIUSDT",
+    "LTCUSDT",
+    "APTUSDT",
+    "PENDLEUSDT",
 ]
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
