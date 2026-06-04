@@ -92,30 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 150,
-      "bar_index": 1978450,
-      "signal_bar_time": 1780605940234,
-      "tp1": 1.0424479768583812,
-      "tp2": 1.0379219652875715,
-      "sl": 1.060552023141619,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 151,
-      "bar_index": 1978450,
-      "signal_bar_time": 1780605941235,
-      "tp1": 0.7540038711222043,
-      "tp2": 0.7501058066833064,
-      "sl": 0.7695961288777957,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "SUIUSDT",
       "direction": "short",
       "msg_id": 152,
@@ -138,6 +114,20 @@
       "sl": 71.63187964931926,
       "tp1_hit": false,
       "resolved": false
+    }
+  ],
+  "resolved_signals": [
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780609521
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780609522
     }
   ]
 }
