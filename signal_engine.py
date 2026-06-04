@@ -757,15 +757,15 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
 
     return (
         f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
-        f"<b>Pair:</b>  {symbol}\n"
+        f"<b>Pair:</b>  {symbol}\n\n"
         f"<b>Entry:</b> <code>{fmt(sig.entry)}</code>\n"
-        f"<b>Entry Zone:</b> <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n"
+        f"<b>Entry Zone:</b> <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n\n"
         f"<b>TP1:</b>   <code>{fmt(sig.tp1)}</code>\n"
         f"<b>TP2:</b>   <code>{fmt(sig.tp2)}</code>\n"
-        f"<b>SL:</b>    <code>{fmt(sig.sl)}</code>\n"
+        f"<b>SL:</b>    <code>{fmt(sig.sl)}</code>\n\n"
         f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
         f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}\n"
+        f"<b>Gates:</b> {sig.v10_gates}\n\n"
         f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
