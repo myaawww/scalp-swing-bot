@@ -30,7 +30,7 @@ On every run, active signals are checked against the current Hyperliquid
 mid price. The original Telegram message is reacted to with:
   🔥  when TP1 is hit before SL
   🏆  when TP2 is also hit (full winner)
-  💀  when SL is hit before TP1
+  😭 when SL is hit before TP1
 Signal tracking state is persisted in state.json under "active_signals".
 Signals are auto-expired after SIGNAL_MAX_AGE_BARS (≈48 h by default).
 """
@@ -136,7 +136,7 @@ N_1D  = 210
 # ── REACTION SETTINGS ────────────────────────────────────────
 REACT_TP1          = "🔥"   # TP1 hit before SL
 REACT_TP2          = "🏆"   # TP2 hit (full winner)
-REACT_SL           = "💀"   # SL hit before TP1
+REACT_SL           = "😭"   # SL hit before TP1
 SIGNAL_MAX_AGE_BARS = 192   # auto-expire after ~48 h of 15m bars
 
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
