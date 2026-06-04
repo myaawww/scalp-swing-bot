@@ -26,13 +26,16 @@ v2 FIXES (aligned to Pine Script v10 logic)
 
 REACTION FEATURE
 ────────────────────────────────────────────
-On every run, active signals are checked against the current Hyperliquid
-mid price. The original Telegram message is reacted to with:
+On every run, active signals are checked against 15m candles fetched
+from the signal's bar time up to now. Each candle's high/low is walked
+oldest→newest to correctly resolve TP1→TP2 vs SL hit order, avoiding
+false 😭 reactions when TP1 is hit first within the same 15m window.
+
   🔥  when TP1 is hit before SL
   🏆  when TP2 is also hit (full winner)
   😭 when SL is hit before TP1
 Signal tracking state is persisted in state.json under "active_signals".
-Signals are auto-expired after SIGNAL_MAX_AGE_BARS (≈48 h by default).
+Signals are auto-expired after SIGNAL_MAX_AGE_BARS (≈12 h by default).
 """
 
 import os, json, time, math, random, threading, requests
@@ -137,7 +140,7 @@ N_1D  = 210
 REACT_TP1          = "🔥"   # TP1 hit before SL
 REACT_TP2          = "🏆"   # TP2 hit (full winner)
 REACT_SL           = "😭"   # SL hit before TP1
-SIGNAL_MAX_AGE_BARS = 192   # auto-expire after ~48 h of 15m bars
+SIGNAL_MAX_AGE_BARS = 48    # auto-expire after ~12 h of 15m bars (12hr × 60min ÷ 15min = 48 bars)
 
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
@@ -214,23 +217,35 @@ def hl_post(payload: dict) -> any:
             time.sleep(sleep_s)
 
 
-def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
+def get_candles(symbol: str, interval: str, n: int, start_time_ms: int | None = None) -> list[dict]:
     """
     Fetch last n closed candles for symbol on interval via Hyperliquid.
     Returns list of dicts: {t, o, h, l, c, v}  newest last.
     Hyperliquid candleSnapshot supports up to 5000 candles.
+
+    If start_time_ms is provided it is used directly as the startTime in
+    the Hyperliquid payload, and n is ignored for the time window
+    calculation (though the final slice still caps results at n candles).
+    This lets check_active_signals() fetch only the candles that have
+    closed since a signal fired, without over-fetching.
     """
-    coin     = hl_coin(symbol)
-    iv_ms    = INTERVAL_MS.get(interval, 60 * 60 * 1000)
-    end_ms   = int(time.time() * 1000)
-    start_ms = end_ms - iv_ms * (n + 10)   # fetch a bit extra for safety
+    coin   = hl_coin(symbol)
+    iv_ms  = INTERVAL_MS.get(interval, 60 * 60 * 1000)
+    end_ms = int(time.time() * 1000)
+
+    if start_time_ms is not None:
+        # Caller supplied an explicit window start — use it directly.
+        computed_start_ms = start_time_ms
+    else:
+        # Default: back-calculate from candle count with a small safety buffer.
+        computed_start_ms = end_ms - iv_ms * (n + 10)
 
     payload = {
         "type": "candleSnapshot",
         "req": {
             "coin":      coin,
             "interval":  interval,
-            "startTime": start_ms,
+            "startTime": computed_start_ms,
             "endTime":   end_ms,
         },
     }
@@ -249,20 +264,9 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
             "qv": float(c["v"]),   # HL returns base volume; reuse for qv
         })
 
-    # Drop the last (possibly still-open) candle, return the most recent n
+    # Drop the last (possibly still-open) candle, return the most recent n.
+    # When start_time_ms is provided n acts only as a safety cap.
     return candles[:-1][-n:]
-
-
-def get_current_price(symbol: str) -> float:
-    """
-    Fetch the current mid price for a symbol via Hyperliquid allMids.
-    Used by check_active_signals() to poll TP/SL levels.
-    Returns 0.0 if the coin is not found in the response.
-    """
-    coin = hl_coin(symbol)
-    data = hl_post({"type": "allMids"})
-    price_str = data.get(coin)
-    return float(price_str) if price_str else 0.0
 
 
 def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
@@ -820,19 +824,25 @@ def track_signal(state: dict, symbol: str, direction: str,
     """
     Persist a newly fired signal so subsequent runs can poll its TP/SL.
     Each entry stored under state["active_signals"] as:
-      {symbol, direction, msg_id, bar_index, tp1, tp2, sl, tp1_hit, resolved}
+      {symbol, direction, msg_id, bar_index, signal_bar_time,
+       tp1, tp2, sl, tp1_hit, resolved}
+
+    signal_bar_time is a Unix millisecond timestamp recorded at signal
+    fire time. check_active_signals() uses it as the startTime for
+    candle fetches so only post-signal candles are walked.
     """
     active = state.setdefault("active_signals", [])
     active.append({
-        "symbol":    symbol,
-        "direction": direction,
-        "msg_id":    msg_id,
-        "bar_index": bar_index,
-        "tp1":       sig.tp1,
-        "tp2":       sig.tp2,
-        "sl":        sig.sl,
-        "tp1_hit":   False,
-        "resolved":  False,
+        "symbol":          symbol,
+        "direction":       direction,
+        "msg_id":          msg_id,
+        "bar_index":       bar_index,
+        "signal_bar_time": int(time.time() * 1000) + 900_000,  # Unix ms; +1 bar so walk starts on the NEXT candle after signal fires
+        "tp1":             sig.tp1,
+        "tp2":             sig.tp2,
+        "sl":              sig.sl,
+        "tp1_hit":         False,
+        "resolved":        False,
     })
 
 
@@ -840,16 +850,29 @@ def check_active_signals(state: dict, bar_index_now: int):
     """
     Called once at the start of every run — before the scan loop.
 
-    For each tracked signal, fetch the current Hyperliquid mid price and
-    apply the following rules (checked in priority order):
+    For each tracked signal, fetch 15m candles from signal_bar_time up
+    to now and walk them oldest→newest, checking high/low on every bar.
+    This correctly resolves TP1→TP2 hit order even when both levels are
+    crossed between two consecutive 15-minute scans.
 
-      1. SL hit before TP1         → react 💀, mark resolved
-      2. TP2 hit                   → react 🔥 (if TP1 not yet marked)
-                                     then 🏆, mark resolved
-      3. TP1 hit (first time only) → react 🔥, keep tracking for TP2
+    Walk rules
+    ──────────
+    LONG  candle:
+      • low  <= sl  AND tp1 not yet hit → 😭 resolve, stop walk
+      • high >= tp1 AND tp1 not yet hit → 🔥 set tp1_hit = True
+      • high >= tp2 AND tp1 already hit → 🏆 resolve, stop walk
 
-    Signals that are already resolved or older than SIGNAL_MAX_AGE_BARS
-    are dropped from the list.
+    SHORT candle:
+      • high >= sl  AND tp1 not yet hit → 😭 resolve, stop walk
+      • low  <= tp1 AND tp1 not yet hit → 🔥 set tp1_hit = True
+      • low  <= tp2 AND tp1 already hit → 🏆 resolve, stop walk
+
+    If tp1_hit is already True in state (reacted in a prior scan), the
+    walk starts with that state and skips the TP1 check — no duplicate
+    🔥 reaction is emitted.
+
+    Signals already resolved or older than SIGNAL_MAX_AGE_BARS are
+    dropped. If the candle fetch fails, the signal is kept for retry.
     """
     signals = state.get("active_signals", [])
     if not signals:
@@ -876,50 +899,86 @@ def check_active_signals(state: dict, bar_index_now: int):
         sl        = sig["sl"]
         tp1_hit   = sig.get("tp1_hit", False)
 
-        # ── Fetch current price ───────────────────────────────
+        # signal_bar_time may be absent on entries created before this
+        # version — fall back to fetching a fixed window via N_15M.
+        signal_bar_time_ms: int | None = sig.get("signal_bar_time")
+
+        # ── Fetch candles since signal fired ─────────────────
         try:
-            price = get_current_price(symbol)
+            candles = get_candles(
+                symbol, "15m", N_15M,
+                start_time_ms=signal_bar_time_ms,
+            )
         except Exception as e:
-            print(f"  [TRACK] price fetch failed for {symbol}: {e}")
+            print(f"  [TRACK] candle fetch failed for {symbol}: {e}")
             still_active.append(sig)
             continue
 
-        if price == 0.0:
+        if not candles:
             still_active.append(sig)
             continue
 
-        # ── Evaluate levels ───────────────────────────────────
-        if direction == "long":
-            sl_hit  = price <= sl
-            tp1_now = price >= tp1
-            tp2_now = price >= tp2
-        else:  # short
-            sl_hit  = price >= sl
-            tp1_now = price <= tp1
-            tp2_now = price <= tp2
+        # ── Walk candles oldest → newest ──────────────────────
+        # get_candles() returns newest-last, so index 0 is oldest — correct order.
+        for candle in candles:
+            c_high = candle["h"]
+            c_low  = candle["l"]
 
-        # Priority 1: SL hit before TP1
-        if not tp1_hit and sl_hit:
-            react_to_message(msg_id, REACT_SL)
-            print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
-            sig["resolved"] = True
+            if direction == "long":
+                # Priority 1: SL hit before TP1 → 😭
+                if not tp1_hit and c_low <= sl:
+                    react_to_message(msg_id, REACT_SL)
+                    print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
+                    sig["resolved"] = True
+                    break
 
-        # Priority 2: TP2 hit (full winner)
-        elif tp2_now:
-            if not tp1_hit:
-                # TP1 was crossed on the way — react 🔥 first, brief pause, then 🏆
-                react_to_message(msg_id, REACT_TP1)
-                time.sleep(0.3)
-            react_to_message(msg_id, REACT_TP2)
-            print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
-            sig["tp1_hit"]  = True
-            sig["resolved"] = True
+                # Priority 2: TP1 hit for the first time → 🔥
+                if not tp1_hit and c_high >= tp1:
+                    react_to_message(msg_id, REACT_TP1)
+                    print(f"  [TRACK] {symbol} TP1 hit → {REACT_TP1}")
+                    tp1_hit        = True
+                    sig["tp1_hit"] = True
 
-        # Priority 3: TP1 hit for the first time (keep tracking for TP2)
-        elif tp1_now and not tp1_hit:
-            react_to_message(msg_id, REACT_TP1)
-            print(f"  [TRACK] {symbol} TP1 hit → {REACT_TP1}")
-            sig["tp1_hit"] = True
+                # Priority 3: TP2 hit after TP1 → 🏆
+                if tp1_hit and c_high >= tp2:
+                    react_to_message(msg_id, REACT_TP2)
+                    print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
+                    sig["resolved"] = True
+                    break
+
+                # Priority 4: SL hit after TP1 — resolve silently (no new reaction)
+                if tp1_hit and not sig.get("resolved", False) and c_low <= sl:
+                    print(f"  [TRACK] {symbol} SL hit after TP1 — resolving silently")
+                    sig["resolved"] = True
+                    break
+
+            else:  # short
+                # Priority 1: SL hit before TP1 → 😭
+                if not tp1_hit and c_high >= sl:
+                    react_to_message(msg_id, REACT_SL)
+                    print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
+                    sig["resolved"] = True
+                    break
+
+                # Priority 2: TP1 hit for the first time → 🔥
+                if not tp1_hit and c_low <= tp1:
+                    react_to_message(msg_id, REACT_TP1)
+                    print(f"  [TRACK] {symbol} TP1 hit → {REACT_TP1}")
+                    tp1_hit        = True
+                    sig["tp1_hit"] = True
+
+                # Priority 3: TP2 hit after TP1 → 🏆
+                if tp1_hit and c_low <= tp2:
+                    react_to_message(msg_id, REACT_TP2)
+                    print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
+                    sig["resolved"] = True
+                    break
+
+                # Priority 4: SL hit after TP1 — resolve silently (no new reaction)
+                if tp1_hit and not sig.get("resolved", False) and c_high >= sl:
+                    print(f"  [TRACK] {symbol} SL hit after TP1 — resolving silently")
+                    sig["resolved"] = True
+                    break
 
         # ── Keep in list if not yet resolved ──────────────────
         if not sig.get("resolved", False):
