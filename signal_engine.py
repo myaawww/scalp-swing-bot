@@ -873,6 +873,9 @@ def check_active_signals(state: dict, bar_index_now: int):
 
     Signals already resolved or older than SIGNAL_MAX_AGE_BARS are
     dropped. If the candle fetch fails, the signal is kept for retry.
+
+    Resolved signals are appended to state["resolved_signals"] with
+    their outcome ("sl", "tp2", or "tp1") before being dropped.
     """
     signals = state.get("active_signals", [])
     if not signals:
@@ -929,6 +932,12 @@ def check_active_signals(state: dict, bar_index_now: int):
                 if not tp1_hit and c_low <= sl:
                     react_to_message(msg_id, REACT_SL)
                     print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "sl",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
@@ -943,12 +952,24 @@ def check_active_signals(state: dict, bar_index_now: int):
                 if tp1_hit and c_high >= tp2:
                     react_to_message(msg_id, REACT_TP2)
                     print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "tp2",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
                 # Priority 4: SL hit after TP1 — resolve silently (no new reaction)
                 if tp1_hit and not sig.get("resolved", False) and c_low <= sl:
                     print(f"  [TRACK] {symbol} SL hit after TP1 — resolving silently")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "tp1",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
@@ -957,6 +978,12 @@ def check_active_signals(state: dict, bar_index_now: int):
                 if not tp1_hit and c_high >= sl:
                     react_to_message(msg_id, REACT_SL)
                     print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "sl",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
@@ -971,12 +998,24 @@ def check_active_signals(state: dict, bar_index_now: int):
                 if tp1_hit and c_low <= tp2:
                     react_to_message(msg_id, REACT_TP2)
                     print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "tp2",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
                 # Priority 4: SL hit after TP1 — resolve silently (no new reaction)
                 if tp1_hit and not sig.get("resolved", False) and c_high >= sl:
                     print(f"  [TRACK] {symbol} SL hit after TP1 — resolving silently")
+                    state.setdefault("resolved_signals", []).append({
+                        "symbol":      symbol,
+                        "direction":   direction,
+                        "outcome":     "tp1",
+                        "resolved_at": int(time.time()),
+                    })
                     sig["resolved"] = True
                     break
 
@@ -985,6 +1024,65 @@ def check_active_signals(state: dict, bar_index_now: int):
             still_active.append(sig)
 
     state["active_signals"] = still_active
+
+
+# ═══════════════════════════════════════════════════════════════
+# DAILY SUMMARY
+# ═══════════════════════════════════════════════════════════════
+
+def should_send_summary() -> bool:
+    """
+    Returns True once per day at the 08:00 UTC scan.
+    Matches any scan running between 08:00 and 08:14 UTC
+    so a delayed GitHub Actions run doesn't miss the window.
+    """
+    now = datetime.now(timezone.utc)
+    return now.hour == 8 and now.minute < 15
+
+
+def send_summary(state: dict):
+    """
+    Build and send a Telegram summary of signals resolved
+    in the last 24 hours, then prune old entries from
+    state["resolved_signals"] keeping only the last 48h.
+
+    Format (use exact emoji and layout):
+
+      📊 Signal Summary (last 24h)
+      ✅ Winners: N (🔥×A  🏆×B)
+      ❌ Losers:  N (😭×C)
+
+    If zero signals were resolved in the last 24h, do not
+    send any message at all — return silently.
+    """
+    cutoff_24h = int(time.time()) - 86400
+    cutoff_48h = int(time.time()) - 172800
+
+    recent = [
+        e for e in state.get("resolved_signals", [])
+        if e["resolved_at"] >= cutoff_24h
+    ]
+
+    tp1_count = sum(1 for e in recent if e["outcome"] == "tp1")
+    tp2_count = sum(1 for e in recent if e["outcome"] == "tp2")
+    sl_count  = sum(1 for e in recent if e["outcome"] == "sl")
+    winners   = tp1_count + tp2_count
+    losers    = sl_count
+
+    if winners == 0 and losers == 0:
+        return
+
+    line1 = "📊 Signal Summary (last 24h)"
+    line2 = f"✅ Winners: {winners} (🔥×{tp1_count}  🏆×{tp2_count})"
+    line3 = f"❌ Losers:  {losers} (😭×{sl_count})"
+    text  = "\n".join([line1, line2, line3])
+
+    send_telegram(text)
+
+    state["resolved_signals"] = [
+        e for e in state.get("resolved_signals", [])
+        if e["resolved_at"] >= cutoff_48h
+    ]
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1032,6 +1130,11 @@ def main():
     print("[TRACK] Checking active signals…")
     check_active_signals(state, bar_index_now)
     save_state(state)   # persist reaction updates immediately
+
+    # ── Step 1.5: Send daily summary if 08:00 UTC window ────
+    if should_send_summary():
+        send_summary(state)
+        save_state(state)   # persist pruned resolved_signals
 
     # ── Step 2: Scan all symbols in parallel ──────────────────
     pending_signals: list[tuple[str, str, str, SignalResult]] = []
