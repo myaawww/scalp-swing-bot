@@ -1,6 +1,6 @@
 {
-  "DOTUSDT_short": 1978370,
-  "DOTUSDT_any": 1978370,
+  "DOTUSDT_short": 1978417,
+  "DOTUSDT_any": 1978417,
   "SUIUSDT_short": 1978409,
   "SUIUSDT_any": 1978409,
   "XLMUSDT_long": 1978123,
@@ -87,5 +87,7 @@
   "ZECUSDT_long": 1978371,
   "ZECUSDT_any": 1978371,
   "BNBUSDT_short": 1978400,
-  "BNBUSDT_any": 1978400
+  "BNBUSDT_any": 1978400,
+  "ONDOUSDT_long": 1978417,
+  "ONDOUSDT_any": 1978417
 }
