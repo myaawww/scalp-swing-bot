@@ -1,8 +1,8 @@
 {
   "DOTUSDT_short": 1978450,
   "DOTUSDT_any": 1978450,
-  "SUIUSDT_short": 1978409,
-  "SUIUSDT_any": 1978409,
+  "SUIUSDT_short": 1978454,
+  "SUIUSDT_any": 1978454,
   "XLMUSDT_long": 1978123,
   "XLMUSDT_any": 1978123,
   "DOGEUSDT_short": 1978438,
@@ -58,8 +58,8 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978405,
-  "AAVEUSDT_any": 1978405,
+  "AAVEUSDT_short": 1978454,
+  "AAVEUSDT_any": 1978454,
   "ETHUSDT_short": 1978436,
   "ETHUSDT_any": 1978436,
   "ADAUSDT_short": 1978432,
@@ -100,7 +100,7 @@
       "tp1": 1.0424479768583812,
       "tp2": 1.0379219652875715,
       "sl": 1.060552023141619,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -112,6 +112,30 @@
       "tp1": 0.7540038711222043,
       "tp2": 0.7501058066833064,
       "sl": 0.7695961288777957,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "SUIUSDT",
+      "direction": "short",
+      "msg_id": 152,
+      "bar_index": 1978454,
+      "signal_bar_time": 1780609541861,
+      "tp1": 0.7617341663181071,
+      "tp2": 0.7579262494771607,
+      "sl": 0.7769658336818929,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "msg_id": 153,
+      "bar_index": 1978454,
+      "signal_bar_time": 1780609542990,
+      "tp1": 70.54412035068073,
+      "tp2": 70.27218052602109,
+      "sl": 71.63187964931926,
       "tp1_hit": false,
       "resolved": false
     }
