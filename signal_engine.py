@@ -23,6 +23,16 @@ v2 FIXES (aligned to Pine Script v10 logic)
 
 [FIX 5] obv_slope indexing corrected to -(1+OBV_LEN) for clarity and
         consistency with Pine's obvVal > obvVal[obvLen].
+
+REACTION FEATURE
+────────────────────────────────────────────
+On every run, active signals are checked against the current Hyperliquid
+mid price. The original Telegram message is reacted to with:
+  🔥  when TP1 is hit before SL
+  🏆  when TP2 is also hit (full winner)
+  💀  when SL is hit before TP1
+Signal tracking state is persisted in state.json under "active_signals".
+Signals are auto-expired after SIGNAL_MAX_AGE_BARS (≈48 h by default).
 """
 
 import os, json, time, math, random, threading, requests
@@ -31,17 +41,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ── CONFIG ───────────────────────────────────────────────────
-TG_BOT_TOKEN = os.environ["TG_BOT_TOKEN"]
-TG_CHAT_ID   = os.environ["TG_CHAT_ID"]
-STATE_FILE   = "state.json"
-SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "2"))
-HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.18"))
+TG_BOT_TOKEN          = os.environ["TG_BOT_TOKEN"]
+TG_CHAT_ID            = os.environ["TG_CHAT_ID"]
+STATE_FILE            = "state.json"
+SCAN_WORKERS          = int(os.getenv("SCAN_WORKERS", "2"))
+HL_MIN_INTERVAL_S     = float(os.getenv("HL_MIN_INTERVAL_S", "0.18"))
 HL_MIN_INTERVAL_MAX_S = float(os.getenv("HL_MIN_INTERVAL_MAX_S", "0.60"))
-HL_TF_WORKERS      = int(os.getenv("HL_TF_WORKERS", "1"))
+HL_TF_WORKERS         = int(os.getenv("HL_TF_WORKERS", "1"))
 
-_hl_request_lock = threading.Lock()
+_hl_request_lock    = threading.Lock()
 _hl_last_request_ts = 0.0
-_hl_min_interval_s = HL_MIN_INTERVAL_S
+_hl_min_interval_s  = HL_MIN_INTERVAL_S
 
 _hl_session = requests.Session()
 
@@ -123,6 +133,12 @@ N_1H  = 60
 N_4H  = 60
 N_1D  = 210
 
+# ── REACTION SETTINGS ────────────────────────────────────────
+REACT_TP1          = "🔥"   # TP1 hit before SL
+REACT_TP2          = "🏆"   # TP2 hit (full winner)
+REACT_SL           = "💀"   # SL hit before TP1
+SIGNAL_MAX_AGE_BARS = 192   # auto-expire after ~48 h of 15m bars
+
 # ── HYPERLIQUID ENDPOINT ──────────────────────────────────────
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
 
@@ -146,8 +162,8 @@ def hl_coin(symbol: str) -> str:
 
 def hl_post(payload: dict) -> any:
     """POST to Hyperliquid /info with retry + 429 backoff."""
-    max_attempts = int(os.getenv("HL_MAX_ATTEMPTS", "6"))
-    base_sleep_s = float(os.getenv("HL_BASE_SLEEP_S", "0.75"))
+    max_attempts  = int(os.getenv("HL_MAX_ATTEMPTS", "6"))
+    base_sleep_s  = float(os.getenv("HL_BASE_SLEEP_S", "0.75"))
     for attempt in range(max_attempts):
         try:
             global _hl_last_request_ts
@@ -155,9 +171,9 @@ def hl_post(payload: dict) -> any:
             # Global rate limiter across all threads.
             # This avoids request bursts that trigger Hyperliquid 429s.
             with _hl_request_lock:
-                now = time.time()
+                now     = time.time()
                 elapsed = now - _hl_last_request_ts
-                wait_s = _hl_min_interval_s - elapsed
+                wait_s  = _hl_min_interval_s - elapsed
                 if wait_s > 0:
                     time.sleep(wait_s)
                 # Mark request time immediately so other threads respect spacing.
@@ -172,8 +188,9 @@ def hl_post(payload: dict) -> any:
             if r.status_code == 429:
                 # If we hit rate-limit, slow down the global throttle immediately.
                 with _hl_request_lock:
-                    _hl_min_interval_s = min(HL_MIN_INTERVAL_MAX_S, _hl_min_interval_s * 1.25 + 0.02)
-
+                    _hl_min_interval_s = min(
+                        HL_MIN_INTERVAL_MAX_S, _hl_min_interval_s * 1.25 + 0.02
+                    )
                 retry_after = r.headers.get("Retry-After")
                 try:
                     retry_after_s = float(retry_after) if retry_after is not None else None
@@ -203,10 +220,10 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     Returns list of dicts: {t, o, h, l, c, v}  newest last.
     Hyperliquid candleSnapshot supports up to 5000 candles.
     """
-    coin      = hl_coin(symbol)
-    iv_ms     = INTERVAL_MS.get(interval, 60 * 60 * 1000)
-    end_ms    = int(time.time() * 1000)
-    start_ms  = end_ms - iv_ms * (n + 10)   # fetch a bit extra for safety
+    coin     = hl_coin(symbol)
+    iv_ms    = INTERVAL_MS.get(interval, 60 * 60 * 1000)
+    end_ms   = int(time.time() * 1000)
+    start_ms = end_ms - iv_ms * (n + 10)   # fetch a bit extra for safety
 
     payload = {
         "type": "candleSnapshot",
@@ -235,6 +252,19 @@ def get_candles(symbol: str, interval: str, n: int) -> list[dict]:
     # Drop the last (possibly still-open) candle, return the most recent n
     return candles[:-1][-n:]
 
+
+def get_current_price(symbol: str) -> float:
+    """
+    Fetch the current mid price for a symbol via Hyperliquid allMids.
+    Used by check_active_signals() to poll TP/SL levels.
+    Returns 0.0 if the coin is not found in the response.
+    """
+    coin = hl_coin(symbol)
+    data = hl_post({"type": "allMids"})
+    price_str = data.get(coin)
+    return float(price_str) if price_str else 0.0
+
+
 def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
     """
     Fetch all 4 timeframes concurrently for one symbol.
@@ -250,9 +280,9 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
     results = {}
     with ThreadPoolExecutor(max_workers=max(1, HL_TF_WORKERS)) as ex:
         futures = {
-            ex.submit(get_candles, symbol, "1h",  N_1H): "1h",
-            ex.submit(get_candles, symbol, "4h",  N_4H): "4h",
-            ex.submit(get_candles, symbol, "1d",  N_1D): "1d",
+            ex.submit(get_candles, symbol, "1h", N_1H): "1h",
+            ex.submit(get_candles, symbol, "4h", N_4H): "4h",
+            ex.submit(get_candles, symbol, "1d", N_1D): "1d",
         }
         for fut in as_completed(futures):
             tf = futures[fut]
@@ -261,7 +291,8 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
     return candles_15m, results["1h"], results["4h"], results["1d"]
 
 
-
+# ═══════════════════════════════════════════════════════════════
+# INDICATOR MATH
 # ═══════════════════════════════════════════════════════════════
 
 def ema(values: list[float], period: int) -> list[float]:
@@ -333,7 +364,7 @@ def bollinger(closes, period: int, mult: float):
 
 
 def adx_dmi(highs, lows, closes, period: int):
-    n = len(closes)
+    n        = len(closes)
     plus_dm  = [0.0] * n
     minus_dm = [0.0] * n
     tr_arr   = [0.0] * n
@@ -470,11 +501,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     obv15    = obv(c15, v15)
     rvwap15  = rolling_vwap(c15, v15, ROLLING_VWAP_LEN)
 
-    # ── Execution-bar values (Pine: h1C/h1O/h1H/h1L via request.security close[1]) ──
-    # get_candles() drops the still-open candle, so [-1] IS the last confirmed close.
-    # Pine's HTF security call with lookahead_off returns the PREVIOUS HTF bar's close,
-    # but the execution TF IS 15m (same as the chart), so h1C == close[1] on the NEXT bar.
-    # To stay consistent: cur_* are the signal-bar values (confirmed close we evaluate now).
+    # ── Execution-bar values ──────────────────────────────────
     cur_c = c15[-1]; cur_o = o15[-1]
     cur_h = h15[-1]; cur_l = l15[-1]
     cur_v = v15[-1]
@@ -495,8 +522,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     bb_long  = cur_c > bb_basis
     bb_short = cur_c < bb_basis
 
-    # OBV slope: Pine uses obvVal > obvVal[obvLen] on the current (confirmed) bar
-    # get_candles() already strips the open candle, so [-1] is the last closed bar
     obv_slope_long  = obv15[-1] > obv15[-(1 + OBV_LEN)]
     obv_slope_short = obv15[-1] < obv15[-(1 + OBV_LEN)]
 
@@ -507,8 +532,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     o1h, h1h, l1h, c1h, v1h = arrays(candles_1h)
     ema_f1h = ema(c1h, FAST_LEN)
     ema_s1h = ema(c1h, SLOW_LEN)
-    # Pine fetches HTF with lookahead_off → uses close[1] (last confirmed bar)
-    # In Python: [-2] is the last fully closed 1H candle, [-1] may still be open
     ef1h = safe(ema_f1h[-2])
     es1h = safe(ema_s1h[-2])
     h1_bull = ef1h > es1h
@@ -518,16 +541,13 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     o4h, h4h, l4h, c4h, v4h = arrays(candles_4h)
     ema_f4h = ema(c4h, FAST_LEN)
     ema_s4h = ema(c4h, SLOW_LEN)
-    # Pine: lookahead_off → close[1], so use [-2] (last confirmed 4H close)
     ef4h = safe(ema_f4h[-2]); es4h = safe(ema_s4h[-2])
     _, _, adx4h_arr = adx_dmi(h4h, l4h, c4h, ADX_LEN)
-    adx4h  = safe(adx4h_arr[-2], 25.0)   # confirmed 4H ADX value
+    adx4h  = safe(adx4h_arr[-2], 25.0)
     d_bull = ef4h > es4h
     d_bear = ef4h < es4h
 
     def trend_held(ef_arr, es_arr, bull: bool) -> bool:
-        # Pine: nz(ef[1])>nz(es[1]) ... nz(ef[N])>nz(es[N])
-        # Since we treat [-2] as bar[1], bar[2]=[-3], bar[N]=[-(N+1)]
         for offset in range(1, TREND_HOLD_BARS + 1):
             idx = -(offset + 1)
             if len(ef_arr) < offset + 2:
@@ -547,7 +567,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     if candles_d and len(candles_d) >= TREND_LEN:
         _, _, _, c_d, _ = arrays(candles_d)
         ema_d200 = ema(c_d, TREND_LEN)
-        # Pine: lookahead_off → close[1]; use [-2] (last confirmed daily close)
         d200 = safe(ema_d200[-2])
     else:
         d200 = cur_c
@@ -556,8 +575,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
 
     daily_adx_ok = adx4h >= MIN_DAILY_ADX if USE_DAILY_ADX else True
 
-    # h4_bull / h4_bear: sourced from actual 4H EMA alignment
-    # (was incorrectly aliased to h1_bull / h1_bear — BUG FIX)
     h4_bull = ef4h > es4h
     h4_bear = ef4h < es4h
 
@@ -590,8 +607,8 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     break_bear_bar = cur_c < cur_o and clean_bear_bar() and close_in_bot_range()
 
     pull_zone          = atr_val * PULL_ZONE_MULT
-    pull_touched_long  = prev_l <= ef15_prev + pull_zone   # Pine: low[1] <= localEMAf[1] + zone
-    pull_touched_short = prev_h >= ef15_prev - pull_zone   # Pine: high[1] >= localEMAf[1] - zone
+    pull_touched_long  = prev_l <= ef15_prev + pull_zone
+    pull_touched_short = prev_h >= ef15_prev - pull_zone
     pull_recover_long  = cur_c > ef15 and cur_c > cur_o
     pull_recover_short = cur_c < ef15 and cur_c < cur_o
     pull_bull_bar      = cur_c > cur_o and clean_bull_bar()
@@ -713,7 +730,11 @@ def stars(score: int) -> str:
     return "★" * score + "☆" * (5 - score)
 
 
-def send_telegram(text: str):
+def send_telegram(text: str) -> int | None:
+    """
+    Send a Telegram message and return its message_id.
+    Returns None if all attempts fail.
+    """
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
     for attempt in range(3):
         try:
@@ -723,11 +744,33 @@ def send_telegram(text: str):
                 "parse_mode": "HTML",
             }, timeout=10)
             r.raise_for_status()
-            return
+            return r.json()["result"]["message_id"]
         except Exception as e:
             if attempt == 2:
                 print(f"[TG ERROR] {e}")
             time.sleep(2)
+    return None
+
+
+def react_to_message(message_id: int, emoji: str):
+    """
+    Add a reaction emoji to an existing Telegram message.
+    Uses setMessageReaction — requires the bot to be admin in the channel,
+    or reactions to be allowed in group settings.
+    Replaces any existing reaction on that message.
+    """
+    url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/setMessageReaction"
+    try:
+        r = requests.post(url, json={
+            "chat_id":    TG_CHAT_ID,
+            "message_id": message_id,
+            "reaction":   [{"type": "emoji", "emoji": emoji}],
+            "is_big":     False,
+        }, timeout=10)
+        r.raise_for_status()
+        print(f"  [REACT] {emoji} → msg_id {message_id}")
+    except Exception as e:
+        print(f"  [REACT ERROR] msg_id {message_id}: {e}")
 
 
 def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
@@ -741,7 +784,6 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
         return f"{v:.6f}"
 
     def recommended_leverage(atr_pct: float, score: int) -> str:
-        # Higher ATR% means more volatility; reduce leverage accordingly.
         if atr_pct <= 0.60:
             low, high = 8, 12
         elif atr_pct <= 1.20:
@@ -750,7 +792,6 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
             low, high = 3, 7
         else:
             low, high = 2, 5
-
         if score == 4:
             high = max(low, high - 2)
         return f"{low}x - {high}x"
@@ -771,7 +812,124 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
 
 
 # ═══════════════════════════════════════════════════════════════
-# MAIN
+# ACTIVE SIGNAL TRACKING  (TP / SL reactions)
+# ═══════════════════════════════════════════════════════════════
+
+def track_signal(state: dict, symbol: str, direction: str,
+                 msg_id: int, sig: SignalResult, bar_index: int):
+    """
+    Persist a newly fired signal so subsequent runs can poll its TP/SL.
+    Each entry stored under state["active_signals"] as:
+      {symbol, direction, msg_id, bar_index, tp1, tp2, sl, tp1_hit, resolved}
+    """
+    active = state.setdefault("active_signals", [])
+    active.append({
+        "symbol":    symbol,
+        "direction": direction,
+        "msg_id":    msg_id,
+        "bar_index": bar_index,
+        "tp1":       sig.tp1,
+        "tp2":       sig.tp2,
+        "sl":        sig.sl,
+        "tp1_hit":   False,
+        "resolved":  False,
+    })
+
+
+def check_active_signals(state: dict, bar_index_now: int):
+    """
+    Called once at the start of every run — before the scan loop.
+
+    For each tracked signal, fetch the current Hyperliquid mid price and
+    apply the following rules (checked in priority order):
+
+      1. SL hit before TP1         → react 💀, mark resolved
+      2. TP2 hit                   → react 🔥 (if TP1 not yet marked)
+                                     then 🏆, mark resolved
+      3. TP1 hit (first time only) → react 🔥, keep tracking for TP2
+
+    Signals that are already resolved or older than SIGNAL_MAX_AGE_BARS
+    are dropped from the list.
+    """
+    signals = state.get("active_signals", [])
+    if not signals:
+        return
+
+    still_active = []
+
+    for sig in signals:
+        # ── Drop expired signals ──────────────────────────────
+        age = bar_index_now - sig.get("bar_index", bar_index_now)
+        if age > SIGNAL_MAX_AGE_BARS:
+            print(f"  [TRACK] {sig['symbol']} expired after {age} bars — dropping")
+            continue
+
+        # ── Skip already-resolved signals ────────────────────
+        if sig.get("resolved", False):
+            continue
+
+        symbol    = sig["symbol"]
+        direction = sig["direction"]
+        msg_id    = sig["msg_id"]
+        tp1       = sig["tp1"]
+        tp2       = sig["tp2"]
+        sl        = sig["sl"]
+        tp1_hit   = sig.get("tp1_hit", False)
+
+        # ── Fetch current price ───────────────────────────────
+        try:
+            price = get_current_price(symbol)
+        except Exception as e:
+            print(f"  [TRACK] price fetch failed for {symbol}: {e}")
+            still_active.append(sig)
+            continue
+
+        if price == 0.0:
+            still_active.append(sig)
+            continue
+
+        # ── Evaluate levels ───────────────────────────────────
+        if direction == "long":
+            sl_hit  = price <= sl
+            tp1_now = price >= tp1
+            tp2_now = price >= tp2
+        else:  # short
+            sl_hit  = price >= sl
+            tp1_now = price <= tp1
+            tp2_now = price <= tp2
+
+        # Priority 1: SL hit before TP1
+        if not tp1_hit and sl_hit:
+            react_to_message(msg_id, REACT_SL)
+            print(f"  [TRACK] {symbol} SL hit → {REACT_SL}")
+            sig["resolved"] = True
+
+        # Priority 2: TP2 hit (full winner)
+        elif tp2_now:
+            if not tp1_hit:
+                # TP1 was crossed on the way — react 🔥 first, brief pause, then 🏆
+                react_to_message(msg_id, REACT_TP1)
+                time.sleep(0.3)
+            react_to_message(msg_id, REACT_TP2)
+            print(f"  [TRACK] {symbol} TP2 hit → {REACT_TP2}")
+            sig["tp1_hit"]  = True
+            sig["resolved"] = True
+
+        # Priority 3: TP1 hit for the first time (keep tracking for TP2)
+        elif tp1_now and not tp1_hit:
+            react_to_message(msg_id, REACT_TP1)
+            print(f"  [TRACK] {symbol} TP1 hit → {REACT_TP1}")
+            sig["tp1_hit"] = True
+
+        # ── Keep in list if not yet resolved ──────────────────
+        if not sig.get("resolved", False):
+            still_active.append(sig)
+
+    state["active_signals"] = still_active
+
+
+# ═══════════════════════════════════════════════════════════════
+# SCAN
 # ═══════════════════════════════════════════════════════════════
 
 def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, SignalResult]]:
@@ -792,8 +950,7 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
         return []
 
     direction = "long" if sig.fire_long else "short"
-    cooldown_key = symbol
-    if not check_cooldown(state, cooldown_key, direction, bar_index_now):
+    if not check_cooldown(state, symbol, direction, bar_index_now):
         print(f"    {coin} signal suppressed by cooldown")
         return []
 
@@ -801,19 +958,29 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
     return [(symbol, format_signal(symbol, sig, "CORE"), direction, sig)]
 
 
+# ═══════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════
+
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
 
     bar_index_now = int(time.time() // (15 * 60))
     state         = load_state()
-    signals_fired = 0
 
-    # Scan all symbols in parallel (keep this conservative to avoid 429 rate-limits).
-    pending_signals = []
+    # ── Step 1: Check pending signals for TP/SL reactions ────
+    print("[TRACK] Checking active signals…")
+    check_active_signals(state, bar_index_now)
+    save_state(state)   # persist reaction updates immediately
+
+    # ── Step 2: Scan all symbols in parallel ──────────────────
+    pending_signals: list[tuple[str, str, str, SignalResult]] = []
     with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
-        futures = {ex.submit(scan_symbol, sym, state, bar_index_now): sym
-                   for sym in WATCHLIST}
+        futures = {
+            ex.submit(scan_symbol, sym, state, bar_index_now): sym
+            for sym in WATCHLIST
+        }
         for fut in as_completed(futures):
             sym = futures[fut]
             try:
@@ -823,16 +990,20 @@ def main():
             except Exception as e:
                 print(f"    ERROR processing {sym}: {e}")
 
-    # Send Telegram alerts sequentially (avoids flood and preserves cooldown ordering)
+    # ── Step 3: Send alerts + register for tracking ───────────
+    signals_fired = 0
     for symbol, msg, direction, sig in pending_signals:
-        send_telegram(msg)
+        msg_id = send_telegram(msg)
         update_cooldown(state, symbol, direction, bar_index_now)
+        if msg_id:
+            track_signal(state, symbol, direction, msg_id, sig, bar_index_now)
+            print(f"  [TRACK] registered {hl_coin(symbol)} {direction.upper()} "
+                  f"TP1={sig.tp1:.4f} TP2={sig.tp2:.4f} SL={sig.sl:.4f}")
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
 
     save_state(state)
     print(f"Scan complete. {signals_fired} signal(s) fired.")
-
 
 
 if __name__ == "__main__":
