@@ -60,8 +60,8 @@
   "DOTUSDT_ADAPTIVE_any": 1978232,
   "AAVEUSDT_short": 1978487,
   "AAVEUSDT_any": 1978487,
-  "ETHUSDT_short": 1978483,
-  "ETHUSDT_any": 1978483,
+  "ETHUSDT_short": 1978518,
+  "ETHUSDT_any": 1978518,
   "ADAUSDT_short": 1978487,
   "ADAUSDT_any": 1978487,
   "TAOUSDT_short": 1978509,
@@ -92,50 +92,14 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "TAOUSDT",
+      "symbol": "ETHUSDT",
       "direction": "short",
-      "msg_id": 175,
-      "bar_index": 1978509,
-      "signal_bar_time": 1780659060908,
-      "tp1": 196.08672502167286,
-      "tp2": 194.8050875325093,
-      "sl": 201.21327497832715,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 178,
-      "bar_index": 1978511,
-      "signal_bar_time": 1780660838442,
-      "tp1": 7.483638665687715,
-      "tp2": 7.447657998531572,
-      "sl": 7.6275613343122854,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 180,
-      "bar_index": 1978511,
-      "signal_bar_time": 1780660840642,
-      "tp1": 43.62102989452743,
-      "tp2": 43.43954484179115,
-      "sl": 44.34697010547257,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 181,
-      "bar_index": 1978514,
-      "signal_bar_time": 1780663548461,
-      "tp1": 65.19813153170782,
-      "tp2": 64.87669729756172,
-      "sl": 66.48386846829217,
+      "msg_id": 183,
+      "bar_index": 1978518,
+      "signal_bar_time": 1780667150702,
+      "tp1": 1651.6056780290521,
+      "tp2": 1644.958517043578,
+      "sl": 1678.194321970948,
       "tp1_hit": false,
       "resolved": false
     }
@@ -302,6 +266,30 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780665323
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1780666227
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1780666228
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1780666228
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780666229
     }
   ]
 }
