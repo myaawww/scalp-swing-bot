@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "AVAXUSDT",
-      "direction": "short",
-      "msg_id": 174,
-      "bar_index": 1978508,
-      "signal_bar_time": 1780658153754,
-      "tp1": 7.077994975401671,
-      "tp2": 7.040492463102507,
-      "sl": 7.228005024598328,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "TAOUSDT",
       "direction": "short",
       "msg_id": 175,
@@ -112,7 +100,7 @@
       "tp1": 196.08672502167286,
       "tp2": 194.8050875325093,
       "sl": 201.21327497832715,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -136,7 +124,7 @@
       "tp1": 0.0834938574892261,
       "tp2": 0.08313078623383915,
       "sl": 0.08494614251077391,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -160,7 +148,7 @@
       "tp1": 2.4944645224508704,
       "tp2": 2.4810967836763056,
       "sl": 2.5479354775491294,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -308,6 +296,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780641024
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780661725
     }
   ]
 }
