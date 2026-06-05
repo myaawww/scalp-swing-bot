@@ -72,8 +72,8 @@
   "XRPUSDT_any": 1978483,
   "NEARUSDT_long": 1978360,
   "NEARUSDT_any": 1978360,
-  "AVAXUSDT_short": 1978474,
-  "AVAXUSDT_any": 1978474,
+  "AVAXUSDT_short": 1978508,
+  "AVAXUSDT_any": 1978508,
   "WLDUSDT_long": 1978351,
   "WLDUSDT_any": 1978351,
   "LTCUSDT_short": 1978473,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1978474,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "msg_id": 174,
+      "bar_index": 1978508,
+      "signal_bar_time": 1780658153754,
+      "tp1": 7.077994975401671,
+      "tp2": 7.040492463102507,
+      "sl": 7.228005024598328,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
