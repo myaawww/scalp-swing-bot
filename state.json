@@ -7,8 +7,8 @@
   "XLMUSDT_any": 1978123,
   "DOGEUSDT_short": 1978511,
   "DOGEUSDT_any": 1978511,
-  "SOLUSDT_short": 1978473,
-  "SOLUSDT_any": 1978473,
+  "SOLUSDT_short": 1978514,
+  "SOLUSDT_any": 1978514,
   "HYPEUSDT_long": 1978358,
   "HYPEUSDT_any": 1978358,
   "TONUSDT_long": 1978266,
@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "PENDLEUSDT",
-      "direction": "short",
-      "msg_id": 176,
-      "bar_index": 1978509,
-      "signal_bar_time": 1780659061932,
-      "tp1": 1.194276852880026,
-      "tp2": 1.1861652793200392,
-      "sl": 1.2267231471199738,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "DOGEUSDT",
       "direction": "short",
       "msg_id": 177,
@@ -160,6 +148,18 @@
       "tp1": 43.62102989452743,
       "tp2": 43.43954484179115,
       "sl": 44.34697010547257,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "msg_id": 181,
+      "bar_index": 1978514,
+      "signal_bar_time": 1780663548461,
+      "tp1": 65.19813153170782,
+      "tp2": 64.87669729756172,
+      "sl": 66.48386846829217,
       "tp1_hit": false,
       "resolved": false
     }
@@ -302,6 +302,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780661725
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780662626
     }
   ]
 }
