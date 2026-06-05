@@ -90,32 +90,7 @@
   "BNBUSDT_any": 1978474,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [
-    {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 160,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627565990,
-      "tp1": 593.4728575791593,
-      "tp2": 591.7992863687389,
-      "sl": 600.1671424208408,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 163,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627569021,
-      "tp1": 7.81221187117997,
-      "tp2": 7.783967806769955,
-      "sl": 7.925188128820029,
-      "tp1_hit": true,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
@@ -188,6 +163,18 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780628436
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780629320
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780629321
     }
   ]
 }
