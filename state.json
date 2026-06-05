@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 184,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668067318,
-      "tp1": 61388.85170999328,
-      "tp2": 61176.77756498993,
-      "sl": 62237.14829000672,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "ZECUSDT",
       "direction": "short",
       "msg_id": 185,
@@ -112,54 +100,6 @@
       "tp1": 293.7526437321496,
       "tp2": 285.3639655982244,
       "sl": 327.30735626785037,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 186,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668069357,
-      "tp1": 587.2594674992177,
-      "tp2": 585.2092012488266,
-      "sl": 595.4605325007823,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 187,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668070381,
-      "tp1": 0.15956483502550678,
-      "tp2": 0.15840725253826016,
-      "sl": 0.1641951649744932,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 188,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668071409,
-      "tp1": 1.109384835752927,
-      "tp2": 1.1040772536293906,
-      "sl": 1.1306151642470732,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 189,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668072485,
-      "tp1": 0.6861968775465013,
-      "tp2": 0.6821953163197518,
-      "sl": 0.7022031224534988,
       "tp1_hit": false,
       "resolved": false
     },
@@ -392,6 +332,36 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780668040
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668922
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668923
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668928
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668930
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668932
     }
   ],
   "ZECUSDT_short": 1978519,
