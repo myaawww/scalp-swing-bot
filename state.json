@@ -1,6 +1,6 @@
 {
-  "DOTUSDT_short": 1978483,
-  "DOTUSDT_any": 1978483,
+  "DOTUSDT_short": 1978515,
+  "DOTUSDT_any": 1978515,
   "SUIUSDT_short": 1978487,
   "SUIUSDT_any": 1978487,
   "XLMUSDT_long": 1978123,
@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 177,
-      "bar_index": 1978511,
-      "signal_bar_time": 1780660837339,
-      "tp1": 0.0834938574892261,
-      "tp2": 0.08313078623383915,
-      "sl": 0.08494614251077391,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "LINKUSDT",
       "direction": "short",
       "msg_id": 178,
@@ -124,18 +112,6 @@
       "tp1": 7.483638665687715,
       "tp2": 7.447657998531572,
       "sl": 7.6275613343122854,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 179,
-      "bar_index": 1978511,
-      "signal_bar_time": 1780660839587,
-      "tp1": 2.4944645224508704,
-      "tp2": 2.4810967836763056,
-      "sl": 2.5479354775491294,
       "tp1_hit": true,
       "resolved": false
     },
@@ -148,7 +124,7 @@
       "tp1": 43.62102989452743,
       "tp2": 43.43954484179115,
       "sl": 44.34697010547257,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -160,6 +136,18 @@
       "tp1": 65.19813153170782,
       "tp2": 64.87669729756172,
       "sl": 66.48386846829217,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "msg_id": 182,
+      "bar_index": 1978515,
+      "signal_bar_time": 1780664466454,
+      "tp1": 0.9738940361106395,
+      "tp2": 0.9684910541659593,
+      "sl": 0.9955059638893605,
       "tp1_hit": false,
       "resolved": false
     }
@@ -308,6 +296,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780662626
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780663518
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780663519
     }
   ]
 }
