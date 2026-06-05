@@ -1,8 +1,8 @@
 {
   "DOTUSDT_short": 1978515,
   "DOTUSDT_any": 1978515,
-  "SUIUSDT_short": 1978487,
-  "SUIUSDT_any": 1978487,
+  "SUIUSDT_short": 1978520,
+  "SUIUSDT_any": 1978520,
   "XLMUSDT_long": 1978123,
   "XLMUSDT_any": 1978123,
   "DOGEUSDT_short": 1978511,
@@ -12,11 +12,11 @@
   "HYPEUSDT_long": 1978358,
   "HYPEUSDT_any": 1978358,
   "TONUSDT_long": 1978266,
-  "TONUSDT_any": 1978266,
+  "TONUSDT_any": 1978520,
   "BTCUSDT_short": 1978519,
   "BTCUSDT_any": 1978519,
-  "PENGUUSDT_short": 1978474,
-  "PENGUUSDT_any": 1978474,
+  "PENGUUSDT_short": 1978520,
+  "PENGUUSDT_any": 1978520,
   "open_trades": [],
   "ETHUSDT_SWING_short": 1978215,
   "ETHUSDT_SWING_any": 1978215,
@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "ETHUSDT",
-      "direction": "short",
-      "msg_id": 183,
-      "bar_index": 1978518,
-      "signal_bar_time": 1780667150702,
-      "tp1": 1651.6056780290521,
-      "tp2": 1644.958517043578,
-      "sl": 1678.194321970948,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "BTCUSDT",
       "direction": "short",
       "msg_id": 184,
@@ -172,6 +160,42 @@
       "tp1": 0.6861968775465013,
       "tp2": 0.6821953163197518,
       "sl": 0.7022031224534988,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "SUIUSDT",
+      "direction": "short",
+      "msg_id": 190,
+      "bar_index": 1978520,
+      "signal_bar_time": 1780669013357,
+      "tp1": 0.6872124267775831,
+      "tp2": 0.6822336401663747,
+      "sl": 0.7071275732224168,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "msg_id": 191,
+      "bar_index": 1978520,
+      "signal_bar_time": 1780669014566,
+      "tp1": 0.006254316958753195,
+      "tp2": 0.006209975438129792,
+      "sl": 0.006431683041246804,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "TONUSDT",
+      "direction": "short",
+      "msg_id": 192,
+      "bar_index": 1978520,
+      "signal_bar_time": 1780669015759,
+      "tp1": 1.490424778559352,
+      "tp2": 1.481037167839028,
+      "sl": 1.5279752214406481,
       "tp1_hit": false,
       "resolved": false
     }
@@ -362,7 +386,14 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780666229
+    },
+    {
+      "symbol": "ETHUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780668040
     }
   ],
-  "ZECUSDT_short": 1978519
+  "ZECUSDT_short": 1978519,
+  "TONUSDT_short": 1978520
 }
