@@ -92,30 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "PENDLEUSDT",
-      "direction": "short",
-      "msg_id": 158,
-      "bar_index": 1978473,
-      "signal_bar_time": 1780626640216,
-      "tp1": 1.2706469603940507,
-      "tp2": 1.2628204405910761,
-      "sl": 1.3019530396059493,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 159,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627565006,
-      "tp1": 0.006670164332018318,
-      "tp2": 0.006637246498027478,
-      "sl": 0.006801835667981681,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "BNBUSDT",
       "direction": "short",
       "msg_id": 160,
@@ -128,30 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "TAOUSDT",
-      "direction": "short",
-      "msg_id": 161,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627566984,
-      "tp1": 205.8432183060596,
-      "tp2": 204.76482745908942,
-      "sl": 210.1567816939404,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "AVAXUSDT",
-      "direction": "short",
-      "msg_id": 162,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627568033,
-      "tp1": 7.495421682985113,
-      "tp2": 7.46708252447767,
-      "sl": 7.608778317014887,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "LINKUSDT",
       "direction": "short",
       "msg_id": 163,
@@ -160,19 +112,7 @@
       "tp1": 7.81221187117997,
       "tp2": 7.783967806769955,
       "sl": 7.925188128820029,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 164,
-      "bar_index": 1978474,
-      "signal_bar_time": 1780627570016,
-      "tp1": 2.576317900384951,
-      "tp2": 2.5657268505774264,
-      "sl": 2.6186820996150493,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     }
   ],
@@ -218,6 +158,36 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780627524
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780628427
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780628428
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780628430
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780628434
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780628436
     }
   ]
 }
