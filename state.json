@@ -92,42 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 155,
-      "bar_index": 1978473,
-      "signal_bar_time": 1780626637055,
-      "tp1": 67.65372466039565,
-      "tp2": 67.39058699059348,
-      "sl": 68.70627533960436,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 156,
-      "bar_index": 1978473,
-      "signal_bar_time": 1780626638105,
-      "tp1": 0.08686784376679542,
-      "tp2": 0.08656176565019313,
-      "sl": 0.08809215623320459,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 157,
-      "bar_index": 1978473,
-      "signal_bar_time": 1780626639159,
-      "tp1": 45.14628390014677,
-      "tp2": 45.00892585022016,
-      "sl": 45.69571609985323,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "PENDLEUSDT",
       "direction": "short",
       "msg_id": 158,
@@ -136,7 +100,7 @@
       "tp1": 1.2706469603940507,
       "tp2": 1.2628204405910761,
       "sl": 1.3019530396059493,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -236,6 +200,24 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780619426
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780627518
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780627519
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780627524
     }
   ]
 }
