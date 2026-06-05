@@ -90,20 +90,7 @@
   "BNBUSDT_any": 1978474,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [
-    {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 170,
-      "bar_index": 1978487,
-      "signal_bar_time": 1780639244464,
-      "tp1": 0.16167900014330822,
-      "tp2": 0.1602385002149623,
-      "sl": 0.1674409998566918,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
@@ -230,6 +217,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780640123
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780641024
     }
   ]
 }
