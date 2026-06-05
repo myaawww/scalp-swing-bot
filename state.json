@@ -138,18 +138,6 @@
       "sl": 66.48386846829217,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 182,
-      "bar_index": 1978515,
-      "signal_bar_time": 1780664466454,
-      "tp1": 0.9738940361106395,
-      "tp2": 0.9684910541659593,
-      "sl": 0.9955059638893605,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -308,6 +296,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780663519
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780665323
     }
   ]
 }
