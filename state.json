@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "ETHUSDT",
-      "direction": "short",
-      "msg_id": 165,
-      "bar_index": 1978483,
-      "signal_bar_time": 1780635634093,
-      "tp1": 1717.9340956069848,
-      "tp2": 1712.201143410477,
-      "sl": 1740.8659043930154,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "DOTUSDT",
       "direction": "short",
       "msg_id": 166,
@@ -112,18 +100,6 @@
       "tp1": 1.0028295309677913,
       "tp2": 0.9977442964516868,
       "sl": 1.0231704690322085,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 167,
-      "bar_index": 1978483,
-      "signal_bar_time": 1780635636190,
-      "tp1": 1.1280518393242616,
-      "tp2": 1.1236277589863923,
-      "sl": 1.1457481606757385,
       "tp1_hit": false,
       "resolved": false
     }
@@ -212,6 +188,18 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780629321
+    },
+    {
+      "symbol": "ETHUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780636515
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780636516
     }
   ]
 }
