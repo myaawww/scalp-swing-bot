@@ -90,56 +90,7 @@
   "BNBUSDT_any": 1978519,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [
-    {
-      "symbol": "ZECUSDT",
-      "direction": "short",
-      "msg_id": 185,
-      "bar_index": 1978519,
-      "signal_bar_time": 1780668068347,
-      "tp1": 293.7526437321496,
-      "tp2": 285.3639655982244,
-      "sl": 327.30735626785037,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "SUIUSDT",
-      "direction": "short",
-      "msg_id": 190,
-      "bar_index": 1978520,
-      "signal_bar_time": 1780669013357,
-      "tp1": 0.6872124267775831,
-      "tp2": 0.6822336401663747,
-      "sl": 0.7071275732224168,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 191,
-      "bar_index": 1978520,
-      "signal_bar_time": 1780669014566,
-      "tp1": 0.006254316958753195,
-      "tp2": 0.006209975438129792,
-      "sl": 0.006431683041246804,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "TONUSDT",
-      "direction": "short",
-      "msg_id": 192,
-      "bar_index": 1978520,
-      "signal_bar_time": 1780669015759,
-      "tp1": 1.490424778559352,
-      "tp2": 1.481037167839028,
-      "sl": 1.5279752214406481,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
@@ -362,6 +313,30 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780668932
+    },
+    {
+      "symbol": "ZECUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780669824
+    },
+    {
+      "symbol": "SUIUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780669825
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780669825
+    },
+    {
+      "symbol": "TONUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780669826
     }
   ],
   "ZECUSDT_short": 1978519,
