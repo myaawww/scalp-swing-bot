@@ -116,18 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 226,
-      "bar_index": 1978621,
-      "signal_bar_time": 1780759843822,
-      "tp1": 2.4100359589611586,
-      "tp2": 2.4022539384417376,
-      "sl": 2.4411640410388418,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "APTUSDT",
       "direction": "short",
       "msg_id": 227,
@@ -566,6 +554,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780760716
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780761625
     }
   ],
   "ZECUSDT_short": 1978609,
