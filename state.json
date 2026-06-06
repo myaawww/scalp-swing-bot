@@ -15,8 +15,8 @@
   "TONUSDT_any": 1978520,
   "BTCUSDT_short": 1978558,
   "BTCUSDT_any": 1978558,
-  "PENGUUSDT_short": 1978520,
-  "PENGUUSDT_any": 1978520,
+  "PENGUUSDT_short": 1978567,
+  "PENGUUSDT_any": 1978567,
   "open_trades": [],
   "ETHUSDT_SWING_short": 1978215,
   "ETHUSDT_SWING_any": 1978215,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1978519,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "msg_id": 203,
+      "bar_index": 1978567,
+      "signal_bar_time": 1780711235626,
+      "tp1": 0.006210648777497067,
+      "tp2": 0.0061744731662455995,
+      "sl": 0.006355351222502934,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
