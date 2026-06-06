@@ -102,18 +102,6 @@
       "sl": 0.6564470334157954,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "ETHUSDT",
-      "direction": "short",
-      "msg_id": 230,
-      "bar_index": 1978640,
-      "signal_bar_time": 1780776970868,
-      "tp1": 1545.368192839521,
-      "tp2": 1541.2022892592813,
-      "sl": 1562.031807160479,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -572,6 +560,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780779625
+    },
+    {
+      "symbol": "ETHUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780781419
     }
   ],
   "ZECUSDT_short": 1978609,
