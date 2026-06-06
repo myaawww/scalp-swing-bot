@@ -104,30 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 222,
-      "bar_index": 1978621,
-      "signal_bar_time": 1780759838776,
-      "tp1": 569.6582401597572,
-      "tp2": 568.2673602396357,
-      "sl": 575.221759840243,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 223,
-      "bar_index": 1978621,
-      "signal_bar_time": 1780759839957,
-      "tp1": 61.10401534796496,
-      "tp2": 60.84352302194745,
-      "sl": 62.14598465203504,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "AVAXUSDT",
       "direction": "short",
       "msg_id": 224,
@@ -136,18 +112,6 @@
       "tp1": 6.573955324857183,
       "tp2": 6.541632987285774,
       "sl": 6.703244675142818,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 225,
-      "bar_index": 1978621,
-      "signal_bar_time": 1780759842581,
-      "tp1": 7.2706252956486015,
-      "tp2": 7.245437943472902,
-      "sl": 7.371374704351398,
       "tp1_hit": false,
       "resolved": false
     },
@@ -584,6 +548,24 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780758917
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780760714
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780760715
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780760716
     }
   ],
   "ZECUSDT_short": 1978609,
