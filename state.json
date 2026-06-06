@@ -102,30 +102,6 @@
       "sl": 194.25059081471275,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 232,
-      "bar_index": 1978649,
-      "signal_bar_time": 1780785065052,
-      "tp1": 60404.85611823182,
-      "tp2": 60309.284177347734,
-      "sl": 60787.14388176818,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 234,
-      "bar_index": 1978649,
-      "signal_bar_time": 1780785067317,
-      "tp1": 0.15498060913990824,
-      "tp2": 0.15440591370986237,
-      "sl": 0.15727939086009174,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -620,6 +596,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780787719
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1780789515
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780789516
     }
   ],
   "ZECUSDT_short": 1978609,
