@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "PENDLEUSDT",
-      "direction": "short",
-      "msg_id": 229,
-      "bar_index": 1978639,
-      "signal_bar_time": 1780776035406,
-      "tp1": 1.1798151284171374,
-      "tp2": 1.175172692625706,
-      "sl": 1.1983848715828627,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "ETHUSDT",
       "direction": "short",
       "msg_id": 230,
@@ -578,6 +566,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780765224
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780779625
     }
   ],
   "ZECUSDT_short": 1978609,
