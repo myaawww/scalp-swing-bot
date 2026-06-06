@@ -85,7 +85,7 @@
   "APTUSDT_short": 1978558,
   "APTUSDT_any": 1978558,
   "ZECUSDT_long": 1978371,
-  "ZECUSDT_any": 1978569,
+  "ZECUSDT_any": 1978609,
   "BNBUSDT_short": 1978519,
   "BNBUSDT_any": 1978519,
   "ONDOUSDT_long": 1978417,
@@ -104,15 +104,15 @@
       "resolved": false
     },
     {
-      "symbol": "XRPUSDT",
+      "symbol": "ZECUSDT",
       "direction": "short",
-      "msg_id": 214,
-      "bar_index": 1978601,
-      "signal_bar_time": 1780741843740,
-      "tp1": 1.0721114262049147,
-      "tp2": 1.067617139307372,
-      "sl": 1.0900885737950852,
-      "tp1_hit": true,
+      "msg_id": 218,
+      "bar_index": 1978609,
+      "signal_bar_time": 1780749035421,
+      "tp1": 349.71503169214014,
+      "tp2": 345.6125475382102,
+      "sl": 366.1249683078599,
+      "tp1_hit": false,
       "resolved": false
     }
   ],
@@ -494,8 +494,14 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780747229
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1780748115
     }
   ],
-  "ZECUSDT_short": 1978569,
+  "ZECUSDT_short": 1978609,
   "TONUSDT_short": 1978603
 }
