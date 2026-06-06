@@ -116,18 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 233,
-      "bar_index": 1978649,
-      "signal_bar_time": 1780785066196,
-      "tp1": 0.006183644078715201,
-      "tp2": 0.006162466118072802,
-      "sl": 0.006268355921284798,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "ADAUSDT",
       "direction": "short",
       "msg_id": 234,
@@ -136,42 +124,6 @@
       "tp1": 0.15498060913990824,
       "tp2": 0.15440591370986237,
       "sl": 0.15727939086009174,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "AAVEUSDT",
-      "direction": "short",
-      "msg_id": 235,
-      "bar_index": 1978649,
-      "signal_bar_time": 1780785068451,
-      "tp1": 59.679586670686795,
-      "tp2": 59.4628800060302,
-      "sl": 60.546413329313204,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 236,
-      "bar_index": 1978649,
-      "signal_bar_time": 1780785069582,
-      "tp1": 1.0784395732155787,
-      "tp2": 1.075709359823368,
-      "sl": 1.0893604267844215,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 237,
-      "bar_index": 1978650,
-      "signal_bar_time": 1780785989269,
-      "tp1": 0.9278209120253883,
-      "tp2": 0.9251763680380825,
-      "sl": 0.9383990879746117,
       "tp1_hit": false,
       "resolved": false
     }
@@ -644,6 +596,30 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780782319
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780787716
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780787717
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780787718
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780787719
     }
   ],
   "ZECUSDT_short": 1978609,
