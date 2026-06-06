@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 209,
-      "bar_index": 1978601,
-      "signal_bar_time": 1780741837717,
-      "tp1": 0.006065599173498485,
-      "tp2": 0.006023398760247727,
-      "sl": 0.006234400826501515,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "ADAUSDT",
       "direction": "short",
       "msg_id": 210,
@@ -184,18 +172,6 @@
       "tp1": 60166.16938441632,
       "tp2": 60003.25407662447,
       "sl": 60817.83061558368,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "TONUSDT",
-      "direction": "short",
-      "msg_id": 217,
-      "bar_index": 1978603,
-      "signal_bar_time": 1780743665286,
-      "tp1": 1.5239817929194255,
-      "tp2": 1.5151726893791382,
-      "sl": 1.5592182070805747,
       "tp1_hit": false,
       "resolved": false
     }
@@ -536,6 +512,18 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780742717
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780744515
+    },
+    {
+      "symbol": "TONUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780744518
     }
   ],
   "ZECUSDT_short": 1978569,
