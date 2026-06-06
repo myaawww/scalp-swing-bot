@@ -162,18 +162,6 @@
       "sl": 1.2277919155342143,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 216,
-      "bar_index": 1978602,
-      "signal_bar_time": 1780742766656,
-      "tp1": 60166.16938441632,
-      "tp2": 60003.25407662447,
-      "sl": 60817.83061558368,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -524,6 +512,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780744518
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780745424
     }
   ],
   "ZECUSDT_short": 1978569,
