@@ -90,44 +90,7 @@
   "BNBUSDT_any": 1978519,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978417,
-  "active_signals": [
-    {
-      "symbol": "ZECUSDT",
-      "direction": "short",
-      "msg_id": 204,
-      "bar_index": 1978569,
-      "signal_bar_time": 1780713037704,
-      "tp1": 363.86876139015556,
-      "tp2": 357.48814208523333,
-      "sl": 389.39123860984444,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 205,
-      "bar_index": 1978569,
-      "signal_bar_time": 1780713038702,
-      "tp1": 1.0875761349378115,
-      "tp2": 1.083064202406717,
-      "sl": 1.1056238650621886,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 206,
-      "bar_index": 1978573,
-      "signal_bar_time": 1780716635366,
-      "tp1": 7.266221250521718,
-      "tp2": 7.236981875782576,
-      "sl": 7.383178749478282,
-      "tp1_hit": true,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
@@ -440,6 +403,24 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1780714824
+    },
+    {
+      "symbol": "ZECUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780719316
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780719317
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780719318
     }
   ],
   "ZECUSDT_short": 1978569,
