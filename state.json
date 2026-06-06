@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978417,
   "active_signals": [
     {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 203,
-      "bar_index": 1978567,
-      "signal_bar_time": 1780711235626,
-      "tp1": 0.006210648777497067,
-      "tp2": 0.0061744731662455995,
-      "sl": 0.006355351222502934,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "ZECUSDT",
       "direction": "short",
       "msg_id": 204,
@@ -434,6 +422,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780705820
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780714824
     }
   ],
   "ZECUSDT_short": 1978569,
