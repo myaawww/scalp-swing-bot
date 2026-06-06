@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "TAOUSDT",
-      "direction": "short",
-      "msg_id": 212,
-      "bar_index": 1978601,
-      "signal_bar_time": 1780741841296,
-      "tp1": 189.64049051522875,
-      "tp2": 188.6407357728431,
-      "sl": 193.63950948477122,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "XRPUSDT",
       "direction": "short",
       "msg_id": 214,
@@ -125,18 +113,6 @@
       "tp2": 1.067617139307372,
       "sl": 1.0900885737950852,
       "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "PENDLEUSDT",
-      "direction": "short",
-      "msg_id": 215,
-      "bar_index": 1978601,
-      "signal_bar_time": 1780741844960,
-      "tp1": 1.2022080844657859,
-      "tp2": 1.1958121266986788,
-      "sl": 1.2277919155342143,
-      "tp1_hit": false,
       "resolved": false
     }
   ],
@@ -506,6 +482,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780746317
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780747228
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780747229
     }
   ],
   "ZECUSDT_short": 1978569,
