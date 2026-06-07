@@ -58,12 +58,12 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978649,
-  "AAVEUSDT_any": 1978649,
+  "AAVEUSDT_short": 1978681,
+  "AAVEUSDT_any": 1978681,
   "ETHUSDT_short": 1978640,
   "ETHUSDT_any": 1978640,
-  "ADAUSDT_short": 1978649,
-  "ADAUSDT_any": 1978649,
+  "ADAUSDT_short": 1978681,
+  "ADAUSDT_any": 1978681,
   "TAOUSDT_short": 1978648,
   "TAOUSDT_any": 1978648,
   "LINKUSDT_short": 1978621,
@@ -90,7 +90,32 @@
   "BNBUSDT_any": 1978674,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978621,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "msg_id": 242,
+      "bar_index": 1978681,
+      "signal_bar_time": 1780813833836,
+      "tp1": 0.15893916487944923,
+      "tp2": 0.15832874731917385,
+      "sl": 0.16138083512055076,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "msg_id": 243,
+      "bar_index": 1978681,
+      "signal_bar_time": 1780813834841,
+      "tp1": 61.71419118157889,
+      "tp2": 61.505286772368336,
+      "sl": 62.549808818421106,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
