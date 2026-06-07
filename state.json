@@ -76,8 +76,8 @@
   "AVAXUSDT_any": 1978713,
   "WLDUSDT_long": 1978351,
   "WLDUSDT_any": 1978351,
-  "LTCUSDT_short": 1978659,
-  "LTCUSDT_any": 1978659,
+  "LTCUSDT_short": 1978727,
+  "LTCUSDT_any": 1978727,
   "UNIUSDT_short": 1978621,
   "UNIUSDT_any": 1978621,
   "PENDLEUSDT_short": 1978639,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1978674,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "msg_id": 253,
+      "bar_index": 1978727,
+      "signal_bar_time": 1780855237081,
+      "tp1": 41.822117878455956,
+      "tp2": 41.71167681768394,
+      "sl": 42.26388212154404,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "AVAXUSDT",
