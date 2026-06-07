@@ -60,8 +60,8 @@
   "DOTUSDT_ADAPTIVE_any": 1978232,
   "AAVEUSDT_short": 1978681,
   "AAVEUSDT_any": 1978681,
-  "ETHUSDT_short": 1978640,
-  "ETHUSDT_any": 1978640,
+  "ETHUSDT_short": 1978705,
+  "ETHUSDT_any": 1978705,
   "ADAUSDT_short": 1978681,
   "ADAUSDT_any": 1978681,
   "TAOUSDT_short": 1978648,
@@ -92,38 +92,14 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "ONDOUSDT",
+      "symbol": "ETHUSDT",
       "direction": "short",
-      "msg_id": 246,
-      "bar_index": 1978695,
-      "signal_bar_time": 1780826433353,
-      "tp1": 0.33991277001906456,
-      "tp2": 0.3374541550285969,
-      "sl": 0.3497472299809355,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 248,
-      "bar_index": 1978697,
-      "signal_bar_time": 1780828238717,
-      "tp1": 0.08405764531231565,
-      "tp2": 0.08383696796847347,
-      "sl": 0.08494035468768436,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 250,
-      "bar_index": 1978699,
-      "signal_bar_time": 1780830036831,
-      "tp1": 1.129177546250813,
-      "tp2": 1.1255163193762194,
-      "sl": 1.1438224537491872,
+      "msg_id": 251,
+      "bar_index": 1978705,
+      "signal_bar_time": 1780835441265,
+      "tp1": 1603.4654227497792,
+      "tp2": 1599.2481341246687,
+      "sl": 1620.334577250221,
       "tp1_hit": false,
       "resolved": false
     }
@@ -560,6 +536,24 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780833627
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780834517
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780834518
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1780834520
     }
   ],
   "ZECUSDT_short": 1978674,
