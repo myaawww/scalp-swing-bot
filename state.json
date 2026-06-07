@@ -68,8 +68,8 @@
   "TAOUSDT_any": 1978648,
   "LINKUSDT_short": 1978621,
   "LINKUSDT_any": 1978621,
-  "XRPUSDT_short": 1978649,
-  "XRPUSDT_any": 1978649,
+  "XRPUSDT_short": 1978699,
+  "XRPUSDT_any": 1978699,
   "NEARUSDT_long": 1978360,
   "NEARUSDT_any": 1978360,
   "AVAXUSDT_short": 1978673,
@@ -136,6 +136,18 @@
       "tp1": 0.9607224629756316,
       "tp2": 0.9582486944634474,
       "sl": 0.9706175370243685,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "msg_id": 250,
+      "bar_index": 1978699,
+      "signal_bar_time": 1780830036831,
+      "tp1": 1.129177546250813,
+      "tp2": 1.1255163193762194,
+      "sl": 1.1438224537491872,
       "tp1_hit": false,
       "resolved": false
     }
