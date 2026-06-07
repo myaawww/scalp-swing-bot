@@ -90,20 +90,7 @@
   "BNBUSDT_any": 1978674,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "AVAXUSDT",
-      "direction": "short",
-      "msg_id": 252,
-      "bar_index": 1978713,
-      "signal_bar_time": 1780842637405,
-      "tp1": 6.60710825031717,
-      "tp2": 6.585912375475755,
-      "sl": 6.69189174968283,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "AVAXUSDT",
@@ -560,6 +547,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780837228
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780843522
     }
   ],
   "ZECUSDT_short": 1978674,
