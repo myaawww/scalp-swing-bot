@@ -90,32 +90,7 @@
   "BNBUSDT_any": 1978621,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978621,
-  "active_signals": [
-    {
-      "symbol": "TAOUSDT",
-      "direction": "short",
-      "msg_id": 231,
-      "bar_index": 1978648,
-      "signal_bar_time": 1780784145688,
-      "tp1": 191.70940918528723,
-      "tp2": 191.07411377793085,
-      "sl": 194.25059081471275,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 238,
-      "bar_index": 1978659,
-      "signal_bar_time": 1780794035734,
-      "tp1": 40.93164056797669,
-      "tp2": 40.80496085196504,
-      "sl": 41.43835943202331,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "DOTUSDT",
@@ -620,6 +595,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780789516
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780794919
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780794920
     }
   ],
   "ZECUSDT_short": 1978609,
