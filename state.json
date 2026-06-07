@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 247,
-      "bar_index": 1978697,
-      "signal_bar_time": 1780828237474,
-      "tp1": 64.27245659646664,
-      "tp2": 64.05818489469996,
-      "sl": 65.12954340353335,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "DOGEUSDT",
       "direction": "short",
       "msg_id": 248,
@@ -124,18 +112,6 @@
       "tp1": 0.08405764531231565,
       "tp2": 0.08383696796847347,
       "sl": 0.08494035468768436,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 249,
-      "bar_index": 1978697,
-      "signal_bar_time": 1780828239939,
-      "tp1": 0.9607224629756316,
-      "tp2": 0.9582486944634474,
-      "sl": 0.9706175370243685,
       "tp1_hit": false,
       "resolved": false
     },
@@ -572,6 +548,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1780821917
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780833626
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1780833627
     }
   ],
   "ZECUSDT_short": 1978674,
