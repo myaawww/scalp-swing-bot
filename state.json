@@ -76,8 +76,8 @@
   "AVAXUSDT_any": 1978621,
   "WLDUSDT_long": 1978351,
   "WLDUSDT_any": 1978351,
-  "LTCUSDT_short": 1978619,
-  "LTCUSDT_any": 1978619,
+  "LTCUSDT_short": 1978659,
+  "LTCUSDT_any": 1978659,
   "UNIUSDT_short": 1978621,
   "UNIUSDT_any": 1978621,
   "PENDLEUSDT_short": 1978639,
@@ -100,6 +100,18 @@
       "tp1": 191.70940918528723,
       "tp2": 191.07411377793085,
       "sl": 194.25059081471275,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "msg_id": 238,
+      "bar_index": 1978659,
+      "signal_bar_time": 1780794035734,
+      "tp1": 40.93164056797669,
+      "tp2": 40.80496085196504,
+      "sl": 41.43835943202331,
       "tp1_hit": false,
       "resolved": false
     }
