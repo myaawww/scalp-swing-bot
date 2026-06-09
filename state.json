@@ -102,18 +102,6 @@
       "sl": 0.006771329890557695,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 259,
-      "bar_index": 1978905,
-      "signal_bar_time": 1781015440833,
-      "tp1": 2.485929215031132,
-      "tp2": 2.4801938225466977,
-      "sl": 2.5088707849688676,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -404,6 +392,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781013635
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781016321
     }
   ],
   "ZECUSDT_short": 1978674,
