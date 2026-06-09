@@ -58,8 +58,8 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978902,
-  "AAVEUSDT_any": 1978902,
+  "AAVEUSDT_short": 1978942,
+  "AAVEUSDT_any": 1978942,
   "ETHUSDT_short": 1978705,
   "ETHUSDT_any": 1978705,
   "ADAUSDT_short": 1978681,
@@ -128,14 +128,14 @@
       "resolved": false
     },
     {
-      "symbol": "PENGUUSDT",
+      "symbol": "AAVEUSDT",
       "direction": "short",
-      "msg_id": 263,
-      "bar_index": 1978940,
-      "signal_bar_time": 1781046950830,
-      "tp1": 0.006623727761933639,
-      "tp2": 0.006602091642900459,
-      "sl": 0.0067102722380663615,
+      "msg_id": 264,
+      "bar_index": 1978942,
+      "signal_bar_time": 1781048743449,
+      "tp1": 61.44623716518227,
+      "tp2": 61.268855747773394,
+      "sl": 62.155762834817736,
       "tp1_hit": false,
       "resolved": false
     }
@@ -440,6 +440,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781018127
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781047822
     }
   ],
   "ZECUSDT_short": 1978674,
