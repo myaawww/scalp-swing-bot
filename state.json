@@ -116,18 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 262,
-      "bar_index": 1978938,
-      "signal_bar_time": 1781045143216,
-      "tp1": 592.0996746362403,
-      "tp2": 591.1495119543604,
-      "sl": 595.9003253637597,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "AAVEUSDT",
       "direction": "short",
       "msg_id": 264,
@@ -446,6 +434,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781047822
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781048718
     }
   ],
   "ZECUSDT_short": 1978674,
