@@ -15,8 +15,8 @@
   "TONUSDT_any": 1978603,
   "BTCUSDT_short": 1978649,
   "BTCUSDT_any": 1978649,
-  "PENGUUSDT_short": 1978649,
-  "PENGUUSDT_any": 1978649,
+  "PENGUUSDT_short": 1978905,
+  "PENGUUSDT_any": 1978905,
   "open_trades": [],
   "ETHUSDT_SWING_short": 1978215,
   "ETHUSDT_SWING_any": 1978215,
@@ -78,8 +78,8 @@
   "WLDUSDT_any": 1978351,
   "LTCUSDT_short": 1978727,
   "LTCUSDT_any": 1978727,
-  "UNIUSDT_short": 1978621,
-  "UNIUSDT_any": 1978621,
+  "UNIUSDT_short": 1978905,
+  "UNIUSDT_any": 1978905,
   "PENDLEUSDT_short": 1978639,
   "PENDLEUSDT_any": 1978639,
   "APTUSDT_short": 1978886,
@@ -90,7 +90,32 @@
   "BNBUSDT_any": 1978674,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "msg_id": 258,
+      "bar_index": 1978905,
+      "signal_bar_time": 1781015439835,
+      "tp1": 0.006688670109442305,
+      "tp2": 0.006668005164163457,
+      "sl": 0.006771329890557695,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "msg_id": 259,
+      "bar_index": 1978905,
+      "signal_bar_time": 1781015440833,
+      "tp1": 2.485929215031132,
+      "tp2": 2.4801938225466977,
+      "sl": 2.5088707849688676,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "ETHUSDT",
