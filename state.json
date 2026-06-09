@@ -58,8 +58,8 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978681,
-  "AAVEUSDT_any": 1978681,
+  "AAVEUSDT_short": 1978902,
+  "AAVEUSDT_any": 1978902,
   "ETHUSDT_short": 1978705,
   "ETHUSDT_any": 1978705,
   "ADAUSDT_short": 1978681,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1978674,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "msg_id": 257,
+      "bar_index": 1978902,
+      "signal_bar_time": 1781012757523,
+      "tp1": 61.69330548418685,
+      "tp2": 61.53945822628028,
+      "sl": 62.308694515813144,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "ETHUSDT",
