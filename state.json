@@ -90,32 +90,7 @@
   "BNBUSDT_any": 1978938,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 272,
-      "bar_index": 1978967,
-      "signal_bar_time": 1781071239460,
-      "tp1": 0.6488881137443239,
-      "tp2": 0.6469821706164858,
-      "sl": 0.656511886255676,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 273,
-      "bar_index": 1978970,
-      "signal_bar_time": 1781073942782,
-      "tp1": 61122.74171830091,
-      "tp2": 61025.612577451364,
-      "sl": 61511.25828169909,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "ETHUSDT",
@@ -488,6 +463,18 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781069423
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781075719
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781075720
     }
   ],
   "ZECUSDT_short": 1978674,
