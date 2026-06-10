@@ -116,18 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "TAOUSDT",
-      "direction": "short",
-      "msg_id": 265,
-      "bar_index": 1978944,
-      "signal_bar_time": 1781050557461,
-      "tp1": 204.55459202760184,
-      "tp2": 203.86688804140275,
-      "sl": 207.30540797239817,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "SUIUSDT",
       "direction": "short",
       "msg_id": 266,
@@ -458,6 +446,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781051426
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781053229
     }
   ],
   "ZECUSDT_short": 1978674,
