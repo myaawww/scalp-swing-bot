@@ -13,8 +13,8 @@
   "HYPEUSDT_any": 1978358,
   "TONUSDT_long": 1978266,
   "TONUSDT_any": 1978603,
-  "BTCUSDT_short": 1978970,
-  "BTCUSDT_any": 1978970,
+  "BTCUSDT_short": 1979014,
+  "BTCUSDT_any": 1979014,
   "PENGUUSDT_short": 1979011,
   "PENGUUSDT_any": 1979011,
   "open_trades": [],
@@ -58,8 +58,8 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978979,
-  "AAVEUSDT_any": 1978979,
+  "AAVEUSDT_short": 1979014,
+  "AAVEUSDT_any": 1979014,
   "ETHUSDT_short": 1978990,
   "ETHUSDT_any": 1978990,
   "ADAUSDT_short": 1979011,
@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 286,
-      "bar_index": 1979009,
-      "signal_bar_time": 1781109039077,
-      "tp1": 7.714732557613589,
-      "tp2": 7.686098836420383,
-      "sl": 7.829267442386412,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "UNIUSDT",
       "direction": "short",
       "msg_id": 287,
@@ -112,7 +100,7 @@
       "tp1": 2.4538499526225044,
       "tp2": 2.4447249289337565,
       "sl": 2.490350047377496,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -148,7 +136,7 @@
       "tp1": 0.1611288505210772,
       "tp2": 0.1603532757816158,
       "sl": 0.16423114947892278,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -160,7 +148,7 @@
       "tp1": 0.9331252684119715,
       "tp2": 0.9297129026179572,
       "sl": 0.9467747315880284,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -172,18 +160,6 @@
       "tp1": 1.108200637713074,
       "tp2": 1.104600956569611,
       "sl": 1.122599362286926,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 293,
-      "bar_index": 1979011,
-      "signal_bar_time": 1781110871590,
-      "tp1": 42.27922142109459,
-      "tp2": 42.168832131641885,
-      "sl": 42.72077857890541,
       "tp1_hit": true,
       "resolved": false
     },
@@ -244,6 +220,30 @@
       "tp1": 1.1962984626800905,
       "tp2": 1.1909976940201359,
       "sl": 1.2175015373199096,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "msg_id": 299,
+      "bar_index": 1979014,
+      "signal_bar_time": 1781113579157,
+      "tp1": 61530.647011941044,
+      "tp2": 61358.97051791156,
+      "sl": 62217.352988058956,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "msg_id": 300,
+      "bar_index": 1979014,
+      "signal_bar_time": 1781113580207,
+      "tp1": 61.730970569058734,
+      "tp2": 61.4389558535881,
+      "sl": 62.89902943094126,
       "tp1_hit": false,
       "resolved": false
     }
@@ -422,6 +422,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781107242
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781112626
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781112632
     }
   ],
   "ZECUSDT_short": 1978674,
