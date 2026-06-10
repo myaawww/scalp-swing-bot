@@ -1,8 +1,8 @@
 {
   "DOTUSDT_short": 1978697,
   "DOTUSDT_any": 1978697,
-  "SUIUSDT_short": 1978626,
-  "SUIUSDT_any": 1978626,
+  "SUIUSDT_short": 1978947,
+  "SUIUSDT_any": 1978947,
   "XLMUSDT_long": 1978123,
   "XLMUSDT_any": 1978123,
   "DOGEUSDT_short": 1978935,
@@ -100,7 +100,7 @@
       "tp1": 61502.693161858646,
       "tp2": 61373.03974278797,
       "sl": 62021.306838141354,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -112,7 +112,7 @@
       "tp1": 0.08436287454720783,
       "tp2": 0.08416731182081175,
       "sl": 0.08514512545279217,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -124,6 +124,18 @@
       "tp1": 204.55459202760184,
       "tp2": 203.86688804140275,
       "sl": 207.30540797239817,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "SUIUSDT",
+      "direction": "short",
+      "msg_id": 266,
+      "bar_index": 1978947,
+      "signal_bar_time": 1781053238534,
+      "tp1": 0.742799555056784,
+      "tp2": 0.7405743325851759,
+      "sl": 0.751700444943216,
       "tp1_hit": false,
       "resolved": false
     }
