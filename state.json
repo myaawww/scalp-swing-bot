@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "ETHUSDT",
-      "direction": "short",
-      "msg_id": 283,
-      "bar_index": 1978990,
-      "signal_bar_time": 1781091941283,
-      "tp1": 1607.6756875964502,
-      "tp2": 1603.5635313946752,
-      "sl": 1624.12431240355,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "TAOUSDT",
       "direction": "short",
       "msg_id": 284,
@@ -272,6 +260,12 @@
       "direction": "short",
       "outcome": "tp1",
       "resolved_at": 1781088318
+    },
+    {
+      "symbol": "ETHUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781093719
     }
   ],
   "ZECUSDT_short": 1978674,
