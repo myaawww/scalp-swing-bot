@@ -78,8 +78,8 @@
   "WLDUSDT_any": 1978351,
   "LTCUSDT_short": 1978978,
   "LTCUSDT_any": 1978978,
-  "UNIUSDT_short": 1978978,
-  "UNIUSDT_any": 1978978,
+  "UNIUSDT_short": 1979010,
+  "UNIUSDT_any": 1979010,
   "PENDLEUSDT_short": 1978639,
   "PENDLEUSDT_any": 1978639,
   "APTUSDT_short": 1978967,
@@ -100,6 +100,18 @@
       "tp1": 7.714732557613589,
       "tp2": 7.686098836420383,
       "sl": 7.829267442386412,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "msg_id": 287,
+      "bar_index": 1979010,
+      "signal_bar_time": 1781109974171,
+      "tp1": 2.4538499526225044,
+      "tp2": 2.4447249289337565,
+      "sl": 2.490350047377496,
       "tp1_hit": false,
       "resolved": false
     }
