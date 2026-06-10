@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 281,
-      "bar_index": 1978979,
-      "signal_bar_time": 1781082119800,
-      "tp1": 0.9327606813390568,
-      "tp2": 0.9305860220085851,
-      "sl": 0.9414593186609432,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "AAVEUSDT",
       "direction": "short",
       "msg_id": 282,
@@ -260,6 +248,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781083829
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781084719
     }
   ],
   "ZECUSDT_short": 1978674,
