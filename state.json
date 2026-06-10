@@ -1,6 +1,6 @@
 {
-  "DOTUSDT_short": 1978697,
-  "DOTUSDT_any": 1978697,
+  "DOTUSDT_short": 1978979,
+  "DOTUSDT_any": 1978979,
   "SUIUSDT_short": 1978947,
   "SUIUSDT_any": 1978947,
   "XLMUSDT_long": 1978123,
@@ -58,8 +58,8 @@
   "DOTUSDT_CORE_any": 1978232,
   "DOTUSDT_ADAPTIVE_short": 1978232,
   "DOTUSDT_ADAPTIVE_any": 1978232,
-  "AAVEUSDT_short": 1978942,
-  "AAVEUSDT_any": 1978942,
+  "AAVEUSDT_short": 1978979,
+  "AAVEUSDT_any": 1978979,
   "ETHUSDT_short": 1978951,
   "ETHUSDT_any": 1978951,
   "ADAUSDT_short": 1978978,
@@ -86,8 +86,8 @@
   "APTUSDT_any": 1978967,
   "ZECUSDT_long": 1978371,
   "ZECUSDT_any": 1978674,
-  "BNBUSDT_short": 1978938,
-  "BNBUSDT_any": 1978938,
+  "BNBUSDT_short": 1978979,
+  "BNBUSDT_any": 1978979,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
   "active_signals": [
@@ -100,7 +100,7 @@
       "tp1": 0.006585118305021396,
       "tp2": 0.0065656774575320945,
       "sl": 0.006662881694978603,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -148,6 +148,42 @@
       "tp1": 42.29549347220097,
       "tp2": 42.227740208301455,
       "sl": 42.56650652779903,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "msg_id": 280,
+      "bar_index": 1978979,
+      "signal_bar_time": 1781082118611,
+      "tp1": 582.3774140824606,
+      "tp2": 581.476121123691,
+      "sl": 585.9825859175393,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "msg_id": 281,
+      "bar_index": 1978979,
+      "signal_bar_time": 1781082119800,
+      "tp1": 0.9327606813390568,
+      "tp2": 0.9305860220085851,
+      "sl": 0.9414593186609432,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "msg_id": 282,
+      "bar_index": 1978979,
+      "signal_bar_time": 1781082120995,
+      "tp1": 60.655076139630474,
+      "tp2": 60.47961420944571,
+      "sl": 61.35692386036953,
       "tp1_hit": false,
       "resolved": false
     }
