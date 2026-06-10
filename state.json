@@ -116,18 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "AAVEUSDT",
-      "direction": "short",
-      "msg_id": 264,
-      "bar_index": 1978942,
-      "signal_bar_time": 1781048743449,
-      "tp1": 61.44623716518227,
-      "tp2": 61.268855747773394,
-      "sl": 62.155762834817736,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "TAOUSDT",
       "direction": "short",
       "msg_id": 265,
@@ -452,6 +440,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781048718
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781051426
     }
   ],
   "ZECUSDT_short": 1978674,
