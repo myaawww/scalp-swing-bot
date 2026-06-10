@@ -13,8 +13,8 @@
   "HYPEUSDT_any": 1978358,
   "TONUSDT_long": 1978266,
   "TONUSDT_any": 1978603,
-  "BTCUSDT_short": 1978934,
-  "BTCUSDT_any": 1978934,
+  "BTCUSDT_short": 1978970,
+  "BTCUSDT_any": 1978970,
   "PENGUUSDT_short": 1978940,
   "PENGUUSDT_any": 1978940,
   "open_trades": [],
@@ -100,6 +100,18 @@
       "tp1": 0.6488881137443239,
       "tp2": 0.6469821706164858,
       "sl": 0.656511886255676,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "msg_id": 273,
+      "bar_index": 1978970,
+      "signal_bar_time": 1781073942782,
+      "tp1": 61122.74171830091,
+      "tp2": 61025.612577451364,
+      "sl": 61511.25828169909,
       "tp1_hit": false,
       "resolved": false
     }
