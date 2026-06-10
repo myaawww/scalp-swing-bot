@@ -92,30 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 260,
-      "bar_index": 1978934,
-      "signal_bar_time": 1781041542372,
-      "tp1": 61502.693161858646,
-      "tp2": 61373.03974278797,
-      "sl": 62021.306838141354,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 261,
-      "bar_index": 1978935,
-      "signal_bar_time": 1781042465900,
-      "tp1": 0.08436287454720783,
-      "tp2": 0.08416731182081175,
-      "sl": 0.08514512545279217,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "ETHUSDT",
       "direction": "short",
       "msg_id": 267,
@@ -124,7 +100,7 @@
       "tp1": 1625.9293283028624,
       "tp2": 1621.8939924542933,
       "sl": 1642.0706716971376,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -136,19 +112,7 @@
       "tp1": 64.4957029921587,
       "tp2": 64.31655448823805,
       "sl": 65.2122970078413,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 269,
-      "bar_index": 1978951,
-      "signal_bar_time": 1781056840199,
-      "tp1": 1.1227659060111859,
-      "tp2": 1.1200988590167789,
-      "sl": 1.1334340939888143,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     }
   ],
@@ -482,6 +446,24 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781054119
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781058623
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781058624
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781058628
     }
   ],
   "ZECUSDT_short": 1978674,
