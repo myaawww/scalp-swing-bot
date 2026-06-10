@@ -82,15 +82,28 @@
   "UNIUSDT_any": 1978905,
   "PENDLEUSDT_short": 1978639,
   "PENDLEUSDT_any": 1978639,
-  "APTUSDT_short": 1978886,
-  "APTUSDT_any": 1978886,
+  "APTUSDT_short": 1978967,
+  "APTUSDT_any": 1978967,
   "ZECUSDT_long": 1978371,
   "ZECUSDT_any": 1978674,
   "BNBUSDT_short": 1978938,
   "BNBUSDT_any": 1978938,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "msg_id": 272,
+      "bar_index": 1978967,
+      "signal_bar_time": 1781071239460,
+      "tp1": 0.6488881137443239,
+      "tp2": 0.6469821706164858,
+      "sl": 0.656511886255676,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "ETHUSDT",
