@@ -64,8 +64,8 @@
   "ETHUSDT_any": 1978705,
   "ADAUSDT_short": 1978681,
   "ADAUSDT_any": 1978681,
-  "TAOUSDT_short": 1978648,
-  "TAOUSDT_any": 1978648,
+  "TAOUSDT_short": 1978944,
+  "TAOUSDT_any": 1978944,
   "LINKUSDT_short": 1978621,
   "LINKUSDT_any": 1978621,
   "XRPUSDT_short": 1978699,
@@ -124,6 +124,18 @@
       "tp1": 61.44623716518227,
       "tp2": 61.268855747773394,
       "sl": 62.155762834817736,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "short",
+      "msg_id": 265,
+      "bar_index": 1978944,
+      "signal_bar_time": 1781050557461,
+      "tp1": 204.55459202760184,
+      "tp2": 203.86688804140275,
+      "sl": 207.30540797239817,
       "tp1_hit": false,
       "resolved": false
     }
