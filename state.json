@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 276,
-      "bar_index": 1978978,
-      "signal_bar_time": 1781081176456,
-      "tp1": 0.08335459784256295,
-      "tp2": 0.08319689676384444,
-      "sl": 0.08398540215743704,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "UNIUSDT",
       "direction": "short",
       "msg_id": 278,
@@ -124,7 +112,7 @@
       "tp1": 2.4362168142114236,
       "tp2": 2.430775221317136,
       "sl": 2.457983185788576,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -136,7 +124,7 @@
       "tp1": 582.3774140824606,
       "tp2": 581.476121123691,
       "sl": 585.9825859175393,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -284,6 +272,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781082039
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781082920
     }
   ],
   "ZECUSDT_short": 1978674,
