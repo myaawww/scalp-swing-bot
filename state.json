@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "BTCUSDT",
-      "direction": "short",
-      "msg_id": 299,
-      "bar_index": 1979014,
-      "signal_bar_time": 1781113579157,
-      "tp1": 61530.647011941044,
-      "tp2": 61358.97051791156,
-      "sl": 62217.352988058956,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "ETHUSDT",
       "direction": "short",
       "msg_id": 301,
@@ -112,7 +100,7 @@
       "tp1": 1608.4491772959707,
       "tp2": 1603.7237659439559,
       "sl": 1627.3508227040295,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     }
   ],
@@ -374,6 +362,12 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781123425
+    },
+    {
+      "symbol": "BTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781128833
     }
   ],
   "ZECUSDT_short": 1978674,
