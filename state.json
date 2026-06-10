@@ -90,32 +90,7 @@
   "BNBUSDT_any": 1978938,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "ETHUSDT",
-      "direction": "short",
-      "msg_id": 267,
-      "bar_index": 1978951,
-      "signal_bar_time": 1781056838079,
-      "tp1": 1625.9293283028624,
-      "tp2": 1621.8939924542933,
-      "sl": 1642.0706716971376,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 268,
-      "bar_index": 1978951,
-      "signal_bar_time": 1781056839144,
-      "tp1": 64.4957029921587,
-      "tp2": 64.31655448823805,
-      "sl": 65.2122970078413,
-      "tp1_hit": true,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "ETHUSDT",
@@ -464,6 +439,18 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781058628
+    },
+    {
+      "symbol": "ETHUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781059515
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781059516
     }
   ],
   "ZECUSDT_short": 1978674,
