@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 287,
-      "bar_index": 1979010,
-      "signal_bar_time": 1781109974171,
-      "tp1": 2.4538499526225044,
-      "tp2": 2.4447249289337565,
-      "sl": 2.490350047377496,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "SUIUSDT",
       "direction": "short",
       "msg_id": 288,
@@ -112,7 +100,7 @@
       "tp1": 0.7360846803644168,
       "tp2": 0.7328870205466251,
       "sl": 0.7488753196355833,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -128,78 +116,6 @@
       "resolved": false
     },
     {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 290,
-      "bar_index": 1979011,
-      "signal_bar_time": 1781110868394,
-      "tp1": 0.1611288505210772,
-      "tp2": 0.1603532757816158,
-      "sl": 0.16423114947892278,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 291,
-      "bar_index": 1979011,
-      "signal_bar_time": 1781110869473,
-      "tp1": 0.9331252684119715,
-      "tp2": 0.9297129026179572,
-      "sl": 0.9467747315880284,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 292,
-      "bar_index": 1979011,
-      "signal_bar_time": 1781110870520,
-      "tp1": 1.108200637713074,
-      "tp2": 1.104600956569611,
-      "sl": 1.122599362286926,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 294,
-      "bar_index": 1979011,
-      "signal_bar_time": 1781110872765,
-      "tp1": 0.6408275411055285,
-      "tp2": 0.6379913116582928,
-      "sl": 0.6521724588944714,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 295,
-      "bar_index": 1979013,
-      "signal_bar_time": 1781112645091,
-      "tp1": 588.6608891157729,
-      "tp2": 587.3163336736594,
-      "sl": 594.0391108842272,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 296,
-      "bar_index": 1979013,
-      "signal_bar_time": 1781112646163,
-      "tp1": 63.9784141439213,
-      "tp2": 63.72412121588195,
-      "sl": 64.99558585607869,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "DOGEUSDT",
       "direction": "short",
       "msg_id": 297,
@@ -208,7 +124,7 @@
       "tp1": 0.08356543353515258,
       "tp2": 0.08329965030272887,
       "sl": 0.08462856646484743,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -220,7 +136,7 @@
       "tp1": 1.1962984626800905,
       "tp2": 1.1909976940201359,
       "sl": 1.2175015373199096,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -434,6 +350,48 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781112632
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113518
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113519
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113520
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113521
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113525
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113527
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781113531
     }
   ],
   "ZECUSDT_short": 1978674,
