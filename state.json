@@ -114,18 +114,6 @@
       "sl": 0.08514512545279217,
       "tp1_hit": true,
       "resolved": false
-    },
-    {
-      "symbol": "SUIUSDT",
-      "direction": "short",
-      "msg_id": 266,
-      "bar_index": 1978947,
-      "signal_bar_time": 1781053238534,
-      "tp1": 0.742799555056784,
-      "tp2": 0.7405743325851759,
-      "sl": 0.751700444943216,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -452,6 +440,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781053229
+    },
+    {
+      "symbol": "SUIUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781054119
     }
   ],
   "ZECUSDT_short": 1978674,
