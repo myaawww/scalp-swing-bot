@@ -112,19 +112,7 @@
       "tp1": 0.08335459784256295,
       "tp2": 0.08319689676384444,
       "sl": 0.08398540215743704,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 277,
-      "bar_index": 1978978,
-      "signal_bar_time": 1781081177458,
-      "tp1": 0.15958563412235316,
-      "tp2": 0.15910845118352976,
-      "sl": 0.16149436587764682,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     },
     {
@@ -136,18 +124,6 @@
       "tp1": 2.4362168142114236,
       "tp2": 2.430775221317136,
       "sl": 2.457983185788576,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 279,
-      "bar_index": 1978978,
-      "signal_bar_time": 1781081179516,
-      "tp1": 42.29549347220097,
-      "tp2": 42.227740208301455,
-      "sl": 42.56650652779903,
       "tp1_hit": false,
       "resolved": false
     },
@@ -296,6 +272,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781075720
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781082037
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781082039
     }
   ],
   "ZECUSDT_short": 1978674,
