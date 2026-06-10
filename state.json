@@ -92,42 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 275,
-      "bar_index": 1978977,
-      "signal_bar_time": 1781080244250,
-      "tp1": 0.006585118305021396,
-      "tp2": 0.0065656774575320945,
-      "sl": 0.006662881694978603,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "UNIUSDT",
-      "direction": "short",
-      "msg_id": 278,
-      "bar_index": 1978978,
-      "signal_bar_time": 1781081178458,
-      "tp1": 2.4362168142114236,
-      "tp2": 2.430775221317136,
-      "sl": 2.457983185788576,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
-      "symbol": "BNBUSDT",
-      "direction": "short",
-      "msg_id": 280,
-      "bar_index": 1978979,
-      "signal_bar_time": 1781082118611,
-      "tp1": 582.3774140824606,
-      "tp2": 581.476121123691,
-      "sl": 585.9825859175393,
-      "tp1_hit": true,
-      "resolved": false
-    },
-    {
       "symbol": "DOTUSDT",
       "direction": "short",
       "msg_id": 281,
@@ -148,7 +112,7 @@
       "tp1": 60.655076139630474,
       "tp2": 60.47961420944571,
       "sl": 61.35692386036953,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "resolved": false
     }
   ],
@@ -278,6 +242,24 @@
       "direction": "short",
       "outcome": "tp2",
       "resolved_at": 1781082920
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781083828
+    },
+    {
+      "symbol": "UNIUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781083829
+    },
+    {
+      "symbol": "BNBUSDT",
+      "direction": "short",
+      "outcome": "tp2",
+      "resolved_at": 1781083829
     }
   ],
   "ZECUSDT_short": 1978674,
