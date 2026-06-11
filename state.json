@@ -7,8 +7,8 @@
   "XLMUSDT_any": 1978123,
   "DOGEUSDT_short": 1979013,
   "DOGEUSDT_any": 1979013,
-  "SOLUSDT_short": 1979013,
-  "SOLUSDT_any": 1979013,
+  "SOLUSDT_short": 1979071,
+  "SOLUSDT_any": 1979071,
   "HYPEUSDT_long": 1978358,
   "HYPEUSDT_any": 1978358,
   "TONUSDT_long": 1978266,
@@ -100,6 +100,18 @@
       "tp1": 0.7431149553953128,
       "tp2": 0.7410224330929692,
       "sl": 0.7514850446046871,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "msg_id": 305,
+      "bar_index": 1979071,
+      "signal_bar_time": 1781164838326,
+      "tp1": 64.5862360620134,
+      "tp2": 64.4458540930201,
+      "sl": 65.14776393798661,
       "tp1_hit": false,
       "resolved": false
     }
