@@ -104,18 +104,6 @@
       "resolved": false
     },
     {
-      "symbol": "LINKUSDT",
-      "direction": "short",
-      "msg_id": 317,
-      "bar_index": 1979090,
-      "signal_bar_time": 1781181945846,
-      "tp1": 7.724704413629166,
-      "tp2": 7.708606620443749,
-      "sl": 7.789095586370834,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "UNIUSDT",
       "direction": "short",
       "msg_id": 318,
@@ -476,6 +464,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781179240
+    },
+    {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781182827
     }
   ],
   "ZECUSDT_short": 1978674,
