@@ -90,68 +90,7 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "AVAXUSDT",
-      "direction": "short",
-      "msg_id": 308,
-      "bar_index": 1979077,
-      "signal_bar_time": 1781170241779,
-      "tp1": 6.533662609476094,
-      "tp2": 6.519243914214141,
-      "sl": 6.591337390523906,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XLMUSDT",
-      "direction": "short",
-      "msg_id": 309,
-      "bar_index": 1979077,
-      "signal_bar_time": 1781170242767,
-      "tp1": 0.18738600732510124,
-      "tp2": 0.18676401098765189,
-      "sl": 0.18987399267489874,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "DOTUSDT",
-      "direction": "short",
-      "msg_id": 311,
-      "bar_index": 1979078,
-      "signal_bar_time": 1781171170040,
-      "tp1": 0.9426034278008351,
-      "tp2": 0.9403401417012525,
-      "sl": 0.951656572199165,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "PENGUUSDT",
-      "direction": "short",
-      "msg_id": 314,
-      "bar_index": 1979080,
-      "signal_bar_time": 1781172976084,
-      "tp1": 0.006689317531802893,
-      "tp2": 0.006668476297704339,
-      "sl": 0.006772682468197107,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "msg_id": 315,
-      "bar_index": 1979081,
-      "signal_bar_time": 1781173870096,
-      "tp1": 0.16480341174412985,
-      "tp2": 0.16435511761619478,
-      "sl": 0.16659658825587012,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "APTUSDT",
@@ -470,6 +409,36 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781176518
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781179236
+    },
+    {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781179237
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781179238
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781179239
+    },
+    {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781179240
     }
   ],
   "ZECUSDT_short": 1978674,
