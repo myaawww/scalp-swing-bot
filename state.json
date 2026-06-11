@@ -15,8 +15,8 @@
   "TONUSDT_any": 1978603,
   "BTCUSDT_short": 1979014,
   "BTCUSDT_any": 1979014,
-  "PENGUUSDT_short": 1979044,
-  "PENGUUSDT_any": 1979044,
+  "PENGUUSDT_short": 1979080,
+  "PENGUUSDT_any": 1979080,
   "open_trades": [],
   "ETHUSDT_SWING_short": 1978215,
   "ETHUSDT_SWING_any": 1978215,
@@ -172,6 +172,18 @@
       "tp1": 1.1130221430722094,
       "tp2": 1.111233214608314,
       "sl": 1.1201778569277907,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "msg_id": 314,
+      "bar_index": 1979080,
+      "signal_bar_time": 1781172976084,
+      "tp1": 0.006689317531802893,
+      "tp2": 0.006668476297704339,
+      "sl": 0.006772682468197107,
       "tp1_hit": false,
       "resolved": false
     }
