@@ -92,18 +92,6 @@
   "ONDOUSDT_any": 1978695,
   "active_signals": [
     {
-      "symbol": "DOGEUSDT",
-      "direction": "short",
-      "msg_id": 307,
-      "bar_index": 1979077,
-      "signal_bar_time": 1781170240779,
-      "tp1": 0.08460569370800666,
-      "tp2": 0.08446804056201,
-      "sl": 0.08515630629199333,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "AVAXUSDT",
       "direction": "short",
       "msg_id": 308,
@@ -124,18 +112,6 @@
       "tp1": 0.18738600732510124,
       "tp2": 0.18676401098765189,
       "sl": 0.18987399267489874,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 310,
-      "bar_index": 1979077,
-      "signal_bar_time": 1781170243765,
-      "tp1": 0.6264341814557122,
-      "tp2": 0.6247012721835683,
-      "sl": 0.6333658185442879,
       "tp1_hit": false,
       "resolved": false
     },
@@ -482,6 +458,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781175631
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781176517
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781176518
     }
   ],
   "ZECUSDT_short": 1978674,
