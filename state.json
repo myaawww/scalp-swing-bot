@@ -102,18 +102,6 @@
       "sl": 0.7514850446046871,
       "tp1_hit": false,
       "resolved": false
-    },
-    {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "msg_id": 305,
-      "bar_index": 1979071,
-      "signal_bar_time": 1781164838326,
-      "tp1": 64.5862360620134,
-      "tp2": 64.4458540930201,
-      "sl": 65.14776393798661,
-      "tp1_hit": false,
-      "resolved": false
     }
   ],
   "resolved_signals": [
@@ -398,6 +386,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781141423
+    },
+    {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781165718
     }
   ],
   "ZECUSDT_short": 1978674,
