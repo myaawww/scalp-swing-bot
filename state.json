@@ -1,6 +1,6 @@
 {
-  "DOTUSDT_short": 1979011,
-  "DOTUSDT_any": 1979011,
+  "DOTUSDT_short": 1979078,
+  "DOTUSDT_any": 1979078,
   "SUIUSDT_short": 1979069,
   "SUIUSDT_any": 1979069,
   "XLMUSDT_long": 1978123,
@@ -76,8 +76,8 @@
   "AVAXUSDT_any": 1979077,
   "WLDUSDT_long": 1978351,
   "WLDUSDT_any": 1978351,
-  "LTCUSDT_short": 1979011,
-  "LTCUSDT_any": 1979011,
+  "LTCUSDT_short": 1979078,
+  "LTCUSDT_any": 1979078,
   "UNIUSDT_short": 1979010,
   "UNIUSDT_any": 1979010,
   "PENDLEUSDT_short": 1979013,
@@ -136,6 +136,30 @@
       "tp1": 0.6264341814557122,
       "tp2": 0.6247012721835683,
       "sl": 0.6333658185442879,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "DOTUSDT",
+      "direction": "short",
+      "msg_id": 311,
+      "bar_index": 1979078,
+      "signal_bar_time": 1781171170040,
+      "tp1": 0.9426034278008351,
+      "tp2": 0.9403401417012525,
+      "sl": 0.951656572199165,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "msg_id": 312,
+      "bar_index": 1979078,
+      "signal_bar_time": 1781171171044,
+      "tp1": 42.32566422752145,
+      "tp2": 42.26149634128217,
+      "sl": 42.58233577247855,
       "tp1_hit": false,
       "resolved": false
     }
