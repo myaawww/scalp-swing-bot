@@ -152,30 +152,6 @@
       "resolved": false
     },
     {
-      "symbol": "LTCUSDT",
-      "direction": "short",
-      "msg_id": 312,
-      "bar_index": 1979078,
-      "signal_bar_time": 1781171171044,
-      "tp1": 42.32566422752145,
-      "tp2": 42.26149634128217,
-      "sl": 42.58233577247855,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
-      "symbol": "XRPUSDT",
-      "direction": "short",
-      "msg_id": 313,
-      "bar_index": 1979079,
-      "signal_bar_time": 1781172098964,
-      "tp1": 1.1130221430722094,
-      "tp2": 1.111233214608314,
-      "sl": 1.1201778569277907,
-      "tp1_hit": false,
-      "resolved": false
-    },
-    {
       "symbol": "PENGUUSDT",
       "direction": "short",
       "msg_id": 314,
@@ -494,6 +470,18 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781166623
+    },
+    {
+      "symbol": "LTCUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781175630
+    },
+    {
+      "symbol": "XRPUSDT",
+      "direction": "short",
+      "outcome": "sl",
+      "resolved_at": 1781175631
     }
   ],
   "ZECUSDT_short": 1978674,
