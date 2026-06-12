@@ -90,20 +90,7 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "APTUSDT",
-      "direction": "short",
-      "msg_id": 322,
-      "bar_index": 1979131,
-      "signal_bar_time": 1781218838823,
-      "tp1": 0.6431364286703856,
-      "tp2": 0.6408046430055784,
-      "sl": 0.6524635713296145,
-      "tp1_hit": true,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "APTUSDT",
@@ -494,6 +481,12 @@
       "direction": "short",
       "outcome": "sl",
       "resolved_at": 1781225120
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "outcome": "tp1",
+      "resolved_at": 1781236834
     }
   ],
   "ZECUSDT_short": 1978674,
