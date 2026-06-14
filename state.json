@@ -82,8 +82,8 @@
   "UNIUSDT_any": 1979090,
   "PENDLEUSDT_short": 1979104,
   "PENDLEUSDT_any": 1979104,
-  "APTUSDT_short": 1979131,
-  "APTUSDT_any": 1979131,
+  "APTUSDT_short": 1979408,
+  "APTUSDT_any": 1979408,
   "ZECUSDT_long": 1978371,
   "ZECUSDT_any": 1978674,
   "BNBUSDT_short": 1979013,
@@ -112,6 +112,18 @@
       "tp1": 6.411720804980663,
       "tp2": 6.398531207470994,
       "sl": 6.464479195019337,
+      "tp1_hit": false,
+      "resolved": false
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "msg_id": 338,
+      "bar_index": 1979408,
+      "signal_bar_time": 1781467200000,
+      "tp1": 0.6458284248808585,
+      "tp2": 0.6445926373212878,
+      "sl": 0.6507715751191415,
       "tp1_hit": false,
       "resolved": false
     }
