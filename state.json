@@ -70,8 +70,8 @@
   "LINKUSDT_any": 1979090,
   "XRPUSDT_short": 1979079,
   "XRPUSDT_any": 1979079,
-  "NEARUSDT_long": 1978360,
-  "NEARUSDT_any": 1978360,
+  "NEARUSDT_long": 1979405,
+  "NEARUSDT_any": 1979405,
   "AVAXUSDT_short": 1979122,
   "AVAXUSDT_any": 1979122,
   "WLDUSDT_long": 1978351,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "NEARUSDT",
+      "direction": "long",
+      "msg_id": 336,
+      "bar_index": 1979405,
+      "signal_bar_time": 1781464500000,
+      "tp1": 2.1192080127150947,
+      "tp2": 2.1261120190726417,
+      "sl": 2.091591987284905,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "TAOUSDT",
