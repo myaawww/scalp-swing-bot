@@ -127,6 +127,21 @@ USE_DAILY_ADX     = True
 MIN_DAILY_ADX     = 20.0
 PULL_REQUIRES_4H  = True
 
+# ── ACCURACY FILTERS (v3) ─────────────────────────────────────
+# Suppress signal when funding headwind exceeds this per-8h rate.
+# Set to None to disable. Default: 0.10% (same as FUNDING_WARN_EXTREME).
+FUNDING_SUPPRESS_EXTREME: float = 0.0010
+
+# Minimum ATR-multiples of clearance required between entry and the
+# nearest S/R level in the trade direction.
+# e.g. 0.5 = resistance must be at least 0.5×ATR above entry for longs.
+# Set to 0.0 to disable.
+SR_CLEARANCE_ATR_MULT: float = 0.5
+
+# OI trend: number of 4H candles to compare volume over to judge rising/falling.
+# Rising 4H volume = confirmation of OI expansion behind the move.
+OI_TREND_BARS: int = 3
+
 # ── CANDLE COUNTS PER TIMEFRAME ──────────────────────────────
 # 15m: full 300 needed for indicators (ADX, BB, OBV, EMA200 not used here)
 # 1H/4H: only need EMA21/50 + ADX14 — 60 candles is plenty
@@ -293,6 +308,116 @@ def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
             results[tf] = fut.result()   # propagates exceptions naturally
 
     return candles_15m, results["1h"], results["4h"], results["1d"]
+
+
+# ═══════════════════════════════════════════════════════════════
+# FUNDING RATE + SUPPORT / RESISTANCE
+# ═══════════════════════════════════════════════════════════════
+
+# Thresholds for funding rate warnings (per 8h, as a decimal)
+FUNDING_WARN_EXTREME   = 0.0010   # ±0.10% — strong headwind, flag it
+FUNDING_WARN_HIGH      = 0.0005   # ±0.05% — elevated, note it
+
+def get_market_context(symbol: str) -> dict | None:
+    """
+    Fetch funding rate + open interest for a Hyperliquid perpetual in one
+    API call (metaAndAssetCtxs).
+
+    Returns a dict:
+      {
+        "funding": float,       # per-8h rate as decimal (e.g. 0.0001 = 0.01%)
+        "open_interest": float, # OI in USD notional
+      }
+    or None on failure.
+    """
+    coin = hl_coin(symbol)
+    try:
+        payload = {"type": "metaAndAssetCtxs"}
+        data = hl_post(payload)
+        # Response: [meta_dict, [assetCtx, ...]]
+        meta       = data[0]
+        asset_ctxs = data[1]
+        universe   = meta.get("universe", [])
+        for i, asset in enumerate(universe):
+            if asset.get("name", "") == coin:
+                ctx = asset_ctxs[i]
+                funding = float(ctx["funding"])         if ctx.get("funding")         is not None else None
+                oi      = float(ctx["openInterest"])    if ctx.get("openInterest")    is not None else None
+                # OI from HL is in coin units; multiply by mark price to get USD notional
+                mark    = float(ctx["markPx"])          if ctx.get("markPx")          is not None else None
+                oi_usd  = oi * mark if (oi is not None and mark is not None) else None
+                return {"funding": funding, "open_interest": oi_usd}
+    except Exception as e:
+        print(f"  [MARKET CTX] fetch failed for {coin}: {e}")
+    return None
+
+
+def format_funding(rate: float | None, direction: str) -> str:
+    """Return a one-line funding rate summary with directional warning."""
+    if rate is None:
+        return "Funding: n/a"
+
+    pct    = rate * 100
+    per_8h = f"{pct:+.4f}%/8h"
+
+    headwind = (rate > 0 and direction == "long") or (rate < 0 and direction == "short")
+    tailwind = (rate < 0 and direction == "long") or (rate > 0 and direction == "short")
+
+    abs_rate = abs(rate)
+    if headwind and abs_rate >= FUNDING_WARN_EXTREME:
+        tag = "⚠️ EXTREME — longs paying heavily" if direction == "long" else "⚠️ EXTREME — shorts paying heavily"
+    elif headwind and abs_rate >= FUNDING_WARN_HIGH:
+        tag = "⚡ elevated against trade"
+    elif tailwind and abs_rate >= FUNDING_WARN_HIGH:
+        tag = "✅ in your favour"
+    else:
+        tag = "✅ neutral"
+
+    return f"Funding: {per_8h}  {tag}"
+
+
+def format_oi(oi_usd: float | None) -> str:
+    """Return a compact OI string: e.g. OI: $1.23B  or  OI: $456.7M"""
+    if oi_usd is None:
+        return "OI: n/a"
+    if oi_usd >= 1_000_000_000:
+        return f"OI: ${oi_usd / 1_000_000_000:.2f}B"
+    if oi_usd >= 1_000_000:
+        return f"OI: ${oi_usd / 1_000_000:.1f}M"
+    return f"OI: ${oi_usd:,.0f}"
+
+
+def find_sr_levels(candles_15m: list[dict], n_levels: int = 2) -> tuple[list[float], list[float]]:
+    """
+    Identify the nearest swing-high (resistance) and swing-low (support)
+    levels from recent 15m candles using a simple pivot approach.
+
+    A pivot high  = bar whose high  is higher than both neighbours.
+    A pivot low   = bar whose low   is lower  than both neighbours.
+
+    Returns (supports, resistances) — each a list of up to n_levels prices,
+    sorted closest-to-current-price first.
+    """
+    highs = [c["h"] for c in candles_15m]
+    lows  = [c["l"] for c in candles_15m]
+    cur   = candles_15m[-1]["c"]
+
+    pivots_high = []
+    pivots_low  = []
+
+    # Use last 100 bars to keep it relevant; skip the most recent (open) bar
+    window = candles_15m[-101:-1]
+    for i in range(1, len(window) - 1):
+        if window[i]["h"] > window[i-1]["h"] and window[i]["h"] > window[i+1]["h"]:
+            pivots_high.append(window[i]["h"])
+        if window[i]["l"] < window[i-1]["l"] and window[i]["l"] < window[i+1]["l"]:
+            pivots_low.append(window[i]["l"])
+
+    # Keep only levels above/below current price, sort by distance
+    resistances = sorted([p for p in pivots_high if p > cur], key=lambda x: x - cur)[:n_levels]
+    supports    = sorted([p for p in pivots_low  if p < cur], key=lambda x: cur - x)[:n_levels]
+
+    return supports, resistances
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -478,6 +603,10 @@ class SignalResult:
         self.atr_val  = 0.0
         self.breakdown = ""
         self.v10_gates = ""
+        self.funding_rate:  float | None = None   # raw per-8h decimal
+        self.open_interest: float | None = None   # USD notional OI
+        self.supports:    list[float] = []        # nearest pivot lows  (below price)
+        self.resistances: list[float] = []        # nearest pivot highs (above price)
 
 
 def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> SignalResult:
@@ -531,6 +660,16 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
 
     adx_score_ok = adx15 >= ADX_SCORE_MIN
     vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
+
+    # ── OI trend proxy: rising 4H volume = expanding open interest ──
+    # Compare average volume of last OI_TREND_BARS candles vs the OI_TREND_BARS
+    # candles before that on the 4H chart. No extra API call needed.
+    if len(v4h) >= OI_TREND_BARS * 2:
+        recent_vol = sum(v4h[-OI_TREND_BARS:])
+        prior_vol  = sum(v4h[-(OI_TREND_BARS * 2):-OI_TREND_BARS])
+        oi_expanding = recent_vol > prior_vol
+    else:
+        oi_expanding = True   # not enough data — don't penalise
 
     # ── 1H ───────────────────────────────────────────────────
     o1h, h1h, l1h, c1h, v1h = arrays(candles_1h)
@@ -624,6 +763,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
         adx_score_ok,
         obv_slope_long,
         vol_score_ok,
+        oi_expanding,   # 4H volume rising = OI conviction
     ])
     short_score = sum([
         bb_short,
@@ -631,6 +771,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
         adx_score_ok,
         obv_slope_short,
         vol_score_ok,
+        oi_expanding,   # 4H volume rising = OI conviction
     ])
 
     long_break  = (macro_long  and daily_adx_ok and full_long_align  and break_bull_bar
@@ -654,7 +795,8 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
         adx_s = "ADX✓" if adx_score_ok  else "ADX✗"
         obv_s = "OBV✓" if (obv_slope_long if is_long else obv_slope_short) else "OBV✗"
         vol_s = "VOL✓" if vol_score_ok   else "VOL✗"
-        return f"{bb_s} {d_s} {adx_s} {obv_s} {vol_s}"
+        oi_s  = "OI✓"  if oi_expanding   else "OI✗"
+        return f"{bb_s} {d_s} {adx_s} {obv_s} {vol_s} {oi_s}"
 
     def make_gates(is_long):
         macro = macro_long if is_long else macro_short
@@ -694,6 +836,29 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
         res.breakdown    = make_breakdown(False)
         res.v10_gates    = make_gates(False)
 
+    # ── Support / Resistance (always compute when a signal fired) ──
+    if res.fire_long or res.fire_short:
+        res.supports, res.resistances = find_sr_levels(candles_15m)
+
+    # ── S/R clearance filter ──────────────────────────────────────
+    # Cancel signal if the nearest opposing S/R is too close to entry.
+    # For longs: nearest resistance must be > SR_CLEARANCE_ATR_MULT × ATR above entry.
+    # For shorts: nearest support must be > SR_CLEARANCE_ATR_MULT × ATR below entry.
+    if SR_CLEARANCE_ATR_MULT > 0 and (res.fire_long or res.fire_short):
+        min_clearance = atr_val * SR_CLEARANCE_ATR_MULT
+        if res.fire_long and res.resistances:
+            nearest_res = res.resistances[0]
+            if nearest_res - res.entry < min_clearance:
+                print(f"  [SR FILTER] {symbol} LONG suppressed — resistance {nearest_res:.4f} "
+                      f"too close to entry {res.entry:.4f} (need {min_clearance:.4f} clearance)")
+                res.fire_long = False
+        if res.fire_short and res.supports:
+            nearest_sup = res.supports[0]
+            if res.entry - nearest_sup < min_clearance:
+                print(f"  [SR FILTER] {symbol} SHORT suppressed — support {nearest_sup:.4f} "
+                      f"too close to entry {res.entry:.4f} (need {min_clearance:.4f} clearance)")
+                res.fire_short = False
+
     return res
 
 
@@ -731,7 +896,7 @@ def update_cooldown(state, coin, direction, bar_index):
 # ═══════════════════════════════════════════════════════════════
 
 def stars(score: int) -> str:
-    return "★" * score + "☆" * (5 - score)
+    return "★" * score + "☆" * (6 - score)
 
 
 def send_telegram(text: str) -> int | None:
@@ -779,6 +944,7 @@ def react_to_message(message_id: int, emoji: str):
 
 def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
+    dir_str   = "long" if sig.fire_long else "short"
     emoji     = "🟢" if sig.fire_long else "🔴"
     ts        = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
@@ -796,9 +962,47 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
             low, high = 3, 7
         else:
             low, high = 2, 5
-        if score == 4:
-            high = max(low, high - 2)
+        if score <= 4:
+            high = max(low, high - 2)   # low-confidence: cap leverage
         return f"{low}x - {high}x"
+
+    lev_range = recommended_leverage(sig.atr_pct, sig.score)
+
+    # ── Support / Resistance lines ──────────────────────────────
+    sr_lines = ""
+    if sig.resistances:
+        sr_lines += "🔴 Resistance: " + "  |  ".join(f"<code>{fmt(r)}</code>" for r in sig.resistances) + "\n"
+    if sig.supports:
+        sr_lines += "🟢 Support:    " + "  |  ".join(f"<code>{fmt(s)}</code>" for s in sig.supports) + "\n"
+
+    # ── Pre-trade checklist ─────────────────────────────────────
+    # Trend: 4H + 1H aligned (gates already confirm this if signal fired)
+    chk_trend   = "✅" if sig.v10_gates else "☐"
+    # S/R marked: we found at least one level on each side
+    chk_sr      = "✅" if (sig.supports or sig.resistances) else "☐"
+    # Entry signal: score ≥ MIN_SCORE (always true here, but shown for context)
+    chk_entry   = "✅"
+    # Leverage: always present
+    chk_lev     = "✅"
+    # Funding: warn if extreme headwind, otherwise OK
+    funding_str = format_funding(sig.funding_rate, dir_str)
+    rate        = sig.funding_rate
+    headwind    = rate is not None and (
+        (rate > 0 and dir_str == "long") or (rate < 0 and dir_str == "short")
+    )
+    chk_funding = "⚠️" if (headwind and rate is not None and abs(rate) >= FUNDING_WARN_EXTREME) else "✅"
+
+    checklist = (
+        f"\n<b>Pre-Trade Checklist</b>\n"
+        f"{chk_trend} Trend identified (4H/1H/15m aligned)\n"
+        f"{chk_sr} Key S/R marked\n"
+        f"{chk_entry} Clear entry signal ({sig.signal_type}, score {sig.score}/6)\n"
+        f"{chk_lev} Leverage appropriate ({lev_range})\n"
+        f"{chk_funding} {funding_str}\n"
+        f"📊 {format_oi(sig.open_interest)}"
+    )
+
+    sr_block = f"\n{sr_lines}" if sr_lines else ""
 
     return (
         f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
@@ -808,9 +1012,11 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
         f"<b>TP1:</b>   <code>{fmt(sig.tp1)}</code>\n"
         f"<b>TP2:</b>   <code>{fmt(sig.tp2)}</code>\n"
         f"<b>SL:</b>    <code>{fmt(sig.sl)}</code>\n\n"
-        f"<b>Leverage:</b> {recommended_leverage(sig.atr_pct, sig.score)}\n"
-        f"<b>Score:</b> {sig.score}/5  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}\n\n"
+        f"<b>Leverage:</b> {lev_range}\n"
+        f"<b>Score:</b> {sig.score}/6  |  {sig.breakdown}\n"
+        f"<b>Gates:</b> {sig.v10_gates}"
+        f"{sr_block}"
+        f"{checklist}\n\n"
         f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
@@ -1112,6 +1318,26 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
         return []
 
     print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] score={sig.score}")
+
+    # Fetch funding rate + OI now that we know a signal fired (avoids unnecessary API call)
+    ctx = get_market_context(symbol)
+    if ctx:
+        sig.funding_rate  = ctx.get("funding")
+        sig.open_interest = ctx.get("open_interest")
+        pct = (sig.funding_rate * 100) if sig.funding_rate is not None else float("nan")
+        print(f"    [MARKET CTX] {coin}: funding={pct:+.4f}%/8h  {format_oi(sig.open_interest)}")
+
+    # ── Funding suppression filter ────────────────────────────────
+    # Cancel signal if funding is an extreme headwind against the trade.
+    if FUNDING_SUPPRESS_EXTREME is not None and sig.funding_rate is not None:
+        rate      = sig.funding_rate
+        headwind  = (rate > 0 and direction == "long") or (rate < 0 and direction == "short")
+        if headwind and abs(rate) >= FUNDING_SUPPRESS_EXTREME:
+            pct = rate * 100
+            print(f"    [FUNDING FILTER] {coin} {direction.upper()} suppressed — "
+                  f"funding {pct:+.4f}%/8h is extreme headwind")
+            return []
+
     return [(symbol, format_signal(symbol, sig, "CORE"), direction, sig)]
 
 
