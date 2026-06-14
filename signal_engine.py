@@ -137,7 +137,7 @@ FUNDING_SUPPRESS_EXTREME: float = 0.0010
 # nearest S/R level in the trade direction.
 # e.g. 0.5 = resistance must be at least 0.5×ATR above entry for longs.
 # Set to 0.0 to disable.
-SR_CLEARANCE_ATR_MULT: float = 0.3
+SR_CLEARANCE_ATR_MULT: float = 0.2
 
 # OI trend: number of 4H candles to compare volume over to judge rising/falling.
 # Rising 4H volume = confirmation of OI expansion behind the move.
