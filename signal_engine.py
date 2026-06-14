@@ -107,6 +107,7 @@ TP2_MULT        = 1.5
 SL_MULT         = 1.0
 COOLDOWN_BARS   = 32
 GLOBAL_COOLDOWN = 16
+MAX_SIGNALS_PER_SCAN = 2   # top N signals to fire per scan; rest are dropped
 
 # ── FILTERS ──────────────────────────────────────────────────
 ADX_BREAK_GATE  = 20.0
@@ -136,7 +137,7 @@ FUNDING_SUPPRESS_EXTREME: float = 0.0010
 # nearest S/R level in the trade direction.
 # e.g. 0.5 = resistance must be at least 0.5×ATR above entry for longs.
 # Set to 0.0 to disable.
-SR_CLEARANCE_ATR_MULT: float = 0.3
+SR_CLEARANCE_ATR_MULT: float = 0.5
 
 # OI trend: number of 4H candles to compare volume over to judge rising/falling.
 # Rising 4H volume = confirmation of OI expansion behind the move.
@@ -942,7 +943,27 @@ def react_to_message(message_id: int, emoji: str):
         print(f"  [REACT ERROR] msg_id {message_id}: {e}")
 
 
-def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str:
+RANK_MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
+
+def priority_score(sig: SignalResult) -> tuple:
+    """
+    Returns a sort key (higher = better priority).
+    Tiebreaker order:
+      1. Raw score (6 = best)
+      2. Signal type: BREAK > PULL
+      3. Funding tailwind (getting paid to hold)
+      4. OI expanding (4H volume rising)
+    All components are booleans/ints so the tuple sorts cleanly.
+    """
+    direction    = "long" if sig.fire_long else "short"
+    rate         = sig.funding_rate or 0.0
+    tailwind     = (rate < 0 and direction == "long") or (rate > 0 and direction == "short")
+    is_break     = sig.signal_type == "BREAK"
+    oi_expanding = "OI✓" in sig.breakdown
+    return (sig.score, int(is_break), int(tailwind), int(oi_expanding))
+
+
+def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: int = 0) -> str:
     direction = "▲ LONG" if sig.fire_long else "▼ SHORT"
     dir_str   = "long" if sig.fire_long else "short"
     emoji     = "🟢" if sig.fire_long else "🔴"
@@ -1004,8 +1025,11 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5") -> str
 
     sr_block = f"\n{sr_lines}" if sr_lines else ""
 
+    medal      = RANK_MEDALS.get(rank, "")
+    rank_tag   = f"{medal} <b>Priority #{rank}</b>\n" if rank else ""
+
     return (
-        f"{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
+        f"{rank_tag}{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.score)}\n"
         f"<b>Pair:</b>  {symbol}\n\n"
         f"<b>Entry:</b> <code>{fmt(sig.entry)}</code>\n"
         f"<b>Entry Zone:</b> <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n\n"
@@ -1378,17 +1402,34 @@ def main():
             except Exception as e:
                 print(f"    ERROR processing {sym}: {e}")
 
-    # ── Step 3: Send alerts + register for tracking ───────────
+    # ── Step 3: Rank, cap, and send alerts ───────────────────
+    # Sort all pending signals best-first, keep top MAX_SIGNALS_PER_SCAN.
+    pending_signals.sort(key=lambda t: priority_score(t[3]), reverse=True)
+
+    top_signals     = pending_signals[:MAX_SIGNALS_PER_SCAN]
+    dropped_signals = pending_signals[MAX_SIGNALS_PER_SCAN:]
+
+    if dropped_signals:
+        dropped_names = [f"{hl_coin(s)} {d.upper()}" for s, _, d, _ in dropped_signals]
+        print(f"  [RANK] Dropped {len(dropped_signals)} lower-priority signal(s): {', '.join(dropped_names)}")
+
     signals_fired = 0
-    for symbol, msg, direction, sig in pending_signals:
+    for rank, (symbol, _msg, direction, sig) in enumerate(top_signals, start=1):
+        msg    = format_signal(symbol, sig, "CORE", rank=rank)
         msg_id = send_telegram(msg)
         update_cooldown(state, symbol, direction, bar_index_now)
         if msg_id:
             track_signal(state, symbol, direction, msg_id, sig, bar_index_now)
-            print(f"  [TRACK] registered {hl_coin(symbol)} {direction.upper()} "
+            print(f"  [TRACK] #{rank} {hl_coin(symbol)} {direction.upper()} "
                   f"TP1={sig.tp1:.4f} TP2={sig.tp2:.4f} SL={sig.sl:.4f}")
         signals_fired += 1
         time.sleep(0.5)   # gentle rate limiting between TG sends
+
+    # Still register dropped signals for cooldown so the same pair
+    # doesn't fire again immediately on the next scan.
+    for symbol, _msg, direction, sig in dropped_signals:
+        update_cooldown(state, symbol, direction, bar_index_now)
+        print(f"  [RANK] cooldown applied to dropped signal: {hl_coin(symbol)} {direction.upper()}")
 
     save_state(state)
     print(f"Scan complete. {signals_fired} signal(s) fired.")
