@@ -445,19 +445,17 @@ def rsi(closes: list[float], period: int) -> list[float]:
         d = closes[i] - closes[i - 1]
         gains.append(max(d, 0))
         losses.append(max(-d, 0))
+    # Seed: simple average of first `period` gains/losses
     avg_g = sum(gains[:period]) / period
     avg_l = sum(losses[:period]) / period
+    rs = avg_g / avg_l if avg_l != 0 else float("inf")
+    result[period] = 100 - 100 / (1 + rs)
+    # Single Wilder smoothing pass from bar period+1 onward
     for i in range(period, len(gains)):
         avg_g = (avg_g * (period - 1) + gains[i]) / period
         avg_l = (avg_l * (period - 1) + losses[i]) / period
-    rs = avg_g / avg_l if avg_l != 0 else float("inf")
-    result[period] = 100 - 100 / (1 + rs)
-    for i in range(period + 1, len(closes)):
-        idx = i - 1
-        avg_g = (avg_g * (period - 1) + gains[idx]) / period
-        avg_l = (avg_l * (period - 1) + losses[idx]) / period
         rs = avg_g / avg_l if avg_l != 0 else float("inf")
-        result[i] = 100 - 100 / (1 + rs)
+        result[i + 1] = 100 - 100 / (1 + rs)
     return result
 
 
@@ -662,16 +660,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     adx_score_ok = adx15 >= ADX_SCORE_MIN
     vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
 
-    # ── OI trend proxy: rising 4H volume = expanding open interest ──
-    # Compare average volume of last OI_TREND_BARS candles vs the OI_TREND_BARS
-    # candles before that on the 4H chart. No extra API call needed.
-    if len(v4h) >= OI_TREND_BARS * 2:
-        recent_vol = sum(v4h[-OI_TREND_BARS:])
-        prior_vol  = sum(v4h[-(OI_TREND_BARS * 2):-OI_TREND_BARS])
-        oi_expanding = recent_vol > prior_vol
-    else:
-        oi_expanding = True   # not enough data — don't penalise
-
     # ── 1H ───────────────────────────────────────────────────
     o1h, h1h, l1h, c1h, v1h = arrays(candles_1h)
     ema_f1h = ema(c1h, FAST_LEN)
@@ -688,8 +676,18 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     ef4h = safe(ema_f4h[-2]); es4h = safe(ema_s4h[-2])
     _, _, adx4h_arr = adx_dmi(h4h, l4h, c4h, ADX_LEN)
     adx4h  = safe(adx4h_arr[-2], 25.0)
-    d_bull = ef4h > es4h
-    d_bear = ef4h < es4h
+    h4_bull = ef4h > es4h
+    h4_bear = ef4h < es4h
+
+    # ── OI trend proxy: rising 4H volume = expanding open interest ──
+    # Compare average volume of last OI_TREND_BARS candles vs the OI_TREND_BARS
+    # candles before that on the 4H chart. No extra API call needed.
+    if len(v4h) >= OI_TREND_BARS * 2:
+        recent_vol = sum(v4h[-OI_TREND_BARS:])
+        prior_vol  = sum(v4h[-(OI_TREND_BARS * 2):-OI_TREND_BARS])
+        oi_expanding = recent_vol > prior_vol
+    else:
+        oi_expanding = True   # not enough data — don't penalise
 
     def trend_held(ef_arr, es_arr, bull: bool) -> bool:
         for offset in range(1, TREND_HOLD_BARS + 1):
@@ -704,33 +702,33 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
                     return False
         return True
 
-    d_trend_held_bull = trend_held(ema_f4h, ema_s4h, True)
-    d_trend_held_bear = trend_held(ema_f4h, ema_s4h, False)
+    h4_trend_held_bull = trend_held(ema_f4h, ema_s4h, True)
+    h4_trend_held_bear = trend_held(ema_f4h, ema_s4h, False)
 
-    # ── Daily 200 EMA ─────────────────────────────────────────
+    # ── Daily 200 EMA + Daily ADX ────────────────────────────
     if candles_d and len(candles_d) >= TREND_LEN:
-        _, _, _, c_d, _ = arrays(candles_d)
+        o_d, h_d, l_d, c_d, v_d = arrays(candles_d)
         ema_d200 = ema(c_d, TREND_LEN)
         d200 = safe(ema_d200[-2])
+        _, _, adx_d_arr = adx_dmi(h_d, l_d, c_d, ADX_LEN)
+        adx_daily = safe(adx_d_arr[-2], 25.0)
     else:
         d200 = cur_c
+        adx_daily = 25.0   # neutral fallback — don't suppress signals
     macro_long  = cur_c > d200 if USE_D200_FILTER else True
     macro_short = cur_c < d200 if USE_D200_FILTER else True
 
-    daily_adx_ok = adx4h >= MIN_DAILY_ADX if USE_DAILY_ADX else True
+    daily_adx_ok = adx_daily >= MIN_DAILY_ADX if USE_DAILY_ADX else True
 
-    h4_bull = ef4h > es4h
-    h4_bear = ef4h < es4h
+    full_long_align  = h4_bull and h4_trend_held_bull and h1_bull
+    full_short_align = h4_bear and h4_trend_held_bear and h1_bear
 
-    full_long_align  = d_bull and d_trend_held_bull and h4_bull and h1_bull
-    full_short_align = d_bear and d_trend_held_bear and h4_bear and h1_bear
-
-    pull_long_align  = (d_bull and d_trend_held_bull and h4_bull and h1_bull) \
+    pull_long_align  = (h4_bull and h4_trend_held_bull and h1_bull) \
                         if PULL_REQUIRES_4H else \
-                       (d_bull and d_trend_held_bull and h1_bull)
-    pull_short_align = (d_bear and d_trend_held_bear and h4_bear and h1_bear) \
+                       (h4_trend_held_bull and h1_bull)
+    pull_short_align = (h4_bear and h4_trend_held_bear and h1_bear) \
                         if PULL_REQUIRES_4H else \
-                       (d_bear and d_trend_held_bear and h1_bear)
+                       (h4_trend_held_bear and h1_bear)
 
     rng = cur_h - cur_l + 1e-10
 
@@ -760,7 +758,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
 
     long_score = sum([
         bb_long,
-        d_bull and d_trend_held_bull,
+        h4_bull and h4_trend_held_bull,
         adx_score_ok,
         obv_slope_long,
         vol_score_ok,
@@ -768,7 +766,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
     ])
     short_score = sum([
         bb_short,
-        d_bear and d_trend_held_bear,
+        h4_bear and h4_trend_held_bear,
         adx_score_ok,
         obv_slope_short,
         vol_score_ok,
@@ -792,7 +790,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d) -> S
 
     def make_breakdown(is_long):
         bb_s  = "BB✓"  if (bb_long  if is_long else bb_short)  else "BB✗"
-        d_s   = "4H✓"  if (d_bull and d_trend_held_bull if is_long else d_bear and d_trend_held_bear) else "4H✗"
+        d_s   = "4H✓"  if (h4_bull and h4_trend_held_bull if is_long else h4_bear and h4_trend_held_bear) else "4H✗"
         adx_s = "ADX✓" if adx_score_ok  else "ADX✗"
         obv_s = "OBV✓" if (obv_slope_long if is_long else obv_slope_short) else "OBV✗"
         vol_s = "VOL✓" if vol_score_ok   else "VOL✗"
@@ -877,7 +875,10 @@ def load_state() -> dict:
 
 
 def save_state(state: dict):
-    Path(STATE_FILE).write_text(json.dumps(state, indent=2))
+    import tempfile, os as _os
+    tmp_path = STATE_FILE + ".tmp"
+    Path(tmp_path).write_text(json.dumps(state, indent=2))
+    _os.replace(tmp_path, STATE_FILE)
 
 
 def check_cooldown(state, coin, direction, bar_index) -> bool:
@@ -1067,7 +1068,7 @@ def track_signal(state: dict, symbol: str, direction: str,
         "direction":       direction,
         "msg_id":          msg_id,
         "bar_index":       bar_index,
-        "signal_bar_time": int(time.time() * 1000) + 900_000,  # Unix ms; +1 bar so walk starts on the NEXT candle after signal fires
+        "signal_bar_time": ((int(time.time() * 1000) // 900_000) + 1) * 900_000,  # snap to next 15m bar open boundary
         "tp1":             sig.tp1,
         "tp2":             sig.tp2,
         "sl":              sig.sl,
