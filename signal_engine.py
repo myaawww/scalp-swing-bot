@@ -137,7 +137,7 @@ FUNDING_SUPPRESS_EXTREME: float = 0.0010
 # nearest S/R level in the trade direction.
 # e.g. 0.5 = resistance must be at least 0.5×ATR above entry for longs.
 # Set to 0.0 to disable.
-SR_CLEARANCE_ATR_MULT: float = 0.2
+SR_CLEARANCE_ATR_MULT: float = 0.3
 
 # OI trend: number of 4H candles to compare volume over to judge rising/falling.
 # Rising 4H volume = confirmation of OI expansion behind the move.
@@ -280,9 +280,15 @@ def get_candles(symbol: str, interval: str, n: int, start_time_ms: int | None = 
             "qv": float(c["v"]),   # HL returns base volume; reuse for qv
         })
 
-    # Drop the last (possibly still-open) candle, return the most recent n.
-    # When start_time_ms is provided n acts only as a safety cap.
-    return candles[:-1][-n:]
+    # Drop the last candle only if it's actually still open (its close
+    # time would be in the future). Previously this always dropped the
+    # last candle, which caused check_active_signals() to silently lose
+    # the most-recently-closed bar (the one most likely to contain a
+    # fresh TP/SL hit) whenever its window ended right at "now".
+    if candles and (candles[-1]["t"] + iv_ms) > end_ms:
+        candles = candles[:-1]
+
+    return candles[-n:]
 
 
 def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
@@ -1068,7 +1074,7 @@ def track_signal(state: dict, symbol: str, direction: str,
         "direction":       direction,
         "msg_id":          msg_id,
         "bar_index":       bar_index,
-        "signal_bar_time": ((int(time.time() * 1000) // 900_000) + 1) * 900_000,  # snap to next 15m bar open boundary
+        "signal_bar_time": (int(time.time() * 1000) // 900_000) * 900_000,  # snap to start of current 15m bar (the signal's own bar)
         "tp1":             sig.tp1,
         "tp2":             sig.tp2,
         "sl":              sig.sl,
