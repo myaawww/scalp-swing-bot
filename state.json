@@ -65,7 +65,7 @@
   "ADAUSDT_short": 1979081,
   "ADAUSDT_any": 1979081,
   "TAOUSDT_short": 1979037,
-  "TAOUSDT_any": 1979362,
+  "TAOUSDT_any": 1979395,
   "LINKUSDT_short": 1979090,
   "LINKUSDT_any": 1979090,
   "XRPUSDT_short": 1979079,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "TAOUSDT",
+      "direction": "long",
+      "msg_id": 328,
+      "bar_index": 1979395,
+      "signal_bar_time": 1781456447421,
+      "tp1": 270.88931990927244,
+      "tp2": 272.38897986390873,
+      "sl": 264.8906800907275,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "TAOUSDT",
@@ -109,5 +122,5 @@
   "TONUSDT_short": 1978603,
   "ONDOUSDT_short": 1978695,
   "XLMUSDT_short": 1979077,
-  "TAOUSDT_long": 1979362
+  "TAOUSDT_long": 1979395
 }
