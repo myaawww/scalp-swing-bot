@@ -107,7 +107,7 @@ TP2_MULT        = 1.5
 SL_MULT         = 1.0
 COOLDOWN_BARS   = 32
 GLOBAL_COOLDOWN = 16
-MAX_SIGNALS_PER_SCAN = 2   # top N signals to fire per scan; rest are dropped
+MAX_SIGNALS_PER_SCAN = 3   # top N signals to fire per scan; rest are dropped
 
 # ── FILTERS ──────────────────────────────────────────────────
 ADX_BREAK_GATE  = 20.0
