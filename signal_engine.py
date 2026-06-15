@@ -666,7 +666,7 @@ def get_btc_regime() -> dict | None:
 
 
 # Coins known to decorrelate from BTC — halve the counter-trend penalty
-LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "TONUSDT", "AAVEUSDT", "ZECUSDT", "ONDOUSDT", "HYPEUSDT"}
+LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "ONDOUSDT", "HYPEUSDT"}
 
 
 def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
