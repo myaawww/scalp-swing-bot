@@ -11670,6 +11670,156 @@
         "ts": 1781523026,
         "oi": 3493633.0812799996
       }
+    ],
+    "BTCUSDT": [
+      {
+        "ts": 1781523922,
+        "oi": 33235.81178
+      }
+    ],
+    "ETHUSDT": [
+      {
+        "ts": 1781523922,
+        "oi": 830669.9664000003
+      }
+    ],
+    "HYPEUSDT": [
+      {
+        "ts": 1781523923,
+        "oi": 21264770.659999996
+      }
+    ],
+    "ZECUSDT": [
+      {
+        "ts": 1781523923,
+        "oi": 504088.7399999999
+      }
+    ],
+    "NEARUSDT": [
+      {
+        "ts": 1781523924,
+        "oi": 47372904.80000001
+      }
+    ],
+    "ONDOUSDT": [
+      {
+        "ts": 1781523925,
+        "oi": 26936746.0
+      }
+    ],
+    "SUIUSDT": [
+      {
+        "ts": 1781523926,
+        "oi": 44340179.4
+      }
+    ],
+    "PENGUUSDT": [
+      {
+        "ts": 1781523926,
+        "oi": 541902958.0
+      }
+    ],
+    "BNBUSDT": [
+      {
+        "ts": 1781523927,
+        "oi": 46763.494
+      }
+    ],
+    "SOLUSDT": [
+      {
+        "ts": 1781523928,
+        "oi": 4519345.6000000015
+      }
+    ],
+    "TRXUSDT": [
+      {
+        "ts": 1781523929,
+        "oi": 55168918.0
+      }
+    ],
+    "TONUSDT": [
+      {
+        "ts": 1781523930,
+        "oi": 0.0
+      }
+    ],
+    "DOGEUSDT": [
+      {
+        "ts": 1781523930,
+        "oi": 371695706.0
+      }
+    ],
+    "ADAUSDT": [
+      {
+        "ts": 1781523931,
+        "oi": 104937052.0
+      }
+    ],
+    "DOTUSDT": [
+      {
+        "ts": 1781523932,
+        "oi": 3772956.8
+      }
+    ],
+    "TAOUSDT": [
+      {
+        "ts": 1781523932,
+        "oi": 202499.076
+      }
+    ],
+    "AVAXUSDT": [
+      {
+        "ts": 1781523933,
+        "oi": 3257779.5399999996
+      }
+    ],
+    "LINKUSDT": [
+      {
+        "ts": 1781523934,
+        "oi": 4258611.4
+      }
+    ],
+    "AAVEUSDT": [
+      {
+        "ts": 1781523935,
+        "oi": 652861.76
+      }
+    ],
+    "XRPUSDT": [
+      {
+        "ts": 1781523935,
+        "oi": 81818248.0
+      }
+    ],
+    "XLMUSDT": [
+      {
+        "ts": 1781523936,
+        "oi": 50209666.0
+      }
+    ],
+    "UNIUSDT": [
+      {
+        "ts": 1781523936,
+        "oi": 2504697.0
+      }
+    ],
+    "LTCUSDT": [
+      {
+        "ts": 1781523937,
+        "oi": 454874.6
+      }
+    ],
+    "APTUSDT": [
+      {
+        "ts": 1781523938,
+        "oi": 6517943.98
+      }
+    ],
+    "PENDLEUSDT": [
+      {
+        "ts": 1781523939,
+        "oi": 5473752.0
+      }
     ]
   },
   "signal_history": [
@@ -11687,5 +11837,140 @@
       "result": "tp2",
       "timestamp": 1781517653
     }
-  ]
+  ],
+  "signal_analytics": [
+    {
+      "symbol": "TAOUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp2",
+      "timestamp": 1781403316
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781427629
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781457327
+    },
+    {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781461825
+    },
+    {
+      "symbol": "APTUSDT",
+      "direction": "short",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781469023
+    },
+    {
+      "symbol": "NEARUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp2",
+      "timestamp": 1781469926
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp1",
+      "timestamp": 1781469926
+    },
+    {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781490621
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "direction": "short",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "sl",
+      "timestamp": 1781501430
+    },
+    {
+      "symbol": "TAOUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp2",
+      "timestamp": 1781505034
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp2",
+      "timestamp": 1781508625
+    },
+    {
+      "symbol": "NEARUSDT",
+      "direction": "long",
+      "signal_type": "UNKNOWN",
+      "score": 0,
+      "funding_rate": null,
+      "atr_pct": null,
+      "oi_change_pct": null,
+      "result": "tp2",
+      "timestamp": 1781521232
+    }
+  ],
+  "macro_calendar_cache": {}
 }
