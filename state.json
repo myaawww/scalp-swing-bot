@@ -90,20 +90,7 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [
-    {
-      "symbol": "HYPEUSDT",
-      "direction": "long",
-      "msg_id": 342,
-      "bar_index": 1979452,
-      "signal_bar_time": 1781506800000,
-      "tp1": 65.64621333644513,
-      "tp2": 65.86832000466771,
-      "sl": 64.75778666355487,
-      "tp1_hit": false,
-      "resolved": false
-    }
-  ],
+  "active_signals": [],
   "resolved_signals": [
     {
       "symbol": "TAOUSDT",
@@ -164,6 +151,12 @@
       "direction": "long",
       "outcome": "tp2",
       "resolved_at": 1781505034
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "direction": "long",
+      "outcome": "tp2",
+      "resolved_at": 1781508625
     }
   ],
   "ZECUSDT_short": 1978674,
