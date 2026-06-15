@@ -73,6 +73,12 @@ import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+# ForexFactory calendar feed timestamps are US Eastern (EST/EDT).
+_FF_TZ = ZoneInfo("America/New_York")
+# Scheduler cadence used to normalize OI snapshot deltas.
+OI_EXPECTED_INTERVAL_S: float = 15 * 60
 
 # ── CONFIG ───────────────────────────────────────────────────
 TG_BOT_TOKEN          = os.environ["TG_BOT_TOKEN"]
@@ -143,6 +149,8 @@ MAX_SIGNALS_PER_SCAN = 3   # top N signals to fire per scan; rest are dropped
 # ── FILTERS ──────────────────────────────────────────────────
 ADX_BREAK_GATE  = 20.0
 ADX_SCORE_MIN   = 20.0
+# Overlap 45–55 is intentional: both gates may pass in the neutral band; long
+# takes precedence via if/elif in compute_signals (documented tie-break).
 RSI_LONG_MIN    = 45.0;  RSI_LONG_MAX  = 65.0
 RSI_SHORT_MIN   = 35.0;  RSI_SHORT_MAX = 55.0
 VOL_SCORE_MULT  = 1.0
@@ -278,14 +286,32 @@ def hl_post(payload: dict) -> any:
             time.sleep(sleep_s)
 
 
-def get_candles(symbol: str, interval: str, n: int, start_time_ms: int | None = None) -> list[dict]:
+def current_bar_open_ms(reference_ms: int, interval: str) -> int:
+    """Open timestamp of the in-progress bar at reference_ms."""
+    iv_ms = INTERVAL_MS.get(interval, 60 * 60 * 1000)
+    return (reference_ms // iv_ms) * iv_ms
+
+
+def filter_closed_candles(candles: list[dict], interval: str, reference_ms: int) -> list[dict]:
+    """Keep only fully closed candles relative to a scan reference timestamp."""
+    cutoff = current_bar_open_ms(reference_ms, interval)
+    return [c for c in candles if c["t"] < cutoff]
+
+
+def get_candles(symbol: str, interval: str, n: int,
+                start_time_ms: int | None = None,
+                reference_ms: int | None = None) -> list[dict]:
     """
     Fetch last n closed candles for symbol on interval via Hyperliquid.
-    Returns list of dicts: {t, o, h, l, c, v}  newest last.
+    Returns list of dicts: {t, o, h, l, c, v, qv}  newest last.
+
+    reference_ms pins all timeframe fetches to the same scan instant so no
+    symbol scores on a partially formed bar while another uses a closed bar.
     """
     coin   = hl_coin(symbol)
     iv_ms  = INTERVAL_MS.get(interval, 60 * 60 * 1000)
-    end_ms = int(time.time() * 1000)
+    ref_ms = int(time.time() * 1000) if reference_ms is None else reference_ms
+    end_ms = current_bar_open_ms(ref_ms, interval)
 
     if start_time_ms is not None:
         computed_start_ms = start_time_ms
@@ -306,38 +332,41 @@ def get_candles(symbol: str, interval: str, n: int, start_time_ms: int | None = 
 
     candles = []
     for c in raw:
+        # Hyperliquid candleSnapshot returns base volume (v). Quote notional (q)
+        # is available on some feeds; fall back to v when absent.
+        base_v = float(c["v"])
+        quote_v = float(c["q"]) if c.get("q") is not None else base_v
         candles.append({
             "t":  int(c["t"]),
             "o":  float(c["o"]),
             "h":  float(c["h"]),
             "l":  float(c["l"]),
             "c":  float(c["c"]),
-            "v":  float(c["v"]),
-            "qv": float(c["v"]),
+            "v":  base_v,
+            "qv": quote_v,
         })
 
-    if candles and (candles[-1]["t"] + iv_ms) > end_ms:
-        candles = candles[:-1]
-
+    candles = filter_closed_candles(candles, interval, ref_ms)
     return candles[-n:]
 
 
-def fetch_all_candles(symbol: str) -> tuple[list, list, list, list] | None:
+def fetch_all_candles(symbol: str,
+                      reference_ms: int | None = None) -> tuple[list, list, list, list] | None:
     """
     Fetch all 4 timeframes concurrently for one symbol.
     Returns (candles_15m, candles_1h, candles_4h, candles_d)
     or None if 15m data is insufficient.
     """
-    candles_15m = get_candles(symbol, "15m", N_15M)
+    candles_15m = get_candles(symbol, "15m", N_15M, reference_ms=reference_ms)
     if len(candles_15m) < 50:
         return None
 
     results = {}
     with ThreadPoolExecutor(max_workers=max(1, HL_TF_WORKERS)) as ex:
         futures = {
-            ex.submit(get_candles, symbol, "1h", N_1H): "1h",
-            ex.submit(get_candles, symbol, "4h", N_4H): "4h",
-            ex.submit(get_candles, symbol, "1d", N_1D): "1d",
+            ex.submit(get_candles, symbol, "1h", N_1H, None, reference_ms): "1h",
+            ex.submit(get_candles, symbol, "4h", N_4H, None, reference_ms): "4h",
+            ex.submit(get_candles, symbol, "1d", N_1D, None, reference_ms): "1d",
         }
         for fut in as_completed(futures):
             tf = futures[fut]
@@ -428,21 +457,23 @@ def update_oi_history(state: dict, symbol: str, oi_coins: float | None) -> None:
     oi_hist[symbol] = symbol_hist[-OI_HISTORY_DEPTH:]
 
 
-def compute_oi_trend(state: dict, symbol: str, current_price: float, price_direction: str) -> dict:
+def compute_oi_trend(state: dict, symbol: str, current_price: float,
+                     price_direction: str, trade_direction: str) -> dict:
     """
     Compute OI trend metrics from stored OI history.
 
-    price_direction: "up" or "down" (based on current 15m bar).
+    price_direction: "up" or "down" — 15m signal-bar candle direction.
+    trade_direction: "long" or "short" — intended trade; scoring is symmetric
+    and only rewards OI patterns that confirm the trade direction.
 
-    Returns:
-      {
-        "oi_trend":        "rising" | "falling" | "flat" | "unknown",
-        "oi_change_pct":   float | None,
-        "oi_acceleration": float | None,   # change of change
-        "score_adj":       int,            # +1, 0, or -1
-        "label":           str,            # for Telegram
-        "breakdown_tag":   str,            # short tag for breakdown line
-      }
+    OI model (futures positioning):
+      • Price↑ + OI↑ → new longs (bullish confirmation)
+      • Price↓ + OI↑ → new shorts (bearish confirmation)
+      • Price↑ + OI↓ → short covering / weak rally (bullish divergence)
+      • Price↓ + OI↓ → long liquidation / weak selloff (bearish divergence)
+
+    Score is +1 when the pattern confirms trade_direction, -1 when it
+    opposes or diverges against it, else 0.
     """
     oi_hist = state.get("oi_history", {}).get(symbol, [])
     if len(oi_hist) < 2:
@@ -461,14 +492,19 @@ def compute_oi_trend(state: dict, symbol: str, current_price: float, price_direc
             "label": "OI Trend: Unknown", "breakdown_tag": "OI?"
         }
 
-    oi_change_pct = (recent - prior) / prior * 100.0
+    raw_change_pct = (recent - prior) / prior * 100.0
+    elapsed_s = max(1.0, oi_hist[-1]["ts"] - oi_hist[-2]["ts"])
+    # Normalize to expected scheduler cadence so delayed runs keep thresholds meaningful.
+    scale = OI_EXPECTED_INTERVAL_S / elapsed_s
+    oi_change_pct = raw_change_pct * scale
 
-    # OI acceleration: compare recent change to the change before it
     oi_acceleration = None
     if len(oi_hist) >= 3:
         prior2 = oi_hist[-3]["oi"]
         if prior2 != 0:
-            prev_change = (prior - prior2) / prior2 * 100.0
+            prev_elapsed = max(1.0, oi_hist[-2]["ts"] - oi_hist[-3]["ts"])
+            prev_raw = (prior - prior2) / prior2 * 100.0
+            prev_change = prev_raw * (OI_EXPECTED_INTERVAL_S / prev_elapsed)
             oi_acceleration = oi_change_pct - prev_change
 
     oi_rising  = oi_change_pct >  OI_CHANGE_THRESHOLD_PCT
@@ -481,33 +517,33 @@ def compute_oi_trend(state: dict, symbol: str, current_price: float, price_direc
     else:
         oi_trend = "flat"
 
-    # Scoring logic
-    # Confirmation:  price up + OI up  OR  price down + OI up
-    # Divergence:    price up + OI down OR  price down + OI down
-    if price_direction == "up" and oi_rising:
-        score_adj     = 1
-        condition     = "Bullish Confirmation"
-        breakdown_tag = "OI↑"
-    elif price_direction == "down" and oi_rising:
-        score_adj     = 1
-        condition     = "Bearish Confirmation"
-        breakdown_tag = "OI↑"
-    elif price_direction == "up" and oi_falling:
-        score_adj     = -1
-        condition     = "Weak Breakout (OI Divergence)"
-        breakdown_tag = "OI Divergence"
-    elif price_direction == "down" and oi_falling:
-        score_adj     = -1
-        condition     = "Weak Breakdown (OI Divergence)"
-        breakdown_tag = "OI Divergence"
-    else:
-        score_adj     = 0
-        condition     = "Neutral"
-        breakdown_tag = "OI→"
+    bullish_confirm = price_direction == "up" and oi_rising
+    bearish_confirm = price_direction == "down" and oi_rising
+    bullish_div     = price_direction == "up" and oi_falling
+    bearish_div     = price_direction == "down" and oi_falling
+
+    if trade_direction == "long":
+        if bullish_confirm:
+            score_adj, condition, breakdown_tag = 1, "Bullish Confirmation", "OI↑"
+        elif bearish_confirm or bullish_div:
+            score_adj, condition, breakdown_tag = -1, "Counter/Divergence vs Long", "OI Divergence"
+        elif bearish_div:
+            score_adj, condition, breakdown_tag = 0, "Neutral (covering)", "OI→"
+        else:
+            score_adj, condition, breakdown_tag = 0, "Neutral", "OI→"
+    else:  # short
+        if bearish_confirm:
+            score_adj, condition, breakdown_tag = 1, "Bearish Confirmation", "OI↑"
+        elif bullish_confirm or bearish_div:
+            score_adj, condition, breakdown_tag = -1, "Counter/Divergence vs Short", "OI Divergence"
+        elif bullish_div:
+            score_adj, condition, breakdown_tag = 0, "Neutral (short covering)", "OI→"
+        else:
+            score_adj, condition, breakdown_tag = 0, "Neutral", "OI→"
 
     label = (
         f"OI Trend: {oi_trend.capitalize()}  "
-        f"OI Change: {oi_change_pct:+.1f}%"
+        f"OI Change: {oi_change_pct:+.1f}% (norm)"
     )
 
     return {
@@ -555,15 +591,20 @@ def format_oi(oi_usd: float | None) -> str:
 
 
 def find_sr_levels(candles_15m: list[dict], n_levels: int = 2) -> tuple[list[float], list[float]]:
+    """Pivot highs/lows require dominance over 2 bars on each side (5-bar window)."""
     cur = candles_15m[-1]["c"]
     pivots_high = []
     pivots_low  = []
     window = candles_15m[-101:-1]
-    for i in range(1, len(window) - 1):
-        if window[i]["h"] > window[i-1]["h"] and window[i]["h"] > window[i+1]["h"]:
-            pivots_high.append(window[i]["h"])
-        if window[i]["l"] < window[i-1]["l"] and window[i]["l"] < window[i+1]["l"]:
-            pivots_low.append(window[i]["l"])
+    for i in range(2, len(window) - 2):
+        h = window[i]["h"]
+        l = window[i]["l"]
+        if (h > window[i - 1]["h"] and h > window[i - 2]["h"]
+                and h > window[i + 1]["h"] and h > window[i + 2]["h"]):
+            pivots_high.append(h)
+        if (l < window[i - 1]["l"] and l < window[i - 2]["l"]
+                and l < window[i + 1]["l"] and l < window[i + 2]["l"]):
+            pivots_low.append(l)
     resistances = sorted([p for p in pivots_high if p > cur], key=lambda x: x - cur)[:n_levels]
     supports    = sorted([p for p in pivots_low  if p < cur], key=lambda x: cur - x)[:n_levels]
     return supports, resistances
@@ -625,7 +666,7 @@ def get_btc_regime() -> dict | None:
 
 
 # Coins known to decorrelate from BTC — halve the counter-trend penalty
-LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "ONDOUSDT", "HYPEUSDT"}
+LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "TONUSDT", "AAVEUSDT", "ZECUSDT", "ONDOUSDT", "HYPEUSDT"}
 
 
 def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
@@ -677,9 +718,17 @@ def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
 # P7: MARKET BREADTH FILTER
 # ═══════════════════════════════════════════════════════════════
 
-# Populated during the BTC/watchlist pre-scan; keyed by symbol
+# Populated during Phase-1 pre-scan; keyed by symbol
 _breadth_ema50_above: dict[str, bool] = {}
+_breadth_snapshot: dict[str, bool] | None = None
 _breadth_lock = threading.Lock()
+
+
+def reset_breadth_cache() -> None:
+    global _breadth_snapshot
+    with _breadth_lock:
+        _breadth_ema50_above.clear()
+        _breadth_snapshot = None
 
 
 def record_breadth_result(symbol: str, price_above_ema50: bool):
@@ -687,13 +736,19 @@ def record_breadth_result(symbol: str, price_above_ema50: bool):
         _breadth_ema50_above[symbol] = price_above_ema50
 
 
+def finalize_breadth_cache() -> None:
+    global _breadth_snapshot
+    with _breadth_lock:
+        _breadth_snapshot = dict(_breadth_ema50_above)
+
+
 def compute_market_breadth() -> dict:
     """
-    Compute breadth from the results already cached during the main scan.
+    Compute breadth from the finalized Phase-2 snapshot when available.
     Returns {breadth_50_pct, label}
     """
     with _breadth_lock:
-        results = dict(_breadth_ema50_above)
+        results = dict(_breadth_snapshot if _breadth_snapshot is not None else _breadth_ema50_above)
 
     if not results:
         return {"breadth_50_pct": 0.5, "label": "Market Breadth: Unknown"}
@@ -732,14 +787,28 @@ def apply_breadth_adjustment(direction: str) -> tuple[int, str]:
 # P5: RELATIVE STRENGTH RANKING
 # ═══════════════════════════════════════════════════════════════
 
-# Populated during main scan: {symbol: 7d_return_pct}
+# Populated during Phase-1 pre-scan: {symbol: 7d_return_pct}
 _rs_scores: dict[str, float] = {}
+_rs_snapshot: dict[str, float] | None = None
 _rs_lock = threading.Lock()
+
+
+def reset_rs_cache() -> None:
+    global _rs_snapshot
+    with _rs_lock:
+        _rs_scores.clear()
+        _rs_snapshot = None
 
 
 def record_rs_return(symbol: str, return_7d_pct: float):
     with _rs_lock:
         _rs_scores[symbol] = return_7d_pct
+
+
+def finalize_rs_cache() -> None:
+    global _rs_snapshot
+    with _rs_lock:
+        _rs_snapshot = dict(_rs_scores)
 
 
 def compute_relative_strength(symbol: str) -> dict:
@@ -749,7 +818,7 @@ def compute_relative_strength(symbol: str) -> dict:
     Returns {rs_pct, percentile, score_adj, label}
     """
     with _rs_lock:
-        scores = dict(_rs_scores)
+        scores = dict(_rs_snapshot if _rs_snapshot is not None else _rs_scores)
 
     btc_return = scores.get("BTCUSDT", None)
     coin_return = scores.get(symbol, None)
@@ -869,6 +938,24 @@ def compute_win_rates(state: dict) -> dict:
     return wrs
 
 
+_win_rates_cache: dict | None = None
+_win_rates_cache_lock = threading.Lock()
+
+
+def reset_win_rates_cache() -> None:
+    global _win_rates_cache
+    with _win_rates_cache_lock:
+        _win_rates_cache = None
+
+
+def get_cached_win_rates(state: dict) -> dict:
+    global _win_rates_cache
+    with _win_rates_cache_lock:
+        if _win_rates_cache is None:
+            _win_rates_cache = compute_win_rates(state)
+        return _win_rates_cache
+
+
 def compute_win_rate_analytics(state: dict, symbol: str, direction: str,
                                 signal_type: str, score: int) -> dict:
     """
@@ -877,7 +964,7 @@ def compute_win_rate_analytics(state: dict, symbol: str, direction: str,
 
     Returns {win_rate, sample_size, score_adj, label}
     """
-    wrs = compute_win_rates(state)
+    wrs = get_cached_win_rates(state)
 
     sym_data = wrs["by_symbol"].get(symbol)
     if sym_data:
@@ -921,6 +1008,23 @@ MACRO_EVENT_KEYWORDS = [
 MACRO_CALENDAR_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
 
 
+def parse_forexfactory_event_utc(ev_date: str, ev_time: str) -> datetime | None:
+    """
+    Parse ForexFactory calendar date/time in US Eastern (EST/EDT) to UTC.
+    Returns None when the time string cannot be parsed.
+    """
+    try:
+        if "day" in ev_time.lower() or ev_time.strip() == "":
+            dt_str = f"{ev_date} 14:00"
+            dt_local = datetime.strptime(dt_str, "%Y-%m-%d %H:%M").replace(tzinfo=_FF_TZ)
+        else:
+            dt_str = f"{ev_date} {ev_time}"
+            dt_local = datetime.strptime(dt_str, "%Y-%m-%d %I:%M%p").replace(tzinfo=_FF_TZ)
+        return dt_local.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
 def fetch_macro_calendar(state: dict) -> list[dict]:
     """
     Fetch macro calendar events from the free ForexFactory-style JSON feed.
@@ -958,18 +1062,9 @@ def fetch_macro_calendar(state: dict) -> list[dict]:
         if not keyword_match:
             continue
 
-        # Parse datetime — ForexFactory feed uses EST, convert to UTC (+5h)
-        try:
-            if "day" in ev_time.lower() or ev_time.strip() == "":
-                # All-day event — treat as 14:00 UTC (common US open)
-                dt_str = f"{ev_date} 14:00"
-                dt_utc = datetime.strptime(dt_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
-            else:
-                # e.g. "8:30am"
-                dt_str = f"{ev_date} {ev_time}"
-                dt_local = datetime.strptime(dt_str, "%Y-%m-%d %I:%M%p")
-                dt_utc = dt_local.replace(tzinfo=timezone.utc) + timedelta(hours=5)
-        except Exception:
+        # Parse datetime — ForexFactory feed uses US Eastern (EST/EDT).
+        dt_utc = parse_forexfactory_event_utc(ev_date, ev_time)
+        if dt_utc is None:
             continue
 
         events.append({
@@ -1055,6 +1150,11 @@ def ema(values: list[float], period: int) -> list[float]:
 
 
 def rsi(closes: list[float], period: int) -> list[float]:
+    """
+    Wilder-smoothed RSI (matches TradingView ta.rsi).
+    First RSI value is at index `period` using SMA of gains/losses; subsequent
+    values use Wilder EMA: avg = (prev_avg * (period-1) + current) / period.
+    """
     if len(closes) < period + 1:
         return [float("nan")] * len(closes)
     result = [float("nan")] * len(closes)
@@ -1234,8 +1334,27 @@ class SignalResult:
         self.score_adjustments: list[tuple[str, int]] = []   # (label, adj) trail
 
 
+def record_market_inputs_from_candles(symbol: str,
+                                      candles_15m: list[dict],
+                                      candles_4h: list[dict]) -> None:
+    """Phase 1 helper — populate breadth / RS caches without full scoring."""
+    c15 = [c["c"] for c in candles_15m]
+    c4h = [c["c"] for c in candles_4h]
+    ema_s4h = ema(c4h, SLOW_LEN)
+    price_above_ema50_4h = c4h[-1] > safe(ema_s4h[-1])
+    record_breadth_result(symbol, price_above_ema50_4h)
+
+    if len(c4h) >= 42:
+        ret_7d = (c4h[-1] - c4h[-42]) / c4h[-42] * 100.0 if c4h[-42] != 0 else 0.0
+    elif len(c15) >= 672:
+        ret_7d = (c15[-1] - c15[-672]) / c15[-672] * 100.0 if c15[-672] != 0 else 0.0
+    else:
+        ret_7d = 0.0
+    record_rs_return(symbol, ret_7d)
+
+
 def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
-                    state: dict) -> SignalResult:
+                    state: dict, record_market_inputs: bool = True) -> SignalResult:
     res = SignalResult()
 
     def arrays(candles):
@@ -1309,18 +1428,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     h4_bull = ef4h > es4h
     h4_bear = ef4h < es4h
 
-    # ── P7: Record breadth data (reuses already-computed 4H EMA50) ──
-    price_above_ema50_4h = c4h[-1] > safe(ema_s4h[-1])
-    record_breadth_result(symbol, price_above_ema50_4h)
-
-    # ── P5: Record 7-day return for RS calculation ────────────
-    if len(c4h) >= 42:   # 42 × 4H bars ≈ 7 days
-        ret_7d = (c4h[-1] - c4h[-42]) / c4h[-42] * 100.0 if c4h[-42] != 0 else 0.0
-    elif len(c15) >= 672:  # 672 × 15m bars = 7 days fallback
-        ret_7d = (c15[-1] - c15[-672]) / c15[-672] * 100.0 if c15[-672] != 0 else 0.0
-    else:
-        ret_7d = 0.0
-    record_rs_return(symbol, ret_7d)
+    # ── P7 / P5: record breadth + RS inputs during Phase 1 only ──
+    if record_market_inputs:
+        record_market_inputs_from_candles(symbol, candles_15m, candles_4h)
 
     def trend_held(ef_arr, es_arr, bull: bool) -> bool:
         for offset in range(1, TREND_HOLD_BARS + 1):
@@ -1483,32 +1593,26 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     price_dir = "up" if cur_c > cur_o else "down"
 
     # ════════════════════════════════════════════════════════
-    # Step 0: BTC Regime — SOFT PENALTY
-    # Counter-trend signals are penalised but not killed.
-    # A high-conviction decorrelated setup can still fire.
-    # ════════════════════════════════════════════════════════
-    btc_adj, btc_label = check_btc_regime_filter(direction, symbol)
-    res.btc_regime_label = btc_label
-
-    # ════════════════════════════════════════════════════════
     # FINAL SCORING STACK — applied in order, threshold checked at end
+    # 1. OI  2. BTC+Breadth  3. RS  4. Win Rate  5. Macro  6. Volume
     # ════════════════════════════════════════════════════════
     adjusted_score = res.score
     adjs = res.score_adjustments
 
-    adjusted_score += btc_adj
-    if btc_adj != 0:
-        adjs.append((btc_label, btc_adj))
-
-
     # ── Step 1: OI Confirmation ───────────────────────────────
-    oi_data = compute_oi_trend(state, symbol, cur_c, price_dir)
+    oi_data = compute_oi_trend(state, symbol, cur_c, price_dir, direction)
     res.oi_trend_data = oi_data
     adjusted_score += oi_data["score_adj"]
     if oi_data["score_adj"] != 0:
         adjs.append((f"OI ({oi_data['breakdown_tag']})", oi_data["score_adj"]))
 
-    # ── Step 2: Market Breadth ─────────────────────────────────
+    # ── Step 2: BTC Regime + Market Breadth (paired market context) ──
+    btc_adj, btc_label = check_btc_regime_filter(direction, symbol)
+    res.btc_regime_label = btc_label
+    adjusted_score += btc_adj
+    if btc_adj != 0:
+        adjs.append((btc_label, btc_adj))
+
     breadth_adj, breadth_label = apply_breadth_adjustment(direction)
     res.breadth_label = breadth_label
     adjusted_score += breadth_adj
@@ -1633,9 +1737,9 @@ def update_cooldown(state, coin, direction, bar_index):
 # ═══════════════════════════════════════════════════════════════
 
 def stars(score: int) -> str:
-    capped = max(0, min(score, 8))   # v3: score can exceed 6 with bonuses
-    filled = min(capped, 6)
-    return "★" * filled + "☆" * max(0, 6 - filled)
+    """Eight-star scale so scores 6/7/8 remain visually distinct."""
+    capped = max(0, min(score, 8))
+    return "★" * capped + "☆" * (8 - capped)
 
 
 def send_telegram(text: str) -> int | None:
@@ -1678,11 +1782,14 @@ def priority_score(sig: SignalResult) -> tuple:
     """
     Sort key — uses final_score (post-adjustment) as primary key.
     """
-    direction    = "long" if sig.fire_long else "short"
-    rate         = sig.funding_rate or 0.0
-    tailwind     = (rate < 0 and direction == "long") or (rate > 0 and direction == "short")
-    is_break     = sig.signal_type == "BREAK"
-    oi_confirm   = sig.oi_trend_data.get("score_adj", 0) > 0
+    direction = "long" if sig.fire_long else "short"
+    rate = sig.funding_rate
+    if rate is None:
+        tailwind = False
+    else:
+        tailwind = (rate < 0 and direction == "long") or (rate > 0 and direction == "short")
+    is_break   = sig.signal_type == "BREAK"
+    oi_confirm = sig.oi_trend_data.get("score_adj", 0) > 0
     return (sig.final_score, int(is_break), int(tailwind), int(oi_confirm))
 
 
@@ -1848,6 +1955,7 @@ def check_active_signals(state: dict, bar_index_now: int):
         sl        = sig["sl"]
         tp1_hit   = sig.get("tp1_hit", False)
         signal_bar_time_ms: int | None = sig.get("signal_bar_time")
+        last_processed_ts: int = sig.get("last_processed_candle_ts", signal_bar_time_ms or 0)
 
         try:
             candles = get_candles(symbol, "15m", N_15M, start_time_ms=signal_bar_time_ms)
@@ -1857,6 +1965,12 @@ def check_active_signals(state: dict, bar_index_now: int):
             continue
 
         if not candles:
+            still_active.append(sig)
+            continue
+
+        # Only walk candles not yet processed on prior runs.
+        new_candles = [c for c in candles if c["t"] > last_processed_ts]
+        if not new_candles:
             still_active.append(sig)
             continue
 
@@ -1874,9 +1988,10 @@ def check_active_signals(state: dict, bar_index_now: int):
             })
             sig["resolved"] = True
 
-        for candle in candles:
+        for candle in new_candles:
             c_high = candle["h"]
             c_low  = candle["l"]
+            last_processed_ts = candle["t"]
 
             if direction == "long":
                 if not tp1_hit and c_low <= sl:
@@ -1920,6 +2035,7 @@ def check_active_signals(state: dict, bar_index_now: int):
                     break
 
         if not sig.get("resolved", False):
+            sig["last_processed_candle_ts"] = last_processed_ts
             still_active.append(sig)
 
     state["active_signals"] = still_active
@@ -1981,15 +2097,35 @@ def send_summary(state: dict):
 # SCAN
 # ═══════════════════════════════════════════════════════════════
 
-def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str, str, str, SignalResult]]:
+def collect_market_inputs(symbol: str, _state: dict,
+                          reference_ms: int) -> tuple | None:
+    """
+    Phase 1: fetch candles and populate breadth / RS input caches.
+    Returns candle bundle for Phase 3 or None if data insufficient.
+    """
+    data = fetch_all_candles(symbol, reference_ms=reference_ms)
+    if data is None:
+        return None
+    candles_15m, candles_1h, candles_4h, candles_d = data
+    record_market_inputs_from_candles(symbol, candles_15m, candles_4h)
+    return data
+
+
+def scan_symbol(symbol: str, state: dict, bar_index_now: int,
+                candle_bundle: tuple | None = None,
+                reference_ms: int | None = None) -> list[tuple[str, str, str, SignalResult]]:
     """
     Scan a single symbol. Returns list of (symbol, formatted_msg, direction, sig).
+    When candle_bundle is supplied (Phase 3), skips re-fetch and uses frozen caches.
     """
     coin = hl_coin(symbol)
-    data = fetch_all_candles(symbol)
-    if data is None:
-        print(f"    Skipping {coin}: insufficient candles")
-        return []
+    if candle_bundle is None:
+        data = fetch_all_candles(symbol, reference_ms=reference_ms)
+        if data is None:
+            print(f"    Skipping {coin}: insufficient candles")
+            return []
+    else:
+        data = candle_bundle
 
     candles_15m, candles_1h, candles_4h, candles_d = data
 
@@ -1999,7 +2135,8 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int) -> list[tuple[str,
         oi_coins = ctx.get("open_interest_coins")
         update_oi_history(state, symbol, oi_coins)
 
-    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d, state)
+    sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
+                          state, record_market_inputs=False)
     if not (sig.fire_long or sig.fire_short):
         print(f"    {coin}: no signal")
         return []
@@ -2040,8 +2177,13 @@ def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
 
-    bar_index_now = int(time.time() // (15 * 60))
+    scan_reference_ms = int(time.time() * 1000)
+    bar_index_now = scan_reference_ms // (15 * 60 * 1000)
     state         = load_state()
+
+    reset_breadth_cache()
+    reset_rs_cache()
+    reset_win_rates_cache()
 
     # ── Step 0: Prime the shared metaAndAssetCtxs cache ──────
     # One API call fetches OI + funding for the entire watchlist.
@@ -2051,8 +2193,8 @@ def main():
     # ── Step 0b: Prime BTC regime — fetch BTC candles now ────
     print("[INIT] Computing BTC regime…")
     try:
-        btc_1h = get_candles("BTCUSDT", "1h", N_1H)
-        btc_4h = get_candles("BTCUSDT", "4h", N_4H)
+        btc_1h = get_candles("BTCUSDT", "1h", N_1H, reference_ms=scan_reference_ms)
+        btc_4h = get_candles("BTCUSDT", "4h", N_4H, reference_ms=scan_reference_ms)
         regime  = compute_btc_regime(btc_1h, btc_4h)
         set_btc_regime(regime)
         print(f"  {regime['label']}")
@@ -2070,17 +2212,39 @@ def main():
         send_summary(state)
         save_state(state)
 
-    # ── Step 2: Scan all symbols in parallel ──────────────────
-    # Note: breadth and RS data are populated as a side-effect of
-    # compute_signals() for each symbol. Because symbols are scanned
-    # in parallel, the breadth/RS caches will be partially filled
-    # when early symbols complete. This is acceptable — the cached
-    # values will still represent the majority of the watchlist by
-    # the time any signal is fully evaluated.
+    # ── Phase 1: Collect breadth + RS inputs for full watchlist ──
+    print("[PHASE 1] Collecting market breadth / RS inputs…")
+    candle_bundles: dict[str, tuple] = {}
+    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
+        futures = {
+            ex.submit(collect_market_inputs, sym, state, scan_reference_ms): sym
+            for sym in WATCHLIST
+        }
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                bundle = fut.result()
+                if bundle is not None:
+                    candle_bundles[sym] = bundle
+            except Exception as e:
+                print(f"    ERROR collecting inputs for {sym}: {e}")
+
+    # ── Phase 2: Finalize immutable breadth / RS snapshots ───
+    finalize_breadth_cache()
+    finalize_rs_cache()
+    with _breadth_lock:
+        breadth_n = len(_breadth_snapshot or {})
+    with _rs_lock:
+        rs_n = len(_rs_snapshot or {})
+    print(f"  Breadth symbols: {breadth_n}  RS symbols: {rs_n}")
+
+    # ── Phase 3: Parallel signal generation on frozen caches ─
+    print("[PHASE 3] Scanning symbols for signals…")
     pending_signals: list[tuple[str, str, str, SignalResult]] = []
     with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
         futures = {
-            ex.submit(scan_symbol, sym, state, bar_index_now): sym
+            ex.submit(scan_symbol, sym, state, bar_index_now, candle_bundles.get(sym),
+                      scan_reference_ms): sym
             for sym in WATCHLIST
         }
         for fut in as_completed(futures):
@@ -2092,8 +2256,6 @@ def main():
             except Exception as e:
                 print(f"    ERROR processing {sym}: {e}")
 
-    # Update OI history for any symbols not yet captured during scan
-    # (scan_symbol already calls update_oi_history — this is a no-op guard)
     save_state(state)   # persist OI history after scan loop
 
     # ── Step 3: Rank, cap, and send alerts ───────────────────
@@ -2127,9 +2289,8 @@ def main():
         signals_fired += 1
         time.sleep(0.5)
 
-    for symbol, _msg, direction, sig in dropped_signals:
-        update_cooldown(state, symbol, direction, bar_index_now)
-        print(f"  [RANK] cooldown applied to dropped signal: {hl_coin(symbol)} {direction.upper()}")
+    if dropped_signals:
+        print(f"  [RANK] {len(dropped_signals)} dropped signal(s) — no cooldown applied")
 
     save_state(state)
     print(f"Scan complete. {signals_fired} signal(s) fired.")
