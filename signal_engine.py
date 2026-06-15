@@ -78,10 +78,12 @@ HL_MIN_INTERVAL_S     = float(os.getenv("HL_MIN_INTERVAL_S", "0.18"))
 HL_MIN_INTERVAL_MAX_S = float(os.getenv("HL_MIN_INTERVAL_MAX_S", "0.60"))
 HL_TF_WORKERS         = int(os.getenv("HL_TF_WORKERS", "1"))
 
-# Economic calendar API (free, no key required for basic endpoint)
-# Swap for your own key if using premium endpoint
-ECON_CALENDAR_API_KEY = os.getenv("FMP_API_KEY", "")
+# Economic calendar source: ForexFactory (faireconomy) public JSON feed.
+# Free, no key required. Updated weekly; "thisweek" covers Mon-Sun UTC.
+ECON_CALENDAR_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
 ECON_CALENDAR_CACHE_SECS = 4 * 3600   # refresh every 4 hours
+ECON_CALENDAR_COUNTRIES = {"USD"}     # crypto reacts primarily to USD macro prints
+ECON_CALENDAR_MIN_IMPACT = {"High"}   # set to {"High","Medium"} to widen the filter
 MACRO_RISK_WINDOW_BEFORE = 60          # minutes before event
 MACRO_RISK_WINDOW_AFTER  = 30          # minutes after event
 MACRO_ATR_SUPPRESS_PCT   = 3.0         # suppress if ATR% > this during macro window
@@ -740,9 +742,13 @@ MACRO_EVENT_KEYWORDS = ["fomc", "cpi", "ppi", "nfp", "gdp", "interest rate",
 
 def fetch_econ_calendar() -> list[dict]:
     """
-    Fetch upcoming economic events. Uses FMP free endpoint (no key needed
-    for basic calendar). Falls back to empty list gracefully.
+    Fetch upcoming economic events. Uses ForexFactory's public "faireconomy"
+    JSON feed (free, no key required). Falls back to empty list gracefully.
     Cached for ECON_CALENDAR_CACHE_SECS.
+
+    Note: the feed covers the current Mon-Sun (UTC) week, so events from
+    earlier in the week are filtered out and only USD high-impact macro
+    releases matching MACRO_EVENT_KEYWORDS are kept (most relevant to crypto).
     """
     global _econ_cache
     now = time.time()
@@ -751,29 +757,36 @@ def fetch_econ_calendar() -> list[dict]:
 
     events = []
     try:
-        # FMP free calendar endpoint (no key required for basic data)
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        ahead = (datetime.now(timezone.utc) + timedelta(days=3)).strftime("%Y-%m-%d")
-        url   = f"https://financialmodelingprep.com/api/v3/economic_calendar?from={today}&to={ahead}"
-        if ECON_CALENDAR_API_KEY:
-            url += f"&apikey={ECON_CALENDAR_API_KEY}"
-
-        r = requests.get(url, timeout=10)
+        r = requests.get(ECON_CALENDAR_URL, timeout=10)
         r.raise_for_status()
         raw = r.json()
 
+        now_utc = datetime.now(timezone.utc)
+
         for ev in raw:
-            name = (ev.get("event") or "").lower()
-            if any(kw in name for kw in MACRO_EVENT_KEYWORDS):
-                date_str = ev.get("date", "")
-                try:
-                    if "T" in date_str:
-                        dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
-                    else:
-                        dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-                    events.append({"name": ev.get("event", ""), "dt": dt})
-                except Exception:
-                    pass
+            if ev.get("country") not in ECON_CALENDAR_COUNTRIES:
+                continue
+            if ev.get("impact") not in ECON_CALENDAR_MIN_IMPACT:
+                continue
+
+            name = (ev.get("title") or "").lower()
+            if not any(kw in name for kw in MACRO_EVENT_KEYWORDS):
+                continue
+
+            date_str = ev.get("date", "")
+            try:
+                dt = datetime.fromisoformat(date_str)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                else:
+                    dt = dt.astimezone(timezone.utc)
+            except Exception:
+                continue
+
+            if dt < now_utc:
+                continue  # skip events already in the past this week
+
+            events.append({"name": ev.get("title", ""), "dt": dt})
 
         print(f"  [ECON CAL] Loaded {len(events)} macro events")
     except Exception as e:
