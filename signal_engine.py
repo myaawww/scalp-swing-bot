@@ -624,29 +624,30 @@ def get_btc_regime() -> dict | None:
         return _btc_regime_cache
 
 
-def apply_btc_regime_adjustment(direction: str, symbol: str) -> tuple[int, str]:
+def check_btc_regime_filter(direction: str, symbol: str) -> tuple[bool, str]:
     """
-    Returns (score_adj, label_suffix).
+    Hard suppression version (matches v11 behaviour).
+    Returns (allowed, label).
     BTCUSDT bypasses this filter entirely.
+
+    - direction == "long"  and BTC regime is Bearish → suppressed
+    - direction == "short" and BTC regime is Bullish → suppressed
     """
     if hl_coin(symbol) == "BTC":
-        return 0, "BTC Regime: N/A (BTC itself)"
+        return True, "BTC Regime: N/A (BTC itself)"
 
     regime = get_btc_regime()
     if regime is None:
-        return 0, "BTC Regime: Unknown"
+        return True, "BTC Regime: Unknown"
 
-    adj   = 0
     label = regime["label"]
 
     if direction == "long" and regime["bearish"]:
-        adj    = -2
-        label += " (-2)"
-    elif direction == "short" and regime["bullish"]:
-        adj    = -2
-        label += " (-2)"
+        return False, f"{label} — LONG suppressed"
+    if direction == "short" and regime["bullish"]:
+        return False, f"{label} — SHORT suppressed"
 
-    return adj, label
+    return True, label
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -759,100 +760,122 @@ def compute_relative_strength(symbol: str) -> dict:
 # P2: HISTORICAL PERFORMANCE ANALYTICS
 # ═══════════════════════════════════════════════════════════════
 
-def record_resolved_signal_analytics(state: dict, sig_record: dict):
+def record_signal_history(state: dict, symbol: str, direction: str,
+                           signal_type: str, score: int,
+                           funding_rate: float | None, atr_pct: float,
+                           oi_change_pct: float | None) -> str:
     """
-    Append a resolved signal record to state["signal_analytics"].
-    Fields: symbol, direction, signal_type, score, funding_rate,
-            atr_pct, oi_change_pct, result, timestamp.
+    Store a new signal entry in state["signal_history"] (matches v11 P2).
+    result is populated later by update_signal_result() once the trade
+    resolves (tp1 / tp2 / sl). Returns the entry's id.
+
+    News fields are intentionally omitted — this build doesn't run the
+    news/sentiment filter.
     """
-    analytics = state.setdefault("signal_analytics", [])
-    analytics.append(sig_record)
-    # Keep last 500 records to avoid unbounded growth
-    state["signal_analytics"] = analytics[-500:]
+    hist = state.setdefault("signal_history", [])
+    entry_id = f"{symbol}_{int(time.time())}"
+    hist.append({
+        "id":            entry_id,
+        "symbol":        symbol,
+        "direction":     direction,
+        "signal_type":   signal_type,
+        "score":         score,
+        "funding_rate":  funding_rate,
+        "atr_pct":       atr_pct,
+        "oi_change_pct": oi_change_pct,
+        "result":        None,
+        "timestamp":     int(time.time()),
+    })
+    # Keep last 500 entries
+    if len(hist) > 500:
+        state["signal_history"] = hist[-500:]
+    return entry_id
+
+
+def update_signal_result(state: dict, signal_id: str, result: str) -> None:
+    """Set result = "tp2" | "tp1" | "sl" for a stored signal_history entry."""
+    for entry in state.get("signal_history", []):
+        if entry.get("id") == signal_id:
+            entry["result"] = result
+            return
+
+
+def compute_win_rates(state: dict) -> dict:
+    """
+    Compute win rates by symbol, signal_type, score, and direction
+    from state["signal_history"] (matches v11 P2). Only groups with
+    at least WIN_RATE_MIN_SAMPLE resolved trades are included.
+    """
+    hist = [e for e in state.get("signal_history", [])
+            if e.get("result") in ("tp1", "tp2", "sl")]
+    wrs: dict = {"by_symbol": {}, "by_type": {}, "by_score": {}, "by_direction": {}}
+
+    def wr_for(entries: list[dict]) -> tuple[float, int]:
+        n    = len(entries)
+        wins = sum(1 for e in entries if e["result"] in ("tp1", "tp2"))
+        return (wins / n if n > 0 else 0.0), n
+
+    # By symbol
+    for sym in set(e["symbol"] for e in hist):
+        subset = [e for e in hist if e["symbol"] == sym]
+        wr, n  = wr_for(subset)
+        if n >= WIN_RATE_MIN_SAMPLE:
+            wrs["by_symbol"][sym] = {"wr": wr, "n": n}
+
+    # By signal type
+    for st in ("BREAK", "PULL"):
+        subset = [e for e in hist if e.get("signal_type") == st]
+        wr, n  = wr_for(subset)
+        if n >= WIN_RATE_MIN_SAMPLE:
+            wrs["by_type"][st] = {"wr": wr, "n": n}
+
+    # By score
+    for sc in range(4, 8):
+        subset = [e for e in hist if e.get("score") == sc]
+        wr, n  = wr_for(subset)
+        if n >= WIN_RATE_MIN_SAMPLE:
+            wrs["by_score"][str(sc)] = {"wr": wr, "n": n}
+
+    # By direction
+    for d in ("long", "short"):
+        subset = [e for e in hist if e.get("direction") == d]
+        wr, n  = wr_for(subset)
+        if n >= WIN_RATE_MIN_SAMPLE:
+            wrs["by_direction"][d] = {"wr": wr, "n": n}
+
+    return wrs
 
 
 def compute_win_rate_analytics(state: dict, symbol: str, direction: str,
                                 signal_type: str, score: int) -> dict:
     """
     Look up historical performance and return a confidence adjustment.
-    Minimum sample size: WIN_RATE_MIN_SAMPLE.
+    Priority: by_symbol → by_direction (matches v11 get_historical_score_delta).
 
     Returns {win_rate, sample_size, score_adj, label}
     """
-    analytics = state.get("signal_analytics", [])
+    wrs = compute_win_rates(state)
 
-    def win_rate_for(records):
-        if len(records) < WIN_RATE_MIN_SAMPLE:
-            return None, len(records)
-        wins = sum(1 for r in records if r.get("result") in ("tp1", "tp2"))
-        return wins / len(records), len(records)
+    sym_data = wrs["by_symbol"].get(symbol)
+    if sym_data:
+        wr, n = sym_data["wr"], sym_data["n"]
+    else:
+        dir_data = wrs["by_direction"].get(direction)
+        if dir_data:
+            wr, n = dir_data["wr"], dir_data["n"]
+        else:
+            return {"win_rate": None, "sample_size": 0, "score_adj": 0,
+                    "label": "Win Rate: Insufficient data"}
 
-    # Priority: most specific filter first (symbol + direction + type)
-    specific = [r for r in analytics
-                if r.get("symbol") == symbol
-                and r.get("direction") == direction
-                and r.get("signal_type") == signal_type]
-
-    wr, n = win_rate_for(specific)
-
-    if wr is None:
-        # Fall back to symbol + direction
-        broader = [r for r in analytics
-                   if r.get("symbol") == symbol
-                   and r.get("direction") == direction]
-        wr, n = win_rate_for(broader)
-
-    if wr is None:
-        # Fall back to symbol only
-        symbol_only = [r for r in analytics if r.get("symbol") == symbol]
-        wr, n = win_rate_for(symbol_only)
-
-    if wr is None:
-        return {"win_rate": None, "sample_size": n, "score_adj": 0,
-                "label": "Win Rate: Insufficient data"}
-
-    if wr > WIN_RATE_HIGH_THRESH:
+    if wr >= WIN_RATE_HIGH_THRESH:
         score_adj = 1
-    elif wr < WIN_RATE_LOW_THRESH:
+    elif wr <= WIN_RATE_LOW_THRESH:
         score_adj = -1
     else:
         score_adj = 0
 
     label = f"Win Rate: {wr*100:.0f}%  Sample: {n}"
     return {"win_rate": wr, "sample_size": n, "score_adj": score_adj, "label": label}
-
-
-def append_resolved_to_analytics(state: dict):
-    """
-    Called after check_active_signals() — converts newly resolved signals
-    into analytics records. Reads state["resolved_signals"] for entries
-    that don't yet have an analytics record.
-
-    This cross-links active signal metadata (score, signal_type, etc.)
-    stored in the resolved_signals entry with the analytics store.
-    """
-    resolved = state.get("resolved_signals", [])
-    analytics_keys = {
-        (r.get("symbol"), r.get("timestamp"))
-        for r in state.get("signal_analytics", [])
-    }
-    for entry in resolved:
-        key = (entry.get("symbol"), entry.get("resolved_at"))
-        if key in analytics_keys:
-            continue
-        # Build analytics record — use metadata if it was stored on resolve
-        rec = {
-            "symbol":       entry.get("symbol"),
-            "direction":    entry.get("direction"),
-            "signal_type":  entry.get("signal_type", "UNKNOWN"),
-            "score":        entry.get("score", 0),
-            "funding_rate": entry.get("funding_rate"),
-            "atr_pct":      entry.get("atr_pct"),
-            "oi_change_pct": entry.get("oi_change_pct"),
-            "result":       entry.get("outcome"),
-            "timestamp":    entry.get("resolved_at"),
-        }
-        record_resolved_signal_analytics(state, rec)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1437,6 +1460,18 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     price_dir = "up" if cur_c > cur_o else "down"
 
     # ════════════════════════════════════════════════════════
+    # Step 0: BTC Regime — HARD SUPPRESSION (matches v11 P3)
+    # Counter-regime signals are dropped entirely before any
+    # further scoring is computed.
+    # ════════════════════════════════════════════════════════
+    btc_allowed, btc_label = check_btc_regime_filter(direction, symbol)
+    res.btc_regime_label = btc_label
+    if not btc_allowed:
+        res.fire_long  = False
+        res.fire_short = False
+        return res
+
+    # ════════════════════════════════════════════════════════
     # FINAL SCORING STACK — applied in order, threshold checked at end
     # ════════════════════════════════════════════════════════
     adjusted_score = res.score
@@ -1449,14 +1484,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     if oi_data["score_adj"] != 0:
         adjs.append((f"OI ({oi_data['breakdown_tag']})", oi_data["score_adj"]))
 
-    # ── Step 2a: BTC Regime ───────────────────────────────────
-    btc_adj, btc_label = apply_btc_regime_adjustment(direction, symbol)
-    res.btc_regime_label = btc_label
-    adjusted_score += btc_adj
-    if btc_adj != 0:
-        adjs.append((btc_label, btc_adj))
-
-    # ── Step 2b: Market Breadth ───────────────────────────────
+    # ── Step 2: Market Breadth ─────────────────────────────────
     breadth_adj, breadth_label = apply_breadth_adjustment(direction)
     res.breadth_label = breadth_label
     adjusted_score += breadth_adj
@@ -1540,18 +1568,19 @@ def load_state() -> dict:
     if Path(STATE_FILE).exists():
         try:
             s = json.loads(Path(STATE_FILE).read_text())
-            # Backward compat: initialize missing v3 keys safely
+            # Backward compat: initialize missing keys safely
             s.setdefault("oi_history", {})
-            s.setdefault("signal_analytics", [])
+            s.setdefault("signal_history", [])
             s.setdefault("macro_calendar_cache", {})
             # Dead fields from previous versions — leave untouched, don't read/write
-            # news_score, sentiment_score, final_news_score remain as-is if present
+            # signal_analytics, news_score, sentiment_score, final_news_score
+            # remain as-is if present but are no longer used.
             return s
         except Exception:
             pass
     return {
         "oi_history": {},
-        "signal_analytics": [],
+        "signal_history": [],
         "macro_calendar_cache": {},
     }
 
@@ -1743,10 +1772,12 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
 # ═══════════════════════════════════════════════════════════════
 
 def track_signal(state: dict, symbol: str, direction: str,
-                 msg_id: int, sig: SignalResult, bar_index: int):
+                 msg_id: int, sig: SignalResult, bar_index: int,
+                 hist_id: str | None = None):
     """
     Persist a newly fired signal so subsequent runs can poll its TP/SL.
-    v3: also stores signal_type, score, atr_pct, oi_change_pct for analytics.
+    hist_id links this active signal to its state["signal_history"] entry
+    (matches v11 P2) so the win-rate analytics get the resolved outcome.
     """
     active = state.setdefault("active_signals", [])
     active.append({
@@ -1760,12 +1791,7 @@ def track_signal(state: dict, symbol: str, direction: str,
         "sl":              sig.sl,
         "tp1_hit":         False,
         "resolved":        False,
-        # v3 analytics metadata
-        "signal_type":     sig.signal_type,
-        "score":           sig.final_score,
-        "atr_pct":         sig.atr_pct,
-        "funding_rate":    sig.funding_rate,
-        "oi_change_pct":   sig.oi_trend_data.get("oi_change_pct"),
+        "hist_id":         hist_id,
     })
 
 
@@ -1809,21 +1835,18 @@ def check_active_signals(state: dict, bar_index_now: int):
             still_active.append(sig)
             continue
 
+        hist_id = sig.get("hist_id")
+
         def resolve_signal(outcome: str):
-            # Build resolved entry with analytics metadata
-            entry = {
-                "symbol":       symbol,
-                "direction":    direction,
-                "outcome":      outcome,
-                "resolved_at":  int(time.time()),
-                # analytics fields (from original signal metadata)
-                "signal_type":  sig.get("signal_type", "UNKNOWN"),
-                "score":        sig.get("score", 0),
-                "atr_pct":      sig.get("atr_pct"),
-                "funding_rate": sig.get("funding_rate"),
-                "oi_change_pct": sig.get("oi_change_pct"),
-            }
-            state.setdefault("resolved_signals", []).append(entry)
+            # Push the result back into signal_history for win-rate analytics
+            if hist_id:
+                update_signal_result(state, hist_id, outcome)
+            state.setdefault("resolved_signals", []).append({
+                "symbol":      symbol,
+                "direction":   direction,
+                "outcome":     outcome,
+                "resolved_at": int(time.time()),
+            })
             sig["resolved"] = True
 
         for candle in candles:
@@ -1904,12 +1927,13 @@ def send_summary(state: dict):
     if winners == 0 and losers == 0:
         return
 
-    # ── v3: Win-rate breakdown by category ───────────────────
-    all_analytics = state.get("signal_analytics", [])
-    total = len(all_analytics)
+    # ── Win-rate breakdown from signal_history ────────────────
+    all_history = [e for e in state.get("signal_history", [])
+                    if e.get("result") in ("tp1", "tp2", "sl")]
+    total = len(all_history)
     overall_wr = None
     if total >= WIN_RATE_MIN_SAMPLE:
-        wins = sum(1 for r in all_analytics if r.get("result") in ("tp1", "tp2"))
+        wins = sum(1 for r in all_history if r.get("result") in ("tp1", "tp2"))
         overall_wr = wins / total
 
     line1 = "📊 Signal Summary (last 24h)"
@@ -2014,9 +2038,6 @@ def main():
     print("[TRACK] Checking active signals…")
     check_active_signals(state, bar_index_now)
 
-    # ── Step 1a: Sync resolved signals to analytics ───────────
-    append_resolved_to_analytics(state)
-
     save_state(state)
 
     # ── Step 1.5: Send daily summary if 08:00 UTC window ─────
@@ -2065,8 +2086,17 @@ def main():
         msg    = format_signal(symbol, sig, "CORE", rank=rank)
         msg_id = send_telegram(msg)
         update_cooldown(state, symbol, direction, bar_index_now)
+
+        # [P2] Record full signal metadata for historical win-rate analytics
+        # (funding, ATR, OI — news fields intentionally omitted)
+        hist_id = record_signal_history(
+            state, symbol, direction, sig.signal_type, sig.final_score,
+            sig.funding_rate, sig.atr_pct,
+            sig.oi_trend_data.get("oi_change_pct")
+        )
+
         if msg_id:
-            track_signal(state, symbol, direction, msg_id, sig, bar_index_now)
+            track_signal(state, symbol, direction, msg_id, sig, bar_index_now, hist_id=hist_id)
             print(f"  [TRACK] #{rank} {hl_coin(symbol)} {direction.upper()} "
                   f"TP1={sig.tp1:.4f} TP2={sig.tp2:.4f} SL={sig.sl:.4f}")
         signals_fired += 1
