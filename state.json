@@ -4,7 +4,7 @@
   "SUIUSDT_short": 1979106,
   "SUIUSDT_any": 1979106,
   "XLMUSDT_long": 1978123,
-  "XLMUSDT_any": 1979400,
+  "XLMUSDT_any": 1979432,
   "DOGEUSDT_short": 1979077,
   "DOGEUSDT_any": 1979077,
   "SOLUSDT_short": 1979071,
@@ -90,7 +90,20 @@
   "BNBUSDT_any": 1979013,
   "ONDOUSDT_long": 1978417,
   "ONDOUSDT_any": 1978695,
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "msg_id": 339,
+      "bar_index": 1979432,
+      "signal_bar_time": 1781488800000,
+      "tp1": 0.1867048616995839,
+      "tp2": 0.18605729254937584,
+      "sl": 0.1892951383004161,
+      "tp1_hit": false,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [
     {
       "symbol": "TAOUSDT",
@@ -138,6 +151,6 @@
   "ZECUSDT_short": 1978674,
   "TONUSDT_short": 1978603,
   "ONDOUSDT_short": 1978695,
-  "XLMUSDT_short": 1979400,
+  "XLMUSDT_short": 1979432,
   "TAOUSDT_long": 1979395
 }
