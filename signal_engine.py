@@ -624,30 +624,53 @@ def get_btc_regime() -> dict | None:
         return _btc_regime_cache
 
 
-def check_btc_regime_filter(direction: str, symbol: str) -> tuple[bool, str]:
-    """
-    Hard suppression version (matches v11 behaviour).
-    Returns (allowed, label).
-    BTCUSDT bypasses this filter entirely.
+# Coins known to decorrelate from BTC — halve the counter-trend penalty
+LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "TONUSDT", "AAVEUSDT", "ZECUSDT", "ONDOUSDT", "HYPEUSDT"}
 
-    - direction == "long"  and BTC regime is Bearish → suppressed
-    - direction == "short" and BTC regime is Bullish → suppressed
+
+def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
+    """
+    Soft score adjustment instead of hard suppression.
+    Returns (score_adj, label).
+
+    Counter-trend : -2  (or -1 for LOW_BTC_CORR coins; still fires if base score is strong enough)
+    Tailwind      : +1  (reward alignment)
+    Mixed         :  0
+    BTC itself    :  0  (bypass)
     """
     if hl_coin(symbol) == "BTC":
-        return True, "BTC Regime: N/A (BTC itself)"
+        return 0, "BTC Regime: N/A (BTC itself)"
 
     regime = get_btc_regime()
     if regime is None:
-        return True, "BTC Regime: Unknown"
+        return 0, "BTC Regime: Unknown"
 
     label = regime["label"]
 
+    # Counter-trend — penalise but don't kill
     if direction == "long" and regime["bearish"]:
-        return False, f"{label} — LONG suppressed"
+        adj = -2
+        out_label = f"{label} — counter-trend (-2)"
+        if symbol in LOW_BTC_CORR:
+            adj = -1
+            out_label = f"{label} — counter-trend (-1, decorrelated)"
+        return adj, out_label
     if direction == "short" and regime["bullish"]:
-        return False, f"{label} — SHORT suppressed"
+        adj = -2
+        out_label = f"{label} — counter-trend (-2)"
+        if symbol in LOW_BTC_CORR:
+            adj = -1
+            out_label = f"{label} — counter-trend (-1, decorrelated)"
+        return adj, out_label
 
-    return True, label
+    # Aligned — reward confirmation
+    if direction == "long" and regime["bullish"]:
+        return +1, f"{label} — tailwind (+1)"
+    if direction == "short" and regime["bearish"]:
+        return +1, f"{label} — tailwind (+1)"
+
+    # Mixed regime — neutral
+    return 0, f"{label} — Mixed (0)"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1460,22 +1483,23 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     price_dir = "up" if cur_c > cur_o else "down"
 
     # ════════════════════════════════════════════════════════
-    # Step 0: BTC Regime — HARD SUPPRESSION (matches v11 P3)
-    # Counter-regime signals are dropped entirely before any
-    # further scoring is computed.
+    # Step 0: BTC Regime — SOFT PENALTY
+    # Counter-trend signals are penalised but not killed.
+    # A high-conviction decorrelated setup can still fire.
     # ════════════════════════════════════════════════════════
-    btc_allowed, btc_label = check_btc_regime_filter(direction, symbol)
+    btc_adj, btc_label = check_btc_regime_filter(direction, symbol)
     res.btc_regime_label = btc_label
-    if not btc_allowed:
-        res.fire_long  = False
-        res.fire_short = False
-        return res
 
     # ════════════════════════════════════════════════════════
     # FINAL SCORING STACK — applied in order, threshold checked at end
     # ════════════════════════════════════════════════════════
     adjusted_score = res.score
     adjs = res.score_adjustments
+
+    adjusted_score += btc_adj
+    if btc_adj != 0:
+        adjs.append((btc_label, btc_adj))
+
 
     # ── Step 1: OI Confirmation ───────────────────────────────
     oi_data = compute_oi_trend(state, symbol, cur_c, price_dir)
@@ -1740,9 +1764,10 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
 
     medal    = RANK_MEDALS.get(rank, "")
     rank_tag = f"{medal} <b>Priority #{rank}</b>\n" if rank else ""
+    counter_tag = "⚠️ " if "counter-trend" in sig.btc_regime_label else ""
 
     return (
-        f"{rank_tag}{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.final_score)}\n"
+        f"{rank_tag}{counter_tag}{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.final_score)}\n"
         f"<b>Pair:</b>  {symbol}\n\n"
         f"<b>Entry:</b> <code>{fmt(sig.entry)}</code>\n"
         f"<b>Entry Zone:</b> <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n\n"
