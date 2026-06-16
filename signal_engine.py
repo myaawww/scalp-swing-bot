@@ -1,5 +1,5 @@
 """
-Scalp Swing Bot v11.2.2 – Python Signal Engine
+Scalp Swing Bot v11.3 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
@@ -97,6 +97,7 @@ PULL_REQUIRES_4H  = True
 # ── ACCURACY FILTERS (v3) ─────────────────────────────────────
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
 SR_CLEARANCE_ATR_MULT: float    = 0.3
+SUPPORT_PROXIMITY_ATR: float    = 0.5   # PULL long bonus: entry within 0.5 ATR of nearest support
 
 # ── OI TREND (v3 / P1) ────────────────────────────────────────
 OI_HISTORY_DEPTH: int        = 6
@@ -113,6 +114,7 @@ RS_BOTTOM_PERCENTILE: float = 0.20
 # [SYM 4] Equidistant from 0.50 — was 0.15 / 0.85
 BREADTH_WEAK_LONG_THRESHOLD:  float = 0.20
 BREADTH_WEAK_SHORT_THRESHOLD: float = 0.80
+BREADTH_BREAK_LONG_SUPPRESS:  float = 0.90  # Hard suppress BREAK longs above this breadth — exhaustion entries
 
 # ── HISTORICAL WIN RATE (P2) ──────────────────────────────────
 WIN_RATE_MIN_SAMPLE: int    = 20
@@ -525,7 +527,8 @@ def get_btc_regime() -> dict | None:
 LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "ONDOUSDT", "HYPEUSDT"}
 
 
-def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
+def check_btc_regime_filter(direction: str, symbol: str,
+                            signal_type: str = "") -> tuple[int, str]:
     # Returns score adj: +1 tailwind, -1 counter-trend, 0 mixed/exempt/BTC
     if hl_coin(symbol) == "BTC":
         return 0, "BTC Regime: N/A (BTC itself)"
@@ -552,6 +555,13 @@ def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
         return +1, f"{label} — tailwind (+1)"
     if direction == "short" and regime["bearish"]:
         return +1, f"{label} — tailwind (+1)"
+
+    # Mixed regime: BREAK needs macro wind, PULL can tolerate it
+    if not regime["bullish"] and not regime["bearish"]:
+        if signal_type == "BREAK":
+            return -1, f"{label} — no tailwind for BREAK (-1)"
+        else:
+            return 0, f"{label} — Mixed (0)"
 
     return 0, f"{label} — Mixed (0)"
 
@@ -604,9 +614,13 @@ def apply_breadth_adjustment(direction: str) -> tuple[int, str]:
     pct     = breadth["breadth_50_pct"]
     label   = breadth["label"]
     adj     = 0
-    if direction == "long" and pct < BREADTH_WEAK_LONG_THRESHOLD:
-        adj    = -1
-        label += " (-1)"
+    if direction == "long":
+        if pct > 0.90:
+            adj    = -2
+            label += " (-2)"
+        elif pct < BREADTH_WEAK_LONG_THRESHOLD:
+            adj    = -1
+            label += " (-1)"
     elif direction == "short" and pct > BREADTH_WEAK_SHORT_THRESHOLD:
         adj    = -1
         label += " (-1)"
@@ -1133,6 +1147,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     obv_slope_short = obv15[-1] < obv15[-(1 + OBV_LEN)]
 
     adx_score_ok = adx15 >= ADX_SCORE_MIN
+    # vol_score_ok is signal-type-aware: computed here with a placeholder for BREAK;
+    # reassigned after signal_type is determined (see below in scoring stack).
+    # Initial value used only in long_score/short_score base computation — treat as neutral.
     vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
 
     vol_break_ok = True if vm15 == 0 else (cur_v >= vm15 * BREAK_VOL_MULT)
@@ -1314,6 +1331,22 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     direction = "long" if res.fire_long else "short"
     price_dir = "up" if cur_c > cur_o else "down"
 
+    # ── Re-evaluate vol_score_ok with signal-type awareness ───
+    # BREAK: high volume confirms momentum. PULL: low vol is healthy (dip on light supply).
+    vol_score_ok = True if vm15 == 0 else (
+        cur_v >= vm15 * VOL_SCORE_MULT if res.signal_type == "BREAK"
+        else cur_v <= vm15 * 1.0  # PULL: penalise high vol — healthy pullbacks are quiet
+    )
+
+    # ── Breadth hard suppress: BREAK longs above 90% breadth ──
+    # PULL longs can still fire — buying a dip. BREAK longs above 90% are almost always exhaustion.
+    breadth_snap = compute_market_breadth()
+    breadth_pct  = breadth_snap["breadth_50_pct"]
+    if res.signal_type == "BREAK" and direction == "long" and breadth_pct > BREADTH_BREAK_LONG_SUPPRESS:
+        print(f"  [BREADTH SUPPRESS] {symbol} BREAK LONG suppressed — breadth {breadth_pct*100:.0f}% > {BREADTH_BREAK_LONG_SUPPRESS*100:.0f}%")
+        res.fire_long = False
+        return res
+
     # ════════════════════════════════════════════════════════
     # FINAL SCORING STACK
     # 1. OI  2. BTC+Breadth  3. RS  4. Win Rate
@@ -1341,7 +1374,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
             adjs.append(("OI Acceleration (diverging↓)", -1))
 
     # ── Step 2: BTC Regime + Market Breadth ──────────────────
-    btc_adj, btc_label = check_btc_regime_filter(direction, symbol)
+    btc_adj, btc_label = check_btc_regime_filter(direction, symbol, res.signal_type)
     res.btc_regime_label = btc_label
     adjusted_score += btc_adj
     if btc_adj != 0:
@@ -1408,6 +1441,18 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     else:
         res.d200_label = "D200: Disabled"
 
+    # ── Step 8: Support Proximity Bonus (PULL longs only) ────
+    # Compute S/R now so support proximity check can reference res.supports.
+    # The same levels are used again below for the clearance filter.
+    res.supports, res.resistances = find_sr_levels(candles_15m, atr_val=atr_val)
+
+    # Entry within 0.5 ATR of nearest support = high-quality dip entry
+    if res.signal_type == "PULL" and res.supports and direction == "long":
+        nearest_sup = res.supports[0]
+        if (res.entry - nearest_sup) < atr_val * SUPPORT_PROXIMITY_ATR:
+            adjusted_score += 1
+            adjs.append(("Support proximity", +1))
+
     # ── Final suppression check ───────────────────────────────
     res.final_score = adjusted_score
     if adjusted_score < MIN_SCORE:
@@ -1419,9 +1464,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 
     res.breakdown = make_breakdown(res.fire_long, oi_data["breakdown_tag"], vol_ratio)
 
-    # ── Support / Resistance ──────────────────────────────────
-    if res.fire_long or res.fire_short:
-        res.supports, res.resistances = find_sr_levels(candles_15m, atr_val=atr_val)
+    # S/R levels already computed in Step 8 above; clearance filter applied below.
 
     # ── S/R clearance filter ──────────────────────────────────
     if SR_CLEARANCE_ATR_MULT > 0 and (res.fire_long or res.fire_short):
@@ -1635,7 +1678,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v11.2.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v11.3 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
