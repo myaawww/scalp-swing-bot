@@ -1,5 +1,5 @@
 """
-Scalp Swing Bot v11.3 – Python Signal Engine
+Scalp Swing Bot v11.4 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
@@ -97,7 +97,7 @@ PULL_REQUIRES_4H  = True
 # ── ACCURACY FILTERS (v3) ─────────────────────────────────────
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
 SR_CLEARANCE_ATR_MULT: float    = 0.3
-SUPPORT_PROXIMITY_ATR: float    = 0.5   # PULL long bonus: entry within 0.5 ATR of nearest support
+SUPPORT_PROXIMITY_ATR: float    = 0.75   # [v11.4] widened 0.5→0.75 ATR — catches valid dips slightly further from support
 
 # ── OI TREND (v3 / P1) ────────────────────────────────────────
 OI_HISTORY_DEPTH: int        = 6
@@ -114,7 +114,8 @@ RS_BOTTOM_PERCENTILE: float = 0.20
 # [SYM 4] Equidistant from 0.50 — was 0.15 / 0.85
 BREADTH_WEAK_LONG_THRESHOLD:  float = 0.20
 BREADTH_WEAK_SHORT_THRESHOLD: float = 0.80
-BREADTH_BREAK_LONG_SUPPRESS:  float = 0.90  # Hard suppress BREAK longs above this breadth — exhaustion entries
+BREADTH_BREAK_LONG_SUPPRESS:  float = 0.95  # [v11.4] raised 0.90→0.95 — only true exhaustion blocked
+BREADTH_CROWDED_LONG_THRESHOLD: float = 0.75  # [v11.4] new: -1 penalty above this level (early warning)
 
 # ── HISTORICAL WIN RATE (P2) ──────────────────────────────────
 WIN_RATE_MIN_SAMPLE: int    = 20
@@ -559,7 +560,7 @@ def check_btc_regime_filter(direction: str, symbol: str,
     # Mixed regime: BREAK needs macro wind, PULL can tolerate it
     if not regime["bullish"] and not regime["bearish"]:
         if signal_type == "BREAK":
-            return -1, f"{label} — no tailwind for BREAK (-1)"
+            return 0, f"{label} — Mixed (neutral for BREAK)"  # [v11.4] was -1 — strong breakouts can lead regime shifts
         else:
             return 0, f"{label} — Mixed (0)"
 
@@ -618,6 +619,9 @@ def apply_breadth_adjustment(direction: str) -> tuple[int, str]:
         if pct > 0.90:
             adj    = -2
             label += " (-2)"
+        elif pct > BREADTH_CROWDED_LONG_THRESHOLD:
+            adj    = -1
+            label += " (-1, crowded)"
         elif pct < BREADTH_WEAK_LONG_THRESHOLD:
             adj    = -1
             label += " (-1)"
@@ -1335,7 +1339,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     # BREAK: high volume confirms momentum. PULL: low vol is healthy (dip on light supply).
     vol_score_ok = True if vm15 == 0 else (
         cur_v >= vm15 * VOL_SCORE_MULT if res.signal_type == "BREAK"
-        else cur_v <= vm15 * 1.0  # PULL: penalise high vol — healthy pullbacks are quiet
+        else cur_v <= vm15 * 1.3  # [v11.4] loosened 1.0→1.3 — allows slightly elevated volume on pullbacks
     )
 
     # ── Breadth hard suppress: BREAK longs above 90% breadth ──
@@ -1678,7 +1682,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v11.3 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v11.4 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
