@@ -1,98 +1,49 @@
 """
-Scalp Swing Bot v10 – Python Signal Engine  (v3 — Full Upgrade + Symmetry Fix)
+Scalp Swing Bot v11 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
 
-SYMMETRY FIXES (applied on top of v3)
-────────────────────────────────────────────
-[SYM 1] RSI windows widened and made symmetric:
-         LONG:  40–70  (was 45–65)
-         SHORT: 30–60  (was 35–55)
-         Both windows now have equal width (30 pts) and the short window
-         extends lower so it triggers in normal retracement conditions.
+v11 UPGRADES  (applied on top of v10 / v3 symmetry fixes)
+────────────────────────────────────────────────────────────
+[v11-1] TP/SL ASYMMETRY — fixes the biggest profitability leak.
+         TP1_MULT 1.0 → 1.2  (more room to breathe)
+         TP2_MULT 1.5 → 2.0  (let full winners run)
+         SL_MULT  1.0 → 0.85 (tighter cut)
+         At 48% win rate this change alone can flip the system net-positive.
 
-[SYM 2] USE_D200_FILTER converted to a soft score gate instead of a hard
-         boolean gate. Price below D200 adds +1 to short score; price above
-         D200 adds +1 to long score. Neither direction is hard-blocked.
-         USE_D200_FILTER=True now means "apply soft D200 score bonus" rather
-         than "hard suppress".
+[v11-2] MIN_SCORE RAISED 4 → 5 — all 5 base components now required to fire.
+         Post-stack bonuses (OI, BTC regime, RS, etc.) reward quality setups
+         rather than compensating for a weak base. Fewer but higher-quality signals.
 
-[SYM 3] BTC regime counter-trend penalty made equal for both directions:
-         -1 for longs in a bearish BTC regime (was 0 / no change)
-         -1 for shorts in a bullish BTC regime (was -2)
-         Tailwind reward remains +1 in both directions.
-         LOW_BTC_CORR coins keep their special -0 treatment (no change).
+[v11-3] PER-SIGNAL-TYPE RSI GATES — replaces the single symmetric pair.
+         BREAK (momentum confirmation):  LONG 50–75 / SHORT 25–50
+         PULL  (retracement tolerance):  LONG 38–65 / SHORT 35–62
+         BREAK signals now require RSI to confirm directional push.
+         PULL signals keep a wider window to allow dip-buys / rally-shorts.
 
-[SYM 4] Market breadth thresholds tightened so the short penalty fires more
-         evenly with the long penalty:
-         BREADTH_WEAK_LONG_THRESHOLD  = 0.20  (was 0.15) → penalty if < 20% above EMA50
-         BREADTH_WEAK_SHORT_THRESHOLD = 0.80  (was 0.85) → penalty if > 80% above EMA50
-         Both thresholds are now equidistant from 0.50 (20pp each side).
+[v11-4] S/R PIVOT DETECTION UPGRADED — 3-bar window + level clustering.
+         Left/right bars widened 2 → 3 to eliminate single-wick false pivots.
+         Nearby pivots within 0.3×ATR merged into midpoint zones, making the
+         SR clearance filter check against genuinely significant levels.
 
-v2 FIXES (aligned to Pine Script v10 logic)
-────────────────────────────────────────────
-[FIX 1] h4_bull / h4_bear was incorrectly aliased to h1_bull / h1_bear.
-        Now correctly computed from the 4H EMA arrays (ef4h > es4h).
+[v11-5] OI ACCELERATION AS FIRST-CLASS SCORE COMPONENT.
+         Previously computed but only used for labels/tags.
+         Now contributes ±1 to the OI score step:
+           +1 when acceleration > 0 and OI is confirming the trade direction
+           -1 when acceleration < 0 and OI is already diverging
+         Combined with the base OI adj, max OI contribution is ±2.
 
-[FIX 2] All HTF EMA/ADX values now use [-2] (last confirmed closed bar)
-        instead of [-1], matching Pine's request.security lookahead_off
-        which returns close[1] — the previous fully closed bar.
-        Affects: 1H EMA (ef1h/es1h), 4H EMA (ef4h/es4h), 4H ADX, Daily 200 EMA.
+[v11-6] BTC REGIME MOMENTUM GATE added to compute_btc_regime().
+         btc_4h_momentum = c4h[-2] > c4h[-5]  (3-bar price check on closed bar)
+         btc_bullish now requires both EMA alignment AND positive momentum.
+         btc_bearish now requires EMA alignment AND negative momentum.
+         Prevents "Bullish" regime label while BTC is actively dumping.
 
-[FIX 3] trend_held() offset corrected to -(offset+1) to align with the
-        [-2]=bar[1] convention, matching Pine's nz(ef[1])>nz(es[1]) checks.
-
-[FIX 4] pull_touched_long/short now use ef15_prev (previous bar's fast EMA)
-        instead of ef15, matching Pine's localEMAf[1] reference.
-
-[FIX 5] obv_slope indexing corrected to -(1+OBV_LEN) for clarity and
-        consistency with Pine's obvVal > obvVal[obvLen].
-
-v3 UPGRADES
-────────────────────────────────────────────
-[P1] Real OI Trend — replaces 4H volume proxy with actual Hyperliquid OI values.
-     OI history stored in state.json per symbol. Detects confirmation / divergence.
-
-[P2] Historical Performance Analytics — tracks every resolved signal, computes
-     per-symbol / per-type / per-score / per-direction win rates. Adjusts score.
-
-[P3] BTC Market Regime Filter — soft score-based penalty (see SYM 3 above).
-
-[P4] Economic Calendar Filter — fetches FOMC/CPI/NFP etc. from open-source feed,
-     caches locally, applies score -= 1 inside ±60/30min risk windows. Hard suppress
-     only when ATR is also elevated (genuine tail-risk).
-
-[P5] Relative Strength Ranking — coin 7d return vs BTC 7d return. +1 / -1 score.
-
-[P6] Breakout Volume Upgrade — BREAK signals now require cur_v >= vm15 * 1.5.
-
-[P7] Market Breadth Filter — % of watchlist above 4H EMA50 reusing already-fetched
-     EMA data. Soft score -= 1 at extremes (see SYM 4 for revised thresholds).
-
-FINAL SCORING STACK (order of application):
-  1. OI Confirmation
-  2. BTC Regime + Market Breadth  (paired market-context adjustments)
-  3. Relative Strength
-  4. Historical Win Rate
-  5. Macro Filter
-  6. Volume Confirmation  (BREAK only)
-  7. D200 Soft Bonus/Penalty  (NEW — replaces hard gate)
-  → Suppression threshold checked only after all 7 steps above.
-
-REACTION FEATURE
-────────────────────────────────────────────
-On every run, active signals are checked against 15m candles fetched
-from the signal's bar time up to now. Each candle's high/low is walked
-oldest→newest to correctly resolve TP1→TP2 vs SL hit order, avoiding
-false 😭 reactions when TP1 is hit first within the same 15m window.
-
-  🔥  when TP1 is hit before SL
-  🏆  when TP2 is also hit (full winner)
-  😭 when SL is hit before TP1
-Signal tracking state is persisted in state.json under "active_signals".
-Signals are auto-expired after SIGNAL_MAX_AGE_BARS (≈12 h by default).
+[v11-7] N_4H BUMPED 60 → 80 for more stable 4H ADX seed.
+         ADX needs ~2× period (28 bars) to warm up; 60 was cutting it close.
+         Adds ~20 extra 4H candle fetches (~3.3 days), negligible API cost.
 """
 
 import os, json, time, math, random, threading, requests
@@ -141,10 +92,10 @@ VOL_LEN   = 20
 OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
-MIN_SCORE            = 4
-TP1_MULT             = 1.0
-TP2_MULT             = 1.5
-SL_MULT              = 1.0
+MIN_SCORE            = 5    # [v11] raised from 4 — require all 5 base components
+TP1_MULT             = 1.2  # [v11] was 1.0 — gives more room to breathe
+TP2_MULT             = 2.0  # [v11] was 1.5 — let full winners run
+SL_MULT              = 0.85 # [v11] was 1.0 — tighter cut improves R:R math
 COOLDOWN_BARS        = 32
 GLOBAL_COOLDOWN      = 16
 MAX_SIGNALS_PER_SCAN = 3
@@ -153,9 +104,16 @@ MAX_SIGNALS_PER_SCAN = 3
 ADX_BREAK_GATE  = 20.0
 ADX_SCORE_MIN   = 20.0
 
-# [SYM 1] Symmetric RSI windows, equal width (30 pts each)
-RSI_LONG_MIN    = 40.0;  RSI_LONG_MAX  = 70.0   # was 45 / 65
-RSI_SHORT_MIN   = 30.0;  RSI_SHORT_MAX = 60.0   # was 35 / 55
+# [v11 / SYM 1] Per-signal-type RSI gates — replaces single pair
+# BREAK signals: momentum confirmation (tighter, confirms directional push)
+RSI_BREAK_LONG_MIN  = 50.0;  RSI_BREAK_LONG_MAX  = 75.0
+RSI_BREAK_SHORT_MIN = 25.0;  RSI_BREAK_SHORT_MAX = 50.0
+# PULL signals: retracement tolerance (wider, allows dip-buy / rally-short)
+RSI_PULL_LONG_MIN   = 38.0;  RSI_PULL_LONG_MAX   = 65.0
+RSI_PULL_SHORT_MIN  = 35.0;  RSI_PULL_SHORT_MAX  = 62.0
+# Legacy aliases kept for any external references (unused internally)
+RSI_LONG_MIN    = RSI_PULL_LONG_MIN;   RSI_LONG_MAX  = RSI_BREAK_LONG_MAX
+RSI_SHORT_MIN   = RSI_BREAK_SHORT_MIN; RSI_SHORT_MAX = RSI_PULL_SHORT_MAX
 
 VOL_SCORE_MULT  = 1.0
 MAX_ATR_PCT     = 10.0
@@ -210,7 +168,7 @@ MACRO_CACHE_TTL_S: int          = 3600
 # ── CANDLE COUNTS PER TIMEFRAME ──────────────────────────────
 N_15M = 300
 N_1H  = 60
-N_4H  = 60
+N_4H  = 80   # [v11] was 60 — gives ADX (2× period warm-up = 28 bars) more stable seed
 N_1D  = 210
 
 # ── REACTION SETTINGS ────────────────────────────────────────
@@ -471,11 +429,25 @@ def compute_oi_trend(state: dict, symbol: str, current_price: float,
         f"OI Trend: {oi_trend.capitalize()}  "
         f"OI Change: {oi_change_pct:+.1f}% (norm)"
     )
+
+    # [v11] OI acceleration is now a first-class score component (+1 / -1)
+    # Rewards accelerating confirmation; penalises accelerating divergence
+    accel_adj = 0
+    if oi_acceleration is not None:
+        is_confirming  = (trade_direction == "long"  and bullish_confirm) or \
+                         (trade_direction == "short" and bearish_confirm)
+        is_diverging   = score_adj < 0  # already penalised by base score_adj
+        if oi_acceleration > 0 and is_confirming:
+            accel_adj = 1    # momentum building behind the signal
+        elif oi_acceleration < 0 and is_diverging:
+            accel_adj = -1   # divergence is getting worse
+
     return {
         "oi_trend":        oi_trend,
         "oi_change_pct":   oi_change_pct,
         "oi_acceleration": oi_acceleration,
-        "score_adj":       score_adj,
+        "score_adj":       score_adj + accel_adj,
+        "accel_adj":       accel_adj,
         "label":           label,
         "breakdown_tag":   breakdown_tag,
         "condition":       condition,
@@ -512,21 +484,47 @@ def format_oi(oi_usd: float | None) -> str:
 
 
 def find_sr_levels(candles_15m: list[dict], n_levels: int = 2) -> tuple[list[float], list[float]]:
-    cur          = candles_15m[-1]["c"]
-    pivots_high  = []
-    pivots_low   = []
-    window       = candles_15m[-101:-1]
-    for i in range(2, len(window) - 2):
+    # [v11] Left/right bars widened from 2 → 3 to reduce single-wick false pivots
+    LEFT_BARS  = 3
+    RIGHT_BARS = 3
+
+    cur         = candles_15m[-1]["c"]
+    pivots_high = []
+    pivots_low  = []
+    window      = candles_15m[-101:-1]
+
+    # [v11] Compute a simple ATR proxy over the window for clustering tolerance
+    if len(window) >= 15:
+        trs = [window[i]["h"] - window[i]["l"] for i in range(1, len(window))]
+        atr_proxy = sum(trs[-14:]) / 14
+    else:
+        atr_proxy = cur * 0.002  # fallback: 0.2%
+
+    for i in range(LEFT_BARS, len(window) - RIGHT_BARS):
         h = window[i]["h"]
         l = window[i]["l"]
-        if (h > window[i-1]["h"] and h > window[i-2]["h"]
-                and h > window[i+1]["h"] and h > window[i+2]["h"]):
+        if all(h > window[i - k]["h"] for k in range(1, LEFT_BARS + 1)) and \
+           all(h > window[i + k]["h"] for k in range(1, RIGHT_BARS + 1)):
             pivots_high.append(h)
-        if (l < window[i-1]["l"] and l < window[i-2]["l"]
-                and l < window[i+1]["l"] and l < window[i+2]["l"]):
+        if all(l < window[i - k]["l"] for k in range(1, LEFT_BARS + 1)) and \
+           all(l < window[i + k]["l"] for k in range(1, RIGHT_BARS + 1)):
             pivots_low.append(l)
-    resistances = sorted([p for p in pivots_high if p > cur], key=lambda x: x - cur)[:n_levels]
-    supports    = sorted([p for p in pivots_low  if p < cur], key=lambda x: cur - x)[:n_levels]
+
+    def cluster_levels(pivots: list[float], tolerance: float = 0.3) -> list[float]:
+        """Merge pivots within tolerance * ATR of each other into their midpoint."""
+        zones: list[float] = []
+        for p in sorted(pivots):
+            if zones and abs(p - zones[-1]) < atr_proxy * tolerance:
+                zones[-1] = (zones[-1] + p) / 2  # merge to midpoint
+            else:
+                zones.append(p)
+        return zones
+
+    clustered_high = cluster_levels(pivots_high)
+    clustered_low  = cluster_levels(pivots_low)
+
+    resistances = sorted([p for p in clustered_high if p > cur], key=lambda x: x - cur)[:n_levels]
+    supports    = sorted([p for p in clustered_low  if p < cur], key=lambda x: cur - x)[:n_levels]
     return supports, resistances
 
 
@@ -550,8 +548,15 @@ def compute_btc_regime(candles_1h: list[dict], candles_4h: list[dict]) -> dict:
     ef1h = safe(ema(c1h, FAST_LEN)[-2])
     es1h = safe(ema(c1h, SLOW_LEN)[-2])
 
-    btc_bullish = (ef4h > es4h) and (ef1h > es1h)
-    btc_bearish = (ef4h < es4h) and (ef1h < es1h)
+    # [v11] Add 4H price momentum gate: close must be up over last 3 bars
+    # Prevents "bullish EMA" regime label while BTC is actively dumping
+    btc_4h_momentum = len(c4h) >= 5 and c4h[-2] > c4h[-5]  # use [-2] (closed bar)
+
+    ema_bull = (ef4h > es4h) and (ef1h > es1h)
+    ema_bear = (ef4h < es4h) and (ef1h < es1h)
+
+    btc_bullish = ema_bull and btc_4h_momentum
+    btc_bearish = ema_bear and not btc_4h_momentum
 
     if btc_bullish:
         label = "BTC Regime: Bullish"
@@ -1182,9 +1187,13 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     vwap_long  = cur_c > rv if USE_ROLLING_VWAP else True
     vwap_short = cur_c < rv if USE_ROLLING_VWAP else True
 
-    # [SYM 1] Wider, symmetric RSI gates
-    rsi_long  = RSI_LONG_MIN  <= r15 <= RSI_LONG_MAX
-    rsi_short = RSI_SHORT_MIN <= r15 <= RSI_SHORT_MAX
+    # [v11] Per-signal-type RSI gates (replaces single pair)
+    # BREAK: tighter window to confirm directional momentum
+    rsi_break_long  = RSI_BREAK_LONG_MIN  <= r15 <= RSI_BREAK_LONG_MAX
+    rsi_break_short = RSI_BREAK_SHORT_MIN <= r15 <= RSI_BREAK_SHORT_MAX
+    # PULL: wider window to tolerate retracement conditions
+    rsi_pull_long   = RSI_PULL_LONG_MIN   <= r15 <= RSI_PULL_LONG_MAX
+    rsi_pull_short  = RSI_PULL_SHORT_MIN  <= r15 <= RSI_PULL_SHORT_MAX
 
     bb_long  = cur_c > bb_basis
     bb_short = cur_c < bb_basis
@@ -1306,18 +1315,19 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     ])
 
     # Signal conditions — D200 macro gate removed; D200 is now a soft score adj
+    # [v11] BREAK uses tighter RSI (momentum confirmation); PULL uses wider RSI (retracement tolerance)
     long_break  = (daily_adx_ok and full_long_align  and break_bull_bar
-                   and adx_break_ok and vwap_long  and rsi_long
+                   and adx_break_ok and vwap_long  and rsi_break_long
                    and long_score  >= (MIN_SCORE - 1) and market_ok and vol_break_ok)
     short_break = (daily_adx_ok and full_short_align and break_bear_bar
-                   and adx_break_ok and vwap_short and rsi_short
+                   and adx_break_ok and vwap_short and rsi_break_short
                    and short_score >= (MIN_SCORE - 1) and market_ok and vol_break_ok)
 
     long_pull  = (daily_adx_ok and pull_long_align  and pull_touched_long
-                  and pull_recover_long  and pull_bull_bar and vwap_long  and rsi_long
+                  and pull_recover_long  and pull_bull_bar and vwap_long  and rsi_pull_long
                   and long_score  >= (MIN_SCORE - 1) and market_ok)
     short_pull = (daily_adx_ok and pull_short_align and pull_touched_short
-                  and pull_recover_short and pull_bear_bar and vwap_short and rsi_short
+                  and pull_recover_short and pull_bear_bar and vwap_short and rsi_pull_short
                   and short_score >= (MIN_SCORE - 1) and market_ok)
 
     long_sig  = long_break  or long_pull
