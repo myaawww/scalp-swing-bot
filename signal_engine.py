@@ -52,7 +52,7 @@ VOL_LEN   = 20
 OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
-MIN_SCORE            = 5          # raised from 4 — all 5 base components required
+MIN_SCORE            = 4          # raised from 4 — all 5 base components required
 TP1_MULT             = 1.2        # widened from 1.0 — more room to breathe
 TP2_MULT             = 2.0        # widened from 1.5 — let full winners run
 SL_MULT              = 0.85       # tightened from 1.0 — cut losses faster
