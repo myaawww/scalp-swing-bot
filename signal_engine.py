@@ -4,34 +4,6 @@ Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
-
-v11 UPGRADES (applied on top of v10)
-────────────────────────────────────────────
-[v11-1] TP/SL ASYMMETRY: TP1=1.2R, TP2=2.0R, SL=0.85R (was 1.0/1.5/1.0).
-         Flips a 48% win-rate system to net-profitable before fees.
-
-[v11-2] MIN_SCORE raised to 5: all 5 base components must pass (was 4/5).
-         Post-stack bonuses now reward quality rather than compensate weakness.
-
-[v11-3] PER-SIGNAL-TYPE RSI GATES:
-         BREAK: 50–75 long / 25–50 short  (momentum confirmation)
-         PULL:  38–65 long / 35–62 short  (retracement tolerance)
-         Replaces the single-window symmetric gates from v10.
-
-[v11-4] S/R PIVOT WINDOW WIDENED to ±3 bars (was ±2). Nearby pivots are
-         clustered into zones within 0.3×ATR so levels represent real areas,
-         not individual wicks. ATR passed into find_sr_levels() for accuracy.
-
-[v11-5] OI ACCELERATION as independent score component: +1 when OI is both
-         rising and accelerating into a confirm, -1 when falling and
-         accelerating into a diverge. Uses the existing 3-reading window.
-
-[v11-6] BTC REGIME MOMENTUM CHECK: btc_bullish/bearish now also requires
-         4H close direction over last 3 bars, preventing false tailwind
-         bonuses when BTC EMAs are aligned but price is actively reversing.
-
-[v11-7] N_4H bumped to 80 (was 60): ADX warm-up needs 28+ bars; 80 gives
-         a comfortable margin without significant extra API cost.
 """
 
 import os, json, time, math, random, threading, requests
@@ -554,16 +526,7 @@ LOW_BTC_CORR = {"TAOUSDT", "TRXUSDT", "PENDLEUSDT", "ONDOUSDT", "HYPEUSDT"}
 
 
 def check_btc_regime_filter(direction: str, symbol: str) -> tuple[int, str]:
-    """
-    [SYM 3] Equal -1 penalty for both directions when counter-trend.
-    Tailwind reward remains +1 for both directions.
-
-    Counter-trend : -1  (was -2 for shorts; longs had no penalty at all)
-    Tailwind      : +1
-    Mixed         :  0
-    LOW_BTC_CORR  :  0  (exempt from counter-trend penalty)
-    BTC itself    :  0
-    """
+    # Returns score adj: +1 tailwind, -1 counter-trend, 0 mixed/exempt/BTC
     if hl_coin(symbol) == "BTC":
         return 0, "BTC Regime: N/A (BTC itself)"
 
