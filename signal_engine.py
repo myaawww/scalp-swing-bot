@@ -1,5 +1,5 @@
 """
-Scalp Swing Bot v11 – Python Signal Engine
+Scalp Swing Bot v11.2.2 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
@@ -52,7 +52,7 @@ VOL_LEN   = 20
 OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
-MIN_SCORE            = 4          # raised from 4 — all 5 base components required
+MIN_SCORE            = 4          # [v11.3] restored to 4 — 4-star signals had high observed win rate
 TP1_MULT             = 1.2        # widened from 1.0 — more room to breathe
 TP2_MULT             = 2.0        # widened from 1.5 — let full winners run
 SL_MULT              = 0.85       # tightened from 1.0 — cut losses faster
@@ -1467,15 +1467,25 @@ def save_state(state: dict):
 
 
 def check_cooldown(state, coin, direction, bar_index) -> bool:
-    last_dir    = state.get(f"{coin}_{direction}", -9999)
-    last_global = state.get(f"{coin}_any",         -9999)
-    return (bar_index - last_dir    >= COOLDOWN_BARS and
-            bar_index - last_global >= GLOBAL_COOLDOWN)
+    """
+    [v11.3] Outcome-based cooldown — direction-aware.
+    A coin is locked only while it has an unresolved active signal in the
+    same direction. An unresolved LONG does NOT block a SHORT, and vice versa.
+    The coin unlocks the moment TP2 or SL is hit (signal resolved by tracker).
+    bar_index retained in signature for drop-in compatibility but unused.
+    """
+    symbol = coin if coin.endswith("USDT") else coin + "USDT"
+    active = state.get("active_signals", [])
+    for sig in active:
+        if sig.get("symbol") == symbol and not sig.get("resolved", False):
+            if sig.get("direction") == direction:
+                return False   # same direction still open — block
+    return True
 
 
 def update_cooldown(state, coin, direction, bar_index):
-    state[f"{coin}_{direction}"] = bar_index
-    state[f"{coin}_any"]         = bar_index
+    """[v11.3] No-op — cooldown is now driven purely by active signal resolution."""
+    pass
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1625,7 +1635,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v10 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v11.2.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
