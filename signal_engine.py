@@ -111,7 +111,7 @@ PULL_REENTRY_COOLDOWN_S: int   = 2700   # [v11.7-3] 45 min post-SL cooldown for 
 
 # ── BREAK / PULL QUALITY REFINEMENTS (v11.9) ─────────────────
 BREAK_OI_FLAT_VOL_THRESHOLD: float = 1.5   # [v11.9-1] OI flat penalty on BREAK only fires if vol_ratio < this
-FUNDING_PULL_WARN_MIN: float        = 0.0030  # [v11.9-3] soft funding headwind penalty threshold for PULL signals
+FUNDING_PULL_WARN_MIN: float        = 0.0005  # [v11.9-3] soft funding headwind penalty threshold for PULL signals
 
 # ── OI TREND (v3 / P1) ────────────────────────────────────────
 OI_HISTORY_DEPTH: int        = 6
