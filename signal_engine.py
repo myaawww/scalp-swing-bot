@@ -1581,6 +1581,52 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 # COOLDOWN STATE
 # ═══════════════════════════════════════════════════════════════
 
+def prune_state(state: dict) -> None:
+    """
+    [BACKPORT from v12.3] Remove stale/expired entries from persisted state
+    before every save so the state file stays bounded in size over time.
+
+    Rules applied:
+    - oi_history:         drop entries older than 24 h; remove the symbol key
+                          entirely once its history is empty.  OI history only
+                          needs the last OI_HISTORY_DEPTH readings (≤ 6 × 15 min
+                          = 90 min), so anything >24 h is safely obsolete.
+    - post_loss_cooldown: drop entries whose cooldown has long since expired
+                          (older than 3× PULL_REENTRY_COOLDOWN_S ≈ 135 min).
+    - resolved_signals:   drop outcomes resolved more than 72 h ago.  The daily
+                          summary only looks back 48 h; 72 h gives a small buffer.
+
+    What is NOT pruned:
+    - active_signals:     managed by check_active_signals() — do not touch here.
+    - signal_history:     long-term win-rate store — do not prune.
+    - macro_calendar_cache: has its own TTL (MACRO_CACHE_TTL_S) — do not touch.
+    """
+    now = int(time.time())
+
+    # ── OI history: evict entries older than 24 h, then drop empty symbol keys ──
+    for sym in list(state.get("oi_history", {}).keys()):
+        state["oi_history"][sym] = [
+            e for e in state["oi_history"][sym]
+            if now - e["ts"] < 86400          # 86400 s = 24 h
+        ]
+        if not state["oi_history"][sym]:
+            del state["oi_history"][sym]      # symbol no longer active — reclaim space
+
+    # ── Post-loss cooldown: drop keys whose cooldown window has long expired ────
+    # Keep 3× the cooldown window so a restarted process still honours recent SLs.
+    cutoff_cooldown = now - PULL_REENTRY_COOLDOWN_S * 3
+    state["post_loss_cooldown"] = {
+        k: v for k, v in state.get("post_loss_cooldown", {}).items()
+        if v > cutoff_cooldown
+    }
+
+    # ── Resolved signals: keep only the last 72 h (daily summary needs 48 h) ───
+    state["resolved_signals"] = [
+        e for e in state.get("resolved_signals", [])
+        if now - e.get("resolved_at", 0) < 259200   # 259200 s = 72 h
+    ]
+
+
 def load_state() -> dict:
     if Path(STATE_FILE).exists():
         try:
@@ -1757,7 +1803,12 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         parts = []
         for lbl, adj in sig.score_adjustments:
             sign = "+" if adj > 0 else ""
-            parts.append(f"{lbl}: {sign}{adj}")
+            # [BACKPORT from v12.3] Escape dynamic label text before inserting
+            # into the Telegram HTML message.  Labels can contain values such as
+            # funding rates, RS percentages, or symbol names that may include
+            # &, <, or > characters which would break Telegram's HTML parser.
+            safe_lbl = lbl.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            parts.append(f"{safe_lbl}: {sign}{adj}")
         score_trail = "\n<i>Adjustments: " + "  |  ".join(parts) + "</i>"
 
     sr_block     = f"\n{sr_lines}" if sr_lines else ""
@@ -2080,6 +2131,10 @@ def main():
     scan_reference_ms = int(time.time() * 1000)
     bar_index_now     = scan_reference_ms // (15 * 60 * 1000)
     state             = load_state()
+
+    # [BACKPORT from v12.3] Prune stale state before processing so the state
+    # file stays bounded in size and startup stays fast over long deployments.
+    prune_state(state)
 
     reset_breadth_cache()
     reset_rs_cache()
