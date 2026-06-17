@@ -4,7 +4,6 @@ Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
-
 """
 
 import os, json, time, math, random, threading, requests
@@ -53,14 +52,10 @@ VOL_LEN   = 20
 OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
+# Note: cooldown is outcome-based (see check_cooldown/update_cooldown) — a coin
+# is locked only while it has an unresolved active signal, not by a fixed bar
+# count or fixed hours. There is no separate per-signal-type time cooldown.
 MIN_SCORE            = 4
-TP1_MULT             = 1.2
-TP2_MULT             = 2.0
-SL_MULT              = 0.85
-COOLDOWN_BARS        = 32
-GLOBAL_COOLDOWN      = 16   # legacy reference, superseded by per-type below
-GLOBAL_COOLDOWN_BREAK = 4  # [v12.2] 1 hour for breakout signals
-GLOBAL_COOLDOWN_PULL  = 2   # [v12.2] 30 minutes for pullback signals (mean-reversion re-touch is valid)
 MAX_SIGNALS_PER_SCAN = 3
 
 # ── FILTERS ──────────────────────────────────────────────────
@@ -73,8 +68,6 @@ RSI_PULL_LONG_MIN   = 38.0;  RSI_PULL_LONG_MAX   = 65.0
 RSI_PULL_SHORT_MIN  = 35.0;  RSI_PULL_SHORT_MAX  = 62.0
 RSI_1H_PULL_LONG_MAX  = 70.0
 RSI_1H_PULL_SHORT_MIN = 30.0
-RSI_LONG_MIN    = RSI_PULL_LONG_MIN;   RSI_LONG_MAX  = RSI_BREAK_LONG_MAX
-RSI_SHORT_MIN   = RSI_BREAK_SHORT_MIN; RSI_SHORT_MAX = RSI_PULL_SHORT_MAX
 
 VOL_SCORE_MULT  = 1.0
 MAX_ATR_PCT     = 10.0
@@ -177,7 +170,7 @@ SESSION_DEAD_ZONE_END_UTC:   int = 7
 SESSION_LOW_ATR_PERCENTILE:  float = 0.20   # [v12.2] tightened from 0.30 — only penalise truly thin bars
 
 # [v11.10-1] Adaptive TP/SL multipliers
-TP1_MULT_BREAK: float = 1.2    # same as TP1_MULT
+TP1_MULT_BREAK: float = 1.2
 TP2_MULT_BREAK: float = 2.5    # widened from 2.0 — let BREAK winners run
 SL_MULT_BREAK:  float = 0.85
 TP1_MULT_PULL:  float = 1.2    # default; overridden by nearest S/R when available
