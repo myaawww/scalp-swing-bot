@@ -1980,7 +1980,8 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         parts = []
         for lbl, adj in sig.score_adjustments:
             sign = "+" if adj > 0 else ""
-            parts.append(f"{lbl}: {sign}{adj}")
+            safe_lbl = lbl.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            parts.append(f"{safe_lbl}: {sign}{adj}")
         score_trail = "\n<i>Adjustments: " + "  |  ".join(parts) + "</i>"
 
     sr_block     = f"\n{sr_lines}" if sr_lines else ""
