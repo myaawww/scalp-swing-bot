@@ -2391,6 +2391,7 @@ def main():
     signals_fired = 0
     for rank, (symbol, _msg, direction, sig) in enumerate(top_signals, start=1):
         msg    = format_signal(symbol, sig, "CORE", rank=rank)
+        print(repr(msg))
         msg_id = send_telegram(msg)
         update_cooldown(state, symbol, direction, bar_index_now)
 
