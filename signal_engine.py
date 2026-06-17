@@ -59,8 +59,8 @@ TP2_MULT             = 2.0
 SL_MULT              = 0.85
 COOLDOWN_BARS        = 32
 GLOBAL_COOLDOWN      = 16   # legacy reference, superseded by per-type below
-GLOBAL_COOLDOWN_BREAK = 16  # [v12.2] 4 hours for breakout signals
-GLOBAL_COOLDOWN_PULL  = 8   # [v12.2] 2 hours for pullback signals (mean-reversion re-touch is valid)
+GLOBAL_COOLDOWN_BREAK = 4  # [v12.2] 1 hour for breakout signals
+GLOBAL_COOLDOWN_PULL  = 2   # [v12.2] 30 minutes for pullback signals (mean-reversion re-touch is valid)
 MAX_SIGNALS_PER_SCAN = 3
 
 # ── FILTERS ──────────────────────────────────────────────────
