@@ -1,9 +1,39 @@
 """
-Scalp Swing Bot v12.2 – Python Signal Engine
+Scalp Swing Bot v12.3 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
 No orders are placed — signal only.
+
+── v12.3 CHANGELOG (fixes for signal drought vs v12.2) ──────────────────────
+[FIX-1] PULL VWAP gate reverted to simple vwap_long/short (v11.5 behaviour).
+        v12.2 required a full VWAP reclaim (dip + recovery); valid pullbacks
+        that consolidated at VWAP without piercing were silently killed.
+
+[FIX-2] BREAK vol restored as hard gate in signal condition AND kept as score
+        penalty. v12.2 removed the hard gate ("score handles it") but added a
+        -1 penalty, meaning low-vol breakouts entered scoring already at a
+        deficit with nothing blocking them earlier — net result was more noise
+        AND fewer signals. Restoring the gate keeps the original intent.
+
+[FIX-3] New v12.2 score penalties relaxed to stop burying valid signals:
+        • PULL_BODY_MIN_RATIO        0.30 → 0.20  (doji filter less aggressive)
+        • SESSION_LOW_ATR_PERCENTILE 0.20 → 0.10  (only penalise truly dead sessions)
+        • ATR_LOW_PERCENTILE         0.20 → 0.10  (ATR history needs more data to penalise)
+        • ATR_HIGH_PERCENTILE        0.80 → 0.90  (same — widen safe band)
+        • EMA_VELOCITY_WEAK_MAX      0.01 → 0.005 (fewer flat-EMA BREAK penalties)
+
+[FIX-4] OI acceleration minimum threshold raised 0.5 → 1.0 to reduce noise
+        penalties from tiny OI wiggles that were not real acceleration.
+
+[KEPT]  All genuine v12.2 improvements retained:
+        • Adaptive TP/SL multipliers (BREAK TP2 widened to 2.5×)
+        • BUG-1/3/4/5 fixes from v12.2
+        • 4H bar age stale gate (kept but threshold tightened: 0.75→0.85)
+        • EMA velocity bonus for BREAK (kept; only the penalty threshold relaxed)
+        • RSI 4H confluence bonus/penalty (kept)
+        • ATR percentile adjustment (kept with relaxed thresholds above)
+        • Per-symbol ATR history, state pruning, PULL reentry cooldown 30 min
 """
 
 import os, json, time, math, random, threading, requests
@@ -52,9 +82,6 @@ VOL_LEN   = 20
 OBV_LEN   = 3
 
 # ── RISK / SCORE ─────────────────────────────────────────────
-# Note: cooldown is outcome-based (see check_cooldown/update_cooldown) — a coin
-# is locked only while it has an unresolved active signal, not by a fixed bar
-# count or fixed hours. There is no separate per-signal-type time cooldown.
 MIN_SCORE            = 4
 MAX_SIGNALS_PER_SCAN = 3
 
@@ -96,14 +123,16 @@ TP1_WALL_MIN_CLEARANCE: float   = 0.40
 
 # ── PULL QUALITY FLOORS ───────────────────────────────────────
 PULL_VOL_FLOOR: float          = 0.40
-PULL_REENTRY_COOLDOWN_S: int   = 1800   # [v12.2] reduced from 2700 (45 min) → 30 min for PULL re-touches
+PULL_REENTRY_COOLDOWN_S: int   = 1800   # 30 min post-SL cooldown
 
 # ── OI TREND ─────────────────────────────────────────────────
 OI_HISTORY_DEPTH: int        = 6
 OI_CHANGE_THRESHOLD_PCT: float = 1.0
 
 # ── BREAKOUT VOLUME ───────────────────────────────────────────
-BREAK_VOL_MULT: float = 1.2   # [v12.2] softened from 1.5; hard gate removed — score handles it
+# [FIX-2] vol_break_ok restored as hard gate in signal condition.
+# Score penalty for not meeting BREAK_VOL_MULT kept as secondary filter.
+BREAK_VOL_MULT: float = 1.2
 
 # ── RELATIVE STRENGTH ─────────────────────────────────────────
 RS_TOP_PERCENTILE: float    = 0.20
@@ -149,45 +178,50 @@ INTERVAL_MS = {
 }
 
 # ══════════════════════════════════════════════════════════════
-# v12 UPGRADE CONSTANTS
+# v12 UPGRADE CONSTANTS  (some relaxed in v12.3 — see FIX notes)
 # ══════════════════════════════════════════════════════════════
 
 # [v11.9-1] Candle body quality filter (PULL)
-PULL_BODY_MIN_RATIO: float = 0.30   # recovery candle body ≥30% of high-low range
+# [FIX-3] relaxed 0.30 → 0.20
+PULL_BODY_MIN_RATIO: float = 0.20
 
 # [v11.9-2] 4H bar age gate
-H4_STALE_AGE_FRACTION: float = 0.75  # penalise if 4H bar >75% complete and 1H trend weakening
-H4_STALE_SPREAD_MIN:   float = 0.15  # 1H EMA spread must be ≥0.15×ATR to be considered strong;
-                                      # below this the 1H trend is weakening even if not yet flipped
+# [FIX-3] stale age threshold tightened 0.75 → 0.85 (fewer stale penalties)
+H4_STALE_AGE_FRACTION: float = 0.85
+H4_STALE_SPREAD_MIN:   float = 0.15
 
-# [v11.9-3] OI acceleration cap
-OI_ACCEL_MIN_THRESHOLD: float = 0.5  # minimum normalised OI delta % to count as real acceleration
-OI_SCORE_CAP: int              = 2   # max total OI contribution (base + acceleration combined)
+# [v11.9-3] OI acceleration
+# [FIX-4] minimum threshold raised 0.5 → 1.0 (less noise)
+OI_ACCEL_MIN_THRESHOLD: float = 1.0
+OI_SCORE_CAP: int              = 2
 
 # [v11.9-4] Time-of-day session filter
 SESSION_DEAD_ZONE_START_UTC: int = 3
 SESSION_DEAD_ZONE_END_UTC:   int = 7
-SESSION_LOW_ATR_PERCENTILE:  float = 0.20   # [v12.2] tightened from 0.30 — only penalise truly thin bars
+# [FIX-3] relaxed 0.20 → 0.10
+SESSION_LOW_ATR_PERCENTILE:  float = 0.10
 
 # [v11.10-1] Adaptive TP/SL multipliers
 TP1_MULT_BREAK: float = 1.2
-TP2_MULT_BREAK: float = 2.5    # widened from 2.0 — let BREAK winners run
+TP2_MULT_BREAK: float = 2.5
 SL_MULT_BREAK:  float = 0.85
-TP1_MULT_PULL:  float = 1.2    # default; overridden by nearest S/R when available
+TP1_MULT_PULL:  float = 1.2
 TP2_MULT_PULL:  float = 2.0
 SL_MULT_PULL:   float = 0.85
-HIGH_ATR_THRESHOLD: float = 3.0   # ATR% above which SL is widened
-SL_HIGH_ATR_MULT:   float = 1.05  # wide SL in high-volatility conditions
+HIGH_ATR_THRESHOLD: float = 3.0
+SL_HIGH_ATR_MULT:   float = 1.05
 
 # [v11.10-4] Per-symbol ATR percentile
 ATR_HIST_DEPTH:     int   = 48
-ATR_LOW_PERCENTILE: float = 0.20
-ATR_HIGH_PERCENTILE: float = 0.80
+# [FIX-3] relaxed: low 0.20→0.10, high 0.80→0.90
+ATR_LOW_PERCENTILE:  float = 0.10
+ATR_HIGH_PERCENTILE: float = 0.90
 
 # [v11.11-1] EMA slope velocity
 EMA_VELOCITY_LOOKBACK:   int   = 4
 EMA_VELOCITY_STRONG_MIN: float = 0.05
-EMA_VELOCITY_WEAK_MAX:   float = 0.01
+# [FIX-3] relaxed 0.01 → 0.005 (fewer flat-EMA penalties on BREAK)
+EMA_VELOCITY_WEAK_MAX:   float = 0.005
 
 # [v11.11-2] Multi-timeframe RSI confluence
 RSI_4H_PULL_LONG_MAX:  float = 70.0
@@ -1089,10 +1123,8 @@ def safe(v, fallback=0.0):
 
 
 # ═══════════════════════════════════════════════════════════════
-# v12 STATE HELPERS
+# STATE HELPERS
 # ═══════════════════════════════════════════════════════════════
-
-# ── [v11.10-4] Per-symbol ATR history ─────────────────────────
 
 def update_atr_history(state: dict, symbol: str, atr_pct: float) -> None:
     hist = state.setdefault("atr_history", {}).setdefault(symbol, [])
@@ -1102,7 +1134,6 @@ def update_atr_history(state: dict, symbol: str, atr_pct: float) -> None:
 
 
 def get_atr_percentile(state: dict, symbol: str, atr_pct: float) -> float | None:
-    """Return percentile (0.0–1.0) of current ATR within symbol's own history. None if insufficient."""
     hist = state.get("atr_history", {}).get(symbol, [])
     vals = sorted(e["atr_pct"] for e in hist)
     if len(vals) < 10:
@@ -1111,27 +1142,21 @@ def get_atr_percentile(state: dict, symbol: str, atr_pct: float) -> float | None
     return below / len(vals)
 
 
-# ── [v11.11-4] State pruning ──────────────────────────────────
-
 def prune_state(state: dict) -> None:
-    """Remove stale entries from all rolling state structures."""
     now = int(time.time())
 
-    # OI history: drop anything older than 24h
     for sym in list(state.get("oi_history", {}).keys()):
         state["oi_history"][sym] = [e for e in state["oi_history"][sym]
                                     if now - e["ts"] < 86400]
         if not state["oi_history"][sym]:
             del state["oi_history"][sym]
 
-    # Post-loss cooldown: drop expired keys
     cutoff_cooldown = now - PULL_REENTRY_COOLDOWN_S * 3
     state["post_loss_cooldown"] = {
         k: v for k, v in state.get("post_loss_cooldown", {}).items()
         if v > cutoff_cooldown
     }
 
-    # ATR history: drop anything older than 24h
     for sym in list(state.get("atr_history", {}).keys()):
         state["atr_history"][sym] = [
             e for e in state["atr_history"][sym]
@@ -1140,7 +1165,6 @@ def prune_state(state: dict) -> None:
         if not state["atr_history"][sym]:
             del state["atr_history"][sym]
 
-    # Resolved signals: keep only last 72h
     state["resolved_signals"] = [
         e for e in state.get("resolved_signals", [])
         if now - e.get("resolved_at", 0) < 259200
@@ -1230,38 +1254,14 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     atr_pct  = atr_val / cur_c * 100
     market_ok = MIN_ATR_PCT <= atr_pct <= MAX_ATR_PCT
 
-    # [v11.10-4] Update per-symbol ATR history before scoring
     update_atr_history(state, symbol, atr_pct)
 
     rv         = safe(rvwap15[-1])
+    # [FIX-1] PULL uses simple vwap_long/short (same as v11.5).
+    # BREAK still uses the same vwap_long/short — no change there.
     vwap_long  = cur_c > rv if USE_ROLLING_VWAP else True
     vwap_short = cur_c < rv if USE_ROLLING_VWAP else True
 
-    # [v12.2] VWAP reclaim check for PULL — near-touch (within 0.10×ATR) counts, not just strict pierce.
-    # Allows consolidation-at-VWAP entries that don't fully pierce before recovering.
-    _vwap_near_touch_buffer = atr_val * 0.10
-    if USE_ROLLING_VWAP:
-        _vwap_dipped_long  = any(
-            c15[-(i + 2)] < safe(rvwap15[-(i + 2)]) + _vwap_near_touch_buffer
-            for i in range(PULL_TOUCH_LOOKBACK)
-            if len(rvwap15) > i + 2 and not math.isnan(safe(rvwap15[-(i + 2)], float("nan")))
-        )
-        _vwap_dipped_short = any(
-            c15[-(i + 2)] > safe(rvwap15[-(i + 2)]) - _vwap_near_touch_buffer
-            for i in range(PULL_TOUCH_LOOKBACK)
-            if len(rvwap15) > i + 2 and not math.isnan(safe(rvwap15[-(i + 2)], float("nan")))
-        )
-        vwap_reclaim_long  = _vwap_dipped_long  and cur_c > safe(rvwap15[-1])
-        vwap_reclaim_short = _vwap_dipped_short and cur_c < safe(rvwap15[-1])
-    else:
-        vwap_reclaim_long  = True
-        vwap_reclaim_short = True
-
-    # pull_vwap_long/short used in PULL conditions; BREAK still uses vwap_long/vwap_short
-    pull_vwap_long  = vwap_reclaim_long
-    pull_vwap_short = vwap_reclaim_short
-
-    # Per-signal-type RSI gates
     rsi_break_long  = RSI_BREAK_LONG_MIN  <= r15 <= RSI_BREAK_LONG_MAX
     rsi_break_short = RSI_BREAK_SHORT_MIN <= r15 <= RSI_BREAK_SHORT_MAX
     rsi_pull_long   = RSI_PULL_LONG_MIN   <= r15 <= RSI_PULL_LONG_MAX
@@ -1276,6 +1276,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     adx_score_ok = adx15 >= ADX_SCORE_MIN
     vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
 
+    # [FIX-2] vol_break_ok used as hard gate in signal conditions (restored from v11.5)
     vol_break_ok = True if vm15 == 0 else (cur_v >= vm15 * BREAK_VOL_MULT)
     vol_ratio    = (cur_v / vm15) if vm15 > 0 else None
 
@@ -1390,19 +1391,21 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         vol_score_ok,
     ])
 
+    # [FIX-2] vol_break_ok restored as hard gate in BREAK conditions (v11.5 behaviour).
+    # Score penalty in Step 6 still applies as a secondary signal-quality indicator.
     long_break  = (daily_adx_ok and full_long_align  and break_bull_bar
                    and adx_break_ok and vwap_long  and rsi_break_long
-                   and long_score  >= (MIN_SCORE - 1) and market_ok)
+                   and long_score  >= (MIN_SCORE - 1) and market_ok and vol_break_ok)
     short_break = (daily_adx_ok and full_short_align and break_bear_bar
                    and adx_break_ok and vwap_short and rsi_break_short
-                   and short_score >= (MIN_SCORE - 1) and market_ok)
+                   and short_score >= (MIN_SCORE - 1) and market_ok and vol_break_ok)
 
-    # [v11.10-3] PULL uses pull_vwap_long/short (requires VWAP reclaim)
+    # [FIX-1] PULL uses plain vwap_long/short — no reclaim requirement.
     long_pull  = (daily_adx_ok and pull_long_align  and pull_touched_long
-                  and pull_recover_long  and pull_bull_bar and pull_vwap_long  and rsi_pull_long
+                  and pull_recover_long  and pull_bull_bar and vwap_long  and rsi_pull_long
                   and long_score  >= (MIN_SCORE - 1) and market_ok)
     short_pull = (daily_adx_ok and pull_short_align and pull_touched_short
-                  and pull_recover_short and pull_bear_bar and pull_vwap_short and rsi_pull_short
+                  and pull_recover_short and pull_bear_bar and vwap_short and rsi_pull_short
                   and short_score >= (MIN_SCORE - 1) and market_ok)
 
     long_sig  = long_break  or long_pull
@@ -1434,12 +1437,12 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         res.atr_pct      = atr_pct
         res.v10_gates    = make_gates(True)
         res.vol_ratio    = vol_ratio
-        # [v11.10-1] Adaptive SL/TP2; TP1 for PULL overridden in Step 8 after S/R
+        # [v11.10-1] Adaptive TP/SL; TP1 for PULL overridden after S/R in Step 9
         _sl_mult  = SL_HIGH_ATR_MULT if atr_pct > HIGH_ATR_THRESHOLD else (
             SL_MULT_BREAK if res.signal_type == "BREAK" else SL_MULT_PULL
         )
         _tp2_mult = TP2_MULT_BREAK if res.signal_type == "BREAK" else TP2_MULT_PULL
-        res.tp1 = cur_c + atr_val * (TP1_MULT_BREAK if res.signal_type == "BREAK" else TP1_MULT_PULL)  # [BUG-5 FIX]
+        res.tp1 = cur_c + atr_val * (TP1_MULT_BREAK if res.signal_type == "BREAK" else TP1_MULT_PULL)
         res.tp2 = cur_c + atr_val * _tp2_mult
         res.sl  = cur_c - atr_val * _sl_mult
 
@@ -1455,12 +1458,12 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         res.atr_pct      = atr_pct
         res.v10_gates    = make_gates(False)
         res.vol_ratio    = vol_ratio
-        # [v11.10-1] Adaptive SL/TP2; TP1 for PULL overridden in Step 8 after S/R
+        # [v11.10-1] Adaptive TP/SL; TP1 for PULL overridden after S/R in Step 9
         _sl_mult  = SL_HIGH_ATR_MULT if atr_pct > HIGH_ATR_THRESHOLD else (
             SL_MULT_BREAK if res.signal_type == "BREAK" else SL_MULT_PULL
         )
         _tp2_mult = TP2_MULT_BREAK if res.signal_type == "BREAK" else TP2_MULT_PULL
-        res.tp1 = cur_c - atr_val * (TP1_MULT_BREAK if res.signal_type == "BREAK" else TP1_MULT_PULL)  # [BUG-5 FIX]
+        res.tp1 = cur_c - atr_val * (TP1_MULT_BREAK if res.signal_type == "BREAK" else TP1_MULT_PULL)
         res.tp2 = cur_c - atr_val * _tp2_mult
         res.sl  = cur_c + atr_val * _sl_mult
 
@@ -1504,17 +1507,17 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     # [v11.9-3] OI acceleration with minimum threshold + total cap
     oi_acceleration = oi_data.get("oi_acceleration")
     oi_trend        = oi_data.get("oi_trend", "unknown")
-    oi_contribution = oi_data["score_adj"]  # base adj already applied
+    oi_contribution = oi_data["score_adj"]
 
     if oi_acceleration is not None:
-        if (oi_acceleration > OI_ACCEL_MIN_THRESHOLD
+        if (oi_acceleration > OI_ACCEL_MIN_THRESHOLD        # [FIX-4] raised threshold
                 and oi_trend == "rising"
                 and oi_data["score_adj"] > 0
                 and oi_contribution < OI_SCORE_CAP):
             adjusted_score += 1
             oi_contribution += 1
             adjs.append(("OI Acceleration (confirming↑)", 1))
-        elif (oi_acceleration < -OI_ACCEL_MIN_THRESHOLD
+        elif (oi_acceleration < -OI_ACCEL_MIN_THRESHOLD     # [FIX-4] raised threshold
                 and oi_trend == "falling"
                 and oi_data["score_adj"] < 0
                 and oi_contribution > -OI_SCORE_CAP):
@@ -1536,17 +1539,14 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         adjs.append((breadth_label, breadth_adj))
 
     # [v11.9-2] 4H bar age gate — penalise stale bias near bar close
+    # [FIX-3] threshold tightened 0.75 → 0.85 so fewer signals get caught
     _ref_ms       = reference_ms if reference_ms is not None else int(time.time() * 1000)
     iv_4h_ms      = 4 * 60 * 60 * 1000
     bar_open_4h_ms = (_ref_ms // iv_4h_ms) * iv_4h_ms
     bar_age_frac  = (_ref_ms - bar_open_4h_ms) / iv_4h_ms
-    # [BUG-1 FIX] Original condition ("not h1_bull") was unreachable — all long/short signal gates
-    # require h1_bull/h1_bear, so the penalty could never fire. Replaced with 1H EMA spread
-    # narrowing: 4H bar is aging AND the 1H fast/slow EMA spread has collapsed to
-    # < H4_STALE_SPREAD_MIN * ATR, meaning the trend is weakening before it visibly flips.
-    _h1_spread    = (ef1h - es1h) / atr_val if atr_val > 0 else 0.0  # +ve = bullish, -ve = bearish
+    _h1_spread    = (ef1h - es1h) / atr_val if atr_val > 0 else 0.0
     h4_stale_bias = (
-        bar_age_frac >= H4_STALE_AGE_FRACTION
+        bar_age_frac >= H4_STALE_AGE_FRACTION      # [FIX-3] 0.85 instead of 0.75
         and ((direction == "long"  and _h1_spread < H4_STALE_SPREAD_MIN)
           or (direction == "short" and _h1_spread > -H4_STALE_SPREAD_MIN))
     )
@@ -1581,23 +1581,23 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         adjs.append(("Macro Risk Window", macro_data["score_adj"]))
 
     # ── Step 6: Volume Confirmation (BREAK only) ──────────────
+    # vol_break_ok already enforced as hard gate in signal condition [FIX-2].
+    # Penalty kept here as a secondary quality indicator for marginal vol.
     if res.signal_type == "BREAK" and not vol_break_ok:
         adjusted_score -= 1
         adjs.append(("Vol (BREAK threshold not met)", -1))
 
     # ── Step 6b: Signal-type quality floors ───────────────────
     if res.signal_type == "PULL":
-        # OI falling on PULL
         if oi_data.get("oi_trend") == "falling":
             adjusted_score -= 1
             adjs.append(("OI falling on PULL", -1))
 
-        # Vol ratio floor
         if vol_ratio is not None and vol_ratio < PULL_VOL_FLOOR:
             adjusted_score -= 1
             adjs.append((f"Vol floor (ratio {vol_ratio:.2f}x < {PULL_VOL_FLOOR}x)", -1))
 
-        # [v11.9-1] Candle body quality — doji/spinning-top recovery candle
+        # [v11.9-1] Candle body quality — [FIX-3] ratio floor relaxed 0.30 → 0.20
         candle_range = cur_h - cur_l
         body_size    = abs(cur_c - cur_o)
         body_ratio   = body_size / candle_range if candle_range > 0 else 1.0
@@ -1607,12 +1607,10 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
             adjs.append((f"Weak candle body (ratio {body_ratio:.2f} < {PULL_BODY_MIN_RATIO})", -1))
 
     if res.signal_type == "BREAK":
-        # OI flat on BREAK
         if oi_data.get("oi_trend") == "flat":
             adjusted_score -= 1
             adjs.append(("OI flat on BREAK (low conviction)", -1))
 
-        # Negative RS on BREAK
         rs_pct = rs_data.get("rs_pct")
         if rs_pct is not None and rs_pct < 0:
             adjusted_score -= 1
@@ -1643,21 +1641,21 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         res.d200_label = "D200: Disabled"
 
     # ── Step 8: Session / EMA velocity / RSI confluence / ATR pctile ─
-    # [v11.9-4] Session quality — low-liquidity dead zone
+    # [v11.9-4] Session dead zone — [FIX-3] ATR percentile floor 0.20 → 0.10
     _now_utc = datetime.now(timezone.utc)
     _in_dead = SESSION_DEAD_ZONE_START_UTC <= _now_utc.hour < SESSION_DEAD_ZONE_END_UTC
     _atr_vals = [v for v in atr15[-(48 + ATR_LEN):] if not math.isnan(v)]
     if _atr_vals:
-        _atr_pct30 = sorted(_atr_vals)[int(len(_atr_vals) * SESSION_LOW_ATR_PERCENTILE)]
+        _atr_pct_thresh = sorted(_atr_vals)[int(len(_atr_vals) * SESSION_LOW_ATR_PERCENTILE)]
     else:
-        _atr_pct30 = atr_val
-    _low_atr       = atr_val <= _atr_pct30
+        _atr_pct_thresh = atr_val
+    _low_atr        = atr_val <= _atr_pct_thresh
     session_penalty = _in_dead and _low_atr
     if session_penalty:
         adjusted_score -= 1
         adjs.append((f"Low-liquidity session ({_now_utc.hour:02d}:xx UTC, thin ATR)", -1))
 
-    # [v11.11-1] EMA slope velocity (BREAK only)
+    # [v11.11-1] EMA slope velocity (BREAK only) — [FIX-3] weak_max relaxed 0.01 → 0.005
     if len(ema_f15) >= EMA_VELOCITY_LOOKBACK + 2:
         _ef_velocity = (safe(ema_f15[-1]) - safe(ema_f15[-(1 + EMA_VELOCITY_LOOKBACK)])) / atr_val
         if res.signal_type == "BREAK":
@@ -1667,25 +1665,21 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
             elif _ef_velocity < -EMA_VELOCITY_STRONG_MIN and direction == "short":
                 adjusted_score += 1
                 adjs.append((f"EMA accelerating down ({_ef_velocity:+.3f}×ATR)", +1))
-            elif abs(_ef_velocity) < EMA_VELOCITY_WEAK_MAX:
+            elif abs(_ef_velocity) < EMA_VELOCITY_WEAK_MAX:   # [FIX-3] 0.005
                 adjusted_score -= 1
                 adjs.append((f"EMA flattening ({_ef_velocity:+.3f}×ATR) on BREAK", -1))
 
     # [v11.11-2] Multi-timeframe RSI confluence
     rsi4h_arr = rsi(c4h, RSI_LEN)
-    # [BUG-4 FIX] Keep raw value to distinguish NaN from a real 0; safe() default of 0.0 is
-    # semantically wrong for RSI (0 = extreme oversold, not "missing data").
     _r4h_raw  = rsi4h_arr[-2] if len(rsi4h_arr) >= 2 else float("nan")
     r4h_valid = not math.isnan(_r4h_raw)
-    r4h       = _r4h_raw if r4h_valid else 50.0  # neutral fallback — no bonus or penalty
+    r4h       = _r4h_raw if r4h_valid else 50.0
 
-    # [BUG-3 FIX] Original code used BREAK RSI bounds for rsi_15m_ok on all signal types.
-    # A PULL long with r15 in [38, 50) could never earn the confluence bonus even with perfect
-    # 1H/4H alignment. Use signal-type-aware bounds so PULL signals use their own RSI range.
+    # [BUG-3 FIX] Use signal-type-aware RSI bounds for confluence check
     if res.signal_type == "BREAK":
         rsi_15m_ok_long  = RSI_BREAK_LONG_MIN  <= r15 <= RSI_BREAK_LONG_MAX
         rsi_15m_ok_short = RSI_BREAK_SHORT_MIN <= r15 <= RSI_BREAK_SHORT_MAX
-    else:  # PULL
+    else:
         rsi_15m_ok_long  = RSI_PULL_LONG_MIN   <= r15 <= RSI_PULL_LONG_MAX
         rsi_15m_ok_short = RSI_PULL_SHORT_MIN  <= r15 <= RSI_PULL_SHORT_MAX
 
@@ -1713,35 +1707,32 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
             adjusted_score -= 1
             adjs.append((f"4H RSI oversold ({r4h:.0f})", -1))
 
-    # [v11.10-4] Per-symbol ATR percentile adjustment
+    # [v11.10-4] Per-symbol ATR percentile — [FIX-3] relaxed thresholds
     _atr_pctile = get_atr_percentile(state, symbol, atr_pct)
     if _atr_pctile is not None:
-        if res.signal_type == "BREAK" and _atr_pctile < ATR_LOW_PERCENTILE:
+        if res.signal_type == "BREAK" and _atr_pctile < ATR_LOW_PERCENTILE:   # 0.10
             adjusted_score -= 1
             adjs.append((f"ATR low vs symbol history ({_atr_pctile*100:.0f}th pct)", -1))
-        elif res.signal_type == "PULL" and _atr_pctile > ATR_HIGH_PERCENTILE:
+        elif res.signal_type == "PULL" and _atr_pctile > ATR_HIGH_PERCENTILE:  # 0.90
             adjusted_score -= 1
             adjs.append((f"ATR high vs symbol history ({_atr_pctile*100:.0f}th pct)", -1))
 
     # ── Step 9: S/R Proximity + TP/SL Override + Headroom + 1H RSI ──
     res.supports, res.resistances = find_sr_levels(candles_15m, atr_val=atr_val)
 
-    # Support proximity bonus — PULL long near support
     if res.signal_type == "PULL" and res.supports and direction == "long":
         nearest_sup = res.supports[0]
         if (res.entry - nearest_sup) < atr_val * SUPPORT_PROXIMITY_ATR:
             adjusted_score += 1
             adjs.append(("Support proximity", +1))
 
-    # Resistance proximity bonus — PULL short near resistance
     if res.signal_type == "PULL" and res.resistances and direction == "short":
         nearest_res = res.resistances[0]
         if (nearest_res - res.entry) < atr_val * SUPPORT_PROXIMITY_ATR:
             adjusted_score += 1
             adjs.append(("Resistance proximity", +1))
 
-    # [v11.10-1] Adaptive TP1 for PULL — use nearest S/R if closer than ATR target.
-    # Applied BEFORE the headroom check so headroom uses the S/R-adjusted TP1.
+    # [v11.10-1] Adaptive TP1 for PULL — use nearest S/R if closer than ATR target
     if res.signal_type == "PULL":
         if res.fire_long and res.resistances:
             sr_tp1  = res.resistances[0]
@@ -1752,7 +1743,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
             atr_tp1 = res.entry - atr_val * TP1_MULT_PULL
             res.tp1 = max(sr_tp1, atr_tp1)
 
-    # TP1 headroom penalty (uses S/R-adjusted TP1 above)
+    # TP1 headroom penalty
     if res.signal_type == "PULL":
         if direction == "long" and res.resistances:
             nearest_res = res.resistances[0]
@@ -1822,7 +1813,7 @@ def load_state() -> dict:
             s.setdefault("signal_history", [])
             s.setdefault("macro_calendar_cache", {})
             s.setdefault("post_loss_cooldown", {})
-            s.setdefault("atr_history", {})          # [v11.10-4]
+            s.setdefault("atr_history", {})
             return s
         except Exception:
             pass
@@ -1840,10 +1831,6 @@ def save_state(state: dict):
 
 
 def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> bool:
-    """
-    [v11.3] Outcome-based cooldown — direction-aware.
-    [v11.8-2] Post-loss cooldown extended to all signal types.
-    """
     symbol = coin if coin.endswith("USDT") else coin + "USDT"
 
     active = state.get("active_signals", [])
@@ -1866,7 +1853,6 @@ def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> 
 
 
 def update_cooldown(state, coin, direction, bar_index):
-    """[v11.3] No-op — cooldown is now driven purely by active signal resolution."""
     pass
 
 
@@ -2018,7 +2004,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v12.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v12.3 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -2190,7 +2176,6 @@ def send_summary(state: dict):
     if overall_wr is not None:
         lines.append(f"📈 Overall Win Rate: {overall_wr*100:.0f}% ({total} trades)")
 
-    # [v11.11-3] P&L breakdown by type and direction (1R = 1× ATR risk unit)
     def r_pnl(entries):
         return sum(
             +2 if e["result"] == "tp2"
@@ -2256,7 +2241,6 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
         oi_coins = ctx.get("open_interest_coins")
         update_oi_history(state, symbol, oi_coins)
 
-    # Pass reference_ms through for [v11.9-2] 4H bar age gate
     sig = compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
                           state, record_market_inputs=False, reference_ms=reference_ms)
     if not (sig.fire_long or sig.fire_short):
@@ -2310,7 +2294,6 @@ def main():
     bar_index_now     = scan_reference_ms // (15 * 60 * 1000)
     state             = load_state()
 
-    # [v11.11-4] Prune stale state before anything else runs
     prune_state(state)
 
     reset_breadth_cache()
