@@ -1,5 +1,5 @@
 """
-Scalp Swing Bot v11.4 – Python Signal Engine
+Scalp Swing Bot v11.5 – Python Signal Engine
 Hyperliquid Perpetuals edition
 Timeframe map: 4H bias / 1H middle / 15m execution
 Runs on GitHub Actions every 15 min, sends Telegram alerts.
@@ -71,6 +71,9 @@ RSI_BREAK_SHORT_MIN = 25.0;  RSI_BREAK_SHORT_MAX = 50.0
 # PULL: retracement tolerance — wider, allows dip/spike entries
 RSI_PULL_LONG_MIN   = 38.0;  RSI_PULL_LONG_MAX   = 65.0
 RSI_PULL_SHORT_MIN  = 35.0;  RSI_PULL_SHORT_MAX  = 62.0
+# [v11.5-3] 1H RSI soft gate for PULL signals — penalise entries into HTF extensions
+RSI_1H_PULL_LONG_MAX  = 70.0   # 1H RSI above this on a PULL long  → −1
+RSI_1H_PULL_SHORT_MIN = 30.0   # 1H RSI below this on a PULL short → −1
 # Legacy aliases kept for any code that references them directly (unused in signal logic)
 RSI_LONG_MIN    = RSI_PULL_LONG_MIN;   RSI_LONG_MAX  = RSI_BREAK_LONG_MAX
 RSI_SHORT_MIN   = RSI_BREAK_SHORT_MIN; RSI_SHORT_MAX = RSI_PULL_SHORT_MAX
@@ -81,6 +84,8 @@ MIN_ATR_PCT     = 0.2
 WICK_FILTER     = 0.45
 RANGE_PCT_BREAK = 0.30
 PULL_ZONE_MULT  = 0.25
+PULL_TOUCH_LOOKBACK   = 3     # [v11.5-1] bars to scan back for EMA touch (was 1)
+PULL_RECOVER_ATR_MULT = 0.10  # [v11.5-2] close must clear EMA by this × ATR to count as recovery
 TREND_HOLD_BARS = 2
 USE_ROLLING_VWAP  = True
 ROLLING_VWAP_LEN  = 16
@@ -98,6 +103,11 @@ PULL_REQUIRES_4H  = True
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
 SR_CLEARANCE_ATR_MULT: float    = 0.3
 SUPPORT_PROXIMITY_ATR: float    = 0.75   # [v11.4] widened 0.5→0.75 ATR — catches valid dips slightly further from support
+TP1_WALL_MIN_CLEARANCE: float   = 0.40   # [v11.6-1] resistance must block ≥40% of entry→TP1 range to trigger penalty
+
+# ── PULL QUALITY FLOORS (v11.7) ──────────────────────────────
+PULL_VOL_FLOOR: float          = 0.40   # [v11.7-2] vol_ratio must be ≥ this to avoid −1 penalty
+PULL_REENTRY_COOLDOWN_S: int   = 2700   # [v11.7-3] 45 min post-SL cooldown for same coin+direction PULL
 
 # ── OI TREND (v3 / P1) ────────────────────────────────────────
 OI_HISTORY_DEPTH: int        = 6
@@ -1166,6 +1176,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     ef1h = safe(ema_f1h[-2]); es1h = safe(ema_s1h[-2])
     h1_bull = ef1h > es1h
     h1_bear = ef1h < es1h
+    # [v11.5-3] 1H RSI — used as soft gate in PULL scoring stack
+    rsi1h = rsi(c1h, RSI_LEN)
+    r1h   = safe(rsi1h[-2])
 
     # ── 4H ───────────────────────────────────────────────────
     o4h, h4h, l4h, c4h, v4h = arrays(candles_4h)
@@ -1244,10 +1257,18 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     break_bear_bar = cur_c < cur_o and clean_bear_bar() and close_in_bot_range()
 
     pull_zone          = atr_val * PULL_ZONE_MULT
-    pull_touched_long  = prev_l <= ef15_prev + pull_zone
-    pull_touched_short = prev_h >= ef15_prev - pull_zone
-    pull_recover_long  = cur_c > ef15 and cur_c > cur_o
-    pull_recover_short = cur_c < ef15 and cur_c < cur_o
+    # [v11.5-1] Multi-bar touch lookback — checks last PULL_TOUCH_LOOKBACK confirmed bars
+    pull_touched_long  = any(
+        l15[-(i + 1)] <= safe(ema_f15[-(i + 1)]) + pull_zone
+        for i in range(1, PULL_TOUCH_LOOKBACK + 1)
+    )
+    pull_touched_short = any(
+        h15[-(i + 1)] >= safe(ema_f15[-(i + 1)]) - pull_zone
+        for i in range(1, PULL_TOUCH_LOOKBACK + 1)
+    )
+    # [v11.5-2] Recovery depth — close must clear EMA21 by at least PULL_RECOVER_ATR_MULT × ATR
+    pull_recover_long  = (cur_c > ef15 + atr_val * PULL_RECOVER_ATR_MULT) and cur_c > cur_o
+    pull_recover_short = (cur_c < ef15 - atr_val * PULL_RECOVER_ATR_MULT) and cur_c < cur_o
     pull_bull_bar      = cur_c > cur_o and clean_bull_bar()
     pull_bear_bar      = cur_c < cur_o and clean_bear_bar()
 
@@ -1421,6 +1442,30 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         adjusted_score -= 1
         adjs.append(("Vol (BREAK threshold not met)", -1))
 
+    # ── Step 6b: Signal-type quality floors [v11.7 / v11.8] ──
+    if res.signal_type == "PULL":
+        # [v11.7-1] OI falling on a PULL = no new money entering the dip — weak
+        if oi_data.get("oi_trend") == "falling":
+            adjusted_score -= 1
+            adjs.append(("OI falling on PULL", -1))
+
+        # [v11.7-2] Vol ratio floor — require at least minimal participation
+        if vol_ratio is not None and vol_ratio < PULL_VOL_FLOOR:
+            adjusted_score -= 1
+            adjs.append((f"Vol floor (ratio {vol_ratio:.2f}x < {PULL_VOL_FLOOR}x)", -1))
+
+    if res.signal_type == "BREAK":
+        # [v11.8-1] OI flat on a BREAK = low-conviction move, price on reshuffling not new entrants
+        if oi_data.get("oi_trend") == "flat":
+            adjusted_score -= 1
+            adjs.append(("OI flat on BREAK (low conviction)", -1))
+
+        # [v11.8-3] Negative RS on a BREAK = breaking out in a lagging coin — likely fakeout
+        rs_pct = rs_data.get("rs_pct")
+        if rs_pct is not None and rs_pct < 0:
+            adjusted_score -= 1
+            adjs.append((f"RS negative on BREAK ({rs_pct:+.1f}%)", -1))
+
     # ── Step 7: D200 Soft Bonus/Penalty [SYM 2] ──────────────
     if USE_D200_FILTER:
         if direction == "long" and d200_above:
@@ -1445,17 +1490,53 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     else:
         res.d200_label = "D200: Disabled"
 
-    # ── Step 8: Support Proximity Bonus (PULL longs only) ────
-    # Compute S/R now so support proximity check can reference res.supports.
+    # ── Step 8: Support/Resistance Proximity + PULL Quality Checks ────
+    # Compute S/R now so proximity and headroom checks can reference levels.
     # The same levels are used again below for the clearance filter.
     res.supports, res.resistances = find_sr_levels(candles_15m, atr_val=atr_val)
 
-    # Entry within 0.5 ATR of nearest support = high-quality dip entry
+    # [v11.5-4/orig] Support proximity bonus — PULL long near support
     if res.signal_type == "PULL" and res.supports and direction == "long":
         nearest_sup = res.supports[0]
         if (res.entry - nearest_sup) < atr_val * SUPPORT_PROXIMITY_ATR:
             adjusted_score += 1
             adjs.append(("Support proximity", +1))
+
+    # [v11.5-4] Resistance proximity bonus — PULL short near resistance (mirrors long)
+    if res.signal_type == "PULL" and res.resistances and direction == "short":
+        nearest_res = res.resistances[0]
+        if (nearest_res - res.entry) < atr_val * SUPPORT_PROXIMITY_ATR:
+            adjusted_score += 1
+            adjs.append(("Resistance proximity", +1))
+
+    # [v11.6-1] TP1 headroom penalty — only fire if wall blocks ≥ TP1_WALL_MIN_CLEARANCE of entry→TP1 range.
+    # A resistance sitting just below TP1 (thin sliver) no longer suppresses — only genuine midpoint+ walls do.
+    if res.signal_type == "PULL":
+        if direction == "long" and res.resistances:
+            nearest_res = res.resistances[0]
+            tp1_range   = res.tp1 - res.entry
+            if (nearest_res < res.tp1 and tp1_range > 0 and
+                    (res.tp1 - nearest_res) / tp1_range > TP1_WALL_MIN_CLEARANCE):
+                adjusted_score -= 1
+                blocked_pct = (res.tp1 - nearest_res) / tp1_range * 100
+                adjs.append((f"Resistance blocks TP1 ({blocked_pct:.0f}%)", -1))
+        elif direction == "short" and res.supports:
+            nearest_sup = res.supports[0]
+            tp1_range   = res.entry - res.tp1
+            if (nearest_sup > res.tp1 and tp1_range > 0 and
+                    (nearest_sup - res.tp1) / tp1_range > TP1_WALL_MIN_CLEARANCE):
+                adjusted_score -= 1
+                blocked_pct = (nearest_sup - res.tp1) / tp1_range * 100
+                adjs.append((f"Support blocks TP1 ({blocked_pct:.0f}%)", -1))
+
+    # [v11.5-3] 1H RSI soft gate for PULL — penalise entries into HTF extensions
+    if res.signal_type == "PULL":
+        if direction == "long" and r1h > RSI_1H_PULL_LONG_MAX:
+            adjusted_score -= 1
+            adjs.append((f"1H RSI extended ({r1h:.0f} > {RSI_1H_PULL_LONG_MAX:.0f})", -1))
+        elif direction == "short" and r1h < RSI_1H_PULL_SHORT_MIN:
+            adjusted_score -= 1
+            adjs.append((f"1H RSI extended ({r1h:.0f} < {RSI_1H_PULL_SHORT_MIN:.0f})", -1))
 
     # ── Final suppression check ───────────────────────────────
     res.final_score = adjusted_score
@@ -1500,10 +1581,11 @@ def load_state() -> dict:
             s.setdefault("oi_history", {})
             s.setdefault("signal_history", [])
             s.setdefault("macro_calendar_cache", {})
+            s.setdefault("post_loss_cooldown", {})  # [v11.7-3]
             return s
         except Exception:
             pass
-    return {"oi_history": {}, "signal_history": [], "macro_calendar_cache": {}}
+    return {"oi_history": {}, "signal_history": [], "macro_calendar_cache": {}, "post_loss_cooldown": {}}
 
 
 def save_state(state: dict):
@@ -1513,20 +1595,39 @@ def save_state(state: dict):
     _os.replace(tmp_path, STATE_FILE)
 
 
-def check_cooldown(state, coin, direction, bar_index) -> bool:
+def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> bool:
     """
     [v11.3] Outcome-based cooldown — direction-aware.
     A coin is locked only while it has an unresolved active signal in the
     same direction. An unresolved LONG does NOT block a SHORT, and vice versa.
     The coin unlocks the moment TP2 or SL is hit (signal resolved by tracker).
     bar_index retained in signature for drop-in compatibility but unused.
+
+    [v11.7-3] PULL signals additionally blocked for PULL_REENTRY_COOLDOWN_S
+    seconds after a SL on the same coin+direction.
     """
     symbol = coin if coin.endswith("USDT") else coin + "USDT"
+
+    # Active signal block (unchanged from v11.3)
     active = state.get("active_signals", [])
     for sig in active:
         if sig.get("symbol") == symbol and not sig.get("resolved", False):
             if sig.get("direction") == direction:
                 return False   # same direction still open — block
+
+    # [v11.8-2] Post-loss re-entry block — all signal types (was PULL-only in v11.7)
+    # Covers the AAVE BREAK double-entry pattern: same coin+direction re-entering
+    # within 45 min of a SL at nearly identical price and context.
+    cooldown_key = f"{symbol}_{direction}"
+    last_sl_ts   = state.get("post_loss_cooldown", {}).get(cooldown_key)
+    if last_sl_ts is not None:
+        elapsed = int(time.time()) - last_sl_ts
+        if elapsed < PULL_REENTRY_COOLDOWN_S:
+            remaining = PULL_REENTRY_COOLDOWN_S - elapsed
+            print(f"  [POST-LOSS COOLDOWN] {hl_coin(symbol)} {direction.upper()} "
+                  f"{signal_type} blocked — {remaining}s remaining after SL")
+            return False
+
     return True
 
 
@@ -1621,7 +1722,11 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
     headwind     = rate is not None and (
         (rate > 0 and dir_str == "long") or (rate < 0 and dir_str == "short")
     )
-    chk_funding  = "⚠️" if (headwind and rate is not None and abs(rate) >= FUNDING_WARN_EXTREME) else "✅"
+    # [v11.6-2] Use FUNDING_SUPPRESS_EXTREME as the checklist threshold — same value
+    # the suppress filter uses — so the ⚠️ emoji is consistent with what would have
+    # blocked the signal. Previously used FUNDING_WARN_EXTREME (same constant value
+    # today but a latent divergence risk if they're ever tuned independently).
+    chk_funding  = "⚠️" if (headwind and rate is not None and abs(rate) >= FUNDING_SUPPRESS_EXTREME) else "✅"
 
     sr_lines = ""
     if sig.resistances:
@@ -1682,7 +1787,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v11.4 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v11.8 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -1760,6 +1865,11 @@ def check_active_signals(state: dict, bar_index_now: int):
                 "resolved_at": int(time.time()),
             })
             sig["resolved"] = True
+            # [v11.7-3] Post-SL re-entry cooldown — block same coin+direction PULL
+            # for PULL_REENTRY_COOLDOWN_S seconds after a loss resolves.
+            if outcome == "sl":
+                cooldown_key = f"{symbol}_{direction}"
+                state.setdefault("post_loss_cooldown", {})[cooldown_key] = int(time.time())
 
         for candle in new_candles:
             c_high = candle["h"]
@@ -1896,7 +2006,7 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
         return []
 
     direction = "long" if sig.fire_long else "short"
-    if not check_cooldown(state, symbol, direction, bar_index_now):
+    if not check_cooldown(state, symbol, direction, bar_index_now, signal_type=sig.signal_type):
         print(f"    {coin} signal suppressed by cooldown")
         return []
 
@@ -1909,8 +2019,21 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
         pct = (sig.funding_rate * 100) if sig.funding_rate is not None else float("nan")
         print(f"    [MARKET CTX] {coin}: funding={pct:+.4f}%/8h  {format_oi(sig.open_interest)}")
 
-    if FUNDING_SUPPRESS_EXTREME is not None and sig.funding_rate is not None:
-        rate     = sig.funding_rate
+    # [v11.6-2] Re-read funding from the live cache entry at suppress time rather than
+    # relying solely on ctx fetched before compute_signals. If funding spiked during the
+    # scan (metaAndAssetCtxs cache is shared and updated once per run), the suppress
+    # check now uses the freshest available value, keeping it consistent with whatever
+    # format_signal will display.
+    live_cache   = get_meta_and_asset_ctxs()
+    live_funding = (live_cache.get(hl_coin(symbol), {}).get("funding")
+                    if live_cache else None)
+    funding_for_suppress = live_funding if live_funding is not None else sig.funding_rate
+    if live_funding is not None and live_funding != sig.funding_rate:
+        sig.funding_rate = live_funding   # keep sig in sync with what we're checking
+        print(f"    [FUNDING REFRESH] {coin}: updated {pct:+.4f}% → {live_funding*100:+.4f}%/8h")
+
+    if FUNDING_SUPPRESS_EXTREME is not None and funding_for_suppress is not None:
+        rate     = funding_for_suppress
         headwind = (rate > 0 and direction == "long") or (rate < 0 and direction == "short")
         if headwind and abs(rate) >= FUNDING_SUPPRESS_EXTREME:
             pct = rate * 100
