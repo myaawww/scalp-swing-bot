@@ -26,7 +26,7 @@ _hl_session = requests.Session()
 WATCHLIST = [
     "BTCUSDT", "ETHUSDT", "HYPEUSDT", "ZECUSDT", "NEARUSDT",
     "ONDOUSDT", "SUIUSDT", "PENGUUSDT", "BNBUSDT", "SOLUSDT",
-    "TRXUSDT", "TONUSDT", "DOGEUSDT", "ADAUSDT", "DOTUSDT",
+    "TRXUSDT", "BCHUSDT", "DOGEUSDT", "ADAUSDT", "DOTUSDT",
     "TAOUSDT", "AVAXUSDT", "LINKUSDT", "AAVEUSDT", "XRPUSDT",
     "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
 ]
@@ -36,9 +36,9 @@ CORR_GROUPS: dict[str, set[str]] = {
                   "SUIUSDT"},                                          # [FIX-A] SUIUSDT added
     "defi":      {"AAVEUSDT", "UNIUSDT", "PENDLEUSDT", "ONDOUSDT"},   # [FIX-A] ONDOUSDT added
     "meme":      {"DOGEUSDT", "PENGUUSDT"},
-    "btc_proxy": {"BTCUSDT", "LTCUSDT", "ZECUSDT"},                   # [FIX-A] ZECUSDT added
+    "btc_proxy": {"BTCUSDT", "LTCUSDT", "ZECUSDT", "BCHUSDT"},                   # [FIX-A] ZECUSDT added
     "xlm_xrp":   {"XLMUSDT", "XRPUSDT"},
-    "l1_alt":    {"TAOUSDT", "TONUSDT", "TRXUSDT"},
+    "l1_alt":    {"TAOUSDT", "TRXUSDT"},
     "bnb_hype":  {"BNBUSDT", "HYPEUSDT"},
     "oracle":    {"LINKUSDT"},                                         # [FIX-A] LINKUSDT added
 }
