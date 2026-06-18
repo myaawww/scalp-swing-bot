@@ -1,5 +1,3 @@
-
-
 import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
@@ -81,6 +79,9 @@ PULL_ZONE_MULT  = 0.25
 PULL_TOUCH_LOOKBACK   = 3
 PULL_RECOVER_ATR_MULT = 0.10
 TREND_HOLD_BARS = 2
+USE_EXHAUSTION_SHORT:       bool = True   # Enable exhaustion short alignment mode
+EXHAUSTION_SHORT_SCORE_ADJ: int  = -1     # Score penalty when exhaustion mode fires
+EXHAUSTION_SPREAD_LOOKBACK: int  = 2      # Bars back to compare EMA spread (narrowing check)
 USE_ROLLING_VWAP  = True
 ROLLING_VWAP_LEN  = 16
 
@@ -1429,10 +1430,33 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     full_long_align  = h4_bull and h4_trend_held_bull and h1_bull
     full_short_align = h4_bear and h4_trend_held_bear and h1_bear
 
+    # Exhaustion short: 4H bull trend losing hold + 1H already bearish.
+    # Fires earlier than full_short_align on rollovers before the 4H EMA cross confirms.
+    if USE_EXHAUSTION_SHORT:
+        h4_spread_now  = ef4h - es4h
+        _f4h_back = safe(ema_f4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
+        _s4h_back = safe(ema_s4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
+        h4_spread_prev = _f4h_back - _s4h_back
+        h4_spread_narrowing = (h4_spread_now < h4_spread_prev) and (h4_spread_now > 0)
+        exhaustion_short_align = (
+            h4_bull                     # 4H still technically bullish
+            and not h4_trend_held_bull  # but failing to hold the trend
+            and h4_spread_narrowing     # and EMA spread is compressing
+            and h1_bear                 # 1H has already flipped bearish
+        )
+    else:
+        exhaustion_short_align = False
+
     pull_long_align  = (h4_bull and h4_trend_held_bull and h1_bull) \
                         if PULL_REQUIRES_4H else (h4_trend_held_bull and h1_bull)
-    pull_short_align = (h4_bear and h4_trend_held_bear and h1_bear) \
-                        if PULL_REQUIRES_4H else (h4_trend_held_bear and h1_bear)
+    pull_short_align = (
+        (h4_bear and h4_trend_held_bear and h1_bear)
+        if PULL_REQUIRES_4H
+        else (h4_trend_held_bear and h1_bear)
+    )
+    # Exhaustion mode overrides pull_short_align when active
+    if USE_EXHAUSTION_SHORT and exhaustion_short_align:
+        pull_short_align = True
 
     rng = cur_h - cur_l + 1e-10
 
@@ -1487,7 +1511,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
                    and adx_break_ok and vwap_long  and rsi_break_long
                    and long_score  >= (MIN_SCORE - 1) and market_ok and vol_break_ok
                    and vol_accel_ok)
-    short_break = (daily_adx_ok and full_short_align and break_bear_bar
+    short_break = (daily_adx_ok
+                   and (full_short_align or exhaustion_short_align)
+                   and break_bear_bar
                    and adx_break_ok and vwap_short and rsi_break_short
                    and short_score >= (MIN_SCORE - 1) and market_ok and vol_break_ok
                    and vol_accel_ok)
@@ -1496,7 +1522,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     long_pull  = (daily_adx_ok and pull_long_align  and pull_touched_long
                   and pull_recover_long  and pull_bull_bar and vwap_long  and rsi_pull_long
                   and long_score  >= (MIN_SCORE - 1) and market_ok)
-    short_pull = (daily_adx_ok and pull_short_align and pull_touched_short
+    short_pull = (daily_adx_ok
+                  and (full_short_align or exhaustion_short_align)
+                  and pull_touched_short
                   and pull_recover_short and pull_bear_bar and vwap_short and rsi_pull_short
                   and short_score >= (MIN_SCORE - 1) and market_ok)
 
@@ -1516,8 +1544,12 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 
     def make_gates(is_long):
         h1 = h1_bull if is_long else h1_bear
+        if not is_long and exhaustion_short_align and not full_short_align:
+            h4_tag = "4H:⚠"   # exhaustion mode — not fully confirmed
+        else:
+            h4_tag = f"4H:{'✓' if (full_long_align if is_long else full_short_align) else '✗'}"
         return (f"DailyADX:{'✓' if daily_adx_ok else '✗'} "
-                f"4H:{'✓' if (full_long_align if is_long else full_short_align) else '✗'} "
+                f"{h4_tag} "
                 f"1H:{'✓' if h1 else '✗'}")
 
     if long_sig:
@@ -1638,6 +1670,15 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     adjusted_score += breadth_adj
     if breadth_adj != 0:
         adjs.append((breadth_label, breadth_adj))
+
+    # Exhaustion short penalty — lower conviction than full bear alignment
+    if (direction == "short"
+            and USE_EXHAUSTION_SHORT
+            and exhaustion_short_align
+            and not full_short_align):
+        adjusted_score += EXHAUSTION_SHORT_SCORE_ADJ
+        adjs.append((f"Exhaustion short mode (4H spread narrowing, not yet confirmed)",
+                     EXHAUSTION_SHORT_SCORE_ADJ))
 
     # [v11.9-2] 4H bar age gate — penalise stale bias near bar close
     # [FIX-3] threshold tightened 0.75 → 0.85 so fewer signals get caught
@@ -2155,7 +2196,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v12.6.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v12.7.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
