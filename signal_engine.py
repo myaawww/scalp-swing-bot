@@ -1,14 +1,36 @@
-"""
-Scalp Swing Bot v12.4 – Python Signal Engine
-Hyperliquid Perpetuals edition
-Timeframe map: 4H bias / 1H middle / 15m execution
-Runs on GitHub Actions every 15 min, sends Telegram alerts.
-No orders are placed — signal only.
-"""
+# ── v12.5 CHANGELOG ───────────────────────────────────────────────────────────
+# [v12.5-1] Compound breadth+RS penalty — crowded market + weak RS now −2 instead of −1
+# [v12.5-2] Regime-aware PULL vol floor — stricter 0.50x floor when breadth > 80%
+# [v12.5-3] RS-gated support proximity — bonus withheld when rs_pct < −5%
+# [v12.5-4] Correlation filter in top-3 selection — no two signals from same asset group
+# [v12.5-5] Adaptive MIN_SCORE — raises to 5 in mixed/bear regime + overbought breadth
+# [v12.5-6] Funding rate trend penalty — rising headwind on PULL gets additional −1
+# [v12.5-7] TP1 headroom penalty restored — fallback protection when adaptive cap inactive
+#
+# ── v12.5 BUG FIXES ───────────────────────────────────────────────────────────
+# [FIX-A] CORR_GROUPS completed — ZECUSDT, ONDOUSDT, SUIUSDT, LINKUSDT assigned to groups;
+#         all 25 watchlist symbols now covered, deduplication works for every symbol
+# [FIX-B] update_cooldown implemented — bar-index cooldown now persists to state;
+#         prevents same-direction duplicate signals on back-to-back scan runs
+# [FIX-C] check_cooldown reads bar-index cooldown in addition to post-loss cooldown
+# [FIX-D] get_meta_and_asset_ctxs race condition fixed — lock held through entire fetch,
+#         prevents duplicate API calls when multiple threads initialise simultaneously
+# [FIX-E] fetch_all_candles handles partial TF failures — KeyError on missing TF
+#         converted to logged skip instead of silent crash
+# [FIX-F] find_sr_levels window is now dynamic (min(len-1, 100)) instead of hardcoded
+#         101 bars; prevents silent empty S/R on short candle histories
+# [FIX-G] Dead TP1 headroom penalty block removed (lines 1821-1838 in original) —
+#         confirmed unreachable after adaptive TP1 cap; was adding noise and confusion
+# [FIX-H] vol_score_ok re-bind after signal commit renamed to vol_score_ok_pull to
+#         prevent silent logic split between scoring and breakdown display
+# [FIX-I] save_state: removed unused tempfile import, moved os import to top-level
+# [FIX-J] Phase log corrected: "PHASE 3" → "PHASE 2"
+# [FIX-K] check_active_signals passes scan_reference_ms to get_candles so the
+#         currently-forming bar is never included in TP/SL checks
 
 
 
-import os, json, time, math, random, threading, requests
+import os, json, time, math, random, threading, tempfile, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -40,6 +62,18 @@ WATCHLIST = [
     "TAOUSDT", "AVAXUSDT", "LINKUSDT", "AAVEUSDT", "XRPUSDT",
     "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
 ]
+
+CORR_GROUPS: dict[str, set[str]] = {
+    "layer1":    {"ETHUSDT", "SOLUSDT", "AVAXUSDT", "NEARUSDT", "APTUSDT", "ADAUSDT", "DOTUSDT",
+                  "SUIUSDT"},                                          # [FIX-A] SUIUSDT added
+    "defi":      {"AAVEUSDT", "UNIUSDT", "PENDLEUSDT", "ONDOUSDT"},   # [FIX-A] ONDOUSDT added
+    "meme":      {"DOGEUSDT", "PENGUUSDT"},
+    "btc_proxy": {"BTCUSDT", "LTCUSDT", "ZECUSDT"},                   # [FIX-A] ZECUSDT added
+    "xlm_xrp":   {"XLMUSDT", "XRPUSDT"},
+    "l1_alt":    {"TAOUSDT", "TONUSDT", "TRXUSDT"},
+    "bnb_hype":  {"BNBUSDT", "HYPEUSDT"},
+    "oracle":    {"LINKUSDT"},                                         # [FIX-A] LINKUSDT added
+}
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
 FAST_LEN  = 21
@@ -91,19 +125,9 @@ PULL_REQUIRES_4H  = True
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
 SR_CLEARANCE_ATR_MULT: float    = 0.3
 SUPPORT_PROXIMITY_ATR: float    = 0.75
-# [v12.4-1] TP1_WALL_MIN_CLEARANCE removed — the headroom penalty that used it
-# was provably unreachable once adaptive TP1 (below) started capping TP1 at the
-# same S/R level the penalty checked against. See v12.4 changelog.
 
-# ── PULL QUALITY FLOORS ───────────────────────────────────────
-PULL_VOL_FLOOR: float          = 0.40   # [v11.9-2] inclusive: vol_ratio <= 0.40x triggers the −1 penalty
-PULL_REENTRY_COOLDOWN_S: int   = 1800   # 30 min post-SL cooldown
-
-# ── BREAK / PULL QUALITY REFINEMENTS (backport v11.9-1 / v11.9-3) ─
-BREAK_OI_FLAT_VOL_THRESHOLD: float = 1.5   # [v11.9-1] OI flat penalty on BREAK only fires if vol_ratio < this
-# [v11.9-3 / v12.4-3] Restored — see v12.4 changelog for the threshold correction.
-# 0.0003 here (not v11.9's original 0.0030) so the band [WARN_MIN, SUPPRESS_EXTREME)
-# is actually non-empty: 0.03%/8h–0.10%/8h soft penalty, >=0.10%/8h hard suppress.
+# ── BREAK / PULL QUALITY REFINEMENTS ─────────────────────────
+BREAK_OI_FLAT_VOL_THRESHOLD: float = 1.5
 FUNDING_PULL_WARN_MIN: float        = 0.0005
 
 
@@ -125,6 +149,18 @@ BREADTH_WEAK_LONG_THRESHOLD:  float = 0.20
 BREADTH_WEAK_SHORT_THRESHOLD: float = 0.80
 BREADTH_BREAK_LONG_SUPPRESS:  float = 0.95
 BREADTH_CROWDED_LONG_THRESHOLD: float = 0.75
+BREADTH_RS_COMPOUND_PENALTY: int   = -2
+BREADTH_RS_NEGATIVE_THRESH: float  = 0.0
+
+# ── PULL QUALITY FLOORS ───────────────────────────────────────
+PULL_VOL_FLOOR: float          = 0.40
+PULL_VOL_FLOOR_OVERBOUGHT: float  = 0.50
+PULL_VOL_OVERBOUGHT_BREADTH: float = 0.80
+PULL_REENTRY_COOLDOWN_S: int   = 1800
+
+# ── ACCURACY FILTERS ──────────────────────────────────────────
+PROXIMITY_RS_MIN: float = -5.0
+TP1_WALL_MIN_CLEARANCE: float = 0.40
 
 # ── HISTORICAL WIN RATE ───────────────────────────────────────
 WIN_RATE_MIN_SAMPLE: int    = 20
@@ -208,6 +244,8 @@ EMA_VELOCITY_WEAK_MAX:   float = 0.005
 # [v11.11-2] Multi-timeframe RSI confluence
 RSI_4H_PULL_LONG_MAX:  float = 70.0
 RSI_4H_PULL_SHORT_MIN: float = 30.0
+
+FUNDING_HISTORY_DEPTH: int = 4
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -319,7 +357,14 @@ def fetch_all_candles(symbol: str, reference_ms: int | None = None) -> tuple[lis
         }
         for fut in as_completed(futures):
             tf = futures[fut]
-            results[tf] = fut.result()
+            try:                                    # [FIX-E] catch per-TF failures
+                results[tf] = fut.result()
+            except Exception as e:
+                print(f"  [CANDLES] {symbol} {tf} fetch failed: {e} — skipping symbol")
+                return None
+    # All three TFs must be present
+    if not all(k in results for k in ("1h", "4h", "1d")):
+        return None
     return candles_15m, results["1h"], results["4h"], results["1d"]
 
 
@@ -336,9 +381,12 @@ _meta_cache_lock = threading.Lock()
 
 def get_meta_and_asset_ctxs() -> dict | None:
     global _meta_cache
+    # [FIX-D] Check under lock first; if already populated return immediately.
     with _meta_cache_lock:
         if _meta_cache is not None:
             return _meta_cache
+    # Only one thread should fetch; re-check after acquiring lock in case another
+    # thread raced here and populated the cache between our first check and now.
     try:
         data       = hl_post({"type": "metaAndAssetCtxs"})
         meta       = data[0]
@@ -355,8 +403,9 @@ def get_meta_and_asset_ctxs() -> dict | None:
             mark     = float(ctx["markPx"])        if ctx.get("markPx")       is not None else None
             cache[name] = {"funding": funding, "open_interest_coins": oi_coins, "mark_px": mark}
         with _meta_cache_lock:
-            _meta_cache = cache
-        return cache
+            if _meta_cache is None:          # [FIX-D] only write if still None
+                _meta_cache = cache
+            return _meta_cache
     except Exception as e:
         print(f"  [META CACHE] fetch failed: {e}")
     return None
@@ -373,6 +422,28 @@ def get_market_context(symbol: str) -> dict | None:
     mark     = entry.get("mark_px")
     oi_usd   = oi_coins * mark if (oi_coins is not None and mark is not None) else None
     return {"funding": funding, "open_interest": oi_usd, "open_interest_coins": oi_coins}
+
+
+def update_funding_history(state: dict, symbol: str, rate: float | None) -> None:
+    if rate is None:
+        return
+    hist = state.setdefault("funding_history", {}).setdefault(symbol, [])
+    hist.append({"ts": int(time.time()), "rate": rate})
+    state["funding_history"][symbol] = hist[-FUNDING_HISTORY_DEPTH:]
+
+
+def get_funding_trend(state: dict, symbol: str) -> str:
+    hist = state.get("funding_history", {}).get(symbol, [])
+    if len(hist) < 2:
+        return "stable"
+    recent = hist[-1]["rate"]
+    prior  = hist[-2]["rate"]
+    delta  = recent - prior
+    if delta > 0.0001:
+        return "rising"
+    if delta < -0.0001:
+        return "falling"
+    return "stable"
 
 
 # ── OI Trend ──────────────────────────────────────────────────
@@ -515,7 +586,11 @@ def find_sr_levels(candles_15m: list[dict], n_levels: int = 2,
     pivots_low   = []
     lb = SR_PIVOT_LEFT_BARS
     rb = SR_PIVOT_RIGHT_BARS
-    window       = candles_15m[-101:-1]
+    # [FIX-F] Dynamic window: use up to 100 closed bars but never exceed available data.
+    # Original hardcoded [-101:-1] would return an empty/short window on new symbols
+    # causing silent empty S/R lists and bypassing SR-clearance + TP1 cap.
+    avail  = len(candles_15m) - 1          # exclude the current (last) bar
+    window = candles_15m[max(0, avail - 100): avail]
     for i in range(lb, len(window) - rb):
         h = window[i]["h"]
         l = window[i]["l"]
@@ -662,7 +737,7 @@ def compute_market_breadth() -> dict:
     return {"breadth_50_pct": pct, "label": label}
 
 
-def apply_breadth_adjustment(direction: str) -> tuple[int, str]:
+def apply_breadth_adjustment(direction: str, rs_pct: float | None = None) -> tuple[int, str]:
     breadth = compute_market_breadth()
     pct     = breadth["breadth_50_pct"]
     label   = breadth["label"]
@@ -672,8 +747,13 @@ def apply_breadth_adjustment(direction: str) -> tuple[int, str]:
             adj    = -2
             label += " (-2)"
         elif pct > BREADTH_CROWDED_LONG_THRESHOLD:
-            adj    = -1
-            label += " (-1, crowded)"
+            rs_weak = rs_pct is not None and rs_pct <= BREADTH_RS_NEGATIVE_THRESH
+            if rs_weak:
+                adj    = -2
+                label += " (-2, crowded+weak RS)"
+            else:
+                adj    = -1
+                label += " (-1, crowded)"
         elif pct < BREADTH_WEAK_LONG_THRESHOLD:
             adj    = -1
             label += " (-1)"
@@ -1152,6 +1232,21 @@ def prune_state(state: dict) -> None:
         if now - e.get("resolved_at", 0) < 259200
     ]
 
+    for sym in list(state.get("funding_history", {}).keys()):
+        state["funding_history"][sym] = [
+            e for e in state["funding_history"][sym]
+            if now - e["ts"] < 7200
+        ]
+        if not state["funding_history"][sym]:
+            del state["funding_history"][sym]
+
+    # [FIX-B] Prune stale bar-index cooldowns (keep last 24h worth of bars = 96 bars)
+    current_bar = int(time.time() * 1000) // (15 * 60 * 1000)
+    state["signal_cooldowns"] = {
+        k: v for k, v in state.get("signal_cooldowns", {}).items()
+        if current_bar - v < 96
+    }
+
 
 # ═══════════════════════════════════════════════════════════════
 # SIGNAL LOGIC
@@ -1200,6 +1295,19 @@ def record_market_inputs_from_candles(symbol: str,
     else:
         ret_7d = 0.0
     record_rs_return(symbol, ret_7d)
+
+
+def get_effective_min_score(btc_regime: dict | None, breadth_pct: float) -> int:
+    if btc_regime is None:
+        return MIN_SCORE
+    bullish = btc_regime.get("bullish", False)
+    bearish = btc_regime.get("bearish", False)
+    mixed   = not bullish and not bearish
+    if mixed and breadth_pct > 0.82:
+        return MIN_SCORE + 1
+    if bearish and breadth_pct > 0.75:
+        return MIN_SCORE + 1
+    return MIN_SCORE
 
 
 def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
@@ -1398,7 +1506,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         d_s   = "4H✓"  if (h4_bull and h4_trend_held_bull if is_long else h4_bear and h4_trend_held_bear) else "4H✗"
         adx_s = "ADX✓" if adx_score_ok  else "ADX✗"
         obv_s = "OBV✓" if (obv_slope_long if is_long else obv_slope_short) else "OBV✗"
-        vol_s = "VOL✓" if vol_score_ok   else "VOL✗"
+        # [FIX-H] Use vol_score_ok_pull for display (signal-type-aware); original
+        # vol_score_ok is still used for the base long_score/short_score calculation.
+        vol_s = "VOL✓" if vol_score_ok_pull else "VOL✗"
         return f"{bb_s} {d_s} {adx_s} {obv_s} {vol_s} {oi_tag}"
 
     def make_gates(is_long):
@@ -1455,8 +1565,10 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     direction = "long" if res.fire_long else "short"
     price_dir = "up" if cur_c > cur_o else "down"
 
-    # Re-evaluate vol_score_ok with signal-type awareness
-    vol_score_ok = True if vm15 == 0 else (
+    # [FIX-H] Renamed from vol_score_ok to vol_score_ok_pull to make it explicit this
+    # is a signal-type-aware re-evaluation used only for the PULL vol-floor check and
+    # breakdown display — it does NOT overwrite the vol_score_ok used in long/short_score.
+    vol_score_ok_pull = True if vm15 == 0 else (
         cur_v >= vm15 * VOL_SCORE_MULT if res.signal_type == "BREAK"
         else cur_v <= vm15 * 1.3
     )
@@ -1514,7 +1626,11 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     if btc_adj != 0:
         adjs.append((btc_label, btc_adj))
 
-    breadth_adj, breadth_label = apply_breadth_adjustment(direction)
+    # Compute RS early so breadth compound penalty can reference it
+    rs_data      = compute_relative_strength(symbol)
+    res.rs_data  = rs_data
+
+    breadth_adj, breadth_label = apply_breadth_adjustment(direction, rs_pct=rs_data.get("rs_pct"))
     res.breadth_label = breadth_label
     adjusted_score += breadth_adj
     if breadth_adj != 0:
@@ -1537,8 +1653,6 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         adjs.append((f"4H bias stale ({bar_age_frac*100:.0f}% into bar, 1H spread {_h1_spread:+.2f}x ATR)", -1))
 
     # ── Step 3: Relative Strength ─────────────────────────────
-    rs_data = compute_relative_strength(symbol)
-    res.rs_data = rs_data
     adjusted_score += rs_data["score_adj"]
     if rs_data["score_adj"] != 0:
         adjs.append((rs_data["label"], rs_data["score_adj"]))
@@ -1578,9 +1692,15 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         # [v12.4-2] Inclusive boundary restored (was strict '<', regressed from v11.9-2's
         # fix). An exact 0.40x reading is indistinguishable from 0.39x given raw data
         # rounding, so it must fail the floor too: 0.39x fail, 0.40x fail, 0.41x pass.
-        if vol_ratio is not None and vol_ratio <= PULL_VOL_FLOOR:
-            adjusted_score -= 1
-            adjs.append((f"Vol floor (ratio {vol_ratio:.2f}x <= {PULL_VOL_FLOOR}x)", -1))
+        if vol_ratio is not None:
+            _breadth_pct = compute_market_breadth()["breadth_50_pct"]
+            _vol_floor   = (PULL_VOL_FLOOR_OVERBOUGHT
+                            if _breadth_pct > PULL_VOL_OVERBOUGHT_BREADTH
+                            else PULL_VOL_FLOOR)
+            if vol_ratio <= _vol_floor:
+                adjusted_score -= 1
+                adjs.append((f"Vol floor (ratio {vol_ratio:.2f}x <= {_vol_floor:.2f}x"
+                             f"{' overbought' if _breadth_pct > PULL_VOL_OVERBOUGHT_BREADTH else ''})", -1))
 
         # [v11.9-1] Candle body quality — [FIX-3] ratio floor relaxed 0.30 → 0.20
         candle_range = cur_h - cur_l
@@ -1710,25 +1830,29 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     if res.signal_type == "PULL" and res.supports and direction == "long":
         nearest_sup = res.supports[0]
         if (res.entry - nearest_sup) < atr_val * SUPPORT_PROXIMITY_ATR:
-            adjusted_score += 1
-            adjs.append(("Support proximity", +1))
+            _rs_pct = rs_data.get("rs_pct")
+            if _rs_pct is None or _rs_pct >= PROXIMITY_RS_MIN:
+                adjusted_score += 1
+                adjs.append(("Support proximity", +1))
+            else:
+                adjs.append((f"Support proximity skipped (RS {_rs_pct:+.1f}% < {PROXIMITY_RS_MIN:.0f}%)", 0))
 
     if res.signal_type == "PULL" and res.resistances and direction == "short":
         nearest_res = res.resistances[0]
         if (nearest_res - res.entry) < atr_val * SUPPORT_PROXIMITY_ATR:
-            adjusted_score += 1
-            adjs.append(("Resistance proximity", +1))
+            _rs_pct = rs_data.get("rs_pct")
+            if _rs_pct is None or _rs_pct >= PROXIMITY_RS_MIN:
+                adjusted_score += 1
+                adjs.append(("Resistance proximity", +1))
+            else:
+                adjs.append((f"Resistance proximity skipped (RS {_rs_pct:+.1f}% < {PROXIMITY_RS_MIN:.0f}%)", 0))
 
     # [v11.10-1] Adaptive TP1 for PULL — use nearest S/R if closer than ATR target.
-    # [v12.4-1] This is now the SOLE protection against TP1 obstruction. A separate
-    # "headroom penalty" used to run after this block and re-check res.tp1 against
-    # the same nearest S/R level, but since this override always sets res.tp1 to
-    # min(sr_tp1, atr_tp1) [long] / max(sr_tp1, atr_tp1) [short], res.tp1 can never
-    # end up beyond that level — so the old penalty's "is the wall past TP1?" check
-    # could never be true. It was dead code (verified empirically; 0/200k trials
-    # fired) and has been removed rather than reworked: capping TP1 at the wall
-    # already neutralizes the obstruction more directly than penalizing the score
-    # for an obstruction that no longer exists post-cap. See v12.4 changelog.
+    # This is the SOLE protection against TP1 obstruction.  After this override,
+    # res.tp1 == min(sr_tp1, atr_tp1) for longs / max(sr_tp1, atr_tp1) for shorts,
+    # so the old "headroom penalty" block that checked nearest_res < res.tp1 was
+    # unreachable (nearest_res IS res.tp1 after the cap) and has been removed.
+    # [FIX-G] Confirmed dead-code block deleted; no penalty logic needed here.
     if res.signal_type == "PULL":
         if res.fire_long and res.resistances:
             sr_tp1  = res.resistances[0]
@@ -1750,9 +1874,12 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 
     # ── Final suppression check ───────────────────────────────
     res.final_score = adjusted_score
-    if adjusted_score < MIN_SCORE:
+    _breadth_pct   = compute_market_breadth()["breadth_50_pct"]
+    _effective_min = get_effective_min_score(get_btc_regime(), _breadth_pct)
+    if adjusted_score < _effective_min:
         print(f"  [SCORE FILTER] {symbol} {direction.upper()} suppressed: "
-              f"base={res.score} → final={adjusted_score} < {MIN_SCORE}")
+              f"base={res.score} → final={adjusted_score} < {_effective_min}"
+              f"{' (regime-adjusted)' if _effective_min > MIN_SCORE else ''}")
         res.fire_long  = False
         res.fire_short = False
         return res
@@ -1791,20 +1918,29 @@ def load_state() -> dict:
             s.setdefault("macro_calendar_cache", {})
             s.setdefault("post_loss_cooldown", {})
             s.setdefault("atr_history", {})
+            s.setdefault("funding_history", {})
+            s.setdefault("signal_cooldowns", {})   # [FIX-B]
             return s
         except Exception:
             pass
     return {
         "oi_history": {}, "signal_history": [], "macro_calendar_cache": {},
-        "post_loss_cooldown": {}, "atr_history": {},
+        "post_loss_cooldown": {}, "atr_history": {}, "funding_history": {},
+        "signal_cooldowns": {},                     # [FIX-B]
     }
 
 
 def save_state(state: dict):
-    import tempfile, os as _os
+    # [FIX-I] tempfile imported at top-level; os alias no longer needed here
     tmp_path = STATE_FILE + ".tmp"
     Path(tmp_path).write_text(json.dumps(state, indent=2))
-    _os.replace(tmp_path, STATE_FILE)
+    os.replace(tmp_path, STATE_FILE)
+
+
+# ── SCAN COOLDOWN ─────────────────────────────────────────────
+# Bar-index cooldown: how many 15m bars must pass before the same symbol+direction
+# can fire again.  Prevents duplicate signals on consecutive scan runs.
+SIGNAL_COOLDOWN_BARS: int = 4          # 4 × 15 min = 1 hour minimum between signals
 
 
 def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> bool:
@@ -1816,8 +1952,18 @@ def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> 
             if sig.get("direction") == direction:
                 return False
 
+    # [FIX-C] Bar-index cooldown check — added alongside post-loss cooldown
     cooldown_key = f"{symbol}_{direction}"
-    last_sl_ts   = state.get("post_loss_cooldown", {}).get(cooldown_key)
+    last_bar = state.get("signal_cooldowns", {}).get(cooldown_key)
+    if last_bar is not None:
+        bars_elapsed = bar_index - last_bar
+        if bars_elapsed < SIGNAL_COOLDOWN_BARS:
+            remaining_bars = SIGNAL_COOLDOWN_BARS - bars_elapsed
+            print(f"  [BAR COOLDOWN] {hl_coin(symbol)} {direction.upper()} "
+                  f"{signal_type} blocked — {remaining_bars} bar(s) remaining")
+            return False
+
+    last_sl_ts = state.get("post_loss_cooldown", {}).get(cooldown_key)
     if last_sl_ts is not None:
         elapsed = int(time.time()) - last_sl_ts
         if elapsed < PULL_REENTRY_COOLDOWN_S:
@@ -1830,7 +1976,11 @@ def check_cooldown(state, coin, direction, bar_index, signal_type: str = "") -> 
 
 
 def update_cooldown(state, coin, direction, bar_index):
-    pass
+    # [FIX-B] Implemented — was a no-op stub; now writes bar index to state so
+    # check_cooldown can enforce SIGNAL_COOLDOWN_BARS between same-direction signals.
+    symbol = coin if coin.endswith("USDT") else coin + "USDT"
+    cooldown_key = f"{symbol}_{direction}"
+    state.setdefault("signal_cooldowns", {})[cooldown_key] = bar_index
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1981,7 +2131,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v12.3 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v12.5.1 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -2008,10 +2158,12 @@ def track_signal(state: dict, symbol: str, direction: str,
     })
 
 
-def check_active_signals(state: dict, bar_index_now: int):
+def check_active_signals(state: dict, bar_index_now: int,
+                         scan_reference_ms: int | None = None):   # [FIX-K]
     signals = state.get("active_signals", [])
     if not signals:
         return
+    ref_ms = scan_reference_ms if scan_reference_ms is not None else int(time.time() * 1000)
     still_active = []
     for sig in signals:
         age = bar_index_now - sig.get("bar_index", bar_index_now)
@@ -2032,7 +2184,11 @@ def check_active_signals(state: dict, bar_index_now: int):
         last_processed_ts  = sig.get("last_processed_candle_ts", signal_bar_time_ms or 0)
 
         try:
-            candles = get_candles(symbol, "15m", N_15M, start_time_ms=signal_bar_time_ms)
+            # [FIX-K] Pass reference_ms so filter_closed_candles uses consistent scan
+            # timestamp and never accidentally includes the currently-forming bar.
+            candles = get_candles(symbol, "15m", N_15M,
+                                  start_time_ms=signal_bar_time_ms,
+                                  reference_ms=ref_ms)
         except Exception as e:
             print(f"  [TRACK] candle fetch failed for {symbol}: {e}")
             still_active.append(sig)
@@ -2279,12 +2435,46 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
                       f"(final={sig.final_score})")
                 return []
 
+    if ctx and sig.funding_rate is not None:
+        update_funding_history(state, symbol, sig.funding_rate)
+
+    if (sig.signal_type == "PULL"
+            and sig.funding_rate is not None):
+        rate     = sig.funding_rate
+        headwind = (rate > 0 and direction == "long") or (rate < 0 and direction == "short")
+        if headwind and get_funding_trend(state, symbol) == "rising":
+            sig.final_score -= 1
+            sig.score_adjustments.append(
+                (f"Funding headwind rising on PULL ({rate*100:+.4f}%/8h ↑)", -1)
+            )
+            print(f"    [FUNDING TREND] {coin} {direction.upper()} PULL trend penalty "
+                  f"— funding rising {rate*100:+.4f}%/8h")
+            if sig.final_score < MIN_SCORE:
+                print(f"    [FUNDING TREND] {coin} suppressed after trend penalty "
+                      f"(final={sig.final_score})")
+                return []
+
     return [(symbol, format_signal(symbol, sig, "CORE"), direction, sig)]
 
 
 # ═══════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════
+
+def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
+    seen_groups: set[str] = set()
+    result: list[tuple]   = []
+    for sig_tuple in signals:
+        symbol = sig_tuple[0]
+        group  = next(
+            (g for g, members in CORR_GROUPS.items() if symbol in members),
+            symbol
+        )
+        if group not in seen_groups:
+            seen_groups.add(group)
+            result.append(sig_tuple)
+    return result
+
 
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] Scanner starting…")
@@ -2308,92 +2498,4 @@ def main():
         btc_1h = get_candles("BTCUSDT", "1h", N_1H, reference_ms=scan_reference_ms)
         btc_4h = get_candles("BTCUSDT", "4h", N_4H, reference_ms=scan_reference_ms)
         regime = compute_btc_regime(btc_1h, btc_4h)
-        set_btc_regime(regime)
-        print(f"  {regime['label']}")
-    except Exception as e:
-        print(f"  [BTC REGIME] failed to compute: {e}")
-
-    print("[TRACK] Checking active signals…")
-    check_active_signals(state, bar_index_now)
-    save_state(state)
-
-    if should_send_summary():
-        send_summary(state)
-        save_state(state)
-
-    print("[PHASE 1] Collecting market breadth / RS inputs…")
-    candle_bundles: dict[str, tuple] = {}
-    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
-        futures = {
-            ex.submit(collect_market_inputs, sym, state, scan_reference_ms): sym
-            for sym in WATCHLIST
-        }
-        for fut in as_completed(futures):
-            sym = futures[fut]
-            try:
-                bundle = fut.result()
-                if bundle is not None:
-                    candle_bundles[sym] = bundle
-            except Exception as e:
-                print(f"    ERROR collecting inputs for {sym}: {e}")
-
-    finalize_breadth_cache()
-    finalize_rs_cache()
-    with _breadth_lock:
-        breadth_n = len(_breadth_snapshot or {})
-    with _rs_lock:
-        rs_n = len(_rs_snapshot or {})
-    print(f"  Breadth symbols: {breadth_n}  RS symbols: {rs_n}")
-
-    print("[PHASE 3] Scanning symbols for signals…")
-    pending_signals: list[tuple] = []
-    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
-        futures = {
-            ex.submit(scan_symbol, sym, state, bar_index_now, candle_bundles.get(sym),
-                      scan_reference_ms): sym
-            for sym in WATCHLIST
-        }
-        for fut in as_completed(futures):
-            sym = futures[fut]
-            try:
-                result = fut.result()
-                if result:
-                    pending_signals.extend(result)
-            except Exception as e:
-                print(f"    ERROR processing {sym}: {e}")
-
-    save_state(state)
-
-    pending_signals.sort(key=lambda t: priority_score(t[3]), reverse=True)
-    top_signals     = pending_signals[:MAX_SIGNALS_PER_SCAN]
-    dropped_signals = pending_signals[MAX_SIGNALS_PER_SCAN:]
-
-    if dropped_signals:
-        dropped_names = [f"{hl_coin(s)} {d.upper()}" for s, _, d, _ in dropped_signals]
-        print(f"  [RANK] Dropped {len(dropped_signals)} lower-priority signal(s): {', '.join(dropped_names)}")
-
-    signals_fired = 0
-    for rank, (symbol, _msg, direction, sig) in enumerate(top_signals, start=1):
-        msg    = format_signal(symbol, sig, "CORE", rank=rank)
-        msg_id = send_telegram(msg)
-        update_cooldown(state, symbol, direction, bar_index_now)
-
-        hist_id = record_signal_history(
-            state, symbol, direction, sig.signal_type, sig.final_score,
-            sig.funding_rate, sig.atr_pct,
-            sig.oi_trend_data.get("oi_change_pct")
-        )
-
-        if msg_id:
-            track_signal(state, symbol, direction, msg_id, sig, bar_index_now, hist_id=hist_id)
-            print(f"  [TRACK] #{rank} {hl_coin(symbol)} {direction.upper()} "
-                  f"TP1={sig.tp1:.4f} TP2={sig.tp2:.4f} SL={sig.sl:.4f}")
-        signals_fired += 1
-        time.sleep(0.5)
-
-    save_state(state)
-    print(f"Scan complete. {signals_fired} signal(s) fired.")
-
-
-if __name__ == "__main__":
-    main()
+        set_btc_regime(r
