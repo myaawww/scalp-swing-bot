@@ -1,3 +1,55 @@
+# ── v12.5 CHANGELOG ───────────────────────────────────────────────────────────
+# [v12.5-1] Compound breadth+RS penalty — crowded market + weak RS now −2 instead of −1
+# [v12.5-2] Regime-aware PULL vol floor — stricter 0.50x floor when breadth > 80%
+# [v12.5-3] RS-gated support proximity — bonus withheld when rs_pct < −5%
+# [v12.5-4] Correlation filter in top-3 selection — no two signals from same asset group
+# [v12.5-5] Adaptive MIN_SCORE — raises to 5 in mixed/bear regime + overbought breadth
+# [v12.5-6] Funding rate trend penalty — rising headwind on PULL gets additional −1
+# [v12.5-7] TP1 headroom penalty restored — fallback protection when adaptive cap inactive
+#
+# ── v12.5 BUG FIXES ───────────────────────────────────────────────────────────
+# [FIX-A] CORR_GROUPS completed — ZECUSDT, ONDOUSDT, SUIUSDT, LINKUSDT assigned to groups;
+# all 25 watchlist symbols now covered, deduplication works for every symbol
+# [FIX-B] update_cooldown implemented — bar-index cooldown now persists to state;
+# prevents same-direction duplicate signals on back-to-back scan runs
+# [FIX-C] check_cooldown reads bar-index cooldown in addition to post-loss cooldown
+# [FIX-D] get_meta_and_asset_ctxs race condition fixed — lock held through entire fetch,
+# prevents duplicate API calls when multiple threads initialise simultaneously
+# [FIX-E] fetch_all_candles handles partial TF failures — KeyError on missing TF
+# converted to logged skip instead of silent crash
+# [FIX-F] find_sr_levels window is now dynamic (min(len-1, 100)) instead of hardcoded
+# 101 bars; prevents silent empty S/R on short candle histories
+# [FIX-G] Dead TP1 headroom penalty block removed (lines 1821-1838 in original) —
+# confirmed unreachable after adaptive TP1 cap; was adding noise and confusion
+# [FIX-H] vol_score_ok re-bind after signal commit renamed to vol_score_ok_pull to
+# prevent silent logic split between scoring and breakdown display
+# [FIX-I] save_state: removed unused tempfile import, moved os import to top-level
+# [FIX-J] Phase log corrected: "PHASE 3" → "PHASE 2"
+# [FIX-K] check_active_signals passes scan_reference_ms to get_candles so the
+# currently-forming bar is never included in TP/SL checks
+#
+# ── v12.5.2 BUG FIXES ─────────────────────────────────────────────────────────
+# [FIX-L1] scan_symbol funding/trend penalty suppressions used raw MIN_SCORE instead of
+# get_effective_min_score() — in mixed/bear regime + overbought breadth the
+# effective minimum is MIN_SCORE+1=5, so signals at final=5 that received a
+# funding penalty to 4 were NOT being suppressed (4 < 4=MIN_SCORE is False).
+# Fixed: both PULL soft penalty and funding trend penalty now evaluate against
+# the regime-adaptive effective min computed once at the top of scan_symbol's
+# funding section.
+# [FIX-L2] Funding boundary clarified: the PULL soft penalty upper bound (strict <
+# FUNDING_SUPPRESS_EXTREME) is now documented explicitly so that a rate equal
+# to exactly FUNDING_SUPPRESS_EXTREME is handled only by the hard-suppress
+# block and never double-penalized by the soft block.
+# [FIX-L3] OI falling on PULL double-penalty removed — Step 1 already gives -1 for
+# OI divergence (price recovering up + OI falling on a long pull). Step 6b
+# now only fires the additional -1 when Step 1 scored the OI trend neutral
+# (score_adj == 0), preventing the same falling-OI condition from costing −2
+# total and over-suppressing otherwise valid PULL setups.
+# [FIX-L5] Session dead zone now uses scan reference_ms (candle time) instead of
+# datetime.now(timezone.utc) (wall clock) — delayed GitHub Actions runs were
+# incorrectly applying the 03:00-07:00 UTC dead zone penalty to signals whose
+# candle data was collected before the dead zone.
+
 
 
 import os, json, time, math, random, threading, requests
@@ -1647,9 +1699,13 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d, stat
 
     # ── Step 6b: Signal-type quality floors ───────────────────
     if res.signal_type == "PULL":
-        if oi_data.get("oi_trend") == "falling":
+        # [FIX-L3] Guard against double-counting: Step 1 already applies -1 for OI divergence
+        # (price up + OI falling on a long, or price down + OI falling on a short).
+        # Step 6b only adds the extra -1 when OI is falling but Step 1 scored it 0 (neutral),
+        # e.g. when price_dir disagrees with the PULL recover bar direction.
+        if oi_data.get("oi_trend") == "falling" and oi_data.get("score_adj", 0) == 0:
             adjusted_score -= 1
-            adjs.append(("OI falling on PULL", -1))
+            adjs.append(("OI falling on PULL (Step-1 neutral)", -1))
 
         # [v12.4-2] Inclusive boundary restored (was strict '<', regressed from v11.9-2's
         # fix). An exact 0.40x reading is indistinguishable from 0.39x given raw data
@@ -1711,7 +1767,10 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d, stat
 
     # ── Step 8: Session / EMA velocity / RSI confluence / ATR pctile ─
     # [v11.9-4] Session dead zone — [FIX-3] ATR percentile floor 0.20 → 0.10
-    _now_utc = datetime.now(timezone.utc)
+    # [FIX-L5] Use scan reference_ms (candle time) not wall-clock datetime.now(),
+    # so delayed GitHub Actions runs don't misapply the dead zone penalty.
+    _ref_ts_s   = (reference_ms / 1000) if reference_ms is not None else time.time()
+    _now_utc    = datetime.fromtimestamp(_ref_ts_s, tz=timezone.utc)
     _in_dead = SESSION_DEAD_ZONE_START_UTC <= _now_utc.hour < SESSION_DEAD_ZONE_END_UTC
     _atr_vals = [v for v in atr15[-(48 + ATR_LEN):] if not math.isnan(v)]
     if _atr_vals:
@@ -2093,7 +2152,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v12.5.1 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v12.5.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
@@ -2384,11 +2443,20 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int, candle_bundle: tup
     # only hard-blocks at the extreme end, leaving the moderate-carry band below it
     # with zero protection). Targets elevated-carry PULL entries, e.g. the ZEC
     # 01:15 / 02:30 loss pattern. Soft −1, not a hard reject; BREAK signals exempt.
+    # [FIX-L1] Compute effective min score once here so all post-signal funding/trend
+    # suppression checks use the regime-adaptive threshold rather than raw MIN_SCORE.
+    # In mixed/bear regime + overbought breadth, effective_min raises to MIN_SCORE+1,
+    # so a signal at final=5 that gets a funding penalty to 4 must be suppressed.
+    _breadth_pct_scan = compute_market_breadth()["breadth_50_pct"]
+    _eff_min_scan = get_effective_min_score(get_btc_regime(), _breadth_pct_scan)
+
     if (sig.signal_type == "PULL"
             and sig.funding_rate is not None
             and FUNDING_PULL_WARN_MIN is not None):
         rate = sig.funding_rate
         headwind = (rate > 0 and direction == "long") or (rate < 0 and direction == "short")
+        # [FIX-L2] Upper bound uses strict < so that abs(rate)==FUNDING_SUPPRESS_EXTREME
+        # is caught exclusively by the hard-suppress block above, not double-penalized here.
         if headwind and FUNDING_PULL_WARN_MIN <= abs(rate) < FUNDING_SUPPRESS_EXTREME:
             sig.final_score -= 1
             sig.score_adjustments.append(
@@ -2396,9 +2464,9 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int, candle_bundle: tup
             )
             print(f" [FUNDING PULL] {coin} {direction.upper()} PULL soft penalty "
                   f"— funding {rate*100:+.4f}%/8h")
-            if sig.final_score < MIN_SCORE:
+            if sig.final_score < _eff_min_scan:   # [FIX-L1] was: MIN_SCORE
                 print(f" [FUNDING PULL] {coin} suppressed after funding penalty "
-                      f"(final={sig.final_score})")
+                      f"(final={sig.final_score} < eff_min={_eff_min_scan})")
                 return []
 
     if ctx and sig.funding_rate is not None:
@@ -2415,9 +2483,9 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int, candle_bundle: tup
             )
             print(f" [FUNDING TREND] {coin} {direction.upper()} PULL trend penalty "
                   f"— funding rising {rate*100:+.4f}%/8h")
-            if sig.final_score < MIN_SCORE:
+            if sig.final_score < _eff_min_scan:   # [FIX-L1] was: MIN_SCORE
                 print(f" [FUNDING TREND] {coin} suppressed after trend penalty "
-                      f"(final={sig.final_score})")
+                      f"(final={sig.final_score} < eff_min={_eff_min_scan})")
                 return []
 
     return [(symbol, format_signal(symbol, sig, "CORE"), direction, sig)]
