@@ -2498,4 +2498,94 @@ def main():
         btc_1h = get_candles("BTCUSDT", "1h", N_1H, reference_ms=scan_reference_ms)
         btc_4h = get_candles("BTCUSDT", "4h", N_4H, reference_ms=scan_reference_ms)
         regime = compute_btc_regime(btc_1h, btc_4h)
-        set_btc_regime(r
+        set_btc_regime(regime)
+        print(f"  {regime['label']}")
+    except Exception as e:
+        print(f"  [BTC REGIME] failed to compute: {e}")
+
+    print("[TRACK] Checking active signals…")
+    check_active_signals(state, bar_index_now, scan_reference_ms)   # [FIX-K]
+    save_state(state)
+
+    if should_send_summary():
+        send_summary(state)
+        save_state(state)
+
+    print("[PHASE 1] Collecting market breadth / RS inputs…")
+    candle_bundles: dict[str, tuple] = {}
+    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
+        futures = {
+            ex.submit(collect_market_inputs, sym, state, scan_reference_ms): sym
+            for sym in WATCHLIST
+        }
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                bundle = fut.result()
+                if bundle is not None:
+                    candle_bundles[sym] = bundle
+            except Exception as e:
+                print(f"    ERROR collecting inputs for {sym}: {e}")
+
+    finalize_breadth_cache()
+    finalize_rs_cache()
+    with _breadth_lock:
+        breadth_n = len(_breadth_snapshot or {})
+    with _rs_lock:
+        rs_n = len(_rs_snapshot or {})
+    print(f"  Breadth symbols: {breadth_n}  RS symbols: {rs_n}")
+
+    print("[PHASE 2] Scanning symbols for signals…")   # [FIX-J] was incorrectly "PHASE 3"
+    pending_signals: list[tuple] = []
+    with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
+        futures = {
+            ex.submit(scan_symbol, sym, state, bar_index_now, candle_bundles.get(sym),
+                      scan_reference_ms): sym
+            for sym in WATCHLIST
+        }
+        for fut in as_completed(futures):
+            sym = futures[fut]
+            try:
+                result = fut.result()
+                if result:
+                    pending_signals.extend(result)
+            except Exception as e:
+                print(f"    ERROR processing {sym}: {e}")
+
+    save_state(state)
+
+    pending_signals.sort(key=lambda t: priority_score(t[3]), reverse=True)
+    deduped_signals = deduplicate_correlated(pending_signals)
+    top_signals     = deduped_signals[:MAX_SIGNALS_PER_SCAN]
+    top_set         = set(id(t) for t in top_signals)
+    dropped_signals = [t for t in pending_signals if id(t) not in top_set]
+
+    if dropped_signals:
+        dropped_names = [f"{hl_coin(s)} {d.upper()}" for s, _, d, _ in dropped_signals]
+        print(f"  [RANK] Dropped {len(dropped_signals)} lower-priority signal(s): {', '.join(dropped_names)}")
+
+    signals_fired = 0
+    for rank, (symbol, _msg, direction, sig) in enumerate(top_signals, start=1):
+        msg    = format_signal(symbol, sig, "CORE", rank=rank)
+        msg_id = send_telegram(msg)
+        update_cooldown(state, symbol, direction, bar_index_now)
+
+        hist_id = record_signal_history(
+            state, symbol, direction, sig.signal_type, sig.final_score,
+            sig.funding_rate, sig.atr_pct,
+            sig.oi_trend_data.get("oi_change_pct")
+        )
+
+        if msg_id:
+            track_signal(state, symbol, direction, msg_id, sig, bar_index_now, hist_id=hist_id)
+            print(f"  [TRACK] #{rank} {hl_coin(symbol)} {direction.upper()} "
+                  f"TP1={sig.tp1:.4f} TP2={sig.tp2:.4f} SL={sig.sl:.4f}")
+        signals_fired += 1
+        time.sleep(0.5)
+
+    save_state(state)
+    print(f"Scan complete. {signals_fired} signal(s) fired.")
+
+
+if __name__ == "__main__":
+    main()
