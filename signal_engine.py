@@ -1,3 +1,5 @@
+
+
 import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
@@ -100,7 +102,7 @@ WICK_FILTER     = 0.45
 RANGE_PCT_BREAK = 0.20  # [FIX-M7] was 0.30 — close must be in top/bottom 20% of range
 PULL_ZONE_MULT  = 0.25
 PULL_TOUCH_LOOKBACK   = 2   # [FIX-L6] was 3 — tighter staleness on touch; range(0,3) = 0,1,2
-PULL_RECOVER_ATR_MULT = 0.10
+PULL_RECOVER_ATR_MULT = 0.25  # [FIX-B8] was 0.10 — trivially met by any close near EMA21; 0.25 requires meaningful recovery
 TREND_HOLD_BARS = 2
 USE_EXHAUSTION_SHORT:       bool = True   # Enable exhaustion short alignment mode
 EXHAUSTION_SHORT_SCORE_ADJ: int  = -1     # Score penalty when exhaustion mode fires
@@ -194,7 +196,7 @@ WIN_RATE_MIN_SAMPLE_FOR_ADJ: int = 80   # [FIX-C7] disable score adj until 80 re
 MAX_OI_SCALE: float = 3.0               # [FIX-C6] cap OI normalization amplification at 3×
 
 # ── MINIMUM R:R RATIO ─────────────────────────────────────────
-MIN_RR_RATIO: float = 0.75              # [FIX-M6] minimum TP1:SL distance ratio — below this, suppress
+MIN_RR_RATIO: float = 1.0               # [FIX-B5] was 0.75 — enforce minimum 1:1 R:R on all signals
 
 # ── ATR FALLBACK ──────────────────────────────────────────────
 ATR_FALLBACK_PCT: float = 0.30          # [FIX-L4] minimum ATR as % of price, was 0.03%
@@ -262,7 +264,7 @@ TP1_MULT_PULL:  float = 1.0   # was 1.2
 TP2_MULT_PULL:  float = 2.0
 SL_MULT_PULL:   float = 0.85
 HIGH_ATR_THRESHOLD: float = 3.0
-SL_HIGH_ATR_MULT:   float = 1.05
+SL_HIGH_ATR_MULT:   float = 0.90  # [FIX-B5] was 1.05 — 1.05 > TP1_MULT=1.0 = R:R < 1.0
 
 # [v11.10-4] Per-symbol ATR percentile
 ATR_HIST_DEPTH:     int   = 48
@@ -685,7 +687,7 @@ def compute_btc_regime(candles_1h: list[dict], candles_4h: list[dict]) -> dict:
     btc_4h_momentum = len(c4h) >= 6 and c4h[-2] > c4h[-5]
 
     btc_bullish = (ef4h > es4h) and (ef1h > es1h) and btc_4h_momentum
-    btc_bearish = (ef4h < es4h) and (ef1h < es1h) and not btc_4h_momentum
+    btc_bearish = (ef4h < es4h) and (ef1h < es1h)  # [FIX-B7] removed btc_4h_momentum gate — bearish declared on EMA cross alone; momentum gate was asymmetric and delayed bear detection
 
     if btc_bullish:
         label = "BTC Regime: Bullish"
@@ -899,7 +901,7 @@ def record_signal_history(state: dict, symbol: str, direction: str,
         "timestamp":       int(time.time()),
     })
     if len(hist) > 500:
-        state["signal_history"] = hist[-500:]
+        state["signal_history"] = hist[-2000:]  # [FIX-B6] was 500 — too low for 30-day WR window
     return entry_id
 
 
@@ -2056,13 +2058,22 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     res.supports, res.resistances = find_sr_levels(candles_15m, atr_val=atr_val)
 
     if res.signal_type == "PULL":
+        # [FIX-B3] Step 6b must not contradict FIX-C2. Only penalise OI falling when
+        # price_dir is "down" (selling into a falling market). When price_dir is "up"
+        # and OI is falling, that is short-covering — already made neutral by FIX-C2
+        # in compute_oi_trend(). Applying -1 here on top would undo FIX-C2 silently.
         # [FIX-L3] Guard against double-counting: Step 1 already applies -1 for OI divergence
         # (price up + OI falling on a long, or price down + OI falling on a short).
         # Step 6b only adds the extra -1 when OI is falling but Step 1 scored it 0 (neutral),
         # e.g. when price_dir disagrees with the PULL recover bar direction.
-        if oi_data.get("oi_trend") == "falling" and oi_data.get("score_adj", 0) == 0:
+        _oi_falling_bearish = (
+            oi_data.get("oi_trend") == "falling"
+            and oi_data.get("score_adj", 0) == 0
+            and price_dir == "down"  # [FIX-B3] exclude short-covering (price_dir == "up")
+        )
+        if _oi_falling_bearish:
             adjusted_score -= 1
-            adjs.append(("OI falling on PULL (Step-1 neutral)", -1))
+            adjs.append(("OI falling on PULL with price down (Step-1 neutral)", -1))  # [FIX-B3]
 
         # [v12.4-2] Inclusive boundary restored (was strict '<', regressed from v11.9-2's
         # fix). An exact 0.40x reading is indistinguishable from 0.39x given raw data
@@ -2422,7 +2433,10 @@ def check_cooldown(state, coin, direction, bar_index, signal_type: str = "",
 
     # [FIX-C] Bar-index cooldown check — added alongside post-loss cooldown
     cooldown_key = f"{symbol}_{direction}"
-    last_bar = state.get("signal_cooldowns", {}).get(cooldown_key)
+    # [FIX-B4] Read both cooldown dicts under _state_lock to prevent race with concurrent threads
+    with _state_lock:  # [FIX-B4]
+        last_bar   = state.get("signal_cooldowns",  {}).get(cooldown_key)
+        last_sl_ts = state.get("post_loss_cooldown", {}).get(cooldown_key)
     if last_bar is not None:
         bars_elapsed = bar_index - last_bar
         required_bars = (SIGNAL_COOLDOWN_BARS_HIGHSCORE
@@ -2435,7 +2449,6 @@ def check_cooldown(state, coin, direction, bar_index, signal_type: str = "",
                   f"{remaining_bars} bar(s) remaining (need {required_bars})")
             return False
 
-    last_sl_ts = state.get("post_loss_cooldown", {}).get(cooldown_key)
     if last_sl_ts is not None:
         elapsed = int(time.time()) - last_sl_ts
         if elapsed < PULL_REENTRY_COOLDOWN_S:
@@ -2452,7 +2465,8 @@ def update_cooldown(state, coin, direction, bar_index):
     # check_cooldown can enforce SIGNAL_COOLDOWN_BARS between same-direction signals.
     symbol = coin if coin.endswith("USDT") else coin + "USDT"
     cooldown_key = f"{symbol}_{direction}"
-    state.setdefault("signal_cooldowns", {})[cooldown_key] = bar_index
+    with _state_lock:  # [FIX-B4] prevent race condition with concurrent scan threads
+        state.setdefault("signal_cooldowns", {})[cooldown_key] = bar_index  # [FIX-B4]
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -3048,16 +3062,17 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
 # ═══════════════════════════════════════════════════════════════
 
 def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
-    seen_groups: set[str] = set()
-    result: list[tuple]   = []
+    seen_groups: set[tuple] = set()  # [FIX-B2] was set[str] — now (group, direction) tuples
+    result: list[tuple]     = []
     for sig_tuple in signals:
-        symbol = sig_tuple[0]
+        symbol    = sig_tuple[0]
+        direction = sig_tuple[2]  # [FIX-B2] extract direction from tuple
         group  = next(
             (g for g, members in CORR_GROUPS.items() if symbol in members),
             symbol
         )
-        if group not in seen_groups:
-            seen_groups.add(group)
+        if (group, direction) not in seen_groups:  # [FIX-B2] direction-aware dedup key
+            seen_groups.add((group, direction))     # [FIX-B2]
             result.append(sig_tuple)
     return result
 
