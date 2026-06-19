@@ -1,14 +1,3 @@
-"""
-Liquidity & Market Structure Confluence Layer
-==============================================
-Strict rules (from prompt):
-  - NEVER generates trades by itself.
-  - May ONLY filter, rank, boost, reduce, or contextualize signals.
-  - Reuses existing utilities (atr, safe, sma, _cluster_levels pattern).
-  - All weights configurable via LiquidityConfig.
-  - Candle-by-candle, no future data leakage, no repainting.
-  - O(n) or near-O(n) complexity.
-"""
 from __future__ import annotations
 
 import math
@@ -16,57 +5,7 @@ import threading
 from dataclasses import dataclass, field
 from typing import Optional, Iterable
 
-# Reuse existing utilities from the signal engine
-try:
-    from signal_engine import safe, atr, sma, _cluster_levels
-except ImportError:
-    # Allow standalone unit-testing of this module
-    def safe(v, fallback=0.0):
-        try:
-            if v is None:
-                return fallback
-            if isinstance(v, (int, float)) and math.isnan(v):
-                return fallback
-            return v
-        except (TypeError, ValueError):
-            return fallback
-
-    def sma(values, period):
-        out = [float("nan")] * len(values)
-        for i in range(period - 1, len(values)):
-            out[i] = sum(values[i - period + 1: i + 1]) / period
-        return out
-
-    def _cluster_levels(pivots, atr_val, tolerance=0.3):
-        if not pivots or atr_val <= 0:
-            return pivots
-        zones, members = [], []
-        for p in sorted(pivots):
-            if zones and abs(p - zones[-1]) < atr_val * tolerance:
-                members[-1].append(p)
-                m = members[-1]
-                zones[-1] = sorted(m)[len(m) // 2]
-            else:
-                zones.append(p)
-                members.append([p])
-        return zones
-
-    def atr(highs, lows, closes, period):
-        trs = [float("nan")]
-        for i in range(1, len(closes)):
-            trs.append(max(
-                highs[i] - lows[i],
-                abs(highs[i] - closes[i - 1]),
-                abs(lows[i] - closes[i - 1]),
-            ))
-        result = [float("nan")] * len(closes)
-        if len(trs) < period + 1:
-            return result
-        result[period] = sum(trs[1:period + 1]) / period
-        for i in range(period + 1, len(trs)):
-            result[i] = (result[i - 1] * (period - 1) + trs[i]) / period
-        return result
-
+from utils import safe, atr, sma, _cluster_levels
 
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION (all weights configurable, no hardcoded scoring)
