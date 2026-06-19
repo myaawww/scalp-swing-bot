@@ -1,6 +1,4 @@
 
-
-import os, json, time, math, random, threading, requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -120,7 +118,9 @@ USE_D200_FILTER   = True
 D200_SOFT_ADJ     = 1
 
 USE_DAILY_ADX     = True
-MIN_DAILY_ADX     = 20.0
+MIN_DAILY_ADX     = 18.0   # [v15.3.0-TUNE1] was 20.0 — daily ADX is slow-moving; 20 blocked many
+                           # valid setups in early-stage daily trends.  18 still requires a
+                           # non-trivial daily trend (flat chopzone ≈ 15); preserves quality.
 PULL_REQUIRES_4H  = True
 
 # ── ACCURACY FILTERS ──────────────────────────────────────────
@@ -146,7 +146,10 @@ BREAK_VOL_ACCEL_BARS: int = 2   # Current bar volume must exceed this many prior
 # ── RELATIVE STRENGTH ─────────────────────────────────────────
 RS_TOP_PERCENTILE: float    = 0.20
 RS_BOTTOM_PERCENTILE: float = 0.20
-RS_BREAK_HARD_GATE_PCT: float = -3.0   # BREAK suppressed if RS vs BTC < this
+RS_BREAK_HARD_GATE_PCT: float = -4.0   # [v15.3.0-TUNE3] was -3.0 — -3% hard-killed many valid BREAKs
+                                       # where coin was merely consolidating slightly vs BTC rather
+                                       # than genuinely leading down. -4% still hard-blocks clear
+                                       # relative weakness while recovering mid-tier setups.
 RS_BREAK_SOFT_PERCENTILE: float = 0.25 # BREAK soft −1 only when RS percentile ≤ this
 
 # ── MARKET BREADTH ────────────────────────────────────────────
@@ -216,10 +219,20 @@ MACRO_HIGH_ATR_SUPPRESS_PCT: float = 3.0
 MACRO_CACHE_TTL_S: int          = 3600
 
 # ── CANDLE COUNTS ─────────────────────────────────────────────
+# [v15.3.0-BUG1] EMA seed-contamination fix — EMAs seeded with a simple average
+# of the first `period` bars; the seed only washes out after several multiples of
+# the period.  Previous values left 1H/4H/Daily EMAs substantially anchored to a
+# stale SMA rather than genuinely weighting recent price action:
+#   N_1H=60  → ~67% seed bias on EMA50;  N_4H=80  → ~30%; N_1D=210 → ~0.5% for D200.
+# New values reduce seed bias to <1% on every indicator:
+#   N_1H: 60→200  (EMA50 needs ≥150 bars for <1% bias; 200 gives comfortable margin)
+#   N_4H: 80→200  (same reasoning)
+#   N_1D: 210→600 (EMA200 needs ≥550 bars; 600 gives a clean buffer)
+# N_15M unchanged — existing 300 bars is already well-converged for EMA50.
 N_15M = 300
-N_1H  = 60
-N_4H  = 80
-N_1D  = 210
+N_1H  = 200   # [v15.3.0-BUG1] was 60  — needed ≥150 for <5% bias, ≥200 for <1%
+N_4H  = 200   # [v15.3.0-BUG1] was 80  — same
+N_1D  = 600   # [v15.3.0-BUG1] was 210 — EMA200 needs ≥550 bars to wash out seed
 
 # ── REACTION SETTINGS ─────────────────────────────────────────
 REACT_TP1           = "🔥"
@@ -571,11 +584,14 @@ def compute_oi_trend(state: dict, symbol: str, current_price: float,
             score_adj, condition, breakdown_tag = 0,  "Neutral",                                  "OI→"
     else:
         if bearish_confirm:
-            score_adj, condition, breakdown_tag = 1,  "Bearish Confirmation",          "OI↑"
-        elif bullish_confirm or bearish_div:
-            score_adj, condition, breakdown_tag = -1, "Counter/Divergence vs Short",   "OI Divergence"
-        else:
-            score_adj, condition, breakdown_tag = 0,  "Neutral",                       "OI→"
+            score_adj, condition, breakdown_tag = 1,  "Bearish Confirmation",                      "OI↑"
+        elif bullish_confirm:                          # [v15.3.0-BUG2] split bearish_div out — it is NOT counter-trend
+            score_adj, condition, breakdown_tag = -1, "Counter vs Short (OI rising on up move)",   "OI Divergence"
+        else:                                          # [v15.3.0-BUG2] bearish_div (price↓ + OI↓ = long-covering) now neutral,
+            score_adj, condition, breakdown_tag = 0,  "Neutral",                                   "OI→"
+            # mirror of [FIX-C2] which made bullish_div neutral for longs:
+            # price down + OI falling = longs closing = structural unwind, not fresh selling pressure.
+            # Penalising it asymmetrically cost short-side PULL/BREAK score with no quality justification.
 
     label = (
         f"OI Trend: {oi_trend.capitalize()}  "
@@ -1727,8 +1743,11 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 
     # Exhaustion short: 4H bull trend losing hold + 1H already bearish.
     # Fires earlier than full_short_align on rollovers before the 4H EMA cross confirms.
-    _f4h_back = safe(ema_f4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
-    _s4h_back = safe(ema_s4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
+    # [v15.3.0-BUG4] was -(LOOKBACK+2) = index -6 = 5 bars back (20h), not 4 bars (16h) as
+    # documented in the comment and EXHAUSTION_SPREAD_LOOKBACK constant.  Changed to -(LOOKBACK+1)
+    # which matches the EMA_VELOCITY pattern and correctly measures 4 bars × 4h = 16h back.
+    _f4h_back = safe(ema_f4h[-(EXHAUSTION_SPREAD_LOOKBACK + 1)])
+    _s4h_back = safe(ema_s4h[-(EXHAUSTION_SPREAD_LOOKBACK + 1)])
     h4_spread_now  = ef4h - es4h
     h4_spread_prev = _f4h_back - _s4h_back
     if USE_EXHAUSTION_SHORT:
@@ -2243,7 +2262,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
 
     # [v11.11-2] Multi-timeframe RSI confluence
     rsi4h_arr = rsi(c4h, RSI_LEN)
-    _r4h_raw  = rsi4h_arr[-2] if len(rsi4h_arr) >= 2 else float("nan")
+    _r4h_raw  = rsi4h_arr[-1] if len(rsi4h_arr) >= 1 else float("nan")  # [v15.3.0-BUG3] was [-2] — missed in QW-2 pass; up to 4h stale vs all other 4H values
     r4h_valid = not math.isnan(_r4h_raw)
     r4h       = _r4h_raw if r4h_valid else 50.0
     
@@ -2499,7 +2518,9 @@ def save_state(state: dict):
 # ── SCAN COOLDOWN ─────────────────────────────────────────────
 # Bar-index cooldown: how many 15m bars must pass before the same symbol+direction
 # can fire again.  Prevents duplicate signals on consecutive scan runs.
-SIGNAL_COOLDOWN_BARS:           int = 4   # Standard cooldown: 4 bars = 1 hour
+SIGNAL_COOLDOWN_BARS:           int = 3   # [v15.3.0-TUNE2] was 4 (1h) — 3 bars = 45min; recovers
+                                          # signals that set up just after the prior cooldown opened.
+                                          # High-conviction threshold unchanged.
 SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2   # High-conviction cooldown: 2 bars = 30 min
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7   # Score at or above this uses shorter cooldown
 
@@ -2723,7 +2744,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v15.2.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v15.3.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
