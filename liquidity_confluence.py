@@ -1,8 +1,6 @@
 """
 Liquidity & Market Structure Confluence Layer
-=============================================
-Non-trade-generating overlay for the existing signal engine.
-
+==============================================
 Strict rules (from prompt):
   - NEVER generates trades by itself.
   - May ONLY filter, rank, boost, reduce, or contextualize signals.
