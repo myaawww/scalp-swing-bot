@@ -101,7 +101,10 @@ MIN_ATR_PCT     = 0.2
 WICK_FILTER     = 0.45
 RANGE_PCT_BREAK = 0.20  # [FIX-M7] was 0.30 — close must be in top/bottom 20% of range
 PULL_ZONE_MULT  = 0.25
-PULL_TOUCH_LOOKBACK   = 2   # [FIX-L6] was 3 — tighter staleness on touch; range(0,3) = 0,1,2
+PULL_TOUCH_LOOKBACK   = 3   # [v15.2.0] was 2 — widened to 3 bars (45min) so slower-developing
+                            # Mixed-regime PULL setups (price grinding sideways near EMA21
+                            # over 3-4 bars) aren't missed; pull_recover_long/short still
+                            # require the current bar to show a real bounce.
 PULL_RECOVER_ATR_MULT_TREND: float = 0.25  # used when BTC regime is Bullish or Bearish
 PULL_RECOVER_ATR_MULT_MIXED: float = 0.10  # used when BTC regime is Mixed (neither bullish nor bearish)
 TREND_HOLD_BARS = 2
@@ -151,6 +154,7 @@ BREADTH_WEAK_LONG_THRESHOLD:  float = 0.20
 BREADTH_WEAK_SHORT_THRESHOLD: float = 0.80
 BREADTH_BREAK_LONG_SUPPRESS:  float = 0.95
 BREADTH_CROWDED_LONG_THRESHOLD: float = 0.75
+BREADTH_CROWDED_LONG_THRESHOLD_MIXED: float = 0.80
 BREADTH_RS_COMPOUND_PENALTY: int   = -2
 BREADTH_RS_NEGATIVE_THRESH: float  = 0.0
 
@@ -792,16 +796,25 @@ def compute_market_breadth() -> dict:
     return {"breadth_50_pct": pct, "label": label}
 
 
-def apply_breadth_adjustment(direction: str, rs_pct: float | None = None) -> tuple[int, str]:
+def apply_breadth_adjustment(direction: str, rs_pct: float | None = None,
+                              btc_regime: dict | None = None) -> tuple[int, str]:
     breadth = compute_market_breadth()
     pct     = breadth["breadth_50_pct"]
     label   = breadth["label"]
     adj     = 0
+
+    _is_mixed = (btc_regime is not None
+                 and not btc_regime.get("bullish")
+                 and not btc_regime.get("bearish"))
+    _crowded_thresh = (BREADTH_CROWDED_LONG_THRESHOLD_MIXED
+                       if _is_mixed
+                       else BREADTH_CROWDED_LONG_THRESHOLD)
+
     if direction == "long":
         if pct > 0.90:
             adj    = -2
             label += " (-2)"
-        elif pct > BREADTH_CROWDED_LONG_THRESHOLD:
+        elif pct > _crowded_thresh:
             rs_weak = rs_pct is not None and rs_pct <= BREADTH_RS_NEGATIVE_THRESH
             if rs_weak:
                 adj    = -2
@@ -1498,9 +1511,6 @@ def get_effective_min_score(btc_regime: dict | None, breadth_pct: float) -> int:
         return MIN_SCORE
     bullish = btc_regime.get("bullish", False)
     bearish = btc_regime.get("bearish", False)
-    mixed   = not bullish and not bearish
-    if mixed and breadth_pct > 0.82:
-        return MIN_SCORE + 1
     if bearish and breadth_pct > 0.75:
         return MIN_SCORE + 1
     return MIN_SCORE
@@ -1997,7 +2007,9 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     rs_data      = compute_relative_strength(symbol)
     res.rs_data  = rs_data
 
-    breadth_adj, breadth_label = apply_breadth_adjustment(direction, rs_pct=rs_data.get("rs_pct"))
+    breadth_adj, breadth_label = apply_breadth_adjustment(
+        direction, rs_pct=rs_data.get("rs_pct"), btc_regime=get_btc_regime()
+    )
     res.breadth_label = breadth_label
     adjusted_score += breadth_adj
     if breadth_adj != 0:
@@ -2048,7 +2060,12 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         and ((direction == "long"  and _h1_spread < H4_STALE_SPREAD_MIN)
           or (direction == "short" and _h1_spread > -H4_STALE_SPREAD_MIN))
     )
-    if h4_stale_bias:
+    _btc_regime_local = get_btc_regime()
+    _is_mixed_local   = (_btc_regime_local is not None
+                         and not _btc_regime_local.get("bullish")
+                         and not _btc_regime_local.get("bearish"))
+
+    if h4_stale_bias and not _is_mixed_local:
         adjusted_score -= 1
         adjs.append((f"4H bias stale ({bar_age_frac*100:.0f}% into bar, 1H spread {_h1_spread:+.2f}x ATR)", -1))
 
@@ -2706,7 +2723,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v15.1.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v15.2.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 
