@@ -131,6 +131,11 @@ EXHAUSTION_SHORT_SCORE_ADJ: int  = -1
 USE_EXHAUSTION_LONG:        bool = True
 EXHAUSTION_LONG_SCORE_ADJ:  int  = -1
 EXHAUSTION_SPREAD_LOOKBACK: int  = 4
+# [New] Pullback alignment mode — 4H trend holding, 1H temporarily against it.
+# PULL-only (never BREAK). Distinct from "exhaustion" (which requires the 4H
+# trend to be breaking down). See build_pullback_alignment_mode.md for rationale.
+USE_PULLBACK_ALIGNMENT:     bool = True
+PULLBACK_SCORE_ADJ:         int  = -1   # conservative penalty until win-rate data proves it
 USE_ROLLING_VWAP  = True
 ROLLING_VWAP_LEN  = 16
 
@@ -1094,7 +1099,7 @@ def compute_win_rates(state: dict) -> dict:
         if n >= WIN_RATE_MIN_SAMPLE:
             wrs["by_direction"][d] = {"wr": wr, "n": n}
 
-    for mode in ("full", "exhaustion"):
+    for mode in ("full", "exhaustion", "pullback"):
         subset = [e for e in hist if e.get("alignment_mode", "full") == mode]
         wr, n  = wr_for(subset)
         if n >= WIN_RATE_MIN_SAMPLE:
@@ -1901,7 +1906,7 @@ def _compute_signal_indicators(symbol: str, candles_15m, candles_1h, candles_4h,
     return ind
 
 def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
-                         funding_rate: float | None) -> SignalResult:
+                         funding_rate: float | None, symbol: str = "?") -> SignalResult:
     """Detect raw BREAK/PULL signals and compute base score.
 
     [Quality-37] Decomposed from compute_signals.
@@ -2056,6 +2061,16 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     else:
         exhaustion_long_align = False
 
+    # [New] Pullback alignment: 4H trend is healthy and HOLDING (not breaking down,
+    # unlike exhaustion), but 1H has temporarily moved against it. This is the
+    # "dip inside a held swing trend" case — PULL-only, never feeds BREAK.
+    if USE_PULLBACK_ALIGNMENT:
+        pullback_long_align  = h4_bull and h4_trend_held_bull and h1_bear
+        pullback_short_align = h4_bear and h4_trend_held_bear and h1_bull
+    else:
+        pullback_long_align  = False
+        pullback_short_align = False
+
     pull_long_align  = (h4_bull and h4_trend_held_bull and h1_bull) \
                         if PULL_REQUIRES_4H else (h4_trend_held_bull and h1_bull)
     pull_short_align = (
@@ -2067,6 +2082,10 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
         pull_short_align = True
     if USE_EXHAUSTION_LONG and exhaustion_long_align:
         pull_long_align = True
+    if USE_PULLBACK_ALIGNMENT and pullback_long_align:
+        pull_long_align = True
+    if USE_PULLBACK_ALIGNMENT and pullback_short_align:
+        pull_short_align = True
 
     rng = cur_h - cur_l + 1e-10
 
@@ -2139,6 +2158,26 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     long_sig  = long_break  or long_pull
     short_sig = short_break or short_pull
 
+    # ── [DIAG] Temporary gate-failure logging — remove after debugging ──
+    if not long_sig and not short_sig:
+        fails = []
+        if not daily_adx_ok:
+            fails.append(f"daily_adx({adx_daily:.1f}<{MIN_DAILY_ADX})")
+        if not (full_long_align or exhaustion_long_align or pullback_long_align
+                or full_short_align or exhaustion_short_align or pullback_short_align):
+            fails.append(f"4H/1H align(h4_bull={h4_bull} h4_held_bull={h4_trend_held_bull} "
+                         f"h1_bull={h1_bull} h4_bear={h4_bear} h4_held_bear={h4_trend_held_bear} h1_bear={h1_bear})")
+        if not market_ok:
+            fails.append(f"atr_pct({atr_pct:.2f} out of [{MIN_ATR_PCT},{MAX_ATR_PCT}])")
+        if not (break_bull_bar or break_bear_bar):
+            fails.append("no_break_bar")
+        if not (pull_touched_long or pull_touched_short):
+            fails.append("no_pull_touch")
+        if long_score < MIN_SCORE and short_score < MIN_SCORE:
+            fails.append(f"score(long={long_score} short={short_score} < {MIN_SCORE})")
+        print(f"  [DIAG] {symbol} no_sig | {' | '.join(fails) if fails else 'unknown — check alignment/RSI/VWAP combo'}")
+    # ── [/DIAG] ──
+
     # Store all computed values for later use
     res._ind = ind
     res._ctx = {
@@ -2151,6 +2190,7 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
         "h4_trend_held_bull": h4_trend_held_bull, "h4_trend_held_bear": h4_trend_held_bear,
         "full_long_align": full_long_align, "full_short_align": full_short_align,
         "exhaustion_short_align": exhaustion_short_align, "exhaustion_long_align": exhaustion_long_align,
+        "pullback_long_align": pullback_long_align, "pullback_short_align": pullback_short_align,
         "rsi_divergence": rsi_divergence,
         "bb_long": bb_long, "bb_short": bb_short,
         "obv_slope_long": obv_slope_long, "obv_slope_short": obv_slope_short,
@@ -2290,14 +2330,36 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
             adjs.append(("Exhaustion long mode (4H spread narrowing, not yet confirmed)",
                          EXHAUSTION_LONG_SCORE_ADJ))
 
-    res.alignment_mode = (
-        "exhaustion" if (
-            (direction == "short" and USE_EXHAUSTION_SHORT
-             and ctx["exhaustion_short_align"] and not ctx["full_short_align"])
-            or (direction == "long" and USE_EXHAUSTION_LONG
-                and ctx["exhaustion_long_align"] and not ctx["full_long_align"])
-        ) else "full"
-    )
+    # Pullback adjustments — 4H trend held (not breaking down), 1H temporarily against it.
+    # Only applies when the signal didn't already qualify under full alignment.
+    if (direction == "long" and USE_PULLBACK_ALIGNMENT
+            and ctx["pullback_long_align"] and not ctx["full_long_align"]):
+        adjusted_score += PULLBACK_SCORE_ADJ
+        adjs.append(("Pullback mode (1H dip inside held 4H uptrend)", PULLBACK_SCORE_ADJ))
+
+    if (direction == "short" and USE_PULLBACK_ALIGNMENT
+            and ctx["pullback_short_align"] and not ctx["full_short_align"]):
+        adjusted_score += PULLBACK_SCORE_ADJ
+        adjs.append(("Pullback mode (1H bounce inside held 4H downtrend)", PULLBACK_SCORE_ADJ))
+
+    if direction == "short":
+        if ctx["full_short_align"]:
+            res.alignment_mode = "full"
+        elif USE_EXHAUSTION_SHORT and ctx["exhaustion_short_align"]:
+            res.alignment_mode = "exhaustion"
+        elif USE_PULLBACK_ALIGNMENT and ctx["pullback_short_align"]:
+            res.alignment_mode = "pullback"
+        else:
+            res.alignment_mode = "full"
+    else:  # long
+        if ctx["full_long_align"]:
+            res.alignment_mode = "full"
+        elif USE_EXHAUSTION_LONG and ctx["exhaustion_long_align"]:
+            res.alignment_mode = "exhaustion"
+        elif USE_PULLBACK_ALIGNMENT and ctx["pullback_long_align"]:
+            res.alignment_mode = "pullback"
+        else:
+            res.alignment_mode = "full"
 
     # 4H stale bias
     _ref_ms       = reference_ms if reference_ms is not None else int(time.time() * 1000)
@@ -2740,9 +2802,18 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
         h4_tag = "4H:⚠"
     elif not res.fire_long and ctx["exhaustion_short_align"] and not ctx["full_short_align"]:
         h4_tag = "4H:⚠"
+    elif res.fire_long and ctx["pullback_long_align"] and not ctx["full_long_align"]:
+        h4_tag = "4H:✓"  # 4H held fine — it's 1H that pulled back, shown via h1_tag below
+    elif not res.fire_long and ctx["pullback_short_align"] and not ctx["full_short_align"]:
+        h4_tag = "4H:✓"
     else:
         h4_tag = f"4H:{'✓' if (ctx['full_long_align'] if res.fire_long else ctx['full_short_align']) else '✗'}"
-    res.v10_gates = (f"DailyADX:{'✓' if ctx['daily_adx_ok'] else '✗'} {h4_tag} 1H:{'✓' if h1 else '✗'}")
+
+    if res.alignment_mode == "pullback":
+        h1_tag = "1H:↩ (pullback)"
+    else:
+        h1_tag = f"1H:{'✓' if h1 else '✗'}"
+    res.v10_gates = (f"DailyADX:{'✓' if ctx['daily_adx_ok'] else '✗'} {h4_tag} {h1_tag}")
 
     _effective_min = get_effective_min_score(btc_regime, breadth_pct)
     if adjusted_score < _effective_min:
@@ -2813,7 +2884,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         record_market_inputs_from_candles(symbol, candles_15m, candles_4h)
 
     # Phase 2: Detect raw signals
-    res = _detect_raw_signals(ind, state, reference_ms, funding_rate)
+    res = _detect_raw_signals(ind, state, reference_ms, funding_rate, symbol)
     res.symbol = symbol
 
     if not (res.fire_long or res.fire_short):
