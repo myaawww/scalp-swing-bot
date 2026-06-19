@@ -2158,48 +2158,6 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     long_sig  = long_break  or long_pull
     short_sig = short_break or short_pull
 
-    # ── [DIAG] Temporary gate-failure logging — remove after debugging ──
-    if not long_sig and not short_sig:
-        fails = []
-        if not daily_adx_ok:
-            fails.append(f"daily_adx({adx_daily:.1f}<{MIN_DAILY_ADX})")
-        if not (full_long_align or exhaustion_long_align or pullback_long_align
-                or full_short_align or exhaustion_short_align or pullback_short_align):
-            fails.append(f"4H/1H align(h4_bull={h4_bull} h4_held_bull={h4_trend_held_bull} "
-                         f"h1_bull={h1_bull} h4_bear={h4_bear} h4_held_bear={h4_trend_held_bear} h1_bear={h1_bear})")
-        if not market_ok:
-            fails.append(f"atr_pct({atr_pct:.2f} out of [{MIN_ATR_PCT},{MAX_ATR_PCT}])")
-        if not (break_bull_bar or break_bear_bar):
-            fails.append("no_break_bar")
-        if not (pull_touched_long or pull_touched_short):
-            fails.append("no_pull_touch")
-        if long_score < MIN_SCORE and short_score < MIN_SCORE:
-            fails.append(f"score(long={long_score} short={short_score} < {MIN_SCORE})")
-        # [DIAG-2] Last-mile PULL entry-quality checks — these are what's hidden
-        # behind "unknown" once alignment/touch/score all clear.
-        align_ok_long  = full_long_align or exhaustion_long_align or pullback_long_align
-        align_ok_short = full_short_align or exhaustion_short_align or pullback_short_align
-        if align_ok_long and pull_touched_long and long_score >= MIN_SCORE:
-            if not pull_recover_long:
-                fails.append("pull_recover_long=False (price hasn't reclaimed EMA+buffer)")
-            if not pull_bull_bar:
-                fails.append("pull_bull_bar=False (candle not clean bullish)")
-            if not vwap_long:
-                fails.append(f"vwap_long=False (price below rolling VWAP)")
-            if not rsi_pull_long:
-                fails.append(f"rsi_pull_long=False (r15={r15:.1f} outside [{RSI_PULL_LONG_MIN},{RSI_PULL_LONG_MAX}])")
-        if align_ok_short and pull_touched_short and short_score >= MIN_SCORE:
-            if not pull_recover_short:
-                fails.append("pull_recover_short=False (price hasn't reclaimed EMA-buffer)")
-            if not pull_bear_bar:
-                fails.append("pull_bear_bar=False (candle not clean bearish)")
-            if not vwap_short:
-                fails.append(f"vwap_short=False (price above rolling VWAP)")
-            if not rsi_pull_short:
-                fails.append(f"rsi_pull_short=False (r15={r15:.1f} outside [{RSI_PULL_SHORT_MIN},{RSI_PULL_SHORT_MAX}])")
-        print(f"  [DIAG] {symbol} no_sig | {' | '.join(fails) if fails else 'unknown — check alignment/RSI/VWAP combo'}")
-    # ── [/DIAG] ──
-
     # Store all computed values for later use
     res._ind = ind
     res._ctx = {
