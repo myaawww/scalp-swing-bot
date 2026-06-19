@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.5.2"  # [Fix-12] Bumped for cache collision fix & hardening
+__version__ = "15.5.3"  # [Fix-12] Bumped for cache collision fix & hardening
 
 _FF_TZ = ZoneInfo("America/New_York")
 OI_EXPECTED_INTERVAL_S: float = 15 * 60
