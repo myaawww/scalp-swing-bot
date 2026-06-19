@@ -203,8 +203,6 @@ INTERVAL_MS = {
     "1d":  24 * 60 * 60 * 1000,
 }
 
-# v12 UPGRADE CONSTANTS  (some relaxed in v12.3 — see FIX notes)
-
 PULL_BODY_MIN_RATIO: float = 0.20
 
 H4_STALE_AGE_FRACTION: float = 0.85
@@ -2439,7 +2437,7 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"✅ Leverage appropriate ({lev_range})\n"
         f"{chk_funding} {funding_str}\n"
         f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v12.8.2 [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"<i>Scalp Swing v15.1.0 [4H/15m] • Hyperliquid Perps • {ts}</i>"
     )
 
 # ACTIVE SIGNAL TRACKING
