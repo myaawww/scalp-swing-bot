@@ -1901,7 +1901,7 @@ def _compute_signal_indicators(symbol: str, candles_15m, candles_1h, candles_4h,
     return ind
 
 def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
-                         funding_rate: float | None) -> SignalResult:
+                         funding_rate: float | None, symbol: str = "?") -> SignalResult:
     """Detect raw BREAK/PULL signals and compute base score.
 
     [Quality-37] Decomposed from compute_signals.
@@ -2138,6 +2138,25 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
 
     long_sig  = long_break  or long_pull
     short_sig = short_break or short_pull
+
+    # ── [DIAG] Temporary gate-failure logging — remove after debugging ──
+    if not long_sig and not short_sig:
+        fails = []
+        if not daily_adx_ok:
+            fails.append(f"daily_adx({adx_daily:.1f}<{MIN_DAILY_ADX})")
+        if not (full_long_align or exhaustion_long_align or full_short_align or exhaustion_short_align):
+            fails.append(f"4H/1H align(h4_bull={h4_bull} h4_held_bull={h4_trend_held_bull} "
+                         f"h1_bull={h1_bull} h4_bear={h4_bear} h4_held_bear={h4_trend_held_bear} h1_bear={h1_bear})")
+        if not market_ok:
+            fails.append(f"atr_pct({atr_pct:.2f} out of [{MIN_ATR_PCT},{MAX_ATR_PCT}])")
+        if not (break_bull_bar or break_bear_bar):
+            fails.append("no_break_bar")
+        if not (pull_touched_long or pull_touched_short):
+            fails.append("no_pull_touch")
+        if long_score < MIN_SCORE and short_score < MIN_SCORE:
+            fails.append(f"score(long={long_score} short={short_score} < {MIN_SCORE})")
+        print(f"  [DIAG] {symbol} no_sig | {' | '.join(fails) if fails else 'unknown — check alignment/RSI/VWAP combo'}")
+    # ── [/DIAG] ──
 
     # Store all computed values for later use
     res._ind = ind
@@ -2813,7 +2832,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         record_market_inputs_from_candles(symbol, candles_15m, candles_4h)
 
     # Phase 2: Detect raw signals
-    res = _detect_raw_signals(ind, state, reference_ms, funding_rate)
+    res = _detect_raw_signals(ind, state, reference_ms, funding_rate, symbol)
     res.symbol = symbol
 
     if not (res.fire_long or res.fire_short):
