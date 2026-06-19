@@ -1837,7 +1837,7 @@ def _compute_signal_indicators(candles_15m, candles_1h, candles_4h, candles_d) -
     ind = {}
 
     # 15m indicators (cached)
-    i15 = get_cached_indicators("15m_temp", "15m", candles_15m)
+    i15 = get_cached_indicators(f"{symbol}_15m", "15m", candles_15m)
     ind["o15"], ind["h15"], ind["l15"], ind["c15"], ind["v15"] = i15["o"], i15["h"], i15["l"], i15["c"], i15["v"]
     ind["ema_f15"] = i15["ema_fast"]
     ind["ema_s15"] = i15["ema_slow"]
@@ -1849,14 +1849,14 @@ def _compute_signal_indicators(candles_15m, candles_1h, candles_4h, candles_d) -
     ind["obv15"]    = i15["obv"]
 
     # 1H indicators
-    i1h = get_cached_indicators("1h_temp", "1h", candles_1h)
+    i1h = get_cached_indicators(f"{symbol}_1h", "1h", candles_1h)
     ind["ema_f1h"] = i1h["ema_fast"]
     ind["ema_s1h"] = i1h["ema_slow"]
     ind["rsi1h"]   = i1h["rsi"]
     ind["h1h"], ind["l1h"], ind["c1h"], ind["v1h"] = i1h["h"], i1h["l"], i1h["c"], i1h["v"]
 
     # 4H indicators
-    i4h = get_cached_indicators("4h_temp", "4h", candles_4h)
+    i4h = get_cached_indicators(f"{symbol}_4h", "4h", candles_4h)
     ind["ema_f4h"] = i4h["ema_fast"]
     ind["ema_s4h"] = i4h["ema_slow"]
     ind["adx4h_arr"] = i4h["adx"][2]
@@ -2784,7 +2784,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         return res
 
     # Phase 1: Compute indicators
-    ind = _compute_signal_indicators(candles_15m, candles_1h, candles_4h, candles_d)
+    ind = _compute_signal_indicators(symbol, candles_15m, candles_1h, candles_4h, candles_d)
 
     if record_market_inputs:
         record_market_inputs_from_candles(symbol, candles_15m, candles_4h)
