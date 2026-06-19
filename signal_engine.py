@@ -1,4 +1,3 @@
-
 import os, json, time, math, random, threading, requests
 import signal as os_signal
 import sys
@@ -8,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.5.0"
+__version__ = "15.5.1"  # [Fix-Upgrade] Bumped for signal engine upgrade
 
 _FF_TZ = ZoneInfo("America/New_York")
 OI_EXPECTED_INTERVAL_S: float = 15 * 60
@@ -72,15 +71,21 @@ OBV_LEN   = 10
 MIN_SCORE            = 4
 MAX_SIGNALS_PER_SCAN = 3
 MAX_SIGNAL_HISTORY   = 2000
+# [Fix-7] MIN_OI_USD kept at 500K per "Implementation All except MIN_OI_USD"
 MIN_OI_USD: float = 500_000.0
 
+# [Fix-9] Penalty stacking cap — prevents over-filtering from double-counted risks
+MAX_NEGATIVE_ADJUSTMENTS: int = 3
+
 # [Risk-31] Maximum concurrent active signals cap (audit #31, related to #32)
-MAX_CONCURRENT_ACTIVE_SIGNALS: int = 8
+# [Fix-1] Raised from 8 → 12: Risk is managed by leverage scaling, not signal count
+MAX_CONCURRENT_ACTIVE_SIGNALS: int = 12
 
 # ── HIGHER-TIMEFRAME DIVERGENCE CHECK ─────────────────────
 USE_1H_RSI_DIVERGENCE: bool = True
 DIVERGENCE_LOOKBACK: int = 20  # [Logic-21] was 10 — increased to 20 to capture divergences forming over 20+ bars
-DIVERGENCE_BONUS: int = 1
+# [Fix-10] Increased from 1 → 2: 1H RSI divergence is a rare, high-conviction signal
+DIVERGENCE_BONUS: int = 2
 
 # ── FUNDING RATE AS CARRY METRIC ──────────────────────────
 USE_FUNDING_CARRY: bool = True
@@ -90,8 +95,9 @@ FUNDING_CARRY_BONUS: int = 1
 
 # ── DYNAMIC MAX_SIGNALS_PER_SCAN ───────────────────────────
 USE_DYNAMIC_MAX_SIGNALS: bool = True
-MAX_SIGNALS_BULL_TREND: int = 5
-MAX_SIGNALS_DEFAULT: int = 3
+# [Fix-5] Increased caps by 1 each: in strong trends, 5 signals across 25 coins is restrictive
+MAX_SIGNALS_BULL_TREND: int = 6  # was 5
+MAX_SIGNALS_DEFAULT: int = 4     # was 3
 BREADTH_BULL_THRESHOLD: float = 0.70
 
 # ── FALSE BREAKOUT PATTERN DETECTION ───────────────────────
@@ -137,7 +143,8 @@ PULL_REQUIRES_4H  = True
 
 # ── ACCURACY FILTERS ──────────────────────────────────────────
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
-SR_CLEARANCE_ATR_MULT: float    = 0.3
+# [Fix-8] Tightened from 0.30 → 0.20: Regime-aware TP/SL (Feature-50) now handles S/R adaptation
+SR_CLEARANCE_ATR_MULT: float    = 0.20
 SUPPORT_PROXIMITY_ATR: float    = 0.75
 
 # ── BREAK / PULL QUALITY REFINEMENTS ─────────────────────────
@@ -155,7 +162,8 @@ BREAK_VOL_ACCEL_BARS: int = 2
 # ── RELATIVE STRENGTH ─────────────────────────────────────────
 RS_TOP_PERCENTILE: float    = 0.20
 RS_BOTTOM_PERCENTILE: float = 0.20
-RS_BREAK_HARD_GATE_PCT: float = -4.0
+# [Fix-6] Loosened from -4.0 → -6.0: -4% RS vs BTC is common for coins with sector-specific catalysts
+RS_BREAK_HARD_GATE_PCT: float = -6.0
 RS_BREAK_SOFT_PERCENTILE: float = 0.25
 
 # ── MARKET BREADTH ────────────────────────────────────────────
@@ -174,7 +182,8 @@ BREADTH_RS_NEGATIVE_THRESH: float  = 0.0
 PULL_VOL_FLOOR: float          = 0.40
 PULL_VOL_FLOOR_OVERBOUGHT: float  = 0.50
 PULL_VOL_OVERBOUGHT_BREADTH: float = 0.80
-PULL_REENTRY_COOLDOWN_S: int   = 1800
+# [Fix-4] Shortened from 1800 → 900: 15min is sufficient — cooldown already blocks same symbol/direction
+PULL_REENTRY_COOLDOWN_S: int   = 900
 
 # ── ACCURACY FILTERS ──────────────────────────────────────────
 PROXIMITY_RS_MIN: float = -5.0
@@ -301,10 +310,12 @@ LEVERAGE_MAX: float = 10.0
 SR_LOOKBACK_BARS: int = 200  # was 100 — extended for major S/R levels
 
 # [Logic-13] Cooldown constants — comment fixed
-SIGNAL_COOLDOWN_BARS:           int = 3   # 3 × 15m = 45 min
+# [Fix-2] Shortened from 3 → 2: 2 bars (30min) still prevents immediate duplicate
+SIGNAL_COOLDOWN_BARS:           int = 2   # 2 × 15m = 30 min
 SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2   # 2 × 15m = 30 min for high-score signals
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7
-SIGNAL_COOLDOWN_POST_WIN_BARS:  int = 2   # [Logic-14 related] 2 bars = 30 min post-win (was 1)
+# [Fix-3] Shortened from 2 → 1: A winning trade proved the regime — re-enter sooner for continuations
+SIGNAL_COOLDOWN_POST_WIN_BARS:  int = 1   # 1 bar = 15 min post-win
 
 STATE_VERSION = 4  # Bumped for audit fixes
 
@@ -1872,6 +1883,7 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     """Detect raw BREAK/PULL signals and compute base score.
 
     [Quality-37] Decomposed from compute_signals.
+    [Fix-11] Added 4H ADX as 6th base score component; raised gate from MIN_SCORE-1 to MIN_SCORE.
     """
     res = SignalResult()
 
@@ -1959,6 +1971,9 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     adx4h = safe(ind["adx4h_arr"][-1], 25.0)
     h4_bull = ef4h > es4h
     h4_bear = ef4h < es4h
+
+    # [Fix-11] 4H ADX as base score component
+    adx4h_score_ok = adx4h >= ADX_SCORE_MIN  # 20.0
 
     def trend_held(ef_arr, es_arr, bull: bool) -> bool:
         for offset in range(1, TREND_HOLD_BARS + 1):
@@ -2061,12 +2076,15 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     pull_bull_bar      = cur_c > cur_o and clean_bull_bar()
     pull_bear_bar      = cur_c < cur_o and clean_bear_bar()
 
+    # [Fix-11] Base score now has 6 components (was 5): added 4H ADX confirmation
+    # Max base score goes from 5 → 6, gate goes from MIN_SCORE-1 → MIN_SCORE (3→4)
     long_score = sum([
         bb_long,
         h4_bull and h4_trend_held_bull,
         adx_score_ok,
         obv_slope_long,
         vol_score_ok,
+        adx4h_score_ok,  # NEW: 4H ADX confirmation
     ])
     short_score = sum([
         bb_short,
@@ -2074,25 +2092,27 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
         adx_score_ok,
         obv_slope_short,
         vol_score_ok,
+        adx4h_score_ok,  # NEW: 4H ADX confirmation
     ])
 
+    # [Fix-11] Gate raised from MIN_SCORE-1 to MIN_SCORE (proportionally with new 6th component)
     long_break  = (daily_adx_ok and (full_long_align or exhaustion_long_align) and break_bull_bar
                    and adx_break_ok and rsi_break_long
-                   and long_score  >= (MIN_SCORE - 1) and market_ok)
+                   and long_score  >= MIN_SCORE and market_ok)
     short_break = (daily_adx_ok
                    and (full_short_align or exhaustion_short_align)
                    and break_bear_bar
                    and adx_break_ok and rsi_break_short
-                   and short_score >= (MIN_SCORE - 1) and market_ok)
+                   and short_score >= MIN_SCORE and market_ok)
 
     long_pull  = (daily_adx_ok and pull_long_align and pull_touched_long
                   and pull_recover_long  and pull_bull_bar and vwap_long  and rsi_pull_long
-                  and long_score  >= (MIN_SCORE - 1) and market_ok)
+                  and long_score  >= MIN_SCORE and market_ok)
     short_pull = (daily_adx_ok
                   and pull_short_align
                   and pull_touched_short
                   and pull_recover_short and pull_bear_bar and vwap_short and rsi_pull_short
-                  and short_score >= (MIN_SCORE - 1) and market_ok)
+                  and short_score >= MIN_SCORE and market_ok)
 
     long_sig  = long_break  or long_pull
     short_sig = short_break or short_pull
@@ -2112,7 +2132,7 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
         "rsi_divergence": rsi_divergence,
         "bb_long": bb_long, "bb_short": bb_short,
         "obv_slope_long": obv_slope_long, "obv_slope_short": obv_slope_short,
-        "adx_score_ok": adx_score_ok, "adx4h": adx4h,
+        "adx_score_ok": adx_score_ok, "adx4h": adx4h, "adx4h_score_ok": adx4h_score_ok,
         "ef15": ef15, "es15": es15, "ef1h": ef1h, "es1h": es1h, "ef4h": ef4h, "es4h": es4h,
         "candles_15m_len": len(c15),
     }
@@ -2159,6 +2179,7 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
     """Apply all scoring adjustments and final filters.
 
     [Quality-37] Decomposed from compute_signals.
+    [Fix-9] Added penalty stacking cap before final MIN_SCORE check.
     """
     ind = res._ind
     ctx = res._ctx
@@ -2623,6 +2644,52 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
         elif direction == "short" and r1h < RSI_1H_PULL_SHORT_MIN:
             adjusted_score -= 1
             adjs.append((f"1H RSI extended ({r1h:.0f} < {RSI_1H_PULL_SHORT_MIN:.0f})", -1))
+
+    # ══════════════════════════════════════════════════════════════
+    # [Fix-9] PENALTY STACKING CAP
+    # ══════════════════════════════════════════════════════════════
+    # Prevent over-filtering from multiple penalties that partially measure
+    # the same risk (e.g., OI counter-trend + BTC regime counter-trend).
+    # Priority penalties (BTC Regime, OI, Exhaustion, RS negative) are kept
+    # first; secondary penalties are trimmed to stay within the cap.
+    total_neg = sum(adj for _, adj in adjs if adj < 0)
+    if total_neg < -MAX_NEGATIVE_ADJUSTMENTS:
+        PENALTY_PRIORITY = [
+            "BTC Regime",       # Keep — most important macro filter
+            "OI",               # Keep — capital flow confirmation
+            "Exhaustion",       # Keep — trend quality
+            "RS negative",      # Keep — relative weakness
+        ]
+
+        cap = -MAX_NEGATIVE_ADJUSTMENTS  # e.g., -3
+        current_sum = 0
+        kept_indices: set[int] = set()
+
+        # First pass: keep priority penalties (in original order)
+        for i, (lbl, adj) in enumerate(adjs):
+            if adj < 0 and any(p in lbl for p in PENALTY_PRIORITY):
+                if current_sum + adj >= cap:
+                    kept_indices.add(i)
+                    current_sum += adj
+
+        # Second pass: fill remaining budget with secondary penalties
+        for i, (lbl, adj) in enumerate(adjs):
+            if adj < 0 and i not in kept_indices:
+                if current_sum + adj >= cap:
+                    kept_indices.add(i)
+                    current_sum += adj
+
+        # Rebuild adjs preserving original order — trim non-kept negatives
+        trimmed_count = sum(1 for i, (_, adj) in enumerate(adjs)
+                           if adj < 0 and i not in kept_indices)
+        if trimmed_count > 0:
+            new_adjs = [(lbl, adj) for i, (lbl, adj) in enumerate(adjs)
+                        if adj >= 0 or i in kept_indices]
+            adjs[:] = new_adjs
+            adjusted_score = res.score + sum(adj for _, adj in adjs)
+            print(f"  [PENALTY CAP] {symbol} {direction.upper()} — "
+                  f"trimmed {trimmed_count} secondary penalty(ies) to stay within "
+                  f"-{MAX_NEGATIVE_ADJUSTMENTS} cap. Final neg total: {current_sum}")
 
     # ── Final suppression check ───────────────────────────────
     res.final_score = adjusted_score
