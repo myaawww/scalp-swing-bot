@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.5.1"  # [Fix-Upgrade] Bumped for signal engine upgrade
+__version__ = "15.5.2"  # [Fix-12] Bumped for cache collision fix & hardening
 
 _FF_TZ = ZoneInfo("America/New_York")
 OI_EXPECTED_INTERVAL_S: float = 15 * 60
@@ -96,8 +96,8 @@ FUNDING_CARRY_BONUS: int = 1
 # ── DYNAMIC MAX_SIGNALS_PER_SCAN ───────────────────────────
 USE_DYNAMIC_MAX_SIGNALS: bool = True
 # [Fix-5] Increased caps by 1 each: in strong trends, 5 signals across 25 coins is restrictive
-MAX_SIGNALS_BULL_TREND: int = 6  # was 5
-MAX_SIGNALS_DEFAULT: int = 4     # was 3
+MAX_SIGNALS_BULL_TREND: int = 5  
+MAX_SIGNALS_DEFAULT: int = 3    
 BREADTH_BULL_THRESHOLD: float = 0.70
 
 # ── FALSE BREAKOUT PATTERN DETECTION ───────────────────────
@@ -1555,7 +1555,16 @@ def get_cached_indicators(symbol: str, timeframe: str, candles: list[dict]) -> d
         return _compute_all_indicators(candles)
 
     cache_key = f"{symbol}_{timeframe}"
-    cache_sig = (len(candles), candles[-1]["t"])
+    
+    # [Fix-12] Hardened cache signature to include first/last candle prices.
+    # Prevents stale cache hits if the same symbol is fetched with overlapping windows.
+    first = candles[0]
+    last = candles[-1]
+    cache_sig = (
+        len(candles),
+        last["t"], last["c"],
+        first["t"], first["c"],
+    )
 
     with _indicator_cache_lock:
         cached = _indicator_cache.get(cache_key)
@@ -1576,6 +1585,14 @@ def get_cached_indicators(symbol: str, timeframe: str, candles: list[dict]) -> d
 def clear_indicator_cache() -> None:
     with _indicator_cache_lock:
         _indicator_cache.clear()
+
+def _selftest_indicator_cache_isolation():
+    """Ensure two different symbols do not share cached indicators."""
+    a = [{"t": i, "o": 100+i, "h": 101+i, "l": 99+i, "c": 100+i, "v": 1.0, "qv": 100.0} for i in range(60)]
+    b = [{"t": i, "o": 1+i*0.01, "h": 1.01+i*0.01, "l": 0.99+i*0.01, "c": 1+i*0.01, "v": 1.0, "qv": 1.0} for i in range(60)]
+    ia = get_cached_indicators("SELFA", "15m", a)
+    ib = get_cached_indicators("SELFB", "15m", b)
+    assert ia["c"][-1] != ib["c"][-1], "Indicator cache is leaking across symbols!"
 
 # ═══════════════════════════════════════════════════════════════
 # STATE HELPERS
@@ -1829,15 +1846,20 @@ def get_regime_aware_multipliers(btc_regime: dict | None,
 # [Quality-37] DECOMPOSED SIGNAL COMPUTATION
 # ═══════════════════════════════════════════════════════════════
 
-def _compute_signal_indicators(candles_15m, candles_1h, candles_4h, candles_d) -> dict:
+def _compute_signal_indicators(symbol: str, candles_15m, candles_1h, candles_4h, candles_d) -> dict:
     """Extract all indicator values needed for signal computation.
 
     [Quality-37] Decomposed from the monolithic compute_signals function.
+    [Fix-12] CRITICAL: pass the actual `symbol` to get_cached_indicators.
+             Previously hardcoded "15m_temp"/"1h_temp"/"4h_temp" caused all
+             symbols to share a single cache entry, so every coin inherited
+             the first-cached symbol's (usually BTC's) OHLCV + indicators.
+             Symptom: identical entry/TP/SL values across all pairs.
     """
     ind = {}
 
     # 15m indicators (cached)
-    i15 = get_cached_indicators(f"{symbol}_15m", "15m", candles_15m)
+    i15 = get_cached_indicators(symbol, "15m", candles_15m)
     ind["o15"], ind["h15"], ind["l15"], ind["c15"], ind["v15"] = i15["o"], i15["h"], i15["l"], i15["c"], i15["v"]
     ind["ema_f15"] = i15["ema_fast"]
     ind["ema_s15"] = i15["ema_slow"]
@@ -1849,14 +1871,14 @@ def _compute_signal_indicators(candles_15m, candles_1h, candles_4h, candles_d) -
     ind["obv15"]    = i15["obv"]
 
     # 1H indicators
-    i1h = get_cached_indicators(f"{symbol}_1h", "1h", candles_1h)
+    i1h = get_cached_indicators(symbol, "1h", candles_1h)
     ind["ema_f1h"] = i1h["ema_fast"]
     ind["ema_s1h"] = i1h["ema_slow"]
     ind["rsi1h"]   = i1h["rsi"]
     ind["h1h"], ind["l1h"], ind["c1h"], ind["v1h"] = i1h["h"], i1h["l"], i1h["c"], i1h["v"]
 
     # 4H indicators
-    i4h = get_cached_indicators(f"{symbol}_4h", "4h", candles_4h)
+    i4h = get_cached_indicators(symbol, "4h", candles_4h)
     ind["ema_f4h"] = i4h["ema_fast"]
     ind["ema_s4h"] = i4h["ema_slow"]
     ind["adx4h_arr"] = i4h["adx"][2]
@@ -2784,6 +2806,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         return res
 
     # Phase 1: Compute indicators
+    # [Fix-12] Pass the actual symbol down to prevent cache cross-contamination
     ind = _compute_signal_indicators(symbol, candles_15m, candles_1h, candles_4h, candles_d)
 
     if record_market_inputs:
@@ -3618,6 +3641,14 @@ def main():
     reset_rs_cache()
     reset_win_rates_cache()
     clear_indicator_cache()
+
+    # [Fix-12] Run self-test to ensure cache isolation
+    try:
+        _selftest_indicator_cache_isolation()
+        print("[INIT] Indicator cache isolation self-test passed.")
+    except AssertionError as e:
+        print(f"[INIT] FATAL: Indicator cache self-test failed: {e}")
+        sys.exit(1)
 
     print("[INIT] Fetching market context (metaAndAssetCtxs)…")
     get_meta_and_asset_ctxs()
