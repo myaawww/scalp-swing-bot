@@ -20,7 +20,7 @@ from typing import Optional, Iterable
 
 # Reuse existing utilities from the signal engine
 try:
-    from scalp_swing_bot_v15_5_3 import safe, atr, sma, _cluster_levels
+    from signal_engine import safe, atr, sma, _cluster_levels
 except ImportError:
     # Allow standalone unit-testing of this module
     def safe(v, fallback=0.0):
