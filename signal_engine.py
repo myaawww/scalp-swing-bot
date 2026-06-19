@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.2.3"
+__version__ = "15.4.0"
 
 _FF_TZ = ZoneInfo("America/New_York")
 OI_EXPECTED_INTERVAL_S: float = 15 * 60
@@ -119,7 +119,7 @@ USE_D200_FILTER   = True
 D200_SOFT_ADJ     = 1
 
 USE_DAILY_ADX     = True
-MIN_DAILY_ADX     = 20.0
+MIN_DAILY_ADX     = 18.0   # [PORTED v15.3.0-TUNE1] was 20.0 — daily ADX is slow-moving; 20 blocked valid early-trend setups; 18 still filters genuine chop (typically ≤15)
 PULL_REQUIRES_4H  = True
 
 # ── ACCURACY FILTERS ──────────────────────────────────────────
@@ -142,7 +142,7 @@ BREAK_VOL_ACCEL_BARS: int = 2
 # ── RELATIVE STRENGTH ─────────────────────────────────────────
 RS_TOP_PERCENTILE: float    = 0.20
 RS_BOTTOM_PERCENTILE: float = 0.20
-RS_BREAK_HARD_GATE_PCT: float = -3.0
+RS_BREAK_HARD_GATE_PCT: float = -4.0   # [PORTED v15.3.0-TUNE3] was -3.0 — -3% hard-killed BREAKs in modest RS consolidation; -4% still blocks genuine relative weakness
 RS_BREAK_SOFT_PERCENTILE: float = 0.25
 
 # ── MARKET BREADTH ────────────────────────────────────────────
@@ -205,9 +205,9 @@ MACRO_CACHE_TTL_S: int          = 3600
 
 # ── CANDLE COUNTS ─────────────────────────────────────────────
 N_15M = 300
-N_1H  = 60
-N_4H  = 80
-N_1D  = 210
+N_1H  = 200   # [PORTED v15.3.0-BUG1] was 60  — needed ≥150 for <5% seed bias, ≥200 for <1%
+N_4H  = 200   # [PORTED v15.3.0-BUG1] was 80  — same
+N_1D  = 600   # [PORTED v15.3.0-BUG1] was 210 — EMA200 needs ≥550 bars to wash out seed
 
 # ── REACTION SETTINGS ─────────────────────────────────────────
 REACT_TP1           = "🔥"
@@ -521,11 +521,14 @@ def compute_oi_trend(state: dict, symbol: str, current_price: float,
             score_adj, condition, breakdown_tag = 0,  "Neutral",                                  "OI→"
     else:
         if bearish_confirm:
-            score_adj, condition, breakdown_tag = 1,  "Bearish Confirmation",          "OI↑"
-        elif bullish_confirm:
-            score_adj, condition, breakdown_tag = -1, "Counter/Divergence vs Short",   "OI Divergence"
-        else:
-            score_adj, condition, breakdown_tag = 0,  "Neutral",                       "OI→"
+            score_adj, condition, breakdown_tag = 1,  "Bearish Confirmation",                      "OI↑"
+        elif bullish_confirm:                          # [PORTED v15.3.0-BUG2] split bearish_div out — it is NOT counter-trend
+            score_adj, condition, breakdown_tag = -1, "Counter vs Short (OI rising on up move)",   "OI Divergence"
+        else:                                          # [PORTED v15.3.0-BUG2] bearish_div (price↓ + OI↓ = long-covering) now neutral,
+            score_adj, condition, breakdown_tag = 0,  "Neutral",                                   "OI→"
+            # mirror of the long-side logic above: price down + OI falling = longs closing =
+            # structural unwind, not fresh selling pressure. Penalising it asymmetrically cost
+            # short-side PULL/BREAK score with no quality justification.
 
     label = (
         f"OI Trend: {oi_trend.capitalize()}  "
@@ -1601,8 +1604,8 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
     full_long_align  = h4_bull and h4_trend_held_bull and h1_bull
     full_short_align = h4_bear and h4_trend_held_bear and h1_bear
 
-    _f4h_back = safe(ema_f4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
-    _s4h_back = safe(ema_s4h[-(EXHAUSTION_SPREAD_LOOKBACK + 2)])
+    _f4h_back = safe(ema_f4h[-(EXHAUSTION_SPREAD_LOOKBACK + 1)])  # [PORTED v15.3.0-BUG4] was +2 — matches documented 4-bar/16h intent
+    _s4h_back = safe(ema_s4h[-(EXHAUSTION_SPREAD_LOOKBACK + 1)])  # [PORTED v15.3.0-BUG4] was +2
     h4_spread_now  = ef4h - es4h
     h4_spread_prev = _f4h_back - _s4h_back
     if USE_EXHAUSTION_SHORT:
@@ -2063,7 +2066,7 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
                 adjs.append((f"EMA flattening ({_ef_velocity:+.3f}×ATR) on BREAK", -1))
 
     rsi4h_arr = rsi(c4h, RSI_LEN)
-    _r4h_raw  = rsi4h_arr[-2] if len(rsi4h_arr) >= 2 else float("nan")
+    _r4h_raw  = rsi4h_arr[-1] if len(rsi4h_arr) >= 1 else float("nan")  # [PORTED v15.3.0-BUG3] was [-2] — up to 4h stale vs all other 4H values
     r4h_valid = not math.isnan(_r4h_raw)
     r4h       = _r4h_raw if r4h_valid else 50.0
     
@@ -2301,7 +2304,7 @@ def save_state(state: dict):
     except Exception:
         pass
 
-SIGNAL_COOLDOWN_BARS:           int = 4
+SIGNAL_COOLDOWN_BARS:           int = 3   # [PORTED v15.3.0-TUNE2] was 4 (1h) — 3 bars = 45min; recovers setups forming just after prior cooldown opens
 SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7
 
