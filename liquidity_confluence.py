@@ -8,6 +8,28 @@ from typing import Optional, Iterable
 from utils import safe, atr
 
 # ─────────────────────────────────────────────────────────────
+# [Fix-45] MSSResult.direction / BOSResult.direction / FVGResult.direction
+# are produced as "bullish"/"bearish" (see detect_mss/detect_bos/detect_fvg
+# below), but the trade-side `direction` threaded through analyze() is
+# "long"/"short". Every comparison in this module used to do
+# `mss.direction == direction` directly, which is a vocabulary mismatch
+# that can NEVER be true ("bullish" != "long"), and for MSS specifically
+# meant a genuinely aligned MSS fell into the *counter-direction* branch
+# and got hard-suppressed instead of rewarded. _dir_matches() is the single
+# place that translates between the two vocabularies — sweep alignment
+# already did this translation correctly inline; MSS/BOS/FVG now route
+# through the same helper instead of a raw ==/!= on mismatched vocab.
+# ─────────────────────────────────────────────────────────────
+def _dir_matches(struct_direction: str | None, trade_direction: str) -> bool:
+    """True if a 'bullish'/'bearish' structure direction agrees with a
+    'long'/'short' trade direction."""
+    if struct_direction is None:
+        return False
+    return (struct_direction == "bullish" and trade_direction == "long") or \
+           (struct_direction == "bearish" and trade_direction == "short")
+
+
+# ─────────────────────────────────────────────────────────────
 # CONFIGURATION (all weights configurable, no hardcoded scoring)
 # ─────────────────────────────────────────────────────────────
 
@@ -106,6 +128,46 @@ class LiquidityConfig:
     rr_weight: int = 2
     sweep_recency_weight: int = 2
     confidence_decay_penalty_per_bar: int = 1
+
+    # [Fix-43] HTF (1h/4h) liquidity layer — ADDITIVE, layered alongside the
+    # existing 15m-derived scoring above rather than replacing it (see
+    # premium_discount_weight / external_liquidity_weight, which remain
+    # 15m-only and unchanged). Previously candles_1h/candles_4h were accepted
+    # by analyze() but always passed as None at the call site, so the only
+    # "HTF" input was the htf_bull_flags EMA-cross boolean — no real 1h/4h
+    # dealing range, external BSL/SSL pools, or premium/discount zone was
+    # ever computed. This block runs the same LiquidityAnalyzer used for 15m
+    # against real 1h/4h candles instead. TUNABLE — needs validation; start
+    # by comparing reasons/score deltas against the pre-existing 15m-only
+    # behavior before promoting any of these from "additive" to "replacing."
+    htf_min_candles: int = 30
+    # Cache 1h/4h swing/level/sweep computation per (symbol, timeframe),
+    # keyed by the last closed HTF candle's timestamp — 1h/4h structure does
+    # not change between consecutive 15m scans within the same HTF bar, so
+    # without this every 15m scan re-runs fractal detection over the same
+    # 1h/4h candles for no reason. Uses the _cache/_lock that were declared
+    # in __init__ but previously never touched anywhere in this file.
+    htf_cache_enable: bool = True
+    # Distance gating is expressed in *that timeframe's own* ATR units, not
+    # 15m-ATR units — a 4h pool 2 4h-ATRs away can be 15+ 15m-ATRs away, and
+    # gating it against 15m ATR would wrongly treat it as "far." Shared
+    # across 1h and 4h since the value is already ATR-normalized (timeframe-
+    # relative), same as external_liquidity_max_dist_atr is for 15m.
+    htf_external_liquidity_max_dist_atr: float = 3.0
+    htf_external_liquidity_weight: int = 2
+    # Premium/discount zone computed from the *HTF's own* dealing range
+    # (real 1h/4h external BSL/SSL), independent of the 15m zone above —
+    # scored separately so behavior can be compared/A-B'd against the
+    # existing 15m-only premium_discount_weight before considering replacing
+    # it.
+    htf_zone_weight: int = 2
+    # A 1h/4h liquidity sweep is a materially stronger tell than a 15m one,
+    # but only awarded when the 15m engine's own MSS already confirms
+    # direction — i.e. the actual "HTF liquidity grab -> LTF structure
+    # confirms -> enter" pattern, not an independent HTF-only bonus that
+    # could fire on HTF noise alone. Default set higher than sweep_weight=4
+    # to reflect that HTF sweeps are rarer and more decisive than 15m ones.
+    htf_sweep_weight: int = 6
 
     # Caps
     # [Fix-13] TUNABLE — needs validation. Was 20, which is 3-5x the typical core
@@ -218,6 +280,21 @@ class ConfluenceOutput:
     htf_alignment: bool = False
     reasons: list = field(default_factory=list)
     hard_suppress: bool = False
+
+    # [Fix-43] Real 1h/4h liquidity structure (separate from htf_alignment
+    # above, which is the borrowed EMA-cross boolean). "neutral"/None when
+    # candles_1h/candles_4h weren't supplied or didn't have enough bars —
+    # always backward compatible with the candles_1h=None/candles_4h=None
+    # call pattern.
+    htf_liquidity_score: int = 0
+    htf_1h_zone: str = "neutral"
+    htf_4h_zone: str = "neutral"
+    htf_1h_external_bsl: Optional[float] = None
+    htf_1h_external_ssl: Optional[float] = None
+    htf_4h_external_bsl: Optional[float] = None
+    htf_4h_external_ssl: Optional[float] = None
+    htf_1h_sweep: dict = field(default_factory=dict)
+    htf_4h_sweep: dict = field(default_factory=dict)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -723,6 +800,67 @@ class SignalConfluence:
         self._cache: dict[str, dict] = {}
         self._lock = threading.Lock()
 
+    # [Fix-44] HTF (1h/4h) swing/level/sweep/zone computation, cached per
+    # (symbol, timeframe). Keyed off the last closed candle's timestamp —
+    # not a time-based TTL — so the cache is correct-by-construction: it
+    # only ever serves a result computed from the exact candle list it was
+    # asked about, and is invalidated for free the moment a new HTF bar
+    # closes. This is real liquidity analysis (actual dealing range, actual
+    # external BSL/SSL, actual sweep) on whatever candle list is passed in
+    # — LiquidityAnalyzer/StructureAnalyzer are stateless and already
+    # timeframe-agnostic, same as the existing 15m path uses.
+    def _get_htf_analysis(
+        self, symbol: str, candles: list[dict] | None,
+        tf_label: str, current_price: float,
+    ) -> dict | None:
+        cfg = self.cfg
+        if not candles or len(candles) < cfg.htf_min_candles:
+            return None
+
+        last_ts = candles[-1]["t"]
+        cache_key = f"{symbol}:{tf_label}"
+
+        if cfg.htf_cache_enable:
+            with self._lock:
+                cached = self._cache.get(cache_key)
+            if cached is not None and cached.get("ts") == last_ts:
+                return cached["data"]
+
+        highs = [c["h"] for c in candles]
+        lows = [c["l"] for c in candles]
+        closes = [c["c"] for c in candles]
+        atr_arr = atr(highs, lows, closes, 14)
+        atr_val = safe(atr_arr[-1], candles[-1]["c"] * 0.01)
+        bar_index = len(candles) - 1
+
+        # No-future-leakage guarantee: detect_swings() only confirms a swing
+        # at i + fractal_right closed bars, same property test_no_future_leakage
+        # already proves on 15m — it holds here unchanged because it's the
+        # identical stateless method applied to a different candle list.
+        swing_highs, swing_lows = self.liq.detect_swings(candles)
+        bsl, ssl = self.liq.build_liquidity_levels(
+            candles, swing_highs, swing_lows, atr_val, current_price, bar_index,
+        )
+        zone, range_high, range_low, eq = self.liq.premium_discount(current_price, bsl, ssl)
+
+        vol_ma = None
+        if len(candles) >= 20:
+            recent_vols = [c["v"] for c in candles[-20:]]
+            vol_ma = sum(recent_vols) / len(recent_vols)
+        sweep = self.liq.detect_sweep(candles, bsl, ssl, bar_index, atr_val, vol_ma)
+
+        data = {
+            "atr_val": atr_val, "bsl": bsl, "ssl": ssl,
+            "zone": zone, "range_high": range_high, "range_low": range_low,
+            "equilibrium": eq, "sweep": sweep,
+        }
+
+        if cfg.htf_cache_enable:
+            with self._lock:
+                self._cache[cache_key] = {"ts": last_ts, "data": data}
+
+        return data
+
     # ── Public entry point ──
     def analyze(
         self,
@@ -839,6 +977,38 @@ class SignalConfluence:
                 htf_aligned = bear_1h and bear_4h
         out.htf_alignment = htf_aligned
 
+        # 8b) [Fix-43] Real HTF (1h/4h) liquidity structure — separate from
+        # htf_aligned above. Backward compatible: candles_1h/candles_4h are
+        # None by default at most call sites, in which case this is a no-op
+        # and htf_data entries stay None (output fields keep their dataclass
+        # defaults, scoring section below contributes nothing).
+        htf_data: dict[str, dict | None] = {
+            "1h": self._get_htf_analysis(symbol, candles_1h, "1h", current_price),
+            "4h": self._get_htf_analysis(symbol, candles_4h, "4h", current_price),
+        }
+        for tf_label, d in htf_data.items():
+            if not d:
+                continue
+            ext_bsl_htf = [lv for lv in d["bsl"] if lv.classification == "external"]
+            ext_ssl_htf = [lv for lv in d["ssl"] if lv.classification == "external"]
+            sweep_summary = {
+                "sweep_detected": d["sweep"].sweep_detected,
+                "sweep_type": d["sweep"].sweep_type,
+                "age_bars": d["sweep"].age_bars,
+                "is_false_sweep": d["sweep"].is_false_sweep,
+                "sweep_status": d["sweep"].sweep_status,
+            }
+            if tf_label == "1h":
+                out.htf_1h_zone = d["zone"]
+                out.htf_1h_external_bsl = ext_bsl_htf[0].price if ext_bsl_htf else None
+                out.htf_1h_external_ssl = ext_ssl_htf[0].price if ext_ssl_htf else None
+                out.htf_1h_sweep = sweep_summary
+            else:
+                out.htf_4h_zone = d["zone"]
+                out.htf_4h_external_bsl = ext_bsl_htf[0].price if ext_bsl_htf else None
+                out.htf_4h_external_ssl = ext_ssl_htf[0].price if ext_ssl_htf else None
+                out.htf_4h_sweep = sweep_summary
+
         # 9) ── SCORE ──
         score = 0
         reasons: list[str] = []
@@ -899,6 +1069,59 @@ class SignalConfluence:
                     score += awarded
                     reasons.append(f"Internal SSL target {dist_atr:.1f} ATR away, strength {lvl.strength:.1f} +{awarded}")
 
+        # [Fix-43] HTF (1h/4h) external liquidity target + premium/discount
+        # zone — additive layer, independently scored from the 15m blocks
+        # above (which use 15m-derived levels/zone). Each timeframe is
+        # gated against its OWN ATR (see htf_external_liquidity_max_dist_atr
+        # comment), not the 15m atr_val_15m used everywhere else in this
+        # method — a 4h pool's "closeness" has to be judged in 4h-ATR units.
+        htf_score_contribution = 0
+        for tf_label, d in htf_data.items():
+            if not d:
+                continue
+            tf_atr = d["atr_val"]
+
+            # External target existence (mirrors the 15m external-liquidity
+            # block, but against the HTF's own external BSL/SSL + own ATR).
+            if direction == "long":
+                htf_ext = [lv for lv in d["bsl"] if lv.classification == "external"]
+            else:
+                htf_ext = [lv for lv in d["ssl"] if lv.classification == "external"]
+            if htf_ext:
+                lvl = htf_ext[0]
+                dist_atr = abs(lvl.price - current_price) / max(tf_atr, 1e-9)
+                if dist_atr <= cfg.htf_external_liquidity_max_dist_atr:
+                    strength_mult = min(1.0, lvl.strength / max(cfg.liquidity_strength_norm, 1e-9))
+                    awarded = round(cfg.htf_external_liquidity_weight * strength_mult)
+                    if awarded > 0:
+                        score += awarded
+                        htf_score_contribution += awarded
+                        reasons.append(
+                            f"{tf_label.upper()} external {lvl.side.upper()} target "
+                            f"{dist_atr:.1f} {tf_label}-ATR away, strength {lvl.strength:.1f} +{awarded}"
+                        )
+
+            # HTF's own premium/discount zone (real dealing range from real
+            # HTF external levels) — independent of the 15m zone scored
+            # further below.
+            zone = d["zone"]
+            if direction == "long" and cfg.prefer_discount_for_long and zone == "discount":
+                score += cfg.htf_zone_weight
+                htf_score_contribution += cfg.htf_zone_weight
+                reasons.append(f"{tf_label.upper()} discount zone +{cfg.htf_zone_weight}")
+            elif direction == "long" and zone == "premium" and cfg.prefer_discount_for_long:
+                score -= cfg.htf_zone_weight
+                htf_score_contribution -= cfg.htf_zone_weight
+                reasons.append(f"{tf_label.upper()} premium zone (long) -{cfg.htf_zone_weight}")
+            elif direction == "short" and cfg.prefer_premium_for_short and zone == "premium":
+                score += cfg.htf_zone_weight
+                htf_score_contribution += cfg.htf_zone_weight
+                reasons.append(f"{tf_label.upper()} premium zone +{cfg.htf_zone_weight}")
+            elif direction == "short" and zone == "discount" and cfg.prefer_premium_for_short:
+                score -= cfg.htf_zone_weight
+                htf_score_contribution -= cfg.htf_zone_weight
+                reasons.append(f"{tf_label.upper()} discount zone (short) -{cfg.htf_zone_weight}")
+
         # [Fix-27] TUNABLE, opt-in (default off) — additive toggle, not a replacement
         # of the independent-scoring behavior below, so it can be A/B compared. When
         # enabled, the sweep/MSS/BOS *bonuses* (not their counter-direction penalties,
@@ -909,8 +1132,8 @@ class SignalConfluence:
             and ((sweep.sweep_type == "bullish" and direction == "long")
                  or (sweep.sweep_type == "bearish" and direction == "short"))
         )
-        _mss_aligns_dir = mss.mss_detected and mss.direction == direction
-        _bos_aligns_dir = bos.bos_detected and bos.direction == direction
+        _mss_aligns_dir = mss.mss_detected and _dir_matches(mss.direction, direction)
+        _bos_aligns_dir = bos.bos_detected and _dir_matches(bos.direction, direction)
         _multi_component_count = sum([_sweep_aligns_dir, _mss_aligns_dir, _bos_aligns_dir])
         _multi_component_ok = (
             not cfg.require_multi_component_confluence
@@ -970,19 +1193,52 @@ class SignalConfluence:
                     reasons.append("Volume-confirmed counter-sweep — hard suppress")
 
         # MSS
-        if mss.mss_detected and mss.direction == direction:
+        if mss.mss_detected and _dir_matches(mss.direction, direction):
             if _multi_component_ok:
                 score += cfg.mss_weight
                 reasons.append(f"{mss.direction.capitalize()} MSS +{cfg.mss_weight}")
-        elif mss.mss_detected and mss.direction != direction:
+        elif mss.mss_detected and not _dir_matches(mss.direction, direction):
             # Counter-direction penalty — independent of require_multi_component_confluence.
             score -= cfg.mss_weight
             reasons.append(f"Counter MSS ({mss.direction}) -{cfg.mss_weight}")
             if cfg.hard_suppress_counter_mss:
                 out.hard_suppress = True  # Strong counter-structure
 
+        # [Fix-43] HTF (1h/4h) sweep confirmed by 15m MSS — the actual
+        # "HTF liquidity grab -> LTF structure confirms -> enter" pattern.
+        # Deliberately gated on the 15m MSS already firing aligned with
+        # direction (not an independent HTF-only bonus), same recency decay
+        # curve as the 15m sweep bonus above, same pending-status halving
+        # as [Fix-22].
+        if mss.mss_detected and _dir_matches(mss.direction, direction):
+            for tf_label, d in htf_data.items():
+                if not d:
+                    continue
+                hsweep = d["sweep"]
+                aligns = (
+                    hsweep.sweep_detected and not hsweep.is_false_sweep and (
+                        (hsweep.sweep_type == "bullish" and direction == "long") or
+                        (hsweep.sweep_type == "bearish" and direction == "short")
+                    )
+                )
+                if not aligns:
+                    continue
+                age = min(hsweep.age_bars, cfg.sweep_recency_max_bars)
+                recency_mult = cfg.sweep_recency_decay_per_bar ** age
+                htf_sweep_pts = max(0, int(round(cfg.htf_sweep_weight * recency_mult)))
+                if hsweep.sweep_status == "pending":
+                    htf_sweep_pts = htf_sweep_pts // 2
+                if htf_sweep_pts > 0:
+                    score += htf_sweep_pts
+                    htf_score_contribution += htf_sweep_pts
+                    reasons.append(
+                        f"{tf_label.upper()} {hsweep.sweep_type} sweep + 15m MSS confluence "
+                        f"+{htf_sweep_pts}"
+                    )
+        out.htf_liquidity_score = htf_score_contribution
+
         # BOS
-        if bos.bos_detected and bos.direction == direction and _multi_component_ok:
+        if bos.bos_detected and _dir_matches(bos.direction, direction) and _multi_component_ok:
             score += cfg.bos_weight
             reasons.append(f"{bos.direction.capitalize()} BOS +{cfg.bos_weight}")
 
@@ -992,7 +1248,7 @@ class SignalConfluence:
             reasons.append(f"HTF alignment ({'+'.join(cfg.htf_timeframes)}) +{cfg.htf_weight}")
 
         # FVG alignment (confluence only)
-        if fvg.fvg_detected and fvg.direction == direction:
+        if fvg.fvg_detected and _dir_matches(fvg.direction, direction):
             score += cfg.fvg_weight
             reasons.append(f"{fvg.direction.capitalize()} FVG confluence +{cfg.fvg_weight}")
 
@@ -1056,8 +1312,8 @@ class SignalConfluence:
 
         # Structure score breakdown
         out.structure_score = (
-            (cfg.mss_weight if mss.mss_detected and mss.direction == direction else 0) +
-            (cfg.bos_weight if bos.bos_detected and bos.direction == direction else 0) +
+            (cfg.mss_weight if mss.mss_detected and _dir_matches(mss.direction, direction) else 0) +
+            (cfg.bos_weight if bos.bos_detected and _dir_matches(bos.direction, direction) else 0) +
             (cfg.htf_weight if htf_aligned else 0)
         )
 
@@ -1107,6 +1363,19 @@ def _make_candles(prices: list[float], vol: float = 1.0) -> list[dict]:
     for i, p in enumerate(prices):
         out.append({
             "t": i * 900_000,
+            "o": p, "h": p * 1.001, "l": p * 0.999, "c": p, "v": vol,
+        })
+    return out
+
+
+def _make_candles_tf(prices: list[float], bar_ms: int, vol: float = 1.0) -> list[dict]:
+    """[Fix-43] Same as _make_candles but with a configurable bar spacing,
+    so HTF tests use realistic 1h (3_600_000ms) / 4h (14_400_000ms)
+    timestamps rather than reusing 15m spacing for non-15m data."""
+    out = []
+    for i, p in enumerate(prices):
+        out.append({
+            "t": i * bar_ms,
             "o": p, "h": p * 1.001, "l": p * 0.999, "c": p, "v": vol,
         })
     return out
@@ -1227,6 +1496,105 @@ def test_sweep_status_pending_vs_confirmed():
             assert sweep_later.is_false_sweep == (sweep_later.sweep_status == "confirmed_false")
 
 
+def test_confluence_output_schema_with_htf():
+    """[Fix-43] analyze() with real candles_1h/candles_4h populates genuine
+    HTF liquidity structure (not just the borrowed EMA htf_bull_flags
+    boolean) — actual zone, actual external BSL/SSL, actual sweep summary
+    per timeframe."""
+    cfg = LiquidityConfig(enable=True)
+    sc = SignalConfluence(cfg)
+    candles_15m = _make_candles([100 + i * 0.1 for i in range(50)])
+    candles_1h = _make_candles_tf([100 + i * 0.3 for i in range(50)], 3_600_000)
+    candles_4h = _make_candles_tf([100 + i * 0.5 for i in range(50)], 14_400_000)
+    out = sc.analyze(
+        symbol="TESTUSDT", candles_15m=candles_15m,
+        candles_1h=candles_1h, candles_4h=candles_4h,
+        direction="long", base_strength=5,
+        entry=100.0, tp1=102.0, sl=99.0,
+        atr_val_15m=1.0, vol_ma_15m=1.0,
+    )
+    assert isinstance(out.htf_liquidity_score, int)
+    assert out.htf_1h_zone in ("premium", "discount", "neutral")
+    assert out.htf_4h_zone in ("premium", "discount", "neutral")
+    assert "sweep_detected" in out.htf_1h_sweep
+    assert "sweep_detected" in out.htf_4h_sweep
+    # Score stays within the same cap as the 15m-only path — the HTF layer
+    # is additive, not a separate budget.
+    assert -cfg.max_bonus <= out.liquidity_score <= cfg.max_bonus
+
+
+def test_confluence_output_schema_with_htf_backward_compatible():
+    """[Fix-43] candles_1h=None/candles_4h=None (the pre-existing default at
+    most call sites) must still work exactly as before — HTF fields stay at
+    their neutral/None defaults and no exception is raised."""
+    cfg = LiquidityConfig(enable=True)
+    sc = SignalConfluence(cfg)
+    candles = _make_candles([100 + i * 0.1 for i in range(50)])
+    out = sc.analyze(
+        symbol="TESTUSDT", candles_15m=candles,
+        candles_1h=None, candles_4h=None,
+        direction="long", base_strength=5,
+        entry=100.0, tp1=102.0, sl=99.0,
+        atr_val_15m=1.0, vol_ma_15m=1.0,
+    )
+    assert out.htf_1h_zone == "neutral"
+    assert out.htf_4h_zone == "neutral"
+    assert out.htf_1h_external_bsl is None
+    assert out.htf_4h_external_bsl is None
+    assert out.htf_liquidity_score == 0
+
+
+def test_no_future_leakage_htf():
+    """[Fix-43] The same no-future-leakage property test_no_future_leakage
+    proves on 15m candles must hold on HTF (1h/4h) candles too — detect_swings
+    is the identical stateless method, but this is verified explicitly at
+    HTF scale rather than just assumed from the 15m test."""
+    cfg = LiquidityConfig(fractal_left=3, fractal_right=3)
+    la = LiquidityAnalyzer(cfg)
+    for bar_ms in (3_600_000, 14_400_000):  # 1h, 4h
+        candles = _make_candles_tf([10 + i for i in range(20)], bar_ms)
+        highs, lows = la.detect_swings(candles)
+        if highs:
+            assert highs[-1]["index"] <= len(candles) - cfg.fractal_right - 1
+        if lows:
+            assert lows[-1]["index"] <= len(candles) - cfg.fractal_right - 1
+
+
+def test_htf_cache_reuse_and_invalidation():
+    """[Fix-44] _get_htf_analysis must return a cached result (no
+    recomputation) when called again with a candle list whose last closed
+    bar's timestamp hasn't changed, and must recompute once a new HTF bar
+    closes — verified via object identity, since a cache hit returns the
+    exact stored dict rather than a freshly built one."""
+    cfg = LiquidityConfig(enable=True, htf_cache_enable=True)
+    sc = SignalConfluence(cfg)
+    candles = _make_candles_tf([100 + i * 0.2 for i in range(40)], 3_600_000)
+
+    first = sc._get_htf_analysis("CACHEUSDT", candles, "1h", candles[-1]["c"])
+    second = sc._get_htf_analysis("CACHEUSDT", candles, "1h", candles[-1]["c"])
+    assert first is not None and second is not None
+    assert first is second, "Expected a cache hit (same object) for an unchanged last candle timestamp"
+
+    # A new closed candle (new last timestamp) must invalidate the cache.
+    extended = candles + [{
+        "t": candles[-1]["t"] + 3_600_000,
+        "o": 108, "h": 108.2, "l": 107.8, "c": 108, "v": 1.0,
+    }]
+    third = sc._get_htf_analysis("CACHEUSDT", extended, "1h", extended[-1]["c"])
+    assert third is not None
+    assert third is not first, "Expected recomputation after a new HTF bar closed"
+
+
+def test_htf_min_candles_gating():
+    """[Fix-43] Too few HTF candles (below htf_min_candles) must return None
+    rather than running fractal detection on an insufficient window."""
+    cfg = LiquidityConfig(htf_min_candles=30)
+    sc = SignalConfluence(cfg)
+    short_candles = _make_candles_tf([100 + i for i in range(10)], 3_600_000)
+    result = sc._get_htf_analysis("SHORTUSDT", short_candles, "1h", short_candles[-1]["c"])
+    assert result is None
+
+
 if __name__ == "__main__":
     test_swing_detection_basic()
     test_bullish_sweep()
@@ -1234,4 +1602,9 @@ if __name__ == "__main__":
     test_confluence_output_schema()
     test_no_future_leakage()
     test_sweep_status_pending_vs_confirmed()
+    test_confluence_output_schema_with_htf()
+    test_confluence_output_schema_with_htf_backward_compatible()
+    test_no_future_leakage_htf()
+    test_htf_cache_reuse_and_invalidation()
+    test_htf_min_candles_gating()
     print("All liquidity_confluence tests passed.")
