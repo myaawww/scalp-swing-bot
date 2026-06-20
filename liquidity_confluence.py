@@ -260,7 +260,8 @@ class LiquidityAnalyzer:
         for price, s in sh_prices:
             placed = False
             for cluster in sh_clusters:
-                if abs(price - cluster[0]["price"]) < eqh_eql_tol:
+                # Compare against the last element to chain contiguous levels properly
+                if abs(price - cluster[-1]["price"]) < eqh_eql_tol:
                     cluster.append(s)
                     placed = True
                     break
@@ -272,7 +273,7 @@ class LiquidityAnalyzer:
         for price, s in sl_prices:
             placed = False
             for cluster in sl_clusters:
-                if abs(price - cluster[0]["price"]) < eqh_eql_tol:
+                if abs(price - cluster[-1]["price"]) < eqh_eql_tol:
                     cluster.append(s)
                     placed = True
                     break
@@ -319,11 +320,11 @@ class LiquidityAnalyzer:
                 touches=touches, is_eqh_eql=is_eql,
             ))
 
-        # Sort by distance from current price
+        # Sort by absolute distance from current price
         bsl_levels = [lv for lv in bsl_levels if lv.price > current_price] or bsl_levels
         ssl_levels = [lv for lv in ssl_levels if lv.price < current_price] or ssl_levels
-        bsl_levels.sort(key=lambda lv: lv.price - current_price)
-        ssl_levels.sort(key=lambda lv: current_price - lv.price)
+        bsl_levels.sort(key=lambda lv: abs(lv.price - current_price))
+        ssl_levels.sort(key=lambda lv: abs(lv.price - current_price))
         return bsl_levels, ssl_levels
 
     def _cluster_strength(
@@ -389,10 +390,6 @@ class LiquidityAnalyzer:
                 # False sweep filter: check if price continued through
                 is_false = self._is_false_sweep(candles, level.price, "bullish", atr_val)
                 age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                recency_factor = max(
-                    0.0,
-                    cfg.sweep_recency_decay_per_bar ** min(age, cfg.sweep_recency_max_bars)
-                )
                 return SweepResult(
                     sweep_detected=True, sweep_type="bullish",
                     swept_level=level, bar_index=current_bar_index,
@@ -407,10 +404,6 @@ class LiquidityAnalyzer:
             if cur["h"] > level.price and cur["c"] < level.price:
                 is_false = self._is_false_sweep(candles, level.price, "bearish", atr_val)
                 age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                recency_factor = max(
-                    0.0,
-                    cfg.sweep_recency_decay_per_bar ** min(age, cfg.sweep_recency_max_bars)
-                )
                 return SweepResult(
                     sweep_detected=True, sweep_type="bearish",
                     swept_level=level, bar_index=current_bar_index,
