@@ -94,7 +94,7 @@ class LiquidityConfig:
     # Hard-suppress toggle for false sweeps
     hard_suppress_false_sweeps: bool = False
     # Hard-suppress toggle for counter-directional MSS
-    hard_suppress_counter_mss: bool = True
+    hard_suppress_counter_mss: bool = False
 
 
 # ─────────────────────────────────────────────────────────────
@@ -364,67 +364,91 @@ class LiquidityAnalyzer:
         Bullish Sweep: low < previous SSL AND close back above SSL.
         Bearish Sweep: high > previous BSL AND close back below BSL.
 
+        Scans backward from the current bar (up to the larger of
+        `sweep_recency_max_bars` / `confidence_decay_max_bars`) and returns
+        the most recent qualifying sweep candle. `age_bars` is the number of
+        bars between that sweep candle and `current_bar_index` — i.e. true
+        "bars since the sweep happened" — NOT the age of the liquidity level
+        that was swept (which can be tens or hundreds of bars old and is a
+        separate, unrelated quantity).
+
         Returns SweepResult with sweep_detected, sweep_type, swept_level,
         is_false_sweep, volume_confirmed, age_bars.
         """
-        if len(candles) < 2:
+        n = len(candles)
+        if n < 2:
             return SweepResult()
 
-        cur = candles[-1]
-        prev = candles[-2]
         cfg = self.cfg
+        lookback = max(cfg.sweep_recency_max_bars, cfg.confidence_decay_max_bars, 1)
+        earliest_idx = max(1, n - 1 - lookback)
 
-        # Volume confirmation
-        vol_confirmed = True
-        if vol_ma is not None and vol_ma > 0:
-            vol_confirmed = cur["v"] >= vol_ma * cfg.sweep_vol_mult
-
-        # Bullish sweep — look at most recent SSL levels (skip the closest)
-        for level in ssl_levels:
-            if level.price >= prev["l"]:
+        # Walk backward from the most recent candle so the *most recent*
+        # qualifying sweep wins.
+        for idx in range(n - 1, earliest_idx - 1, -1):
+            cur = candles[idx]
+            prev = candles[idx - 1]
+            age = current_bar_index - idx
+            if age < 0:
                 continue
-            # Current candle poked below SSL but closed back above
-            if cur["l"] < level.price and cur["c"] > level.price:
-                # False sweep filter: check if price continued through
-                is_false = self._is_false_sweep(candles, level.price, "bullish", atr_val)
-                age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                return SweepResult(
-                    sweep_detected=True, sweep_type="bullish",
-                    swept_level=level, bar_index=current_bar_index,
-                    is_false_sweep=is_false, volume_confirmed=vol_confirmed,
-                    age_bars=age,
-                )
 
-        # Bearish sweep
-        for level in bsl_levels:
-            if level.price <= prev["h"]:
-                continue
-            if cur["h"] > level.price and cur["c"] < level.price:
-                is_false = self._is_false_sweep(candles, level.price, "bearish", atr_val)
-                age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                return SweepResult(
-                    sweep_detected=True, sweep_type="bearish",
-                    swept_level=level, bar_index=current_bar_index,
-                    is_false_sweep=is_false, volume_confirmed=vol_confirmed,
-                    age_bars=age,
-                )
+            vol_confirmed = True
+            if vol_ma is not None and vol_ma > 0:
+                vol_confirmed = cur["v"] >= vol_ma * cfg.sweep_vol_mult
+
+            # Bullish sweep — candle poked below SSL but closed back above
+            for level in ssl_levels:
+                if level.price >= prev["l"]:
+                    continue
+                if cur["l"] < level.price and cur["c"] > level.price:
+                    is_false = self._is_false_sweep(
+                        candles, level.price, "bullish", atr_val,
+                        sweep_bar_index=idx, current_bar_index=current_bar_index,
+                    )
+                    return SweepResult(
+                        sweep_detected=True, sweep_type="bullish",
+                        swept_level=level, bar_index=idx,
+                        is_false_sweep=is_false, volume_confirmed=vol_confirmed,
+                        age_bars=age,
+                    )
+
+            # Bearish sweep — candle poked above BSL but closed back below
+            for level in bsl_levels:
+                if level.price <= prev["h"]:
+                    continue
+                if cur["h"] > level.price and cur["c"] < level.price:
+                    is_false = self._is_false_sweep(
+                        candles, level.price, "bearish", atr_val,
+                        sweep_bar_index=idx, current_bar_index=current_bar_index,
+                    )
+                    return SweepResult(
+                        sweep_detected=True, sweep_type="bearish",
+                        swept_level=level, bar_index=idx,
+                        is_false_sweep=is_false, volume_confirmed=vol_confirmed,
+                        age_bars=age,
+                    )
 
         return SweepResult()
 
     def _is_false_sweep(self, candles: list[dict], level_price: float,
-                        direction: str, atr_val: float) -> bool:
-        """A sweep is 'false' if price continued through the level
-        rather than rejecting. Check the lookback bars after the sweep."""
+                        direction: str, atr_val: float,
+                        sweep_bar_index: int, current_bar_index: int) -> bool:
+        """A sweep is 'false' if price continued through the level rather
+        than rejecting, evaluated using bars that closed *after* the sweep
+        bar. Returns False (not-yet-determined) until enough bars exist."""
         cfg = self.cfg
         lb = cfg.false_sweep_lookback
-        if len(candles) < lb + 1:
+        bars_since_sweep = current_bar_index - sweep_bar_index
+        if bars_since_sweep < lb:
+            # Not enough bars have closed after the sweep yet — can't judge.
             return False
         threshold = atr_val * cfg.false_sweep_continue_atr
-        # Check the most recent `lb` candles after the sweep candle (-1)
-        for i in range(-lb, 0):
+        # Bars strictly AFTER the sweep bar, up to `lb` of them.
+        start = sweep_bar_index + 1
+        end = min(len(candles), sweep_bar_index + 1 + lb)
+        for i in range(start, end):
             c = candles[i]
             if direction == "bullish":
-                # If close remains well below level → continuation down (false sweep)
                 if c["c"] < level_price - threshold:
                     return True
             else:
