@@ -25,7 +25,11 @@ class LiquidityConfig:
 
     # EQH/EQL
     eqh_eql_atr_mult: float = 0.15
-    eqh_eql_min_touches: int = 2
+    # [Fix-21] TUNABLE — needs validation. Raised from 2 to 3 per audit Section 5
+    # Item 3. This will reduce how often the eqh_eql_weight bonus and the
+    # eqh_eql_strength_mult multiplier apply (fewer clusters qualify as "equal
+    # highs/lows"), trading some frequency for a stricter equal-highs/lows definition.
+    eqh_eql_min_touches: int = 3
     eqh_eql_strength_mult: float = 1.5
 
     # Liquidity cluster scoring
@@ -73,6 +77,16 @@ class LiquidityConfig:
     # ── Scoring weights (no hardcoded scoring values anywhere) ──
     external_liquidity_weight: int = 2
     internal_liquidity_weight: int = 1
+    # [Fix-14] TUNABLE — needs validation. Gates for the existence-based bonuses
+    # above: a level only earns its bonus if within this many ATRs of price.
+    # Internal levels are expected closer-in by definition, hence the tighter default.
+    external_liquidity_max_dist_atr: float = 3.0
+    internal_liquidity_max_dist_atr: float = 1.5
+    # [Fix-14] TUNABLE — normalizes raw _cluster_strength() output (roughly 0-5 in
+    # typical conditions) to a 0..1 multiplier applied to the bonus weights above.
+    # A level with strength >= this value gets the full weight; weaker levels get
+    # proportionally less.
+    liquidity_strength_norm: float = 2.0
     sweep_weight: int = 4
     mss_weight: int = 5
     bos_weight: int = 3
@@ -88,13 +102,37 @@ class LiquidityConfig:
     confidence_decay_penalty_per_bar: int = 1
 
     # Caps
-    max_bonus: int = 20
+    # [Fix-13] TUNABLE — needs validation. Was 20, which is 3-5x the typical core
+    # engine base score (4-6 points from the six-boolean long_score/short_score sum
+    # in _detect_raw_signals), letting the liquidity bonus dominate the final score
+    # rather than confirm it. Reduced to 10, the top of the audit's suggested 8-10
+    # range. MUST stay reconciled with MAX_POSITIVE_ADJUSTMENTS in the main bot file
+    # (see Fix-13 there) — if you change one, change the other.
+    max_bonus: int = 10
     final_strength_cap: int = 100
 
+    # [Fix-27] TUNABLE, default off (opt-in). When True, the sweep/MSS/BOS
+    # confirmation bonuses only count if at least two of those three fire together
+    # aligned with the signal's direction, rather than each contributing
+    # independently. Additive — does not replace the independent-scoring behavior,
+    # so it can be A/B compared by toggling this flag alone.
+    require_multi_component_confluence: bool = False
+
     # Hard-suppress toggle for false sweeps
+    # [Fix-16] TUNABLE either way, but an explicit decision: left at False on
+    # purpose. A false sweep is ambiguous/borderline by nature (see _is_false_sweep's
+    # pending-state handling, Fix-22), so hard-suppressing on it would discard
+    # signals on what is often a judgment call rather than a clear invalidation.
     hard_suppress_false_sweeps: bool = False
     # Hard-suppress toggle for counter-directional MSS
-    hard_suppress_counter_mss: bool = False
+    # [Fix-16] TUNABLE, flipped from False to True. Previously both toggles
+    # defaulted to False, meaning hard_suppress could never actually be set under
+    # shipped defaults — dead code. A counter-directional MSS (price structurally
+    # breaking against the signal's own direction) is a strong, fairly unambiguous
+    # invalidation signal, not a borderline call, so it's enabled by default. Confirm
+    # against your own data before shipping — this changes behavior (some signals
+    # that previously fired will now be suppressed).
+    hard_suppress_counter_mss: bool = True
 
 
 # ─────────────────────────────────────────────────────────────
@@ -121,6 +159,17 @@ class SweepResult:
     is_false_sweep: bool = False
     volume_confirmed: bool = False
     age_bars: int = 0
+    # [Fix-22] TUNABLE — needs validation. Explicit three-state tracking of the
+    # false-sweep ambiguity window (audit Section 7 Item 9 / Part 3). Previously
+    # `is_false_sweep` was a plain bool, and `_is_false_sweep()`'s early return
+    # (not enough bars closed yet to judge) collapsed onto `False`, which callers
+    # then read as "confirmed valid" — silently overstating confidence during the
+    # one-bar+ window where the sweep's outcome genuinely isn't known yet.
+    # `sweep_status` makes that window an explicit value instead of an implicit
+    # false. Kept alongside `is_false_sweep` (not replacing it) so existing
+    # callers/tests that read the bool keep working unchanged; `is_false_sweep`
+    # is derived as `sweep_status == "confirmed_false"`.
+    sweep_status: str = "confirmed_valid"  # "confirmed_valid" | "confirmed_false" | "pending"
 
 
 @dataclass
@@ -373,7 +422,7 @@ class LiquidityAnalyzer:
         separate, unrelated quantity).
 
         Returns SweepResult with sweep_detected, sweep_type, swept_level,
-        is_false_sweep, volume_confirmed, age_bars.
+        is_false_sweep, sweep_status, volume_confirmed, age_bars.
         """
         n = len(candles)
         if n < 2:
@@ -401,14 +450,16 @@ class LiquidityAnalyzer:
                 if level.price >= prev["l"]:
                     continue
                 if cur["l"] < level.price and cur["c"] > level.price:
-                    is_false = self._is_false_sweep(
+                    status = self._is_false_sweep_status(
                         candles, level.price, "bullish", atr_val,
                         sweep_bar_index=idx, current_bar_index=current_bar_index,
                     )
                     return SweepResult(
                         sweep_detected=True, sweep_type="bullish",
                         swept_level=level, bar_index=idx,
-                        is_false_sweep=is_false, volume_confirmed=vol_confirmed,
+                        is_false_sweep=(status == "confirmed_false"),
+                        sweep_status=status,
+                        volume_confirmed=vol_confirmed,
                         age_bars=age,
                     )
 
@@ -417,31 +468,38 @@ class LiquidityAnalyzer:
                 if level.price <= prev["h"]:
                     continue
                 if cur["h"] > level.price and cur["c"] < level.price:
-                    is_false = self._is_false_sweep(
+                    status = self._is_false_sweep_status(
                         candles, level.price, "bearish", atr_val,
                         sweep_bar_index=idx, current_bar_index=current_bar_index,
                     )
                     return SweepResult(
                         sweep_detected=True, sweep_type="bearish",
                         swept_level=level, bar_index=idx,
-                        is_false_sweep=is_false, volume_confirmed=vol_confirmed,
+                        is_false_sweep=(status == "confirmed_false"),
+                        sweep_status=status,
+                        volume_confirmed=vol_confirmed,
                         age_bars=age,
                     )
 
         return SweepResult()
 
-    def _is_false_sweep(self, candles: list[dict], level_price: float,
+    def _is_false_sweep_status(self, candles: list[dict], level_price: float,
                         direction: str, atr_val: float,
-                        sweep_bar_index: int, current_bar_index: int) -> bool:
-        """A sweep is 'false' if price continued through the level rather
-        than rejecting, evaluated using bars that closed *after* the sweep
-        bar. Returns False (not-yet-determined) until enough bars exist."""
+                        sweep_bar_index: int, current_bar_index: int) -> str:
+        """[Fix-22] Returns one of "confirmed_valid" / "confirmed_false" /
+        "pending" — see SweepResult.sweep_status docstring. A sweep is
+        'confirmed_false' if price continued through the level rather than
+        rejecting, evaluated using bars that closed *after* the sweep bar.
+        Returns "pending" (not yet determined either way) until enough bars
+        have closed after the sweep to judge — previously this case silently
+        returned False (i.e. "confirmed valid"), overstating confidence during
+        the ambiguity window."""
         cfg = self.cfg
         lb = cfg.false_sweep_lookback
         bars_since_sweep = current_bar_index - sweep_bar_index
         if bars_since_sweep < lb:
-            # Not enough bars have closed after the sweep yet — can't judge.
-            return False
+            # Not enough bars have closed after the sweep yet — genuinely unknown.
+            return "pending"
         threshold = atr_val * cfg.false_sweep_continue_atr
         # Bars strictly AFTER the sweep bar, up to `lb` of them.
         start = sweep_bar_index + 1
@@ -450,11 +508,14 @@ class LiquidityAnalyzer:
             c = candles[i]
             if direction == "bullish":
                 if c["c"] < level_price - threshold:
-                    return True
+                    return "confirmed_false"
             else:
                 if c["c"] > level_price + threshold:
-                    return True
-        return False
+                    return "confirmed_false"
+        # Enough bars closed after the sweep, and none of them broke the
+        # continuation threshold — genuinely confirmed valid, not just "not yet
+        # determined."
+        return "confirmed_valid"
 
     @staticmethod
     def _bar_index_from_ts(candles: list[dict], ts: int) -> int:
@@ -724,6 +785,7 @@ class SignalConfluence:
             "sweep_detected": sweep.sweep_detected,
             "sweep_type": sweep.sweep_type,
             "is_false_sweep": sweep.is_false_sweep,
+            "sweep_status": sweep.sweep_status,
             "volume_confirmed": sweep.volume_confirmed,
             "age_bars": sweep.age_bars,
             "swept_level_price": sweep.swept_level.price if sweep.swept_level else None,
@@ -776,61 +838,137 @@ class SignalConfluence:
         reasons: list[str] = []
 
         # External liquidity target existence
+        # [Fix-14] TUNABLE — needs validation. Previously this awarded the full
+        # external_liquidity_weight on a bare existence check (`if out.nearest_external_bsl:`),
+        # which is true on the overwhelming majority of scans (audit Part 5) and therefore
+        # added little real signal. Now gated by (a) proximity — only awarded if the level
+        # is within external_liquidity_max_dist_atr of price — and (b) scaled by the level's
+        # already-computed strength (touches/age/volume), so a weak, distant level contributes
+        # less or nothing. `external_target` itself (used below for the R:R check) is still set
+        # whenever a level exists, independent of whether the bonus was awarded — the RR check
+        # is a different question from "is this existence bonus-worthy."
         external_target = None
         if direction == "long" and out.nearest_external_bsl:
             external_target = out.nearest_external_bsl
-            score += cfg.external_liquidity_weight
-            reasons.append(f"External BSL target exists +{cfg.external_liquidity_weight}")
+            lvl = ext_bsl[0]
+            dist_atr = abs(lvl.price - current_price) / max(atr_val_15m, 1e-9)
+            if dist_atr <= cfg.external_liquidity_max_dist_atr:
+                strength_mult = min(1.0, lvl.strength / max(cfg.liquidity_strength_norm, 1e-9))
+                awarded = round(cfg.external_liquidity_weight * strength_mult)
+                if awarded > 0:
+                    score += awarded
+                    reasons.append(
+                        f"External BSL target {dist_atr:.1f} ATR away, strength {lvl.strength:.1f} +{awarded}"
+                    )
         elif direction == "short" and out.nearest_external_ssl:
             external_target = out.nearest_external_ssl
-            score += cfg.external_liquidity_weight
-            reasons.append(f"External SSL target exists +{cfg.external_liquidity_weight}")
+            lvl = ext_ssl[0]
+            dist_atr = abs(lvl.price - current_price) / max(atr_val_15m, 1e-9)
+            if dist_atr <= cfg.external_liquidity_max_dist_atr:
+                strength_mult = min(1.0, lvl.strength / max(cfg.liquidity_strength_norm, 1e-9))
+                awarded = round(cfg.external_liquidity_weight * strength_mult)
+                if awarded > 0:
+                    score += awarded
+                    reasons.append(
+                        f"External SSL target {dist_atr:.1f} ATR away, strength {lvl.strength:.1f} +{awarded}"
+                    )
 
-        # Internal liquidity (smaller weight)
+        # Internal liquidity (smaller weight) — same proximity + strength gating as external.
         if direction == "long" and out.nearest_internal_bsl:
-            score += cfg.internal_liquidity_weight
-            reasons.append(f"Internal BSL target +{cfg.internal_liquidity_weight}")
+            lvl = int_bsl[0]
+            dist_atr = abs(lvl.price - current_price) / max(atr_val_15m, 1e-9)
+            if dist_atr <= cfg.internal_liquidity_max_dist_atr:
+                strength_mult = min(1.0, lvl.strength / max(cfg.liquidity_strength_norm, 1e-9))
+                awarded = round(cfg.internal_liquidity_weight * strength_mult)
+                if awarded > 0:
+                    score += awarded
+                    reasons.append(f"Internal BSL target {dist_atr:.1f} ATR away, strength {lvl.strength:.1f} +{awarded}")
         elif direction == "short" and out.nearest_internal_ssl:
-            score += cfg.internal_liquidity_weight
-            reasons.append(f"Internal SSL target +{cfg.internal_liquidity_weight}")
+            lvl = int_ssl[0]
+            dist_atr = abs(lvl.price - current_price) / max(atr_val_15m, 1e-9)
+            if dist_atr <= cfg.internal_liquidity_max_dist_atr:
+                strength_mult = min(1.0, lvl.strength / max(cfg.liquidity_strength_norm, 1e-9))
+                awarded = round(cfg.internal_liquidity_weight * strength_mult)
+                if awarded > 0:
+                    score += awarded
+                    reasons.append(f"Internal SSL target {dist_atr:.1f} ATR away, strength {lvl.strength:.1f} +{awarded}")
+
+        # [Fix-27] TUNABLE, opt-in (default off) — additive toggle, not a replacement
+        # of the independent-scoring behavior below, so it can be A/B compared. When
+        # enabled, the sweep/MSS/BOS *bonuses* (not their counter-direction penalties,
+        # which remain independent risk controls regardless of this flag) only count
+        # if at least two of {sweep, MSS, BOS} fire together aligned with `direction`.
+        _sweep_aligns_dir = (
+            sweep.sweep_detected and not sweep.is_false_sweep
+            and ((sweep.sweep_type == "bullish" and direction == "long")
+                 or (sweep.sweep_type == "bearish" and direction == "short"))
+        )
+        _mss_aligns_dir = mss.mss_detected and mss.direction == direction
+        _bos_aligns_dir = bos.bos_detected and bos.direction == direction
+        _multi_component_count = sum([_sweep_aligns_dir, _mss_aligns_dir, _bos_aligns_dir])
+        _multi_component_ok = (
+            not cfg.require_multi_component_confluence
+            or _multi_component_count >= 2
+        )
+        if cfg.require_multi_component_confluence and not _multi_component_ok and _multi_component_count > 0:
+            reasons.append(
+                f"Multi-component confluence required but only {_multi_component_count}/3 "
+                f"of sweep/MSS/BOS aligned — sweep/MSS/BOS bonuses withheld"
+            )
 
         # Sweep
         if sweep.sweep_detected and not sweep.is_false_sweep:
             aligns = (sweep.sweep_type == "bullish" and direction == "long") or \
                      (sweep.sweep_type == "bearish" and direction == "short")
             if aligns:
-                # Recency decay
-                age = min(sweep.age_bars, cfg.sweep_recency_max_bars)
-                recency_mult = cfg.sweep_recency_decay_per_bar ** age
-                sweep_pts = max(0, int(round(cfg.sweep_weight * recency_mult)))
-                score += sweep_pts
-                reasons.append(
-                    f"Recent {sweep.sweep_type} sweep +{sweep_pts}"
-                    + (f" (age {sweep.age_bars}b, decay {recency_mult:.2f})" if age > 0 else "")
-                )
-                if sweep.volume_confirmed:
-                    score += cfg.volume_confirm_weight
-                    reasons.append(f"Sweep volume confirmed +{cfg.volume_confirm_weight}")
-                if cfg.use_oi_confirmation and oi_trend == "rising":
-                    score += cfg.oi_confirm_weight
-                    reasons.append(f"OI rising confirms sweep +{cfg.oi_confirm_weight}")
+                if _multi_component_ok:
+                    # Recency decay
+                    age = min(sweep.age_bars, cfg.sweep_recency_max_bars)
+                    recency_mult = cfg.sweep_recency_decay_per_bar ** age
+                    sweep_pts = max(0, int(round(cfg.sweep_weight * recency_mult)))
+                    # [Fix-22] TUNABLE — needs validation. sweep_status == "pending"
+                    # means not enough bars have closed since the sweep to confirm it
+                    # didn't fail (see _is_false_sweep_status). Award half the
+                    # otherwise-earned bonus rather than the full amount, so the score
+                    # reflects the genuine one-bar+ uncertainty instead of treating
+                    # "not yet disproven" identically to "confirmed valid."
+                    if sweep.sweep_status == "pending":
+                        sweep_pts = sweep_pts // 2
+                        status_note = " [pending confirmation]"
+                    else:
+                        status_note = ""
+                    score += sweep_pts
+                    reasons.append(
+                        f"Recent {sweep.sweep_type} sweep +{sweep_pts}{status_note}"
+                        + (f" (age {sweep.age_bars}b, decay {recency_mult:.2f})" if age > 0 else "")
+                    )
+                    if sweep.volume_confirmed:
+                        score += cfg.volume_confirm_weight
+                        reasons.append(f"Sweep volume confirmed +{cfg.volume_confirm_weight}")
+                    if cfg.use_oi_confirmation and oi_trend == "rising":
+                        score += cfg.oi_confirm_weight
+                        reasons.append(f"OI rising confirms sweep +{cfg.oi_confirm_weight}")
             else:
-                # Counter-direction sweep — penalty
+                # Counter-direction sweep — penalty. Independent of
+                # require_multi_component_confluence; this is a risk control, not a
+                # confirmation bonus.
                 score -= cfg.sweep_weight
                 reasons.append(f"Counter-direction {sweep.sweep_type} sweep -{cfg.sweep_weight}")
 
         # MSS
         if mss.mss_detected and mss.direction == direction:
-            score += cfg.mss_weight
-            reasons.append(f"{mss.direction.capitalize()} MSS +{cfg.mss_weight}")
+            if _multi_component_ok:
+                score += cfg.mss_weight
+                reasons.append(f"{mss.direction.capitalize()} MSS +{cfg.mss_weight}")
         elif mss.mss_detected and mss.direction != direction:
+            # Counter-direction penalty — independent of require_multi_component_confluence.
             score -= cfg.mss_weight
             reasons.append(f"Counter MSS ({mss.direction}) -{cfg.mss_weight}")
             if cfg.hard_suppress_counter_mss:
                 out.hard_suppress = True  # Strong counter-structure
 
         # BOS
-        if bos.bos_detected and bos.direction == direction:
+        if bos.bos_detected and bos.direction == direction and _multi_component_ok:
             score += cfg.bos_weight
             reasons.append(f"{bos.direction.capitalize()} BOS +{cfg.bos_weight}")
 
@@ -1040,10 +1178,46 @@ def test_no_future_leakage():
         assert lows[-1]["index"] <= len(candles) - cfg.fractal_right - 1
 
 
+def test_sweep_status_pending_vs_confirmed():
+    """[Fix-22] A sweep with too few closed bars after it must report
+    sweep_status == "pending" (not silently "confirmed_valid"/False), and
+    is_false_sweep must stay False during that window (it only becomes True
+    on a genuine confirmed_false determination)."""
+    cfg = LiquidityConfig(fractal_left=2, fractal_right=2)
+    la = LiquidityAnalyzer(cfg)
+    candles = []
+    for i, p in enumerate([20, 18, 16, 15, 17, 19, 21, 19, 17, 14, 16]):
+        candles.append({"t": i * 900_000, "o": p + 0.5, "h": p + 1, "l": p - 1, "c": p, "v": 2.0})
+    candles[3]["l"] = 13
+    highs, lows = la.detect_swings(candles)
+    bsl, ssl = la.build_liquidity_levels(candles, highs, lows, 1.0,
+                                          candles[-1]["c"], len(candles) - 1)
+    # Sweep evaluated at the bar it occurs on — zero bars have closed after it
+    # yet, so the false-sweep determination must be "pending", not a default
+    # "confirmed valid" by omission.
+    sweep_at_occurrence = la.detect_sweep(candles, bsl, ssl, len(candles) - 1, 1.0, 1.5)
+    if sweep_at_occurrence.sweep_detected:
+        assert sweep_at_occurrence.sweep_status == "pending"
+        assert sweep_at_occurrence.is_false_sweep is False
+
+    # Re-evaluated many bars later (current_bar_index far past the sweep bar
+    # plus false_sweep_lookback), the ambiguity window has closed and the
+    # status must resolve to either confirmed_valid or confirmed_false — never
+    # left as "pending" indefinitely.
+    if sweep_at_occurrence.sweep_detected:
+        later_index = sweep_at_occurrence.bar_index + cfg.false_sweep_lookback + 1
+        later_index = min(later_index, len(candles) - 1)
+        sweep_later = la.detect_sweep(candles, bsl, ssl, later_index, 1.0, 1.5)
+        if sweep_later.sweep_detected and sweep_later.bar_index == sweep_at_occurrence.bar_index:
+            assert sweep_later.sweep_status in ("confirmed_valid", "confirmed_false")
+            assert sweep_later.is_false_sweep == (sweep_later.sweep_status == "confirmed_false")
+
+
 if __name__ == "__main__":
     test_swing_detection_basic()
     test_bullish_sweep()
     test_fvg_detection()
     test_confluence_output_schema()
     test_no_future_leakage()
+    test_sweep_status_pending_vs_confirmed()
     print("All liquidity_confluence tests passed.")
