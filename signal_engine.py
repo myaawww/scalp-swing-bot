@@ -132,10 +132,61 @@ __version__ = "15.8.1"  # Rollback pass (2026-06-20): reverted the Section 6
 # intent. The Section 8 score-logic fixes (counter-sweep suppression, adverse-
 # zone penalty, severe S/R disagreement penalty) are independent of these and
 # remain in place.
+# SECTION 10 (HTF liquidity wiring, 2026-06-20 — user request: "wire the
+# liquidity engine to also analyze 4h/1h candles for HTF liquidity pools
+# instead of just borrowing the EMA trend flag"):
+#   1. [Fix-43] liquidity_confluence.py: SignalConfluence.analyze() now runs
+#      real LiquidityAnalyzer/StructureAnalyzer passes over candles_1h/
+#      candles_4h (actual 1h/4h dealing range, external BSL/SSL pools,
+#      premium/discount zone, and sweep detection) instead of those params
+#      always being unused. ADDITIVE/layered, not a replacement of the
+#      existing 15m-only scoring: new htf_external_liquidity_weight (=2),
+#      htf_zone_weight (=2), and htf_sweep_weight (=6, higher than the 15m
+#      sweep_weight=4 — an HTF sweep is rarer and more decisive) score
+#      independently and flow through the same existing max_bonus=10 cap, so
+#      [Fix-13]'s MAX_POSITIVE_ADJUSTMENTS/max_bonus reconciliation still
+#      holds with no changes needed there. Distance gating
+#      (htf_external_liquidity_max_dist_atr) is computed against each
+#      timeframe's OWN ATR, not 15m ATR. The htf_sweep_weight bonus only
+#      fires when the 15m engine's own MSS already confirms direction (the
+#      "HTF grab -> LTF structure confirms -> enter" pattern), not as an
+#      independent HTF-only signal.
+#   2. [Fix-44] liquidity_confluence.py: SignalConfluence._cache/_lock
+#      (declared in __init__, previously never touched anywhere in the
+#      file) now actually cache 1h/4h swing/level/sweep computation per
+#      (symbol, timeframe), keyed by the last closed HTF candle's
+#      timestamp — avoids redoing fractal detection on the same 1h/4h
+#      candles on every 15m scan within an unchanged HTF bar.
+#   3. Call-site wiring: _apply_scoring_and_filters() now accepts
+#      candles_1h/candles_4h (threaded from compute_signals(), where both
+#      were already in scope but not passed down), and the
+#      _liq_engine.analyze() call no longer hardcodes candles_1h=None,
+#      candles_4h=None. htf_bull_flags / htf_weight (the EMA-cross
+#      alignment gate) are UNCHANGED — still a legitimate, cheap directional
+#      filter, kept alongside the new genuine HTF liquidity structure as a
+#      separate confluence input rather than one masquerading as the other.
+#   4. New SignalResult / liquidity_confluence_log fields for visibility:
+#      htf_liquidity_score, htf_1h_zone, htf_4h_zone, htf_1h_external_bsl/
+#      ssl, htf_4h_external_bsl/ssl, htf_1h_sweep, htf_4h_sweep.
+# All Section 10 weights are TUNABLE — reasoned defaults, not backtested.
+# Compare htf_liquidity_score / [LIQ] reasons against outcomes before
+# adjusting; consider promoting from "layer" to "replace" (using HTF zone/
+# external levels instead of the 15m-derived ones in the existing blocks)
+# only after that comparison, per the original design discussion.
 
 
 # ── LIQUIDITY CONFLUENCE FEATURE FLAG ─────────────────────────
 ENABLE_LIQUIDITY_CONFLUENCE: bool = True
+# [Fix-46] L2 order-book imbalance feature flag. fetch_l2_imbalance() was
+# fully implemented and imported, but the call site below hardcoded
+# `_l2_imb = None`, so l2_imbalance_weight/l2_imbalance_threshold never
+# contributed to any score. Now wired through hl_post (the existing
+# rate-limited/retrying Hyperliquid request function) when enabled.
+# Default False: this is a TUNABLE, unvalidated addition — and unlike the
+# other confluence inputs, it costs a synchronous network round-trip per
+# candidate signal, so it's opt-in rather than on-by-default until that
+# latency/rate-limit cost has been weighed against backtested edge.
+ENABLE_L2_IMBALANCE: bool = False
 try:
     from liquidity_confluence import (
         LiquidityConfig, SignalConfluence, ConfluenceOutput,
@@ -2073,6 +2124,18 @@ class SignalResult:
         # tuning decision the audit didn't make for us.
         self.sr_liquidity_disagreement: str | None = None
 
+        # [Fix-43] Real 1h/4h liquidity structure (separate from
+        # htf_alignment above, which is the borrowed EMA-cross boolean).
+        self.htf_liquidity_score: int = 0
+        self.htf_1h_zone: str = "neutral"
+        self.htf_4h_zone: str = "neutral"
+        self.htf_1h_external_bsl: float | None = None
+        self.htf_1h_external_ssl: float | None = None
+        self.htf_4h_external_bsl: float | None = None
+        self.htf_4h_external_ssl: float | None = None
+        self.htf_1h_sweep: dict = {}
+        self.htf_4h_sweep: dict = {}
+
         # ── Portfolio / leverage context (set by scan_symbol) ──
         self._concurrent: int = 0
 
@@ -2560,7 +2623,14 @@ def _setup_signal_entry(res: SignalResult, cur_c: float, atr_val: float):
 def _apply_scoring_and_filters(res: SignalResult, state: dict,
                                 symbol: str, reference_ms: int | None,
                                 funding_rate: float | None,
-                                candles_15m: list[dict]) -> SignalResult:
+                                candles_15m: list[dict],
+                                # [Fix-43] Threaded through so the liquidity
+                                # engine's analyze() call below can run real
+                                # HTF liquidity analysis instead of always
+                                # being passed None — see call site for the
+                                # previous candles_1h=None/candles_4h=None.
+                                candles_1h: list[dict] | None = None,
+                                candles_4h: list[dict] | None = None) -> SignalResult:
     ind = res._ind
     ctx = res._ctx
     btc_regime = ctx["btc_regime"]
@@ -3055,13 +3125,30 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
                 "4h_bull": ctx.get("h4_bull", False),
                 "4h_bear": ctx.get("h4_bear", False),
             }
+            # [Fix-46] Previously hardcoded to None — fetch_l2_imbalance()
+            # was fully implemented and imported but never called, so
+            # l2_imbalance_weight/l2_imbalance_threshold in LiquidityConfig
+            # never contributed to any score. Gated on ENABLE_L2_IMBALANCE
+            # (default off) since this adds a synchronous HL API call per
+            # candidate signal; failures inside fetch_l2_imbalance already
+            # degrade to None rather than raising, so this can't itself
+            # break signal generation when the network call fails.
             _l2_imb = None
+            if ENABLE_L2_IMBALANCE:
+                _l2_imb = fetch_l2_imbalance(symbol, hl_post)
 
             _liq_out: ConfluenceOutput = _liq_engine.analyze(
                 symbol=symbol,
                 candles_15m=candles_15m,
-                candles_1h=None,
-                candles_4h=None,
+                # [Fix-43] Previously always None — the liquidity engine's
+                # candles_1h/candles_4h params were accepted but never fed,
+                # so HTF liquidity structure was never actually analyzed
+                # (only the EMA-cross htf_bull_flags boolean below was used
+                # as a stand-in). Now threaded through from compute_signals()
+                # via _apply_scoring_and_filters so the engine can run real
+                # 1h/4h dealing-range / external-BSL-SSL / sweep analysis.
+                candles_1h=candles_1h,
+                candles_4h=candles_4h,
                 direction=direction,
                 base_strength=res.score,
                 entry=res.entry,
@@ -3087,6 +3174,20 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
             res.htf_alignment         = _liq_out.htf_alignment
             res.liquidity_reasons     = _liq_out.reasons
             res.liquidity_hard_suppress = _liq_out.hard_suppress
+
+            # [Fix-43] Real HTF liquidity structure — for logging/dashboard
+            # visibility, same as the other liquidity_* fields above. Already
+            # folded into adjusted_score via liquidity_bonus (see below); not
+            # added again here.
+            res.htf_liquidity_score   = _liq_out.htf_liquidity_score
+            res.htf_1h_zone           = _liq_out.htf_1h_zone
+            res.htf_4h_zone           = _liq_out.htf_4h_zone
+            res.htf_1h_external_bsl   = _liq_out.htf_1h_external_bsl
+            res.htf_1h_external_ssl   = _liq_out.htf_1h_external_ssl
+            res.htf_4h_external_bsl   = _liq_out.htf_4h_external_bsl
+            res.htf_4h_external_ssl   = _liq_out.htf_4h_external_ssl
+            res.htf_1h_sweep          = _liq_out.htf_1h_sweep
+            res.htf_4h_sweep          = _liq_out.htf_4h_sweep
 
             if _liq_out.hard_suppress:
                 print(f"  [LIQ-SUPPRESS] {symbol} {direction.upper()} — "
@@ -3340,7 +3441,8 @@ def compute_signals(symbol, candles_15m, candles_1h, candles_4h, candles_d,
         return res
 
     res = _apply_scoring_and_filters(res, state, symbol, reference_ms,
-                                      funding_rate, candles_15m)
+                                      funding_rate, candles_15m,
+                                      candles_1h, candles_4h)
 
     return res
 
@@ -4053,6 +4155,15 @@ def log_liquidity_confluence(state: dict, symbol: str, direction: str,
             "zone": getattr(sig, 'premium_discount', 'neutral'),
             "htf_aligned": getattr(sig, 'htf_alignment', False),
             "reasons": getattr(sig, 'liquidity_reasons', []),
+            # [Fix-43] Real HTF (1h/4h) liquidity structure — logged
+            # alongside the existing fields above for the same backtesting
+            # comparison purpose (e.g. "did the HTF zone/sweep correlate
+            # with win rate" once enough history accumulates).
+            "htf_liquidity_score": getattr(sig, 'htf_liquidity_score', 0),
+            "htf_1h_zone": getattr(sig, 'htf_1h_zone', 'neutral'),
+            "htf_4h_zone": getattr(sig, 'htf_4h_zone', 'neutral'),
+            "htf_1h_sweep": getattr(sig, 'htf_1h_sweep', {}),
+            "htf_4h_sweep": getattr(sig, 'htf_4h_sweep', {}),
         })
         if len(log) > 5000:
             state["liquidity_confluence_log"] = log[-5000:]
