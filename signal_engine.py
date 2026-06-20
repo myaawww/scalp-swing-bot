@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
-from utils import safe, atr, sma, _cluster_levels
 
 __version__ = "15.5.5"  # [Fix-12] Bumped for cache collision fix & hardening
 
@@ -625,6 +624,20 @@ SR_PIVOT_LEFT_BARS  = 3
 SR_PIVOT_RIGHT_BARS = 3
 SR_CLUSTER_ATR_MULT = 0.3
 
+def _cluster_levels(pivots: list[float], atr_val: float, tolerance: float = 0.3) -> list[float]:
+    if not pivots or atr_val <= 0:
+        return pivots
+    zones: list[float] = []
+    zone_members: list[list[float]] = []
+    for p in sorted(pivots):
+        if zones and abs(p - zones[-1]) < atr_val * tolerance:
+            zone_members[-1].append(p)
+            members = zone_members[-1]
+            zones[-1] = sorted(members)[len(members) // 2]
+        else:
+            zones.append(p)
+            zone_members.append([p])
+    return zones
 
 def find_sr_levels(candles_15m: list[dict], n_levels: int = 2,
                    atr_val: float | None = None) -> tuple[list[float], list[float]]:
@@ -1229,6 +1242,23 @@ def rsi(closes: list[float], period: int) -> list[float]:
         result[i + 1] = 100 - 100 / (1 + rs)
     return result
 
+def atr(highs, lows, closes, period: int) -> list[float]:
+    trs = [float("nan")]
+    for i in range(1, len(closes)):
+        tr = max(
+            highs[i] - lows[i],
+            abs(highs[i] - closes[i - 1]),
+            abs(lows[i]  - closes[i - 1]),
+        )
+        trs.append(tr)
+    result = [float("nan")] * len(closes)
+    if len(trs) < period + 1:
+        return result
+    result[period] = sum(trs[1:period + 1]) / period
+    for i in range(period + 1, len(trs)):
+        result[i] = (result[i - 1] * (period - 1) + trs[i]) / period
+    return result
+
 def bollinger(closes, period: int, mult: float):
     n = len(closes)
     basis_arr = [float("nan")] * n
@@ -1368,6 +1398,11 @@ def detect_rsi_divergence(closes: list[float], rsi_values: list[float],
     else:
         return {"type": None, "strength": 0}
 
+def sma(values, period: int) -> list[float]:
+    result = [float("nan")] * len(values)
+    for i in range(period - 1, len(values)):
+        result[i] = sum(values[i - period + 1: i + 1]) / period
+    return result
 
 def rolling_vwap(closes, volumes, period: int) -> list[float]:
     pv  = [c * v for c, v in zip(closes, volumes)]
@@ -1393,6 +1428,15 @@ def daily_vwap(candles_15m: list[dict]) -> float:
     total_pv = sum(c["c"] * c["v"] for c in today_candles)
     return total_pv / total_vol
 
+def safe(v, fallback=0.0):
+    try:
+        if v is None:
+            return fallback
+        if isinstance(v, (int, float)) and math.isnan(v):
+            return fallback
+        return v
+    except (TypeError, ValueError):
+        return fallback
 
 # ═══════════════════════════════════════════════════════════════
 # INDICATOR CACHE
