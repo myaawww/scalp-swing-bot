@@ -5,7 +5,7 @@ import threading
 from dataclasses import dataclass, field
 from typing import Optional, Iterable
 
-from utils import safe, atr, sma, _cluster_levels
+from utils import safe, atr
 
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION (all weights configurable, no hardcoded scoring)
@@ -69,7 +69,6 @@ class LiquidityConfig:
 
     # Confidence decay after sweep
     confidence_decay_max_bars: int = 10
-    confidence_decay_per_bar: float = 0.5
 
     # ── Scoring weights (no hardcoded scoring values anywhere) ──
     external_liquidity_weight: int = 2
@@ -389,10 +388,6 @@ class LiquidityAnalyzer:
                 # False sweep filter: check if price continued through
                 is_false = self._is_false_sweep(candles, level.price, "bullish", atr_val)
                 age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                recency_factor = max(
-                    0.0,
-                    cfg.sweep_recency_decay_per_bar ** min(age, cfg.sweep_recency_max_bars)
-                )
                 return SweepResult(
                     sweep_detected=True, sweep_type="bullish",
                     swept_level=level, bar_index=current_bar_index,
@@ -407,10 +402,6 @@ class LiquidityAnalyzer:
             if cur["h"] > level.price and cur["c"] < level.price:
                 is_false = self._is_false_sweep(candles, level.price, "bearish", atr_val)
                 age = max(0, current_bar_index - self._bar_index_from_ts(candles, level.timestamp))
-                recency_factor = max(
-                    0.0,
-                    cfg.sweep_recency_decay_per_bar ** min(age, cfg.sweep_recency_max_bars)
-                )
                 return SweepResult(
                     sweep_detected=True, sweep_type="bearish",
                     swept_level=level, bar_index=current_bar_index,
