@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 # removed below in utils.py.
 from utils import safe, atr
 
-__version__ = "15.7.1"  # Bumped: Fix-38 (missing get_pull_requires_4h def) + backtest_harness.py removed (unused, no signal-path dependency)
+__version__ = "15.7.2"  # Bumped: Fix-39 (leverage always showing 1x — atr_pct was read from the never-populated res.atr_pct instead of ctx["atr_pct"], plus a units mismatch in recommended_leverage's sl_pct calc that saturated leverage at LEVERAGE_MAX once real ATR% was wired in)
 
 # ═══════════════════════════════════════════════════════════════
 # CHANGELOG — scalp_swing_bot_audit.md implementation pass (2026-06-20)
@@ -2513,7 +2513,13 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
     cur_v = ind["v15"][-1]
     price_dir = "up" if cur_c > cur_o else "down"
     atr_val = res.atr_val
-    atr_pct = res.atr_pct
+    # [Fix-39] res.atr_pct was never populated before this point (only atr_val is
+    # copied onto res by _setup_signal_entry) — reading it here pulled the class
+    # default of 0.0 on every single signal, which made recommended_leverage()'s
+    # `sl_pct <= 0` guard fire unconditionally downstream, so leverage always
+    # displayed "1x" regardless of real volatility. The correct value was sitting
+    # unused in ctx["atr_pct"] the whole time (set by _detect_raw_signals).
+    atr_pct = ctx["atr_pct"]
 
     oi_data = compute_oi_trend(state, symbol, cur_c, price_dir, direction)
     res.oi_trend_data = oi_data
@@ -3500,7 +3506,14 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         sl_atr_mult = SL_HIGH_ATR_MULT if atr_pct > HIGH_ATR_THRESHOLD else (
             SL_MULT_BREAK if signal_type == "BREAK" else SL_MULT_PULL
         )
-        sl_pct = (atr_pct * sl_atr_mult) / 100.0
+        # [Fix-39] Dropped the stray /100.0 here. account_risk_pct (e.g. 2.0,
+        # meaning "2%") and atr_pct (e.g. 1.5, meaning "1.5%") are both already
+        # in the same "percent-number" convention used elsewhere in this file
+        # (see HIGH_ATR_THRESHOLD comparisons above). Dividing sl_pct down into
+        # a 0-1 fraction while leaving account_risk_pct un-scaled made the ratio
+        # ~100x too large, so leverage saturated at LEVERAGE_MAX for virtually
+        # any nonzero ATR% instead of producing a real 1x-10x gradient.
+        sl_pct = atr_pct * sl_atr_mult
         if sl_pct <= 0:
             return "1x"
         max_lev = account_risk_pct / sl_pct
