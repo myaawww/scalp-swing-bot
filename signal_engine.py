@@ -14,7 +14,11 @@ from zoneinfo import ZoneInfo
 # removed below in utils.py.
 from utils import safe, atr
 
-__version__ = "15.7.2"  # Bumped: Fix-39 (leverage always showing 1x — atr_pct was read from the never-populated res.atr_pct instead of ctx["atr_pct"], plus a units mismatch in recommended_leverage's sl_pct calc that saturated leverage at LEVERAGE_MAX once real ATR% was wired in)
+__version__ = "15.8.1"  # Rollback pass (2026-06-20): reverted the Section 6
+# frequency-tuning constants (MIN_RR_RATIO, ADX_SCORE_MIN, MIN_DAILY_ADX,
+# ADX_BREAK_GATE, TREND_HOLD_BARS, SIGNAL_COOLDOWN_BARS[_HIGHSCORE],
+# MAX_SIGNALS_DEFAULT/BULL_TREND) back to their pre-Section-6 originals. See
+# SECTION 9 below.
 
 # ═══════════════════════════════════════════════════════════════
 # CHANGELOG — scalp_swing_bot_audit.md implementation pass (2026-06-20)
@@ -93,6 +97,41 @@ __version__ = "15.7.2"  # Bumped: Fix-39 (leverage always showing 1x — atr_pct
 #      "confirmed_false" / "pending"); analyze() halves the sweep bonus when pending.
 #   (All other Section 7 items map 1:1 onto Section 4/5 items above — see table
 #   in delivery summary; no separate Fix-N tags since no separate code changed.)
+# SECTION 8 (signal-quality pass, 2026-06-20 — driven by review of 6 consecutive
+# SL losses across SUIUSDT/BTCUSDT/BNBUSDT/ETHUSDT/HYPEUSDT/SOLUSDT):
+#   1. [Fix-40] liquidity_confluence.py: a volume-confirmed counter-direction
+#      SWEEP now sets out.hard_suppress=True (previously only a counter-direction
+#      MSS could suppress; a fresh, volume-confirmed counter-sweep — one of the
+#      strongest reversal tells in the engine — was only ever a -4 score penalty
+#      that got outvoted by unrelated bonuses). Gated behind the existing
+#      hard_suppress_counter_mss config flag.
+#   2. [Fix-41] liquidity_confluence.py: new premium_discount_adverse_weight
+#      (default 4, vs the existing favorable-zone premium_discount_weight=2).
+#      Longing into a premium zone / shorting into a discount zone is now
+#      penalized twice as hard as the favorable case is rewarded.
+#   3. [Fix-42] Main bot: severe S/R-vs-liquidity-engine disagreement (>3.0 ATR,
+#      new SR_LIQUIDITY_DISAGREEMENT_SEVERE_ATR_MULT) now applies a real
+#      SR_LIQUIDITY_DISAGREEMENT_PENALTY (-3) routed through the normal
+#      adjs/penalty-cap path, instead of being log-only as in [Fix-24]. The
+#      original >1.0 ATR threshold still just logs (kept as-is, was working
+#      as visibility-only).
+# All three are TUNABLE — values are reasoned defaults, not backtested. Watch
+# the next batch of signals: if [LIQ-SUPPRESS] / severe-disagreement penalties
+# fire on setups that would have won, loosen; if losers like the 6 above still
+# slip through, tighten further.
+# SECTION 9 (rollback pass, 2026-06-20 — user-directed, undoing Section 6's
+# frequency-tuning constants now that Section 8's score-logic fixes are in):
+#   MIN_RR_RATIO        0.8  -> 1.0
+#   ADX_SCORE_MIN        17.5 -> 20.0
+#   ADX_BREAK_GATE       22.0 -> 25.0
+#   MIN_DAILY_ADX        16.0 -> 18.0
+#   TREND_HOLD_BARS      1    -> 2
+#   SIGNAL_COOLDOWN_BARS / _HIGHSCORE   1 -> 2 (both)
+#   MAX_SIGNALS_DEFAULT / _BULL_TREND   5/9 -> 4/7
+# This will reduce signal frequency relative to v15.7.2/15.8.0 — that's the
+# intent. The Section 8 score-logic fixes (counter-sweep suppression, adverse-
+# zone penalty, severe S/R disagreement penalty) are independent of these and
+# remain in place.
 
 
 # ── LIQUIDITY CONFLUENCE FEATURE FLAG ─────────────────────────
@@ -207,7 +246,10 @@ USE_DYNAMIC_MAX_SIGNALS: bool = True
 # deploying — the codebase has no visibility into position-sizing/account
 # capital to validate this for you. Originals: MAX_SIGNALS_BULL_TREND=7,
 # MAX_SIGNALS_DEFAULT=4 (example +2/+1 bump applied here).
-MAX_SIGNALS_BULL_TREND: int = 97
+# [ROLLBACK 2026-06-20] Per signal-quality review: this is a sizing lever, not a
+# quality lever — tightening it buys breathing room while the Section 8 score
+# logic fixes are validated, without touching the actual signal logic. 9/5 -> 7/4.
+MAX_SIGNALS_BULL_TREND: int = 7
 MAX_SIGNALS_DEFAULT: int = 4
 BREADTH_BULL_THRESHOLD: float = 0.70
 
@@ -225,6 +267,10 @@ FALSE_BREAKOUT_BONUS: int = 1
 # it's warranted, and no such data exists yet (the harness that would have
 # produced it, backtest_harness.py, was removed — see Fix-25 changelog entry
 # above). Originals: ADX_BREAK_GATE=25.0, ADX_SCORE_MIN=20.0.
+# [ROLLBACK 2026-06-20] Per signal-quality review: the original breakout-strength
+# bar (in place since v15.1.0 for a documented reason, FIX-M8) was the gate that
+# kept weak-trend setups from scoring as high as strong ones in the BREAK path.
+# Reverted to originals.
 ADX_BREAK_GATE  = 25.0
 ADX_SCORE_MIN   = 20.0
 
@@ -256,6 +302,8 @@ PULL_RECOVER_ATR_MULT_MIXED: float = 0.10
 # confirmation. This is a frequency/quality tradeoff — still validate against your
 # own historical data before trusting the tradeoff (no in-repo harness for
 # this anymore — see Fix-25 changelog entry); revert to 2 to undo.
+# [ROLLBACK 2026-06-20] Per signal-quality review: single-bar confirmation is
+# the easiest setting to whipsaw on. Reverted to 2.
 TREND_HOLD_BARS = 2
 USE_EXHAUSTION_SHORT:       bool = True
 EXHAUSTION_SHORT_SCORE_ADJ: int  = -1
@@ -275,7 +323,9 @@ USE_DAILY_ADX     = True
 # [Fix-30] TUNABLE — same hypothesis-not-evidence caveat as ADX_BREAK_GATE/
 # ADX_SCORE_MIN above; user/reviewer has explicitly confirmed (2026-06-20) that
 # higher signal frequency is wanted. Original: 18.0.
-MIN_DAILY_ADX     = 20.0
+# [ROLLBACK 2026-06-20] Per signal-quality review: the daily trend filter got
+# weakened twice in a row across versions. Reverted to original 18.0.
+MIN_DAILY_ADX     = 18.0
 PULL_REQUIRES_4H  = True
 # [Fix-37] TUNABLE — needs validation. Section 6 Item 10: per-symbol or
 # per-BTC-regime-label override for PULL_REQUIRES_4H, rather than a single
@@ -381,6 +431,14 @@ MAX_OI_SCALE: float = 3.0
 # find_sr_levels()'s nearest level and the liquidity engine's nearest external
 # level are considered to "materially disagree" for logging purposes only.
 SR_LIQUIDITY_DISAGREEMENT_ATR_MULT: float = 1.0
+# [Fix-42] TUNABLE — needs validation. Disagreement beyond this (much larger)
+# threshold means the two structure systems aren't just using different
+# clustering tolerances — they don't agree on which side of price the nearest
+# real level even is. Past this point it's not noise, it's a sign the
+# structure read for this symbol/scan is unreliable, so it now costs real
+# score (see SR_LIQUIDITY_DISAGREEMENT_PENALTY) instead of just being logged.
+SR_LIQUIDITY_DISAGREEMENT_SEVERE_ATR_MULT: float = 3.0
+SR_LIQUIDITY_DISAGREEMENT_PENALTY: int = -3
 # [Fix-18] TUNABLE — needs validation. Hard cutoff for OI staleness in
 # compute_oi_trend(): past this many seconds since the last OI reading, treat OI
 # as "unknown" instead of damped-but-nonzero. 45 minutes = 3x OI_EXPECTED_INTERVAL_S.
@@ -388,6 +446,9 @@ OI_STALE_CUTOFF_S: float = 45 * 60
 # [Fix-31] TUNABLE — needs validation. Widened the R:R filter's tolerance
 # modestly downward so marginally-sub-1:1 setups aren't auto-rejected.
 # Original: 0.9.
+# [ROLLBACK 2026-06-20] Per signal-quality review: this hits expectancy
+# directly — below 1:1 R:R you need a much higher win rate just to break even.
+# Held at 1.0 for 3+ versions before the 0.8 drop. Reverted to 1.0.
 MIN_RR_RATIO: float = 1.0
 ATR_FALLBACK_PCT: float = 0.30
 
@@ -474,6 +535,9 @@ SR_LOOKBACK_BARS: int = 200
 # it. SIGNAL_COOLDOWN_BARS_HIGHSCORE is lowered to match (was 2), removing the
 # extra bar of cooldown previously required for high-score signals specifically.
 # Original: SIGNAL_COOLDOWN_BARS_HIGHSCORE=2.
+# [ROLLBACK 2026-06-20] Per signal-quality review: re-firing the same
+# symbol/direction 15 min later just compounds a wrong read rather than
+# confirming it. Both reverted to 2.
 SIGNAL_COOLDOWN_BARS:           int = 2
 SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7
@@ -3065,6 +3129,18 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
                     )
                     print(f"  [SR-LIQ DISAGREEMENT] {symbol} {direction.upper()} — "
                           f"{res.sr_liquidity_disagreement}")
+                    # [Fix-42] Severe disagreement (the two systems don't even
+                    # agree which side of price the nearest level is on) now
+                    # costs real score instead of being log-only, routed through
+                    # the standard adjs/penalty-cap machinery like every other
+                    # penalty.
+                    if _sr_liq_dist_atr > SR_LIQUIDITY_DISAGREEMENT_SEVERE_ATR_MULT:
+                        adjs.append((
+                            f"S/R vs liquidity engine severe disagreement "
+                            f"({_sr_liq_dist_atr:.1f} ATR apart)",
+                            SR_LIQUIDITY_DISAGREEMENT_PENALTY
+                        ))
+                        adjusted_score += SR_LIQUIDITY_DISAGREEMENT_PENALTY
 
         except Exception as _liq_err:
             print(f"  [LIQ-ERROR] {symbol} {direction.upper()}: {_liq_err}")
