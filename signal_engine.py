@@ -8,7 +8,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 from utils import safe, atr, sma, _cluster_levels
 
-__version__ = "15.5.4"  # [Fix-12] Bumped for cache collision fix & hardening
+__version__ = "15.5.5"  # [Fix-12] Bumped for cache collision fix & hardening
 
 # ── LIQUIDITY CONFLUENCE FEATURE FLAG ─────────────────────────
 ENABLE_LIQUIDITY_CONFLUENCE: bool = True
@@ -239,7 +239,7 @@ H4_STALE_SPREAD_MIN:   float = 0.15
 OI_ACCEL_MIN_THRESHOLD: float = 1.0
 OI_SCORE_CAP: int              = 2
 SESSION_DEAD_ZONE_START_UTC: int = 3
-SESSION_DEAD_ZONE_END_UTC:   int = 7
+SESSION_DEAD_ZONE_END_UTC:   int = 6
 SESSION_LOW_ATR_PERCENTILE:  float = 0.10
 TP1_MULT_BREAK: float = 1.0
 TP2_MULT_BREAK: float = 2.5
@@ -272,8 +272,9 @@ REGIME_LOW_VOL_SL_MULT: float   = 1.10
 REGIME_BEAR_TP1_MULT: float = 0.9
 REGIME_BULL_TP2_MULT: float = 1.1
 
-LOW_BTC_CORR_THRESHOLD: float = 0.5
+LOW_BTC_CORR_THRESHOLD: float = 0.35
 LOW_BTC_CORR_LOOKBACK_BARS: int = 42
+RS_BEARISH_REGIME_EXEMPT_PCT: float = 3.0
 
 LEVERAGE_BASE_RISK_PCT: float = 2.0
 LEVERAGE_MIN_RISK_PCT: float = 0.5
@@ -659,7 +660,8 @@ def find_sr_levels(candles_15m: list[dict], n_levels: int = 2,
 _btc_regime_cache: dict | None = None
 _btc_regime_lock  = threading.Lock()
 
-def compute_btc_regime(candles_1h: list[dict], candles_4h: list[dict]) -> dict:
+def compute_btc_regime(candles_1h: list[dict], candles_4h: list[dict],
+                       candles_1d: list[dict] | None = None) -> dict:
     def _arr(candles):
         return [c["c"] for c in candles]
 
@@ -674,16 +676,36 @@ def compute_btc_regime(candles_1h: list[dict], candles_4h: list[dict]) -> dict:
     btc_4h_momentum = len(c4h) >= 6 and c4h[-2] > c4h[-5]
 
     btc_bullish = (ef4h > es4h) and (ef1h > es1h) and btc_4h_momentum
-    btc_bearish = (ef4h < es4h) and (ef1h < es1h)
+    btc_bearish_intraday = (ef4h < es4h) and (ef1h < es1h)
+
+    # Daily confirmation: only treat as confirmed bearish if daily EMA21 < EMA50 as well
+    btc_daily_bearish = False
+    if candles_1d and len(candles_1d) >= SLOW_LEN:
+        c1d = _arr(candles_1d)
+        ef1d = safe(ema(c1d, FAST_LEN)[-1])
+        es1d = safe(ema(c1d, SLOW_LEN)[-1])
+        btc_daily_bearish = ef1d < es1d
+
+    # Bearish requires both intraday structure AND daily trend confirmation
+    btc_bearish = btc_bearish_intraday and btc_daily_bearish
+    # Intraday-only bearish (4H/1H bear but daily still bullish) → treat as Mixed
+    btc_intraday_only_bearish = btc_bearish_intraday and not btc_daily_bearish
 
     if btc_bullish:
         label = "BTC Regime: Bullish"
     elif btc_bearish:
-        label = "BTC Regime: Bearish"
+        label = "BTC Regime: Bearish (confirmed)"
+    elif btc_intraday_only_bearish:
+        label = "BTC Regime: Mixed (4H dip, daily intact)"
     else:
         label = "BTC Regime: Mixed"
 
-    return {"bullish": btc_bullish, "bearish": btc_bearish, "label": label}
+    return {
+        "bullish": btc_bullish,
+        "bearish": btc_bearish,
+        "intraday_bearish": btc_bearish_intraday,
+        "label": label,
+    }
 
 def set_btc_regime(regime: dict):
     global _btc_regime_cache
@@ -759,6 +781,15 @@ def check_btc_regime_filter(direction: str, symbol: str,
     if direction == "long" and regime["bearish"]:
         if symbol in low_corr_set:
             return 0, f"{label} — counter-trend (exempt, decorrelated)"
+        # RS exemption: coin actively outperforming BTC → treat as decorrelated this scan
+        with _rs_lock:
+            rs_snap = dict(_rs_snapshot if _rs_snapshot is not None else _rs_scores)
+        btc_ret  = rs_snap.get("BTCUSDT")
+        coin_ret = rs_snap.get(symbol)
+        if btc_ret is not None and coin_ret is not None:
+            rs_vs_btc = coin_ret - btc_ret
+            if rs_vs_btc >= RS_BEARISH_REGIME_EXEMPT_PCT:
+                return 0, f"{label} — counter-trend (exempt, RS +{rs_vs_btc:.1f}% vs BTC)"
         return -1, f"{label} — counter-trend (-1)"
 
     if direction == "short" and regime["bullish"]:
@@ -1781,10 +1812,13 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
     vol_score_ok = True if vm15 == 0 else (cur_v >= vm15 * VOL_SCORE_MULT)
     vol_ratio    = (cur_v / vm15) if vm15 > 0 else None
 
+    _ref_ts_vol = (reference_ms / 1000) if reference_ms is not None else time.time()
+    _is_weekend = datetime.fromtimestamp(_ref_ts_vol, tz=timezone.utc).weekday() >= 5
+    _vol_accel_bars = 1 if _is_weekend else BREAK_VOL_ACCEL_BARS
     vol_accel_ok = all(
         cur_v > v15[-(i + 2)]
-        for i in range(BREAK_VOL_ACCEL_BARS)
-    ) if len(v15) > BREAK_VOL_ACCEL_BARS + 1 else False
+        for i in range(_vol_accel_bars)
+    ) if len(v15) > _vol_accel_bars + 1 else False
 
     vol_score_ok_pull = True if vm15 == 0 else (
         cur_v >= vm15 * VOL_SCORE_MULT if True
@@ -3539,7 +3573,8 @@ def main():
     try:
         btc_1h = get_candles("BTCUSDT", "1h", N_1H, reference_ms=scan_reference_ms)
         btc_4h = get_candles("BTCUSDT", "4h", N_4H, reference_ms=scan_reference_ms)
-        regime = compute_btc_regime(btc_1h, btc_4h)
+        btc_1d = get_candles("BTCUSDT", "1d", N_1D, reference_ms=scan_reference_ms)
+        regime = compute_btc_regime(btc_1h, btc_4h, btc_1d)
         set_btc_regime(regime)
         print(f"  {regime['label']}")
     except Exception as e:
