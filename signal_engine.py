@@ -207,8 +207,8 @@ USE_DYNAMIC_MAX_SIGNALS: bool = True
 # deploying — the codebase has no visibility into position-sizing/account
 # capital to validate this for you. Originals: MAX_SIGNALS_BULL_TREND=7,
 # MAX_SIGNALS_DEFAULT=4 (example +2/+1 bump applied here).
-MAX_SIGNALS_BULL_TREND: int = 9
-MAX_SIGNALS_DEFAULT: int = 5
+MAX_SIGNALS_BULL_TREND: int = 97
+MAX_SIGNALS_DEFAULT: int = 4
 BREADTH_BULL_THRESHOLD: float = 0.70
 
 USE_FALSE_BREAKOUT_DETECTION: bool = True
@@ -225,8 +225,8 @@ FALSE_BREAKOUT_BONUS: int = 1
 # it's warranted, and no such data exists yet (the harness that would have
 # produced it, backtest_harness.py, was removed — see Fix-25 changelog entry
 # above). Originals: ADX_BREAK_GATE=25.0, ADX_SCORE_MIN=20.0.
-ADX_BREAK_GATE  = 22.0
-ADX_SCORE_MIN   = 17.5
+ADX_BREAK_GATE  = 25.0
+ADX_SCORE_MIN   = 20.0
 
 RSI_BREAK_LONG_MIN  = 50.0;  RSI_BREAK_LONG_MAX  = 75.0
 RSI_BREAK_SHORT_MIN = 25.0;  RSI_BREAK_SHORT_MAX = 50.0
@@ -256,7 +256,7 @@ PULL_RECOVER_ATR_MULT_MIXED: float = 0.10
 # confirmation. This is a frequency/quality tradeoff — still validate against your
 # own historical data before trusting the tradeoff (no in-repo harness for
 # this anymore — see Fix-25 changelog entry); revert to 2 to undo.
-TREND_HOLD_BARS = 1
+TREND_HOLD_BARS = 2
 USE_EXHAUSTION_SHORT:       bool = True
 EXHAUSTION_SHORT_SCORE_ADJ: int  = -1
 USE_EXHAUSTION_LONG:        bool = True
@@ -275,7 +275,7 @@ USE_DAILY_ADX     = True
 # [Fix-30] TUNABLE — same hypothesis-not-evidence caveat as ADX_BREAK_GATE/
 # ADX_SCORE_MIN above; user/reviewer has explicitly confirmed (2026-06-20) that
 # higher signal frequency is wanted. Original: 18.0.
-MIN_DAILY_ADX     = 16.0
+MIN_DAILY_ADX     = 20.0
 PULL_REQUIRES_4H  = True
 # [Fix-37] TUNABLE — needs validation. Section 6 Item 10: per-symbol or
 # per-BTC-regime-label override for PULL_REQUIRES_4H, rather than a single
@@ -388,7 +388,7 @@ OI_STALE_CUTOFF_S: float = 45 * 60
 # [Fix-31] TUNABLE — needs validation. Widened the R:R filter's tolerance
 # modestly downward so marginally-sub-1:1 setups aren't auto-rejected.
 # Original: 0.9.
-MIN_RR_RATIO: float = 0.8
+MIN_RR_RATIO: float = 1.0
 ATR_FALLBACK_PCT: float = 0.30
 
 MACRO_WINDOW_BEFORE_MINS: int   = 60
@@ -474,8 +474,8 @@ SR_LOOKBACK_BARS: int = 200
 # it. SIGNAL_COOLDOWN_BARS_HIGHSCORE is lowered to match (was 2), removing the
 # extra bar of cooldown previously required for high-score signals specifically.
 # Original: SIGNAL_COOLDOWN_BARS_HIGHSCORE=2.
-SIGNAL_COOLDOWN_BARS:           int = 1
-SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 1
+SIGNAL_COOLDOWN_BARS:           int = 2
+SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7
 SIGNAL_COOLDOWN_POST_WIN_BARS:  int = 1
 
