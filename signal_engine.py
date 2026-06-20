@@ -86,8 +86,13 @@ MAX_SIGNAL_HISTORY   = 2000
 MIN_OI_USD: float = 500_000.0
 
 MAX_NEGATIVE_ADJUSTMENTS: int = 3
+# Mirrors MAX_NEGATIVE_ADJUSTMENTS. Without this, positive adjustment stacks
+# (e.g. liquidity-confluence bonus up to +20) are structurally uncapped while
+# negative stacks are capped at -3, biasing the system toward more signals
+# firing rather than better-filtered ones.
+MAX_POSITIVE_ADJUSTMENTS: int = 20  # reconciled with liquidity engine's max_bonus=20
 
-MAX_CONCURRENT_ACTIVE_SIGNALS: int = 12
+MAX_CONCURRENT_ACTIVE_SIGNALS: int = 18
 
 USE_1H_RSI_DIVERGENCE: bool = True
 DIVERGENCE_LOOKBACK: int = 20
@@ -99,8 +104,8 @@ FUNDING_CARRY_NEGATIVE_THRESHOLD: float = -0.0005
 FUNDING_CARRY_BONUS: int = 1
 
 USE_DYNAMIC_MAX_SIGNALS: bool = True
-MAX_SIGNALS_BULL_TREND: int = 5  
-MAX_SIGNALS_DEFAULT: int = 3    
+MAX_SIGNALS_BULL_TREND: int = 7  
+MAX_SIGNALS_DEFAULT: int = 4    
 BREADTH_BULL_THRESHOLD: float = 0.70
 
 USE_FALSE_BREAKOUT_DETECTION: bool = True
@@ -146,7 +151,7 @@ MIN_DAILY_ADX     = 18.0
 PULL_REQUIRES_4H  = True
 
 FUNDING_SUPPRESS_EXTREME: float = 0.0010
-SR_CLEARANCE_ATR_MULT: float    = 0.20
+SR_CLEARANCE_ATR_MULT: float    = 0.15
 SUPPORT_PROXIMITY_ATR: float    = 0.75
 
 BREAK_OI_FLAT_VOL_THRESHOLD: float = 1.5
@@ -203,7 +208,7 @@ WIN_RATE_RECENT_DAYS:    int   = 7
 WIN_RATE_RECENT_WEIGHT:  float = 2.0
 
 MAX_OI_SCALE: float = 3.0
-MIN_RR_RATIO: float = 1.0
+MIN_RR_RATIO: float = 0.9
 ATR_FALLBACK_PCT: float = 0.30
 
 MACRO_WINDOW_BEFORE_MINS: int   = 60
@@ -281,7 +286,7 @@ LEVERAGE_MAX: float = 10.0
 
 SR_LOOKBACK_BARS: int = 200
 
-SIGNAL_COOLDOWN_BARS:           int = 2
+SIGNAL_COOLDOWN_BARS:           int = 1
 SIGNAL_COOLDOWN_BARS_HIGHSCORE: int = 2
 SIGNAL_HIGHSCORE_THRESHOLD:     int = 7
 SIGNAL_COOLDOWN_POST_WIN_BARS:  int = 1
@@ -1633,6 +1638,9 @@ class SignalResult:
         self.liquidity_reasons: list[str] = []
         self.liquidity_hard_suppress: bool = False
 
+        # ── Portfolio / leverage context (set by scan_symbol) ──
+        self._concurrent: int = 0
+
 def record_market_inputs_from_candles(symbol: str,
                                       candles_15m: list[dict],
                                       candles_4h: list[dict]) -> None:
@@ -2611,17 +2619,19 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
                 res.fire_short = False
                 return res
 
-            adjusted_score += _liq_out.liquidity_bonus
+            # Route liquidity_bonus through adjs so the bonus-cap logic
+            # accounts for it in one unified place.  Do NOT also add it
+            # directly to adjusted_score here; the cap recompute path does
+            # adjusted_score = res.score + sum(adjs), so adding it both
+            # ways would double-count the bonus on capped signals.
+            if _liq_out.liquidity_bonus != 0:
+                adjs.append(("[LIQ] liquidity_bonus", _liq_out.liquidity_bonus))
+                adjusted_score += _liq_out.liquidity_bonus
 
+            # Per-reason strings are for display/logging only (adj=0 so
+            # they do not contribute to score totals or cap accounting).
             for reason in _liq_out.reasons:
-                _adj_val = 0
-                _matches = re.findall(r'[+-]\d+', reason)
-                if _matches:
-                    try:
-                        _adj_val = int(_matches[-1])
-                    except ValueError:
-                        _adj_val = 0
-                adjs.append((f"[LIQ] {reason}", _adj_val))
+                adjs.append((f"[LIQ] {reason}", 0))
 
         except Exception as _liq_err:
             print(f"  [LIQ-ERROR] {symbol} {direction.upper()}: {_liq_err}")
@@ -2664,6 +2674,50 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
             print(f"  [PENALTY CAP] {symbol} {direction.upper()} — "
                   f"trimmed {trimmed_count} secondary penalty(ies) to stay within "
                   f"-{MAX_NEGATIVE_ADJUSTMENTS} cap. Final neg total: {current_sum}")
+
+    # ══════════════════════════════════════════════════════════════
+    # [Fix-10] BONUS STACKING CAP (mirrors [Fix-9] penalty cap)
+    # ══════════════════════════════════════════════════════════════
+    total_pos = sum(adj for _, adj in adjs if adj > 0)
+    if total_pos > MAX_POSITIVE_ADJUSTMENTS:
+        cap = MAX_POSITIVE_ADJUSTMENTS
+        current_sum = 0
+        kept_indices: set[int] = set()
+
+        # Keep the highest-value bonuses first.  Sort descending by
+        # magnitude so that the single most-important bonus (e.g. a
+        # combined liquidity_bonus) is always included before smaller
+        # incremental ones.  Ties are broken by insertion order (stable
+        # sort), which respects the semantic priority already baked into
+        # adjs ordering (OI, RS, structural signals come earlier).
+        pos_order = sorted(
+            [i for i, (_, adj) in enumerate(adjs) if adj > 0],
+            key=lambda i: adjs[i][1], reverse=True,
+        )
+        for i in pos_order:
+            adj = adjs[i][1]
+            if current_sum + adj <= cap:
+                kept_indices.add(i)
+                current_sum += adj
+            # If the largest remaining bonus alone would exceed the cap
+            # (e.g. a +15 liquidity_bonus against a cap of 20 with
+            # current_sum already at 8), still include it but stop
+            # adding further items to avoid exceeding the cap.
+            elif not kept_indices:
+                kept_indices.add(i)
+                current_sum += adj
+                break
+
+        trimmed_count = sum(1 for i, (_, adj) in enumerate(adjs)
+                           if adj > 0 and i not in kept_indices)
+        if trimmed_count > 0:
+            new_adjs = [(lbl, adj) for i, (lbl, adj) in enumerate(adjs)
+                        if adj <= 0 or i in kept_indices]
+            adjs[:] = new_adjs
+            adjusted_score = res.score + sum(adj for _, adj in adjs)
+            print(f"  [BONUS CAP] {symbol} {direction.upper()} — "
+                  f"trimmed {trimmed_count} secondary bonus(es) to stay within "
+                  f"+{MAX_POSITIVE_ADJUSTMENTS} cap. Final pos total: {current_sum}")
 
     res.final_score = adjusted_score
     res.atr_pct     = atr_pct
@@ -2880,23 +2934,21 @@ def count_concurrent_correlated_exposure(state: dict, symbol: str, direction: st
         symbol
     )
 
-    count = 0
+    counted: set[int] = set()
     with _state_lock:
-        for sig in state.get("active_signals", []):
+        for idx, sig in enumerate(state.get("active_signals", [])):
             if sig.get("resolved"):
                 continue
             sig_symbol = sig.get("symbol", "")
-            sig_dir = sig.get("direction", "")
-            sig_group = next(
+            sig_dir    = sig.get("direction", "")
+            sig_group  = next(
                 (g for g, members in CORR_GROUPS.items() if sig_symbol in members),
                 sig_symbol
             )
-            if sig_group == group:
-                count += 1
-            elif sig_dir == direction:
-                count += 1
+            if sig_group == group or sig_dir == direction:
+                counted.add(idx)
 
-    return count
+    return len(counted)
 
 # ═══════════════════════════════════════════════════════════════
 # TELEGRAM
@@ -3136,6 +3188,7 @@ def track_signal(state: dict, symbol: str, direction: str,
             "msg_id":          msg_id,
             "bar_index":       bar_index,
             "signal_bar_time": bar_index * 900_000,
+            "entry":           sig.entry,
             "tp1":             sig.tp1,
             "tp2":             sig.tp2,
             "sl":              sig.sl,
@@ -3556,16 +3609,12 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
 # ═══════════════════════════════════════════════════════════════
 
 def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
-    def _sort_key(t):
-        sig = t[2]
-        rs = sig.rs_data.get("rs_pct")
-        if rs is None: rs = -999.0
-        if sig.fire_short:
-            return -rs
-        return rs
-
-    signals.sort(key=_sort_key, reverse=True)
-
+    # IMPORTANT: do NOT re-sort here.  The caller has already sorted
+    # `signals` by priority_score() (composite quality ranking).  Any
+    # internal re-sort would discard that ranking and cause lower-quality
+    # signals to survive dedup while higher-quality ones get dropped.
+    # Within each correlation group the first (highest priority_score)
+    # signal wins; later ones in the same group are silently dropped.
     seen_groups: set[tuple] = set()
     result: list[tuple]     = []
     for sig_tuple in signals:
