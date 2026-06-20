@@ -895,7 +895,7 @@ class SignalConfluence:
         )
 
         out.liquidity_bonus = score
-        out.final_strength = min(base_strength + score, cfg.final_strength_cap)
+        out.final_strength = max(0, min(base_strength + score, cfg.final_strength_cap))
         out.reasons = reasons
         return out
 
