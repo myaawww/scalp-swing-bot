@@ -44,6 +44,7 @@ class LiquidityConfig:
 
     # FVG
     fvg_min_size_atr: float = 0.25
+    fvg_lookback_bars: int = 10
 
     # Sweep volume confirmation
     sweep_vol_mult: float = 1.1
@@ -93,6 +94,8 @@ class LiquidityConfig:
 
     # Hard-suppress toggle for false sweeps
     hard_suppress_false_sweeps: bool = False
+    # Hard-suppress toggle for counter-directional MSS
+    hard_suppress_counter_mss: bool = True
 
 
 # ─────────────────────────────────────────────────────────────
@@ -528,18 +531,24 @@ class StructureAnalyzer:
         recent_lows = [s for s in swing_lows if s["index"] < len(candles) - 1][-lookback:]
 
         if sweep.sweep_type == "bullish":
-            # Need a higher low after the sweep, then break of recent swing high
-            if len(recent_lows) >= 2:
-                # The sweep should be at or below the most recent swing low,
-                # but a subsequent low must be higher (higher-low formation).
+            # Bullish MSS: SSL swept → higher low formed → break of recent swing high
+            if len(recent_lows) >= 2 and sweep.swept_level is not None:
+                swept_price = sweep.swept_level.price
+                # The most recent swing low must be ABOVE the swept level (higher low)
                 last_low = recent_lows[-1]["price"]
-                # Check break of recent swing high
-                if recent_highs and cur_close > recent_highs[-1]["price"]:
+                higher_low_formed = last_low > swept_price
+                # Then price must break above the most recent swing high (BOS confirmation)
+                if higher_low_formed and recent_highs and cur_close > recent_highs[-1]["price"]:
                     return MSSResult(mss_detected=True, direction="bullish")
         elif sweep.sweep_type == "bearish":
-            if len(recent_highs) >= 2:
+            # Bearish MSS: BSL swept → lower high formed → break of recent swing low
+            if len(recent_highs) >= 2 and sweep.swept_level is not None:
+                swept_price = sweep.swept_level.price
+                # The most recent swing high must be BELOW the swept level (lower high)
                 last_high = recent_highs[-1]["price"]
-                if recent_lows and cur_close < recent_lows[-1]["price"]:
+                lower_high_formed = last_high < swept_price
+                # Then price must break below the most recent swing low (BOS confirmation)
+                if lower_high_formed and recent_lows and cur_close < recent_lows[-1]["price"]:
                     return MSSResult(mss_detected=True, direction="bearish")
         return MSSResult()
 
@@ -550,26 +559,61 @@ class StructureAnalyzer:
         """
         Bullish FVG: candle[i-1].high < candle[i+1].low  (gap up)
         Bearish FVG: candle[i-1].low > candle[i+1].high  (gap down)
-        We look at the most recent 3-candle window (last closed candle is index -1).
+        Scans the most recent `fvg_lookback_bars` windows and returns
+        the most recent valid FVG found, with its true age in age_bars.
+        Only unfilled FVGs are returned — a gap is considered filled if
+        any subsequent candle's low (bullish) or high (bearish) closed
+        inside the gap.
         """
         cfg = self.cfg
-        if len(candles) < 3:
+        n = len(candles)
+        if n < 3:
             return FVGResult()
-        # i = -2 is the middle candle of the most recent completed pattern
-        a = candles[-3]
-        b = candles[-2]
-        c = candles[-1]
-        # Bullish FVG between candle a.high and candle c.low
-        if a["h"] < c["l"] and (c["l"] - a["h"]) > atr_val * cfg.fvg_min_size_atr:
-            return FVGResult(
-                fvg_detected=True, direction="bullish",
-                top=c["l"], bottom=a["h"], age_bars=1,
-            )
-        if a["l"] > c["h"] and (a["l"] - c["h"]) > atr_val * cfg.fvg_min_size_atr:
-            return FVGResult(
-                fvg_detected=True, direction="bearish",
-                top=a["l"], bottom=c["h"], age_bars=1,
-            )
+
+        lookback = min(cfg.fvg_lookback_bars, n - 2)
+
+        for offset in range(lookback):
+            # Middle candle of the 3-bar pattern is at index -(2 + offset)
+            idx_c = -(1 + offset)       # right candle
+            idx_b = -(2 + offset)       # middle candle (impulse)
+            idx_a = -(3 + offset)       # left candle
+
+            if abs(idx_a) > n:
+                break
+
+            a = candles[idx_a]
+            c = candles[idx_c]
+            age = offset + 1
+
+            # Bullish FVG: gap between a.high and c.low
+            if a["h"] < c["l"] and (c["l"] - a["h"]) > atr_val * cfg.fvg_min_size_atr:
+                # Check if the gap has been filled by any subsequent candle
+                gap_top    = c["l"]
+                gap_bottom = a["h"]
+                filled = any(
+                    candles[j]["l"] <= gap_bottom
+                    for j in range(idx_c + n if idx_c < 0 else idx_c, n)
+                ) if age > 1 else False
+                if not filled:
+                    return FVGResult(
+                        fvg_detected=True, direction="bullish",
+                        top=gap_top, bottom=gap_bottom, age_bars=age,
+                    )
+
+            # Bearish FVG: gap between c.high and a.low
+            if a["l"] > c["h"] and (a["l"] - c["h"]) > atr_val * cfg.fvg_min_size_atr:
+                gap_top    = a["l"]
+                gap_bottom = c["h"]
+                filled = any(
+                    candles[j]["h"] >= gap_top
+                    for j in range(idx_c + n if idx_c < 0 else idx_c, n)
+                ) if age > 1 else False
+                if not filled:
+                    return FVGResult(
+                        fvg_detected=True, direction="bearish",
+                        top=gap_top, bottom=gap_bottom, age_bars=age,
+                    )
+
         return FVGResult()
 
 
@@ -767,7 +811,8 @@ class SignalConfluence:
         elif mss.mss_detected and mss.direction != direction:
             score -= cfg.mss_weight
             reasons.append(f"Counter MSS ({mss.direction}) -{cfg.mss_weight}")
-            out.hard_suppress = True  # Strong counter-structure
+            if cfg.hard_suppress_counter_mss:
+                out.hard_suppress = True  # Strong counter-structure
 
         # BOS
         if bos.bos_detected and bos.direction == direction:
