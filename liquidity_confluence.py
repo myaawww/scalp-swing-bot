@@ -97,6 +97,12 @@ class LiquidityConfig:
     eqh_eql_weight: int = 1
     l2_imbalance_weight: int = 1
     premium_discount_weight: int = 2
+    # [Fix-41] TUNABLE — needs validation. Entering long into a premium zone or
+    # short into a discount zone (trading the wrong side of the HTF range) was
+    # only penalized at the same weight as the favorable-zone bonus (2), which
+    # wasn't enough to matter once HTF alignment/R:R/other bonuses stacked on
+    # top. Adverse zone entries get their own, larger penalty.
+    premium_discount_adverse_weight: int = 4
     rr_weight: int = 2
     sweep_recency_weight: int = 2
     confidence_decay_penalty_per_bar: int = 1
@@ -954,6 +960,14 @@ class SignalConfluence:
                 # confirmation bonus.
                 score -= cfg.sweep_weight
                 reasons.append(f"Counter-direction {sweep.sweep_type} sweep -{cfg.sweep_weight}")
+                # [Fix-40] A volume-confirmed counter-direction sweep is a strong
+                # reversal tell (fresh liquidity grab against our thesis with real
+                # participation) — treat it the same as a counter-direction MSS and
+                # hard-suppress rather than letting it be outvoted by unrelated
+                # bonuses (HTF alignment, zone, R:R, etc.) elsewhere in the score.
+                if cfg.hard_suppress_counter_mss and sweep.volume_confirmed:
+                    out.hard_suppress = True
+                    reasons.append("Volume-confirmed counter-sweep — hard suppress")
 
         # MSS
         if mss.mss_detected and mss.direction == direction:
@@ -1006,14 +1020,14 @@ class SignalConfluence:
             score += cfg.premium_discount_weight
             reasons.append(f"Discount zone +{cfg.premium_discount_weight}")
         elif direction == "long" and zone == "premium" and cfg.prefer_discount_for_long:
-            score -= cfg.premium_discount_weight
-            reasons.append(f"Premium zone (long) -{cfg.premium_discount_weight}")
+            score -= cfg.premium_discount_adverse_weight
+            reasons.append(f"Premium zone (long) -{cfg.premium_discount_adverse_weight}")
         elif direction == "short" and cfg.prefer_premium_for_short and zone == "premium":
             score += cfg.premium_discount_weight
             reasons.append(f"Premium zone +{cfg.premium_discount_weight}")
         elif direction == "short" and zone == "discount" and cfg.prefer_premium_for_short:
-            score -= cfg.premium_discount_weight
-            reasons.append(f"Discount zone (short) -{cfg.premium_discount_weight}")
+            score -= cfg.premium_discount_adverse_weight
+            reasons.append(f"Discount zone (short) -{cfg.premium_discount_adverse_weight}")
 
         # R:R against external liquidity target
         if external_target is not None:
