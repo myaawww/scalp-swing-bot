@@ -1,4 +1,4 @@
-import os, json, time, math, random, threading, requests
+import os, json, time, math, random, threading, requests, re
 import signal as os_signal
 import sys
 import copy
@@ -18,7 +18,7 @@ try:
     )
     _liq_cfg = LiquidityConfig(enable=ENABLE_LIQUIDITY_CONFLUENCE)
     _liq_engine = SignalConfluence(_liq_cfg)
-except ImportError as _e:
+except Exception as _e:
     print(f"[INIT] liquidity_confluence module not available: {_e}")
     _liq_engine = None
 
@@ -2615,10 +2615,10 @@ def _apply_scoring_and_filters(res: SignalResult, state: dict,
 
             for reason in _liq_out.reasons:
                 _adj_val = 0
-                _parts = reason.rsplit(" ", 1)
-                if len(_parts) == 2:
+                _matches = re.findall(r'[+-]\d+', reason)
+                if _matches:
                     try:
-                        _adj_val = int(_parts[1])
+                        _adj_val = int(_matches[-1])
                     except ValueError:
                         _adj_val = 0
                 adjs.append((f"[LIQ] {reason}", _adj_val))
