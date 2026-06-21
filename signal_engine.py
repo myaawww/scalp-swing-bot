@@ -261,7 +261,7 @@ VOL_LEN   = 20
 OBV_LEN   = 10
 
 # ── RISK / SCORE ─────────────────────────────────────────────
-MIN_SCORE            = 4
+MIN_SCORE            = 3
 MAX_SIGNALS_PER_SCAN = 3
 MAX_SIGNAL_HISTORY   = 2000
 MIN_OI_USD: float = 500_000.0
@@ -500,7 +500,7 @@ OI_STALE_CUTOFF_S: float = 45 * 60
 # [ROLLBACK 2026-06-20] Per signal-quality review: this hits expectancy
 # directly — below 1:1 R:R you need a much higher win rate just to break even.
 # Held at 1.0 for 3+ versions before the 0.8 drop. Reverted to 1.0.
-MIN_RR_RATIO: float = 1.0
+MIN_RR_RATIO: float = 0.9
 ATR_FALLBACK_PCT: float = 0.30
 
 MACRO_WINDOW_BEFORE_MINS: int   = 60
