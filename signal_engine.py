@@ -572,9 +572,10 @@ LOW_BTC_CORR_THRESHOLD: float = 0.35
 LOW_BTC_CORR_LOOKBACK_BARS: int = 42
 RS_BEARISH_REGIME_EXEMPT_PCT: float = 3.0
 
-LEVERAGE_BASE_RISK_PCT: float = 2.0
-LEVERAGE_MIN_RISK_PCT: float = 0.5
-LEVERAGE_MAX: float = 10.0
+LEVERAGE_BASE_RISK_PCT: float = 10.0
+LEVERAGE_RANGE_LOW_RISK_PCT: float = 5.0
+LEVERAGE_RANGE_HIGH_RISK_PCT: float = 15.0
+LEVERAGE_MAX: float = 15.0
 
 SR_LOOKBACK_BARS: int = 200
 
@@ -2136,9 +2137,6 @@ class SignalResult:
         self.htf_1h_sweep: dict = {}
         self.htf_4h_sweep: dict = {}
 
-        # ── Portfolio / leverage context (set by scan_symbol) ──
-        self._concurrent: int = 0
-
 def record_market_inputs_from_candles(symbol: str,
                                       candles_15m: list[dict],
                                       candles_4h: list[dict]) -> None:
@@ -3557,28 +3555,6 @@ def update_cooldown(state, coin, direction, bar_index):
 # RISK MANAGEMENT
 # ═══════════════════════════════════════════════════════════════
 
-def count_concurrent_correlated_exposure(state: dict, symbol: str, direction: str) -> int:
-    group = next(
-        (g for g, members in CORR_GROUPS.items() if symbol in members),
-        symbol
-    )
-
-    counted: set[int] = set()
-    with _state_lock:
-        for idx, sig in enumerate(state.get("active_signals", [])):
-            if sig.get("resolved"):
-                continue
-            sig_symbol = sig.get("symbol", "")
-            sig_dir    = sig.get("direction", "")
-            sig_group  = next(
-                (g for g, members in CORR_GROUPS.items() if sig_symbol in members),
-                sig_symbol
-            )
-            if sig_group == group or sig_dir == direction:
-                counted.add(idx)
-
-    return len(counted)
-
 # ═══════════════════════════════════════════════════════════════
 # TELEGRAM
 # ═══════════════════════════════════════════════════════════════
@@ -3674,13 +3650,8 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         spread_tag = ("⚠️ elevated" if sig.spread_pct >= SPREAD_WARN_PCT else "✅ tight")
         spread_line = f"\nSpread/Liquidity: {sig.spread_pct:.3f}%  {spread_tag}"
 
-    def recommended_leverage(atr_pct: float, score: int, signal_type: str,
-                             concurrent_count: int = 0) -> str:
-        account_risk_pct = LEVERAGE_BASE_RISK_PCT
-        if concurrent_count > 0:
-            account_risk_pct = max(LEVERAGE_MIN_RISK_PCT,
-                                   account_risk_pct / (concurrent_count + 1))
-
+    def _leverage_for_risk_pct(atr_pct: float, score: int, signal_type: str,
+                               account_risk_pct: float) -> float:
         sl_atr_mult = SL_HIGH_ATR_MULT if atr_pct > HIGH_ATR_THRESHOLD else (
             SL_MULT_BREAK if signal_type == "BREAK" else SL_MULT_PULL
         )
@@ -3693,15 +3664,30 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         # any nonzero ATR% instead of producing a real 1x-10x gradient.
         sl_pct = atr_pct * sl_atr_mult
         if sl_pct <= 0:
-            return "1x"
+            return 1.0
         max_lev = account_risk_pct / sl_pct
         lev = min(max(1.0, max_lev), LEVERAGE_MAX)
         if score <= 4:
             lev = max(1.0, lev * 0.8)
+        return lev
+
+    def recommended_leverage(atr_pct: float, score: int, signal_type: str) -> str:
+        lev = _leverage_for_risk_pct(atr_pct, score, signal_type, LEVERAGE_BASE_RISK_PCT)
         return f"{lev:.1f}x"
 
-    concurrent = getattr(sig, '_concurrent', 0)
-    lev_range    = recommended_leverage(sig.atr_pct, sig.final_score, sig.signal_type, concurrent)
+    def recommended_leverage_range(atr_pct: float, score: int, signal_type: str) -> str:
+        lo = _leverage_for_risk_pct(atr_pct, score, signal_type, LEVERAGE_RANGE_LOW_RISK_PCT)
+        hi = _leverage_for_risk_pct(atr_pct, score, signal_type, LEVERAGE_RANGE_HIGH_RISK_PCT)
+        lo_i = max(1, min(int(round(lo)), int(LEVERAGE_MAX)))
+        hi_i = max(1, min(int(round(hi)), int(LEVERAGE_MAX)))
+        if lo_i > hi_i:
+            lo_i, hi_i = hi_i, lo_i
+        if lo_i == hi_i:
+            return f"{lo_i}x"
+        return f"{lo_i}x\u2013{hi_i}x"
+
+    lev_range    = recommended_leverage(sig.atr_pct, sig.final_score, sig.signal_type)
+    lev_band     = recommended_leverage_range(sig.atr_pct, sig.final_score, sig.signal_type)
     funding_str  = format_funding(sig.funding_rate, dir_str)
     rate         = sig.funding_rate
     headwind     = rate is not None and (
@@ -3773,10 +3759,6 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
     rank_tag     = f"{medal} <b>Priority #{rank}</b>\n" if rank else ""
     counter_tag  = "⚠️ " if "counter-trend" in (sig.btc_regime_label or "") else ""
 
-    concurrent_note = ""
-    if concurrent > 0:
-        concurrent_note = f"\n⚠️ {concurrent} concurrent correlated position(s) — leverage scaled down"
-
     return (
         f"{rank_tag}{counter_tag}{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.final_score)}\n"
         f"<b>Pair:</b>  {symbol}\n\n"
@@ -3786,7 +3768,8 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
         f"\n<b>TP1:</b>   <code>{fmt(sig.tp1)}</code>\n"
         f"<b>TP2:</b>   <code>{fmt(sig.tp2)}</code>\n"
         f"<b>SL:</b>    <code>{fmt(sig.sl)}</code>\n\n"
-        f"<b>Leverage:</b> {lev_range}{concurrent_note}\n"
+        f"<b>Leverage:</b> {lev_range}\n"
+        f"<b>Leverage Range:</b> {lev_band}\n"
         f"<b>Score:</b> {sig.final_score}/{sig.score}+adj  |  {sig.breakdown}\n"
         f"<b>Gates:</b> {sig.v10_gates}\n"
         f"\n<b>Signal Context</b>\n"
@@ -4214,11 +4197,8 @@ def scan_symbol(symbol: str, state: dict, bar_index_now: int,
         print(f"    {coin} signal suppressed by cooldown")
         return []
 
-    concurrent = count_concurrent_correlated_exposure(state, symbol, direction)
-    sig._concurrent = concurrent
-
     print(f"    🚀 SIGNAL: {coin} {direction.upper()} [{sig.signal_type}] "
-          f"base={sig.score} final={sig.final_score} concurrent={concurrent}")
+          f"base={sig.score} final={sig.final_score}")
 
     if ctx:
         sig.funding_rate  = live_funding if live_funding is not None else ctx.get("funding")
