@@ -7,7 +7,17 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.5.4.0"  
+__version__ = "15.5.5"  # [v15.5.5 SUMMARY] Ported the dynamic pairwise correlation
+                            # clustering / union-find system from v15.8.1 (Fix-33) and wired
+                            # it into deduplicate_correlated() as the live correlated-exposure
+                            # control, replacing the static, hand-maintained CORR_GROUPS
+                            # dict. See compute_pairwise_correlation_matrix(),
+                            # cluster_by_correlation(), group_of_dynamic() and the
+                            # [v15.5.5] block in main(). NOTE: in v15.8.1 itself this
+                            # machinery was diagnostic-only (never consulted by
+                            # deduplicate_correlated()) — see the audit notes delivered
+                            # alongside this file for why, and what changed here.
+                            # Everything below this point is unmodified v15.5.4.0 logic.
                             # [v15.5.4.0 SUMMARY] This pass: Fix-40 (gap-covering candle
                             # fetch for active-signal tracking), Fix-41 (short-side RS
                             # exemption in BTC regime filter), Fix-42 (relaxed daily-ADX
@@ -86,17 +96,11 @@ WATCHLIST = [
     "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
 ]
 
-CORR_GROUPS: dict[str, set[str]] = {
-    "layer1":    {"ETHUSDT", "SOLUSDT", "AVAXUSDT", "NEARUSDT", "APTUSDT", "ADAUSDT", "DOTUSDT", "SUIUSDT"},
-    "defi":      {"AAVEUSDT", "UNIUSDT", "PENDLEUSDT", "ONDOUSDT"},
-    "meme":      {"DOGEUSDT", "PENGUUSDT"},
-    "btc_proxy": {"BTCUSDT", "LTCUSDT", "ZECUSDT", "BCHUSDT"},
-    "xlm_xrp":   {"XLMUSDT", "XRPUSDT"},
-    "l1_alt":    {"TAOUSDT", "TRXUSDT"},
-    "bnb":       {"BNBUSDT"},
-    "hype":      {"HYPEUSDT"},
-    "oracle":    {"LINKUSDT"},
-}
+# [v15.5.5] The static, hand-maintained CORR_GROUPS dict that used to live here
+# has been removed. Correlated-exposure grouping is now computed dynamically
+# every scan from measured pairwise return correlation — see
+# compute_pairwise_correlation_matrix() / cluster_by_correlation() /
+# group_of_dynamic() below, and the clustering step in main()'s Phase 1.
 
 # ── INDICATOR LENGTHS ────────────────────────────────────────
 FAST_LEN  = 21
@@ -381,6 +385,15 @@ REGIME_BULL_TP2_MULT: float = 1.1       # extend TP2 in bull regime
 LOW_BTC_CORR_THRESHOLD: float = 0.65  # |correlation| below this = "decorrelated"
 LOW_BTC_CORR_LOOKBACK_BARS: int = 42  # 7 days of 4H candles
 RS_BEARISH_REGIME_EXEMPT_PCT: float = 3.0
+
+# [v15.5.5] Dynamic pairwise correlation clustering — ported from v15.8.1's
+# Fix-33 (compute_pairwise_correlation_matrix / cluster_by_correlation),
+# generalizing the single-symbol-vs-BTC approach above to all-pairs-within-
+# watchlist. Renamed from v15.8.1's LAYER1_CLUSTER_CORR_THRESHOLD since it's
+# no longer specific to the "layer1" group — it now drives clustering across
+# the whole watchlist. Same default value (0.75) carried over unchanged.
+DYNAMIC_CORR_CLUSTER_THRESHOLD: float = 0.75  # |correlation| >= this unions two symbols into the same cluster
+CORR_MATRIX_MIN_SAMPLE: int = 20              # minimum overlapping-return sample size before a pair is scored at all
 
 # [Risk-34] Leverage sizing (concurrent-position deduction removed — see v15.8.1)
 LEVERAGE_BASE_RISK_PCT: float = 10.0
@@ -939,6 +952,141 @@ def get_low_btc_corr_set() -> set[str]:
         if _dynamic_low_btc_corr:
             return _dynamic_low_btc_corr.copy()
     return LOW_BTC_CORR_BASELINE.copy()
+
+# ═══════════════════════════════════════════════════════════════
+# [v15.5.5] DYNAMIC PAIRWISE CORRELATION CLUSTERING
+# Ported from v15.8.1 (Fix-33). Generalizes update_dynamic_btc_correlation()
+# above (vs-BTC only) to all-pairs-within-watchlist, then unions symbols into
+# clusters via union-find wherever measured correlation clears
+# DYNAMIC_CORR_CLUSTER_THRESHOLD. Unlike v15.8.1 — where this same machinery
+# was diagnostic-only and never consulted by deduplicate_correlated() — here
+# it IS the correlated-exposure control: deduplicate_correlated() below calls
+# group_of_dynamic() instead of looking symbols up in a static CORR_GROUPS
+# dict. Uses the same 4H candle history already fetched per symbol in Phase 1
+# of main() — no new data fetching required.
+# ═══════════════════════════════════════════════════════════════
+
+_dynamic_corr_clusters: list[frozenset[str]] = []
+_dynamic_corr_clusters_lock = threading.Lock()
+
+def compute_pairwise_correlation_matrix(
+    symbols: list[str],
+    candle_bundles: dict[str, tuple],
+    candle_idx: int = 2,
+    lookback: int = LOW_BTC_CORR_LOOKBACK_BARS,
+) -> dict[tuple[str, str], float]:
+    """Pairwise Pearson correlation of 4H close-to-close returns across
+    `symbols`, generalizing update_dynamic_btc_correlation() (vs-BTC only) to
+    all pairs. `candle_bundles[sym][candle_idx]` is expected to be the 4H
+    candle list — matches the convention already used at the
+    update_dynamic_btc_correlation() call site in main() (bundle[2]). Pairs
+    with insufficient overlapping history are simply omitted from the result
+    rather than raising."""
+    returns_by_symbol: dict[str, list[float]] = {}
+    for sym in symbols:
+        bundle = candle_bundles.get(sym)
+        if not bundle or len(bundle) <= candle_idx:
+            continue
+        candles = bundle[candle_idx]
+        if len(candles) < lookback + 2:
+            continue
+        closes = [c["c"] for c in candles[-(lookback + 1):]]
+        rets = [(closes[i] - closes[i - 1]) / closes[i - 1]
+                for i in range(1, len(closes)) if closes[i - 1] != 0]
+        if len(rets) >= CORR_MATRIX_MIN_SAMPLE:
+            returns_by_symbol[sym] = rets
+
+    matrix: dict[tuple[str, str], float] = {}
+    syms = sorted(returns_by_symbol.keys())
+    for i, a in enumerate(syms):
+        for b in syms[i + 1:]:
+            ra, rb = returns_by_symbol[a], returns_by_symbol[b]
+            n = min(len(ra), len(rb))
+            if n < CORR_MATRIX_MIN_SAMPLE:
+                continue
+            ra_, rb_ = ra[:n], rb[:n]
+            mean_a = sum(ra_) / n
+            mean_b = sum(rb_) / n
+            cov   = sum((x - mean_a) * (y - mean_b) for x, y in zip(ra_, rb_)) / n
+            var_a = sum((x - mean_a) ** 2 for x in ra_) / n
+            var_b = sum((y - mean_b) ** 2 for y in rb_) / n
+            if var_a <= 0 or var_b <= 0:
+                continue
+            matrix[(a, b)] = cov / (math.sqrt(var_a) * math.sqrt(var_b))
+    return matrix
+
+def cluster_by_correlation(
+    symbols: list[str],
+    corr_matrix: dict[tuple[str, str], float],
+    threshold: float = DYNAMIC_CORR_CLUSTER_THRESHOLD,
+) -> list[set[str]]:
+    """Greedy union-find clustering: symbols end up in the same cluster if a
+    chain of pairwise correlations >= `threshold` connects them. This is a
+    simple, reviewable clustering choice, not a claim that it's the "right"
+    algorithm for this purpose (e.g. it can chain a long transitive sequence
+    of pairs together even if not all pairs in the resulting cluster are
+    mutually correlated above threshold). Symbols with no qualifying edge —
+    including any symbol missing from `corr_matrix` entirely, e.g. due to
+    insufficient candle history this scan — end up as their own singleton
+    cluster, so every symbol in `symbols` is always covered."""
+    parent = {s: s for s in symbols}
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(x, y):
+        rx, ry = find(x), find(y)
+        if rx != ry:
+            parent[rx] = ry
+
+    for (a, b), corr in corr_matrix.items():
+        if a in parent and b in parent and corr >= threshold:
+            union(a, b)
+
+    clusters: dict[str, set[str]] = {}
+    for s in symbols:
+        clusters.setdefault(find(s), set()).add(s)
+    return list(clusters.values())
+
+def set_dynamic_corr_clusters(clusters: list[set[str]]) -> None:
+    global _dynamic_corr_clusters
+    with _dynamic_corr_clusters_lock:
+        _dynamic_corr_clusters = [frozenset(c) for c in clusters]
+
+def get_dynamic_corr_clusters() -> list[frozenset[str]]:
+    with _dynamic_corr_clusters_lock:
+        return list(_dynamic_corr_clusters)
+
+def group_of_dynamic(symbol: str) -> object:
+    """Return a stable, hashable group key for `symbol` based on this scan's
+    dynamic correlation clusters, for use as the grouping key in
+    deduplicate_correlated() (replaces the old static CORR_GROUPS lookup).
+    Falls back to the symbol itself (a singleton group) if cluster data
+    hasn't been computed yet this scan (e.g. very first scan after startup,
+    before main()'s Phase 1 clustering step has run) or the symbol isn't
+    covered by any computed cluster."""
+    for cluster in get_dynamic_corr_clusters():
+        if symbol in cluster:
+            return cluster
+    return symbol
+
+def log_dynamic_corr_clusters(clusters: list[set[str]]) -> None:
+    """Print this scan's dynamic correlation clusters for visibility. Unlike
+    v15.8.1's log_dynamic_layer1_clustering() (diagnostic-only, gated behind
+    LOG_DYNAMIC_CORR_GROUPS, never consulted by deduplicate_correlated()),
+    these clusters are the live exposure-control grouping — see
+    deduplicate_correlated() / group_of_dynamic()."""
+    multi = [sorted(c) for c in clusters if len(c) > 1]
+    if multi:
+        print(f"  [CORR MATRIX] Dynamic correlation clusters this scan "
+              f"(threshold={DYNAMIC_CORR_CLUSTER_THRESHOLD}): {multi}")
+    else:
+        print(f"  [CORR MATRIX] No symbol pairs cleared the "
+              f"{DYNAMIC_CORR_CLUSTER_THRESHOLD} correlation threshold this scan "
+              f"— all symbols treated as decorrelated singletons.")
 
 def check_btc_regime_filter(direction: str, symbol: str,
                             signal_type: str = "") -> tuple[int, str]:
@@ -3909,10 +4057,11 @@ def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
     for sig_tuple in signals:
         symbol    = sig_tuple[0]
         direction = sig_tuple[1]
-        group  = next(
-            (g for g, members in CORR_GROUPS.items() if symbol in members),
-            symbol
-        )
+        # [v15.5.5] Group key now comes from this scan's dynamic correlation
+        # clusters (see compute_pairwise_correlation_matrix() /
+        # cluster_by_correlation() / group_of_dynamic()) instead of a static
+        # hand-maintained CORR_GROUPS dict.
+        group = group_of_dynamic(symbol)
         if (group, direction) not in seen_groups:
             seen_groups.add((group, direction))
             result.append(sig_tuple)
@@ -3922,12 +4071,9 @@ def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
     # keys: (group, "long") vs (group, "short")). Resolve any surviving
     # long/short pair in the same group by priority_score, keeping the
     # higher-priority side.
-    group_of = lambda sym: next(
-        (g for g, members in CORR_GROUPS.items() if sym in members), sym
-    )
     by_group: dict = {}
     for sig_tuple in result:
-        g = group_of(sig_tuple[0])
+        g = group_of_dynamic(sig_tuple[0])
         by_group.setdefault(g, []).append(sig_tuple)
 
     dropped_ids = set()
@@ -3939,7 +4085,8 @@ def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
             best_short = max(shorts, key=lambda t: priority_score(t[2]))
             loser = best_short if priority_score(best_long[2]) >= priority_score(best_short[2]) else best_long
             dropped_ids.add(id(loser))
-            print(f"  [CORR CONFLICT] Group '{g}' has both long ({best_long[0]}) and "
+            g_label = sorted(g) if isinstance(g, frozenset) else g
+            print(f"  [CORR CONFLICT] Group {g_label} has both long ({best_long[0]}) and "
                   f"short ({best_short[0]}) surviving dedup — dropping lower-priority "
                   f"{loser[1]} on {loser[0]}.")
 
@@ -4034,6 +4181,22 @@ def main():
             if sym == "BTCUSDT":
                 continue
             update_dynamic_btc_correlation(sym, bundle[2], btc_4h_candles)
+
+    # [v15.5.5] Build this scan's dynamic pairwise correlation clusters across
+    # the watchlist (ported from v15.8.1 Fix-33), reusing the same Phase-1 4H
+    # candle bundles — no new data fetching. This replaces the static
+    # CORR_GROUPS dict as the grouping deduplicate_correlated() uses for
+    # correlated-exposure control. On failure (or on a cold-start scan before
+    # any candles are available), fall back to treating every watchlist
+    # symbol as its own singleton group rather than crashing the scan.
+    try:
+        _corr_matrix = compute_pairwise_correlation_matrix(WATCHLIST, candle_bundles)
+        _corr_clusters = cluster_by_correlation(WATCHLIST, _corr_matrix)
+        set_dynamic_corr_clusters(_corr_clusters)
+        log_dynamic_corr_clusters(_corr_clusters)
+    except Exception as e:
+        print(f"  [CORR MATRIX] dynamic clustering failed, falling back to singleton groups: {e}")
+        set_dynamic_corr_clusters([{s} for s in WATCHLIST])
 
     print("[INIT] Computing BTC regime…")
     try:
