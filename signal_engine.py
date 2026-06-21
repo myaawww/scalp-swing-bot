@@ -7,7 +7,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-__version__ = "15.5.4.0"  # [v15.5.4.0 SUMMARY] This pass: Fix-40 (gap-covering candle
+__version__ = "15.5.4.0"  
+                            # [v15.5.4.0 SUMMARY] This pass: Fix-40 (gap-covering candle
                             # fetch for active-signal tracking), Fix-41 (short-side RS
                             # exemption in BTC regime filter), Fix-42 (relaxed daily-ADX
                             # gate for PULL signals), Fix-43 (vol_score_ok fail-closed on
