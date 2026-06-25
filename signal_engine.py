@@ -3791,9 +3791,9 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
 
     sr_lines = ""
     if sig.resistances:
-        sr_lines += "🔴 Resistance: " + "  |  ".join(f"<code>{fmt(r)}</code>" for r in sig.resistances) + "\n"
+        sr_lines += "🔴 Resistance: " + "  |  ".join(fmt(r) for r in sig.resistances) + "\n"
     if sig.supports:
-        sr_lines += "🟢 Support:    " + "  |  ".join(f"<code>{fmt(s)}</code>" for s in sig.supports) + "\n"
+        sr_lines += "🟢 Support:    " + "  |  ".join(fmt(s) for s in sig.supports) + "\n"
 
     oi_data      = sig.oi_trend_data
     oi_line      = oi_data.get("label", "OI Trend: Unknown")
@@ -3850,43 +3850,20 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
 
     sr_block     = f"\n{sr_lines}" if sr_lines else ""
     medal        = RANK_MEDALS.get(rank, "")
-    rank_tag     = f"{medal} <b>Priority #{rank}</b>\n" if rank else ""
+    rank_tag     = f"{medal} Priority #{rank}\n" if rank else ""
     counter_tag  = "⚠️ " if "counter-trend" in (sig.btc_regime_label or "") else ""
 
     return (
-        f"{rank_tag}{counter_tag}{emoji} <b>{direction} [{sig.signal_type}]</b>  {stars(sig.final_score)}\n"
-        f"<b>Pair:</b>  {symbol}\n\n"
-        f"<b>Entry:</b> <code>{fmt(sig.entry)}</code>\n"
-        f"<b>Entry Zone:</b> <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n"
-        f"{pull_entry_block}"
-        f"\n<b>TP1:</b>   <code>{fmt(sig.tp1)}</code>\n"
-        f"<b>TP2:</b>   <code>{fmt(sig.tp2)}</code>\n"
-        f"<b>SL:</b>    <code>{fmt(sig.sl)}</code>\n\n"
-        f"<b>Leverage:</b> {lev_range}\n"
-        f"<b>Leverage Range:</b> {lev_band}\n"
-        f"<b>Score:</b> {sig.final_score}/{sig.score}+adj  |  {sig.breakdown}\n"
-        f"<b>Gates:</b> {sig.v10_gates}\n"
-        f"\n<b>Signal Context</b>\n"
-        f"{oi_line}\n"
-        f"{btc_line}\n"
-        f"{breadth_line}\n"
-        f"{rs_line}\n"
-        f"{wr_line}\n"
-        f"{macro_line}\n"
-        f"{d200_line}\n"
-        f"{vol_ratio_line}"
-        f"{spread_line}"
-        f"{liq_block}"
-        f"{score_trail}"
+        f"{rank_tag}{counter_tag}{emoji} {direction} [{sig.signal_type}]  {stars(sig.final_score)}\n"
+        f"Pair:  {symbol}\n\n"
+        f"Entry: {fmt(sig.entry)}\n"
+        f"Entry Zone: {fmt(sig.entry_low)} – {fmt(sig.entry_high)}\n"
+        f"\nTP1:   {fmt(sig.tp1)}\n"
+        f"TP2:   {fmt(sig.tp2)}\n"
+        f"SL:    {fmt(sig.sl)}\n"
         f"{sr_block}\n"
-        f"<b>Pre-Trade Checklist</b>\n"
-        f"✅ Trend identified (4H/1H/15m aligned)\n"
-        f"{'✅' if sig.supports or sig.resistances else '☐'} Key S/R marked\n"
-        f"✅ Clear entry signal ({sig.signal_type}, score {sig.final_score}/{sig.score}+adj)\n"
-        f"✅ Leverage appropriate ({lev_range})\n"
-        f"{chk_funding} {funding_str}\n"
-        f"📊 {format_oi(sig.open_interest)}\n\n"
-        f"<i>Scalp Swing v{__version__} [4H/15m] • Hyperliquid Perps • {ts}</i>"
+        f"Leverage: {lev_range}\n\n"
+        f"v{__version__} • {ts}"
     )
 
 # ═══════════════════════════════════════════════════════════════
