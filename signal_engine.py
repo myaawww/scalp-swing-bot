@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 # removed below in utils.py.
 from utils import safe, atr
 
-__version__ = "15.8.1.5"  # tp1_then_sl removed; SL-after-TP1 resolves as plain tp1
+__version__ = "15.8.1.6"  # SL/TP1 mults widened (1.2/1.2 BREAK, 1.1/1.2 PULL); high-vol SL logic flipped to widen not tighten; copyable code tags on all prices
 # frequency-tuning constants (MIN_RR_RATIO, ADX_SCORE_MIN, MIN_DAILY_ADX,
 # ADX_BREAK_GATE, TREND_HOLD_BARS, SIGNAL_COOLDOWN_BARS[_HIGHSCORE],
 # MAX_SIGNALS_DEFAULT/BULL_TREND) back to their pre-Section-6 originals. See
@@ -537,14 +537,14 @@ OI_SCORE_CAP: int              = 2
 SESSION_DEAD_ZONE_START_UTC: int = 3
 SESSION_DEAD_ZONE_END_UTC:   int = 6
 SESSION_LOW_ATR_PERCENTILE:  float = 0.10
-TP1_MULT_BREAK: float = 1.0
+TP1_MULT_BREAK: float = 1.2
 TP2_MULT_BREAK: float = 2.5
-SL_MULT_BREAK:  float = 0.85
-TP1_MULT_PULL:  float = 1.0
+SL_MULT_BREAK:  float = 1.2
+TP1_MULT_PULL:  float = 1.1
 TP2_MULT_PULL:  float = 2.0
-SL_MULT_PULL:   float = 0.85
+SL_MULT_PULL:   float = 1.2
 HIGH_ATR_THRESHOLD: float = 3.0
-SL_HIGH_ATR_MULT:   float = 0.90
+SL_HIGH_ATR_MULT:   float = 1.30  # [Fix-SL] was 0.90 (tightened during high ATR — wrong; extreme ATR means bigger spikes, so SL needs more room)
 ATR_HIST_DEPTH:     int   = 48
 ATR_LOW_PERCENTILE:  float = 0.10
 ATR_HIGH_PERCENTILE: float = 0.90
@@ -561,7 +561,7 @@ FUNDING_WARN_HIGH    = 0.0005
 USE_REGIME_AWARE_TP_SL: bool = True
 REGIME_HIGH_VOL_TP1_MULT: float = 1.2
 REGIME_HIGH_VOL_TP2_MULT: float = 1.15
-REGIME_HIGH_VOL_SL_MULT: float  = 0.95
+REGIME_HIGH_VOL_SL_MULT: float  = 1.10  # [Fix-SL] was 0.95 (tightened in high vol — wrong direction; widened to give more room during spike regimes)
 REGIME_LOW_VOL_TP1_MULT: float  = 0.85
 REGIME_LOW_VOL_TP2_MULT: float  = 0.90
 REGIME_LOW_VOL_SL_MULT: float   = 1.10
@@ -3791,9 +3791,9 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
 
     sr_lines = ""
     if sig.resistances:
-        sr_lines += "🔴 Resistance: " + "  |  ".join(fmt(r) for r in sig.resistances) + "\n"
+        sr_lines += "🔴 Resistance: " + "  |  ".join(f"<code>{fmt(r)}</code>" for r in sig.resistances) + "\n"
     if sig.supports:
-        sr_lines += "🟢 Support:    " + "  |  ".join(fmt(s) for s in sig.supports) + "\n"
+        sr_lines += "🟢 Support:    " + "  |  ".join(f"<code>{fmt(s)}</code>" for s in sig.supports) + "\n"
 
     oi_data      = sig.oi_trend_data
     oi_line      = oi_data.get("label", "OI Trend: Unknown")
@@ -3856,11 +3856,11 @@ def format_signal(symbol: str, sig: SignalResult, engine_tag: str = "V5", rank: 
     return (
         f"{rank_tag}{counter_tag}{emoji} {direction} [{sig.signal_type}]  {stars(sig.final_score)}\n"
         f"Pair:  {symbol}\n\n"
-        f"Entry: {fmt(sig.entry)}\n"
-        f"Entry Zone: {fmt(sig.entry_low)} – {fmt(sig.entry_high)}\n"
-        f"\nTP1:   {fmt(sig.tp1)}\n"
-        f"TP2:   {fmt(sig.tp2)}\n"
-        f"SL:    {fmt(sig.sl)}\n"
+        f"Entry: <code>{fmt(sig.entry)}</code>\n"
+        f"Entry Zone: <code>{fmt(sig.entry_low)}</code> – <code>{fmt(sig.entry_high)}</code>\n"
+        f"\nTP1:   <code>{fmt(sig.tp1)}</code>\n"
+        f"TP2:   <code>{fmt(sig.tp2)}</code>\n"
+        f"SL:    <code>{fmt(sig.sl)}</code>\n"
         f"{sr_block}\n"
         f"Leverage: {lev_range}\n\n"
         f"v{__version__} • {ts}"
