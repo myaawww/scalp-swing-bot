@@ -300,8 +300,8 @@ USE_DYNAMIC_MAX_SIGNALS: bool = True
 # [ROLLBACK 2026-06-20] Per signal-quality review: this is a sizing lever, not a
 # quality lever — tightening it buys breathing room while the Section 8 score
 # logic fixes are validated, without touching the actual signal logic. 9/5 -> 7/4.
-MAX_SIGNALS_BULL_TREND: int = 7
-MAX_SIGNALS_DEFAULT: int = 4
+MAX_SIGNALS_BULL_TREND: int = 3
+MAX_SIGNALS_DEFAULT: int = 3
 BREADTH_BULL_THRESHOLD: float = 0.70
 
 USE_FALSE_BREAKOUT_DETECTION: bool = True
