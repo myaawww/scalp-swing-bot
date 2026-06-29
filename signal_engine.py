@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 # removed below in utils.py.
 from utils import safe, atr
 
-__version__ = "15.8.1.6"  # SL/TP1 mults widened (1.2/1.2 BREAK, 1.1/1.2 PULL); high-vol SL logic flipped to widen not tighten; copyable code tags on all prices
+__version__ = "15.8.1.7"  # [Fix-47] exhaustion_short_align removed from short_break gate; exhaustion short now routes to PULL only
 # frequency-tuning constants (MIN_RR_RATIO, ADX_SCORE_MIN, MIN_DAILY_ADX,
 # ADX_BREAK_GATE, TREND_HOLD_BARS, SIGNAL_COOLDOWN_BARS[_HIGHSCORE],
 # MAX_SIGNALS_DEFAULT/BULL_TREND) back to their pre-Section-6 originals. See
@@ -173,6 +173,15 @@ __version__ = "15.8.1.6"  # SL/TP1 mults widened (1.2/1.2 BREAK, 1.1/1.2 PULL); 
 # adjusting; consider promoting from "layer" to "replace" (using HTF zone/
 # external levels instead of the 15m-derived ones in the existing blocks)
 # only after that comparison, per the original design discussion.
+# SECTION 11 (BREAK short WR fix, v15.8.1.7):
+#   [Fix-47] exhaustion_short_align removed from the short_break gate.
+#   Exhaustion short alignment (4H still bullish but EMA spread narrowing +
+#   1H bear) is a counter-trend scalp setup — structurally different from a
+#   genuine momentum BREAK. Allowing it to trigger BREAK signals was mixing
+#   two distinct setups under one label, suppressing BREAK short WR (observed
+#   32%, n=19). Exhaustion shorts now route exclusively through pull_short_align
+#   (which already sets pull_short_align=True when exhaustion_short_align is
+#   True, unchanged). No change to BREAK long or any PULL path.
 
 
 # ── LIQUIDITY CONFLUENCE FEATURE FLAG ─────────────────────────
@@ -2559,7 +2568,10 @@ def _detect_raw_signals(ind: dict, state: dict, reference_ms: int | None,
                    and adx_break_ok and rsi_break_long
                    and long_score  >= MIN_SCORE and market_ok)
     short_break = (daily_adx_ok
-                   and (full_short_align or exhaustion_short_align)
+                   and full_short_align          # [Fix-47] exhaustion_short_align removed:
+                                                 # counter-trend exhaustion setups must not
+                                                 # fire as BREAK; they route to PULL only
+                                                 # via pull_short_align (unchanged below).
                    and break_bear_bar
                    and adx_break_ok and rsi_break_short
                    and short_score >= MIN_SCORE and market_ok)
