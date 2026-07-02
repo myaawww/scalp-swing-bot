@@ -2,17 +2,6 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
-      "PENGUUSDT": {
-        "direction": "long",
-        "zone_low": 0.006064,
-        "zone_high": 0.006083,
-        "sweep_extreme": 0.005874,
-        "sfp_time": 1782864000000,
-        "range_low": 0.005874,
-        "range_high": 0.006375,
-        "eq": 0.0061245,
-        "atr_h4": 0.0001981546402335429
-      },
       "ADAUSDT": {
         "direction": "long",
         "zone_low": 0.1449,
@@ -23,17 +12,6 @@
         "range_high": 0.15802,
         "eq": 0.149565,
         "atr_h4": 0.00373697429899533
-      },
-      "TAOUSDT": {
-        "direction": "long",
-        "zone_low": 199.13,
-        "zone_high": 202.76,
-        "sweep_extreme": 196.54,
-        "sfp_time": 1782864000000,
-        "range_low": 195.53,
-        "range_high": 210.89,
-        "eq": 203.20999999999998,
-        "atr_h4": 5.905554569165901
       },
       "PENDLEUSDT": {
         "direction": "long",
@@ -48,17 +26,6 @@
       }
     },
     "12h_1h": {
-      "BTCUSDT": {
-        "direction": "long",
-        "zone_low": 59433.0,
-        "zone_high": 59561.0,
-        "sweep_extreme": 58990.0,
-        "sfp_time": 1782734400000,
-        "range_low": 58062.0,
-        "range_high": 60935.0,
-        "eq": 59498.5,
-        "atr_h4": 1664.0628969141646
-      },
       "APTUSDT": {
         "direction": "long",
         "zone_low": 0.5743,
