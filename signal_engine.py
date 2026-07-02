@@ -1,16 +1,27 @@
 """
-CASTELLAN PROTOCOL v1.0.0
+CASTELLAN PROTOCOL v1.2.0
 --------------------------------------------------------------------
 An institutional Smart Money Concept execution engine trading a single,
-non-negotiable sequence on Hyperliquid perpetuals:
+non-negotiable sequence on Hyperliquid perpetuals, run across two
+independent timeframe combos in parallel:
 
-    H4 HTF Bias
-      -> H4 Institutional Point of Interest (POI)
-        -> H4 Swing Failure Pattern (liquidity sweep)
-          -> M15 Market Structure Shift (confirmation)
+    HTF Bias
+      -> HTF Institutional Point of Interest (POI)
+        -> HTF Swing Failure Pattern (liquidity sweep)
+          -> Execution-TF Market Structure Shift (confirmation)
             -> Breaker / Mitigation Block entry
               -> Structure-based Stop Loss
                 -> Minimum 2R Target, dynamically extended to 3R / 4R
+
+Combos:
+    H4 / 15m   (original)
+    12H / 1h   (added v1.2.0)
+
+Each combo runs its own bias/POI/SFP/MSS pipeline with its own tuned
+constants, its own pending-setup and cooldown state, and its own
+active-signal tracking, so a symbol can fire on either combo, or both,
+independently in the same scan. Telegram signals are tagged with the
+combo that produced them, e.g. "(H4/15m)" or "(12H/1h)".
 
 No EMA crossover systems, no RSI/MACD entries, no breakout or pullback
 systems, no scoring/voting, no machine learning. One setup, executed
@@ -29,7 +40,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
-__version__ = "1.0.0"
+__version__ = "1.2.0"
 ENGINE_NAME = "Castellan Protocol"
 
 # ── CONFIG ──────────────────────────────────────────────────────────
@@ -68,11 +79,10 @@ INTERVAL_MS = {
     "15m": 15 * 60 * 1000,
     "1h":  60 * 60 * 1000,
     "4h":  4  * 60 * 60 * 1000,
+    "12h": 12 * 60 * 60 * 1000,
     "1d":  24 * 60 * 60 * 1000,
 }
 
-N_M15 = 300     # ~3.1 days of M15 — plenty for post-sweep MSS confirmation
-N_H4  = 220     # ~36 days of H4 — bias + POI lookback
 N_D   = 400     # ~13 months of daily — PDH/PDL/PWH/PWL/PMH/PML
 
 REACT_TP1 = "🔥"
@@ -81,38 +91,90 @@ REACT_SL  = "😭"
 
 STATE_VERSION = 1
 
-# ── STRATEGY CONSTANTS ───────────────────────────────────────────────
-PIVOT_LEFT_H4          = 3
-PIVOT_RIGHT_H4         = 3
-PIVOT_LEFT_M15         = 2
-PIVOT_RIGHT_M15        = 2
-H4_POI_LOOKBACK        = 120
-H4_LIQUIDITY_TOLERANCE = 0.0012      # 0.12% price tolerance for equal highs/lows clustering
-POI_CONFLUENCE_BUFFER_ATR_MULT = 0.30
-OB_DISPLACEMENT_ATR_MULT = 1.30
-OB_BOS_LOOKBACK         = 3
-FVG_MIN_GAP_ATR_MULT    = 0.05
-
-SFP_MAX_SWEEP_DEPTH_ATR_MULT = 1.60   # reject SFPs that sweep too far (runaway, not a rejection)
-SFP_MIN_WICK_RATIO      = 0.33        # rejection wick must be a meaningful share of the candle range
-SFP_LOOKBACK_H4_BARS    = 24          # only consider SFPs from the most recent ~4 days of H4
-
-MSS_MAX_WAIT_HOURS      = 30          # M15 confirmation must arrive within this window of the H4 SFP
-MSS_DISPLACEMENT_ATR_MULT = 1.15
-MSS_MIN_CLOSE_MARGIN_ATR_MULT = 0.08  # confirmation close must clear the swing point by this margin
-BREAKER_SEARCH_BARS     = 6
-
-SL_BUFFER_ATR_MULT      = 0.20
+# ── STRATEGY CONSTANTS (shared across all combos) ───────────────────
 MIN_RR                  = 2.0
 EXT_RR_LEVELS           = (2.0, 3.0, 4.0)
 LIQUIDITY_ROOM_BUFFER_ATR_MULT = 0.50
 
-SIGNAL_MAX_AGE_BARS_M15 = 96          # 24h max life for a tracked, unresolved signal
-PENDING_SETUP_MAX_AGE_HOURS = 48      # drop an unconfirmed H4 SFP after this long
+MAX_CONCURRENT_ACTIVE_SIGNALS = 10    # global cap across all combos combined
+MAX_SIGNALS_PER_SCAN = 2              # global cap across all combos combined
 
-MAX_CONCURRENT_ACTIVE_SIGNALS = 10
-MAX_SIGNALS_PER_SCAN = 2
-SIGNAL_COOLDOWN_H4_BARS = 2
+
+# ── COMBO CONFIG ──────────────────────────────────────────────────────
+# Each combo runs the full HTF Bias -> POI -> SFP -> MSS -> Breaker
+# pipeline independently, with its own tuned constants, its own pending-
+# setup/cooldown state, and its own active-signal tracking. A symbol can
+# fire on one combo, the other, or both in the same scan.
+class Combo:
+    __slots__ = (
+        "id", "label", "htf_tf", "exec_tf", "n_htf", "n_exec",
+        "pivot_left_htf", "pivot_right_htf", "pivot_left_exec", "pivot_right_exec",
+        "poi_lookback", "liquidity_tolerance", "poi_confluence_buffer_atr_mult",
+        "ob_displacement_atr_mult", "ob_bos_lookback", "fvg_min_gap_atr_mult",
+        "sfp_max_sweep_depth_atr_mult", "sfp_min_wick_ratio", "sfp_lookback_htf_bars",
+        "mss_max_wait_hours", "mss_displacement_atr_mult", "mss_min_close_margin_atr_mult",
+        "breaker_search_bars", "sl_buffer_atr_mult",
+        "signal_max_age_hours", "pending_setup_max_age_hours", "cooldown_htf_bars",
+    )
+    def __init__(self, **kw):
+        for k in self.__slots__:
+            setattr(self, k, kw[k])
+
+
+COMBOS: dict[str, Combo] = {
+    "h4_15m": Combo(
+        id="h4_15m", label="H4/15m", htf_tf="4h", exec_tf="15m",
+        n_htf=220, n_exec=300,                      # ~36d H4, ~3.1d M15
+        pivot_left_htf=3, pivot_right_htf=3,
+        pivot_left_exec=2, pivot_right_exec=2,
+        poi_lookback=120,
+        liquidity_tolerance=0.0012,                 # 0.12% price tolerance for equal highs/lows
+        poi_confluence_buffer_atr_mult=0.30,
+        ob_displacement_atr_mult=1.30,
+        ob_bos_lookback=3,
+        fvg_min_gap_atr_mult=0.05,
+        sfp_max_sweep_depth_atr_mult=1.60,           # reject SFPs that sweep too far
+        sfp_min_wick_ratio=0.33,
+        sfp_lookback_htf_bars=24,                    # ~4 days of H4
+        mss_max_wait_hours=30,                       # M15 confirm must arrive within this window
+        mss_displacement_atr_mult=1.15,
+        mss_min_close_margin_atr_mult=0.08,
+        breaker_search_bars=6,
+        sl_buffer_atr_mult=0.20,
+        signal_max_age_hours=24,                     # max life for a tracked, unresolved signal
+        pending_setup_max_age_hours=48,               # drop an unconfirmed HTF SFP after this long
+        cooldown_htf_bars=2,
+    ),
+    "12h_1h": Combo(
+        id="12h_1h", label="12H/1h", htf_tf="12h", exec_tf="1h",
+        n_htf=100, n_exec=200,                       # ~50d of 12H, ~8.3d of 1h
+        pivot_left_htf=3, pivot_right_htf=3,
+        pivot_left_exec=2, pivot_right_exec=2,
+        poi_lookback=80,                              # 12H bars, deeper HTF -> shorter bar-count lookback
+        liquidity_tolerance=0.0015,                   # slightly looser clustering on the coarser TF
+        poi_confluence_buffer_atr_mult=0.30,
+        ob_displacement_atr_mult=1.30,
+        ob_bos_lookback=3,
+        fvg_min_gap_atr_mult=0.05,
+        sfp_max_sweep_depth_atr_mult=1.60,
+        sfp_min_wick_ratio=0.33,
+        sfp_lookback_htf_bars=16,                     # 16 * 12h = ~8 days of 12H bars
+        mss_max_wait_hours=90,                        # 3x the H4/15m window (12h is 3x slower than 4h)
+        mss_displacement_atr_mult=1.15,
+        mss_min_close_margin_atr_mult=0.08,
+        breaker_search_bars=6,
+        sl_buffer_atr_mult=0.20,
+        signal_max_age_hours=96,                      # 4x the H4/15m window (1h is 4x slower than 15m)
+        pending_setup_max_age_hours=144,               # 3x the H4/15m window
+        cooldown_htf_bars=2,                           # 2 * 12h = 24h cooldown between same-direction fires
+    ),
+}
+
+# Max allowed drift between plan.entry and live market price at fire-time,
+# expressed as a fraction of the plan's own risk distance (|entry - sl|).
+# e.g. 0.5 = market may be at most 0.5R away from entry before we consider
+# the setup stale and refuse to send it.
+MAX_ENTRY_DRIFT_R = 0.5
 
 _shutdown = False
 def _handle_sigterm(signum, frame):
@@ -205,15 +267,29 @@ def get_candles(symbol: str, interval: str, n: int,
     candles = filter_closed_candles(candles, interval, ref_ms)
     return candles[-n:]
 
-def fetch_all_candles(symbol: str, reference_ms: int | None = None):
-    candles_m15 = get_candles(symbol, "15m", N_M15, reference_ms=reference_ms)
-    if len(candles_m15) < 60:
-        return None
-    results = {}
+MIN_BARS_HTF  = 60
+MIN_BARS_EXEC = 60
+MIN_BARS_D    = 30
+
+def _required_timeframes() -> dict[str, int]:
+    """Union of every timeframe used by any combo (plus daily), mapped to
+    the max candle count any combo needs for that timeframe."""
+    need: dict[str, int] = {"1d": N_D}
+    for combo in COMBOS.values():
+        need[combo.htf_tf]  = max(need.get(combo.htf_tf, 0), combo.n_htf)
+        need[combo.exec_tf] = max(need.get(combo.exec_tf, 0), combo.n_exec)
+    return need
+
+def fetch_all_candles(symbol: str, reference_ms: int | None = None) -> dict[str, list] | None:
+    """Fetches every timeframe required across all combos for one symbol
+    in parallel, and returns {timeframe: candles}. Returns None if any
+    required timeframe comes back too thin to be usable."""
+    needed = _required_timeframes()
+    results: dict[str, list] = {}
     with ThreadPoolExecutor(max_workers=max(1, HL_TF_WORKERS)) as ex:
         futures = {
-            ex.submit(get_candles, symbol, "4h", N_H4, None, reference_ms): "4h",
-            ex.submit(get_candles, symbol, "1d", N_D, None, reference_ms): "1d",
+            ex.submit(get_candles, symbol, tf, n, None, reference_ms): tf
+            for tf, n in needed.items()
         }
         for fut in as_completed(futures):
             tf = futures[fut]
@@ -222,11 +298,14 @@ def fetch_all_candles(symbol: str, reference_ms: int | None = None):
             except Exception as e:
                 print(f"  [CANDLES] {symbol} {tf} fetch failed: {e} — skipping symbol")
                 return None
-    if "4h" not in results or "1d" not in results:
-        return None
-    if len(results["4h"]) < 60 or len(results["1d"]) < 30:
-        return None
-    return candles_m15, results["4h"], results["1d"]
+
+    for tf in needed:
+        if tf not in results:
+            return None
+        min_bars = MIN_BARS_D if tf == "1d" else (MIN_BARS_HTF if tf in ("4h", "12h") else MIN_BARS_EXEC)
+        if len(results[tf]) < min_bars:
+            return None
+    return results
 
 _meta_cache: dict | None = None
 _meta_cache_lock = threading.Lock()
@@ -334,10 +413,10 @@ class HTFBias:
     def zone(self) -> str:
         return None
 
-def compute_htf_bias(candles_h4: list[dict]) -> HTFBias | None:
-    if len(candles_h4) < (PIVOT_LEFT_H4 + PIVOT_RIGHT_H4 + 10):
+def compute_htf_bias(candles_h4: list[dict], combo: Combo) -> HTFBias | None:
+    if len(candles_h4) < (combo.pivot_left_htf + combo.pivot_right_htf + 10):
         return None
-    pivots = detect_pivots(candles_h4, PIVOT_LEFT_H4, PIVOT_RIGHT_H4)
+    pivots = detect_pivots(candles_h4, combo.pivot_left_htf, combo.pivot_right_htf)
     highs = sorted([p for p in pivots if p.kind == "high"], key=lambda p: p.index)
     lows  = sorted([p for p in pivots if p.kind == "low"],  key=lambda p: p.index)
     if len(highs) < 2 or len(lows) < 2:
@@ -387,44 +466,45 @@ class POIZone:
     def contains(self, price: float, buf: float = 0.0) -> bool:
         return (self.low - buf) <= price <= (self.high + buf)
 
-def _order_blocks(candles: list[dict], atr_vals: list[float]) -> list[POIZone]:
+def _order_blocks(candles: list[dict], atr_vals: list[float], combo: Combo) -> list[POIZone]:
     zones = []
     n = len(candles)
-    for i in range(OB_BOS_LOOKBACK + 1, n):
+    lookback = combo.ob_bos_lookback
+    for i in range(lookback + 1, n):
         c = candles[i]
         body = c["c"] - c["o"]
         a = atr_vals[i] or 1e-9
-        displacement = abs(body) >= OB_DISPLACEMENT_ATR_MULT * a
+        displacement = abs(body) >= combo.ob_displacement_atr_mult * a
         if not displacement:
             continue
         if body > 0:
-            prior_high = max(candles[j]["h"] for j in range(max(0, i - OB_BOS_LOOKBACK), i))
+            prior_high = max(candles[j]["h"] for j in range(max(0, i - lookback), i))
             if c["c"] <= prior_high:
                 continue
-            for j in range(i - 1, max(-1, i - OB_BOS_LOOKBACK - 1), -1):
+            for j in range(i - 1, max(-1, i - lookback - 1), -1):
                 ob = candles[j]
                 if ob["c"] < ob["o"]:
                     zones.append(POIZone(ob["l"], ob["h"], "demand", j))
                     break
         else:
-            prior_low = min(candles[j]["l"] for j in range(max(0, i - OB_BOS_LOOKBACK), i))
+            prior_low = min(candles[j]["l"] for j in range(max(0, i - lookback), i))
             if c["c"] >= prior_low:
                 continue
-            for j in range(i - 1, max(-1, i - OB_BOS_LOOKBACK - 1), -1):
+            for j in range(i - 1, max(-1, i - lookback - 1), -1):
                 ob = candles[j]
                 if ob["c"] > ob["o"]:
                     zones.append(POIZone(ob["l"], ob["h"], "supply", j))
                     break
     return zones
 
-def _fair_value_gaps(candles: list[dict], atr_vals: list[float]) -> list[POIZone]:
+def _fair_value_gaps(candles: list[dict], atr_vals: list[float], combo: Combo) -> list[POIZone]:
     zones = []
     for i in range(1, len(candles) - 1):
         left, right = candles[i - 1], candles[i + 1]
         a = atr_vals[i] or 1e-9
-        if left["h"] < right["l"] and (right["l"] - left["h"]) >= FVG_MIN_GAP_ATR_MULT * a:
+        if left["h"] < right["l"] and (right["l"] - left["h"]) >= combo.fvg_min_gap_atr_mult * a:
             zones.append(POIZone(left["h"], right["l"], "demand", i))
-        elif left["l"] > right["h"] and (left["l"] - right["h"]) >= FVG_MIN_GAP_ATR_MULT * a:
+        elif left["l"] > right["h"] and (left["l"] - right["h"]) >= combo.fvg_min_gap_atr_mult * a:
             zones.append(POIZone(right["h"], left["l"], "supply", i))
     return zones
 
@@ -457,8 +537,8 @@ def _period_hl(candles_d: list[dict], days: int) -> tuple:
         return None, None
     return max(c["h"] for c in window), min(c["l"] for c in window)
 
-def build_liquidity_levels(candles_h4: list[dict], candles_d: list[dict], pivots_h4) -> list[tuple]:
-    levels = list(_equal_liquidity_levels(pivots_h4, H4_LIQUIDITY_TOLERANCE))
+def build_liquidity_levels(candles_h4: list[dict], candles_d: list[dict], pivots_h4, combo: Combo) -> list[tuple]:
+    levels = list(_equal_liquidity_levels(pivots_h4, combo.liquidity_tolerance))
     pdh, pdl = _period_hl(candles_d, 1)
     pwh, pwl = _period_hl(candles_d, 7)
     pmh, pml = _period_hl(candles_d, 30)
@@ -476,21 +556,21 @@ def is_zone_untested(zone: POIZone, candles: list[dict]) -> bool:
             return False
     return True
 
-def build_poi_zones(candles_h4: list[dict], candles_d: list[dict], htf: HTFBias) -> list[POIZone]:
-    window = candles_h4[-H4_POI_LOOKBACK:]
+def build_poi_zones(candles_h4: list[dict], candles_d: list[dict], htf: HTFBias, combo: Combo) -> list[POIZone]:
+    window = candles_h4[-combo.poi_lookback:]
     offset = len(candles_h4) - len(window)
     atr_vals = atr_series(candles_h4, 14)
-    pivots_h4 = detect_pivots(window, PIVOT_LEFT_H4, PIVOT_RIGHT_H4)
+    pivots_h4 = detect_pivots(window, combo.pivot_left_htf, combo.pivot_right_htf)
     for p in pivots_h4:
         p.index += offset
 
-    raw = _order_blocks(window, atr_vals[offset:]) + _fair_value_gaps(window, atr_vals[offset:])
+    raw = _order_blocks(window, atr_vals[offset:], combo) + _fair_value_gaps(window, atr_vals[offset:], combo)
     for z in raw:
         z.index += offset
 
-    liquidity_levels = build_liquidity_levels(candles_h4, candles_d, pivots_h4)
+    liquidity_levels = build_liquidity_levels(candles_h4, candles_d, pivots_h4, combo)
     a = htf.atr_h4 or 1e-9
-    buf = POI_CONFLUENCE_BUFFER_ATR_MULT * a
+    buf = combo.poi_confluence_buffer_atr_mult * a
 
     kept = []
     for z in raw:
@@ -520,12 +600,12 @@ class SFPEvent:
         self.candle_index = candle_index
         self.candle_time = candle_time
 
-def detect_sfp(candles_h4: list[dict], zones: list[POIZone], htf: HTFBias) -> SFPEvent | None:
+def detect_sfp(candles_h4: list[dict], zones: list[POIZone], htf: HTFBias, combo: Combo) -> SFPEvent | None:
     if htf.bias == "neutral" or not zones:
         return None
     atr_vals = atr_series(candles_h4, 14)
     n = len(candles_h4)
-    start = max(0, n - SFP_LOOKBACK_H4_BARS)
+    start = max(0, n - combo.sfp_lookback_htf_bars)
 
     best = None
     for i in range(start, n):
@@ -536,18 +616,18 @@ def detect_sfp(candles_h4: list[dict], zones: list[POIZone], htf: HTFBias) -> SF
             continue
         for z in zones:
             if htf.bias == "bullish" and z.kind == "demand":
-                swept = c["l"] < z.low and (z.low - c["l"]) <= SFP_MAX_SWEEP_DEPTH_ATR_MULT * a
+                swept = c["l"] < z.low and (z.low - c["l"]) <= combo.sfp_max_sweep_depth_atr_mult * a
                 rejected = c["c"] > z.low and c["c"] > c["o"]
                 wick_ratio = safe_div(min(c["o"], c["c"]) - c["l"], rng)
-                if swept and rejected and wick_ratio >= SFP_MIN_WICK_RATIO:
+                if swept and rejected and wick_ratio >= combo.sfp_min_wick_ratio:
                     cand = SFPEvent("long", z, c["l"], i, c["t"])
                     if best is None or cand.candle_index > best.candle_index:
                         best = cand
             elif htf.bias == "bearish" and z.kind == "supply":
-                swept = c["h"] > z.high and (c["h"] - z.high) <= SFP_MAX_SWEEP_DEPTH_ATR_MULT * a
+                swept = c["h"] > z.high and (c["h"] - z.high) <= combo.sfp_max_sweep_depth_atr_mult * a
                 rejected = c["c"] < z.high and c["c"] < c["o"]
                 wick_ratio = safe_div(c["h"] - max(c["o"], c["c"]), rng)
-                if swept and rejected and wick_ratio >= SFP_MIN_WICK_RATIO:
+                if swept and rejected and wick_ratio >= combo.sfp_min_wick_ratio:
                     cand = SFPEvent("short", z, c["h"], i, c["t"])
                     if best is None or cand.candle_index > best.candle_index:
                         best = cand
@@ -565,14 +645,14 @@ class MSSEvent:
         self.swing_price = swing_price
         self.confirm_time = confirm_time
 
-def detect_mss(candles_m15: list[dict], direction: str, sweep_time_ms: int) -> MSSEvent | None:
-    post = [(i, c) for i, c in enumerate(candles_m15) if c["t"] > sweep_time_ms]
-    if len(post) < (PIVOT_LEFT_M15 + PIVOT_RIGHT_M15 + 3):
+def detect_mss(candles_exec: list[dict], direction: str, sweep_time_ms: int, combo: Combo) -> MSSEvent | None:
+    post = [(i, c) for i, c in enumerate(candles_exec) if c["t"] > sweep_time_ms]
+    if len(post) < (combo.pivot_left_exec + combo.pivot_right_exec + 3):
         return None
     post_candles = [c for _, c in post]
     offset = post[0][0]
-    atr_vals = atr_series(candles_m15, 14)
-    pivots = detect_pivots(post_candles, PIVOT_LEFT_M15, PIVOT_RIGHT_M15)
+    atr_vals = atr_series(candles_exec, 14)
+    pivots = detect_pivots(post_candles, combo.pivot_left_exec, combo.pivot_right_exec)
 
     if direction == "long":
         swing_highs = sorted([p for p in pivots if p.kind == "high"], key=lambda p: p.index)
@@ -585,8 +665,8 @@ def detect_mss(candles_m15: list[dict], direction: str, sweep_time_ms: int) -> M
             swing_price = relevant_highs[-1].price
             c = post_candles[idx]
             a = atr_vals[offset + idx] or 1e-9
-            displacement = (c["c"] - c["o"]) >= MSS_DISPLACEMENT_ATR_MULT * a
-            margin = c["c"] - swing_price >= MSS_MIN_CLOSE_MARGIN_ATR_MULT * a
+            displacement = (c["c"] - c["o"]) >= combo.mss_displacement_atr_mult * a
+            margin = c["c"] - swing_price >= combo.mss_min_close_margin_atr_mult * a
             if c["c"] > swing_price and displacement and margin:
                 return MSSEvent("long", offset + idx, swing_price, c["t"])
         return None
@@ -601,8 +681,8 @@ def detect_mss(candles_m15: list[dict], direction: str, sweep_time_ms: int) -> M
             swing_price = relevant_lows[-1].price
             c = post_candles[idx]
             a = atr_vals[offset + idx] or 1e-9
-            displacement = (c["o"] - c["c"]) >= MSS_DISPLACEMENT_ATR_MULT * a
-            margin = swing_price - c["c"] >= MSS_MIN_CLOSE_MARGIN_ATR_MULT * a
+            displacement = (c["o"] - c["c"]) >= combo.mss_displacement_atr_mult * a
+            margin = swing_price - c["c"] >= combo.mss_min_close_margin_atr_mult * a
             if c["c"] < swing_price and displacement and margin:
                 return MSSEvent("short", offset + idx, swing_price, c["t"])
         return None
@@ -618,16 +698,16 @@ class TradePlan:
         self.r_multiple_tp2 = r_multiple_tp2
         self.breaker_low, self.breaker_high = breaker_low, breaker_high
 
-def find_breaker_block(candles_m15: list[dict], mss: MSSEvent) -> POIZone | None:
-    lo = max(0, mss.impulse_index - BREAKER_SEARCH_BARS)
+def find_breaker_block(candles_exec: list[dict], mss: MSSEvent, combo: Combo) -> POIZone | None:
+    lo = max(0, mss.impulse_index - combo.breaker_search_bars)
     if mss.direction == "long":
         for j in range(mss.impulse_index - 1, lo - 1, -1):
-            c = candles_m15[j]
+            c = candles_exec[j]
             if c["c"] < c["o"]:
                 return POIZone(c["l"], c["h"], "demand", j)
     else:
         for j in range(mss.impulse_index - 1, lo - 1, -1):
-            c = candles_m15[j]
+            c = candles_exec[j]
             if c["c"] > c["o"]:
                 return POIZone(c["l"], c["h"], "supply", j)
     return None
@@ -651,8 +731,9 @@ def room_to_next_opposing_level(entry: float, direction: str, sfp: SFPEvent,
 
 def build_trade_plan(direction: str, sfp: SFPEvent, breaker: POIZone,
                       candles_h4: list[dict], atr_h4: float,
-                      zones: list[POIZone], liquidity_levels: list[tuple]) -> TradePlan | None:
-    buf = SL_BUFFER_ATR_MULT * (atr_h4 or 1e-9)
+                      zones: list[POIZone], liquidity_levels: list[tuple],
+                      combo: Combo) -> TradePlan | None:
+    buf = combo.sl_buffer_atr_mult * (atr_h4 or 1e-9)
     if direction == "long":
         entry = breaker.high
         sl = sfp.sweep_extreme - buf
@@ -760,12 +841,14 @@ def fmt_px(v: float) -> str:
     return f"{v:.6f}"
 
 def format_signal(symbol: str, direction: str, plan: TradePlan, htf: HTFBias, zone_kind: str,
-                   market_price: float | None = None) -> str:
+                   combo: Combo, market_price: float | None = None) -> str:
     coin = hl_coin(symbol)
     arrow = "▲ LONG" if direction == "long" else "▼ SHORT"
     emoji = "🟢" if direction == "long" else "🔴"
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     risk = abs(plan.entry - plan.sl)
+    htf_label = combo.htf_tf.upper() if combo.htf_tf != "12h" else "12H"
+    exec_label = combo.exec_tf
     price_line = ""
     if market_price is not None:
         dist = market_price - plan.entry
@@ -777,9 +860,9 @@ def format_signal(symbol: str, direction: str, plan: TradePlan, htf: HTFBias, zo
         )
     return (
         f"{emoji} <b>{ENGINE_NAME} v{__version__}</b>\n"
-        f"<b>{coin} — {arrow}</b>\n\n"
-        f"HTF Bias (H4): {htf.bias.upper()} | Zone swept: {zone_kind.upper()}\n"
-        f"Setup: H4 SFP -> M15 MSS -> Breaker Entry\n\n"
+        f"<b>{coin} — {arrow} ({combo.label})</b>\n\n"
+        f"HTF Bias ({htf_label}): {htf.bias.upper()} | Zone swept: {zone_kind.upper()}\n"
+        f"Setup: {htf_label} SFP -> {exec_label} MSS -> Breaker Entry\n\n"
         f"{price_line}"
         f"Entry (breaker zone): <code>{fmt_px(plan.entry)}</code>\n"
         f"Stop Loss (structure): <code>{fmt_px(plan.sl)}</code>\n"
@@ -793,94 +876,100 @@ def format_signal(symbol: str, direction: str, plan: TradePlan, htf: HTFBias, zo
 # SIGNAL LIFECYCLE: PENDING SETUPS -> ACTIVE SIGNALS -> RESOLUTION
 # ══════════════════════════════════════════════════════════════════
 
-def check_cooldown(state: dict, symbol: str, direction: str, bar_index_h4: int) -> bool:
+def check_cooldown(state: dict, symbol: str, direction: str, bar_index_htf: int, combo: Combo) -> bool:
     active = state.get("active_signals", [])
     active_count = sum(1 for s in active if not s.get("resolved", False))
     if active_count >= MAX_CONCURRENT_ACTIVE_SIGNALS:
         return False
+    # Exclusivity is per (symbol, combo): an active H4/15m signal on a
+    # symbol does not block a 12H/1h signal on the same symbol, or vice versa.
     for s in active:
-        if s.get("symbol") == symbol and not s.get("resolved", False):
+        if s.get("symbol") == symbol and s.get("combo") == combo.id and not s.get("resolved", False):
             return False
-    key = f"{symbol}_{direction}"
+    key = f"{combo.id}:{symbol}_{direction}"
     last_bar = state.get("signal_cooldowns", {}).get(key)
-    if last_bar is not None and (bar_index_h4 - last_bar) < SIGNAL_COOLDOWN_H4_BARS:
+    if last_bar is not None and (bar_index_htf - last_bar) < combo.cooldown_htf_bars:
         return False
     return True
 
-def update_cooldown(state: dict, symbol: str, direction: str, bar_index_h4: int):
-    state.setdefault("signal_cooldowns", {})[f"{symbol}_{direction}"] = bar_index_h4
+def update_cooldown(state: dict, symbol: str, direction: str, bar_index_htf: int, combo: Combo):
+    state.setdefault("signal_cooldowns", {})[f"{combo.id}:{symbol}_{direction}"] = bar_index_htf
 
-def process_symbol(symbol: str, state: dict, bundle: tuple, reference_ms: int,
-                    bar_index_h4: int, bar_index_m15: int) -> dict | None:
-    candles_m15, candles_h4, candles_d = bundle
+def process_symbol(symbol: str, combo: Combo, state: dict, bundle: tuple, reference_ms: int,
+                    bar_index_htf: int, bar_index_exec: int) -> dict | None:
+    candles_exec, candles_htf, candles_d = bundle
     coin = hl_coin(symbol)
+    tag = f"{coin}/{combo.label}"
 
-    pending = state.setdefault("pending_setups", {})
+    pending = state.setdefault("pending_setups", {}).setdefault(combo.id, {})
     setup = pending.get(symbol)
 
-    # -- Advance an existing pending H4 SFP toward M15 confirmation --
+    # -- Advance an existing pending HTF SFP toward exec-TF confirmation --
     if setup is not None:
         age_hours = (reference_ms - setup["sfp_time"]) / 3_600_000.0
-        if age_hours > PENDING_SETUP_MAX_AGE_HOURS:
-            print(f"    {coin}: pending setup expired ({age_hours:.1f}h) — dropping")
+        if age_hours > combo.pending_setup_max_age_hours:
+            print(f"    {tag}: pending setup expired ({age_hours:.1f}h) — dropping")
             del pending[symbol]
             setup = None
 
     if setup is not None:
-        mss = detect_mss(candles_m15, setup["direction"], setup["sfp_time"])
+        mss = detect_mss(candles_exec, setup["direction"], setup["sfp_time"], combo)
         if mss is None:
-            print(f"    {coin}: SFP pending, no M15 MSS yet")
+            print(f"    {tag}: SFP pending, no {combo.exec_tf} MSS yet")
             return None
 
         zone = POIZone(setup["zone_low"], setup["zone_high"],
                         "demand" if setup["direction"] == "long" else "supply", 0)
         sfp = SFPEvent(setup["direction"], zone, setup["sweep_extreme"], 0, setup["sfp_time"])
-        breaker = find_breaker_block(candles_m15, mss)
+        breaker = find_breaker_block(candles_exec, mss, combo)
         if breaker is None:
-            print(f"    {coin}: MSS confirmed but no breaker candle found — dropping setup")
+            print(f"    {tag}: MSS confirmed but no breaker candle found — dropping setup")
             del pending[symbol]
             return None
 
         htf = HTFBias(setup["direction"] == "long" and "bullish" or "bearish",
                       setup["range_low"], setup["range_high"], setup["eq"], setup["atr_h4"])
-        zones = build_poi_zones(candles_h4, candles_d, htf)
+        zones = build_poi_zones(candles_htf, candles_d, htf, combo)
         liquidity_levels = build_liquidity_levels(
-            candles_h4, candles_d, detect_pivots(candles_h4[-H4_POI_LOOKBACK:], PIVOT_LEFT_H4, PIVOT_RIGHT_H4))
+            candles_htf, candles_d,
+            detect_pivots(candles_htf[-combo.poi_lookback:], combo.pivot_left_htf, combo.pivot_right_htf),
+            combo)
 
-        plan = build_trade_plan(setup["direction"], sfp, breaker, candles_h4, setup["atr_h4"],
-                                 zones, liquidity_levels)
+        plan = build_trade_plan(setup["direction"], sfp, breaker, candles_htf, setup["atr_h4"],
+                                 zones, liquidity_levels, combo)
         del pending[symbol]
         if plan is None:
-            print(f"    {coin}: MSS confirmed but trade plan failed validation")
+            print(f"    {tag}: MSS confirmed but trade plan failed validation")
             return None
 
-        if not check_cooldown(state, symbol, setup["direction"], bar_index_h4):
-            print(f"    {coin}: setup confirmed but suppressed by cooldown / concurrency limit")
+        if not check_cooldown(state, symbol, setup["direction"], bar_index_htf, combo):
+            print(f"    {tag}: setup confirmed but suppressed by cooldown / concurrency limit")
             return None
 
-        print(f"    CASTELLAN SIGNAL: {coin} {setup['direction'].upper()} "
+        print(f"    CASTELLAN SIGNAL [{combo.label}]: {coin} {setup['direction'].upper()} "
               f"entry={fmt_px(plan.entry)} sl={fmt_px(plan.sl)} "
               f"tp1={fmt_px(plan.tp1)} tp2={fmt_px(plan.tp2)} ({plan.r_multiple_tp2:.0f}R)")
         return {"symbol": symbol, "direction": setup["direction"], "plan": plan,
-                "zone_kind": zone.kind, "bar_index_m15": bar_index_m15}
+                "zone_kind": zone.kind, "bar_index_exec": bar_index_exec, "combo": combo}
 
-    # -- No pending setup: look for a fresh H4 bias -> POI -> SFP sequence --
-    htf = compute_htf_bias(candles_h4)
+    # -- No pending setup: look for a fresh HTF bias -> POI -> SFP sequence --
+    htf = compute_htf_bias(candles_htf, combo)
     if htf is None or htf.bias == "neutral":
-        print(f"    {coin}: no H4 bias")
+        print(f"    {tag}: no {combo.htf_tf} bias")
         return None
 
-    zones = build_poi_zones(candles_h4, candles_d, htf)
+    zones = build_poi_zones(candles_htf, candles_d, htf, combo)
     if not zones:
-        print(f"    {coin}: no qualified H4 POI in {price_zone(candles_h4[-1]['c'], htf)}")
+        print(f"    {tag}: no qualified {combo.htf_tf} POI in {price_zone(candles_htf[-1]['c'], htf)}")
         return None
 
-    sfp = detect_sfp(candles_h4, zones, htf)
+    sfp = detect_sfp(candles_htf, zones, htf, combo)
     if sfp is None:
-        print(f"    {coin}: {htf.bias} bias, no valid H4 SFP yet")
+        print(f"    {tag}: {htf.bias} bias, no valid {combo.htf_tf} SFP yet")
         return None
 
-    already_active = any(s.get("symbol") == symbol and not s.get("resolved", False)
+    already_active = any(s.get("symbol") == symbol and s.get("combo") == combo.id
+                          and not s.get("resolved", False)
                           for s in state.get("active_signals", []))
     if already_active:
         return None
@@ -891,19 +980,23 @@ def process_symbol(symbol: str, state: dict, bundle: tuple, reference_ms: int,
         "range_low": htf.range_low, "range_high": htf.range_high, "eq": htf.eq,
         "atr_h4": htf.atr_h4,
     }
-    print(f"    {coin}: H4 SFP detected ({sfp.direction.upper()}) — awaiting M15 MSS confirmation")
+    print(f"    {tag}: {combo.htf_tf} SFP detected ({sfp.direction.upper()}) — "
+          f"awaiting {combo.exec_tf} MSS confirmation")
     return None
 
 def track_signal(state: dict, symbol: str, direction: str, msg_id: int,
-                  plan: TradePlan, bar_index_m15: int):
+                  plan: TradePlan, bar_index_exec: int, combo: Combo):
+    exec_iv_ms = INTERVAL_MS[combo.exec_tf]
     state.setdefault("active_signals", []).append({
         "symbol": symbol, "direction": direction, "msg_id": msg_id,
-        "bar_index": bar_index_m15, "signal_bar_time": bar_index_m15 * 900_000,
+        "combo": combo.id, "exec_tf": combo.exec_tf,
+        "signal_max_age_hours": combo.signal_max_age_hours,
+        "bar_index": bar_index_exec, "signal_bar_time": bar_index_exec * exec_iv_ms,
         "entry": plan.entry, "tp1": plan.tp1, "tp2": plan.tp2, "sl": plan.sl,
         "tp1_hit": False, "resolved": False,
     })
 
-def check_active_signals(state: dict, bar_index_m15_now: int, reference_ms: int):
+def check_active_signals(state: dict, reference_ms: int):
     signals = list(state.get("active_signals", []))
     if not signals:
         return
@@ -911,22 +1004,30 @@ def check_active_signals(state: dict, bar_index_m15_now: int, reference_ms: int)
     for sig in signals:
         if sig.get("resolved", False):
             continue
-        age = bar_index_m15_now - sig.get("bar_index", bar_index_m15_now)
-        if age > SIGNAL_MAX_AGE_BARS_M15:
-            print(f"  [TRACK] {sig['symbol']} expired after {age} M15 bars — dropping")
+
+        # Legacy signals (pre-multi-combo) default to the H4/15m combo's
+        # execution timeframe and max age so in-flight tracking survives upgrade.
+        exec_tf = sig.get("exec_tf", "15m")
+        max_age_hours = sig.get("signal_max_age_hours", COMBOS["h4_15m"].signal_max_age_hours)
+        signal_bar_time_ms = sig.get("signal_bar_time")
+        age_hours = (reference_ms - signal_bar_time_ms) / 3_600_000.0 if signal_bar_time_ms else 0.0
+        if age_hours > max_age_hours:
+            print(f"  [TRACK] {sig['symbol']} ({sig.get('combo', 'h4_15m')}) expired "
+                  f"after {age_hours:.1f}h — dropping")
             state.setdefault("resolved_signals", []).append(
                 {"symbol": sig["symbol"], "direction": sig.get("direction", ""),
+                 "combo": sig.get("combo", "h4_15m"),
                  "outcome": "expired", "resolved_at": int(time.time())})
             continue
 
         symbol, direction, msg_id = sig["symbol"], sig["direction"], sig["msg_id"]
         tp1, tp2, sl = sig["tp1"], sig["tp2"], sig["sl"]
         tp1_hit = sig.get("tp1_hit", False)
-        signal_bar_time_ms = sig.get("signal_bar_time")
         last_ts = sig.get("last_processed_candle_ts", signal_bar_time_ms or 0)
+        exec_n = COMBOS.get(sig.get("combo", "h4_15m"), COMBOS["h4_15m"]).n_exec
 
         try:
-            candles = get_candles(symbol, "15m", N_M15, start_time_ms=signal_bar_time_ms, reference_ms=reference_ms)
+            candles = get_candles(symbol, exec_tf, exec_n, start_time_ms=signal_bar_time_ms, reference_ms=reference_ms)
         except Exception as e:
             print(f"  [TRACK] candle fetch failed for {symbol}: {e}")
             still_active.append(sig)
@@ -986,14 +1087,14 @@ def check_active_signals(state: dict, bar_index_m15_now: int, reference_ms: int)
 def main():
     print(f"[{datetime.now(timezone.utc).isoformat()}] {ENGINE_NAME} v{__version__} starting…")
     print(f"Watchlist ({len(WATCHLIST)} pairs): {[hl_coin(s) for s in WATCHLIST]}")
+    print(f"Combos: {', '.join(c.label for c in COMBOS.values())}")
 
     reference_ms = int(time.time() * 1000)
-    bar_index_h4 = reference_ms // INTERVAL_MS["4h"]
-    bar_index_m15 = reference_ms // INTERVAL_MS["15m"]
+    bar_index_by_tf = {tf: reference_ms // iv for tf, iv in INTERVAL_MS.items()}
     state = load_state()
 
     print("[TRACK] Checking active signals…")
-    check_active_signals(state, bar_index_m15, reference_ms)
+    check_active_signals(state, reference_ms)
     save_state(state)
 
     print("[INIT] Fetching market context…")
@@ -1003,7 +1104,7 @@ def main():
         save_state(state); sys.exit(0)
 
     print("[PHASE 1] Fetching candles…")
-    bundles: dict[str, tuple] = {}
+    bundles: dict[str, dict[str, list]] = {}
     with ThreadPoolExecutor(max_workers=max(1, SCAN_WORKERS)) as ex:
         futures = {ex.submit(fetch_all_candles, sym, reference_ms): sym for sym in WATCHLIST}
         for fut in as_completed(futures):
@@ -1018,11 +1119,11 @@ def main():
     if _shutdown:
         save_state(state); sys.exit(0)
 
-    print("[PHASE 2] Running SMC sequence per symbol…")
+    print("[PHASE 2] Running SMC sequence per symbol per combo…")
     results = []
     for sym in WATCHLIST:
-        bundle = bundles.get(sym)
-        if bundle is None:
+        candles_by_tf = bundles.get(sym)
+        if candles_by_tf is None:
             print(f"    Skipping {hl_coin(sym)}: insufficient candles")
             continue
         try:
@@ -1030,31 +1131,63 @@ def main():
             if oi_usd is not None and oi_usd < 500_000:
                 print(f"    Skipping {hl_coin(sym)}: OI too low (${oi_usd:,.0f})")
                 continue
-            res = process_symbol(sym, state, bundle, reference_ms, bar_index_h4, bar_index_m15)
-            if res:
-                results.append(res)
         except Exception as e:
-            print(f"    ERROR processing {sym}: {e}")
+            print(f"    ERROR checking OI for {sym}: {e}")
+            continue
+
+        for combo in COMBOS.values():
+            candles_exec = candles_by_tf.get(combo.exec_tf)
+            candles_htf  = candles_by_tf.get(combo.htf_tf)
+            candles_d    = candles_by_tf.get("1d")
+            if not candles_exec or not candles_htf or not candles_d:
+                continue
+            bundle = (candles_exec, candles_htf, candles_d)
+            try:
+                res = process_symbol(sym, combo, state, bundle, reference_ms,
+                                      bar_index_by_tf[combo.htf_tf], bar_index_by_tf[combo.exec_tf])
+                if res:
+                    results.append(res)
+            except Exception as e:
+                print(f"    ERROR processing {sym} [{combo.label}]: {e}")
 
     results = results[:MAX_SIGNALS_PER_SCAN]
 
     signals_fired = 0
     for res in results:
-        symbol, direction, plan = res["symbol"], res["direction"], res["plan"]
+        symbol, direction, plan, combo = res["symbol"], res["direction"], res["plan"], res["combo"]
+        coin = hl_coin(symbol)
         mark_cache = get_meta_and_asset_ctxs() or {}
-        market_price = (mark_cache.get(hl_coin(symbol)) or {}).get("mark_px")
+        market_price = (mark_cache.get(coin) or {}).get("mark_px")
+
+        # -- Staleness guard: refuse to fire if we can't confirm the live
+        #    price is still close to the planned entry. A missing price is
+        #    treated as a failure, not silently ignored. --
+        if market_price is None:
+            print(f"  [SKIP] {coin} {direction.upper()} [{combo.label}] — could not fetch live mark price, "
+                  f"refusing to send a signal with unverified entry")
+            continue
+
+        risk = abs(plan.entry - plan.sl)
+        drift = abs(market_price - plan.entry)
+        drift_r = safe_div(drift, risk)
+        if drift_r > MAX_ENTRY_DRIFT_R:
+            print(f"  [SKIP] {coin} {direction.upper()} [{combo.label}] — entry stale: "
+                  f"market={fmt_px(market_price)} is {drift_r:.2f}R from entry={fmt_px(plan.entry)} "
+                  f"(max {MAX_ENTRY_DRIFT_R}R)")
+            continue
+
         msg = format_signal(symbol, direction, plan,
                              HTFBias(direction == "long" and "bullish" or "bearish", 0, 0, 0, 0),
-                             res["zone_kind"], market_price)
+                             res["zone_kind"], combo, market_price)
         msg_id = send_telegram(msg)
         if msg_id:
-            update_cooldown(state, symbol, direction, bar_index_h4)
-            track_signal(state, symbol, direction, msg_id, plan, res["bar_index_m15"])
-            print(f"  [FIRED] {hl_coin(symbol)} {direction.upper()} "
+            update_cooldown(state, symbol, direction, bar_index_by_tf[combo.htf_tf], combo)
+            track_signal(state, symbol, direction, msg_id, plan, res["bar_index_exec"], combo)
+            print(f"  [FIRED] {hl_coin(symbol)} {direction.upper()} [{combo.label}] "
                   f"TP1={fmt_px(plan.tp1)} TP2={fmt_px(plan.tp2)} SL={fmt_px(plan.sl)}")
             signals_fired += 1
         else:
-            print(f"  [TG FAIL] {hl_coin(symbol)} {direction.upper()} — Telegram send failed")
+            print(f"  [TG FAIL] {hl_coin(symbol)} {direction.upper()} [{combo.label}] — Telegram send failed")
         time.sleep(0.5)
 
     save_state(state)
