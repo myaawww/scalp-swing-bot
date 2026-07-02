@@ -759,21 +759,31 @@ def fmt_px(v: float) -> str:
     if v >= 1:    return f"{v:,.4f}"
     return f"{v:.6f}"
 
-def format_signal(symbol: str, direction: str, plan: TradePlan, htf: HTFBias, zone_kind: str) -> str:
+def format_signal(symbol: str, direction: str, plan: TradePlan, htf: HTFBias, zone_kind: str,
+                   market_price: float | None = None) -> str:
     coin = hl_coin(symbol)
     arrow = "▲ LONG" if direction == "long" else "▼ SHORT"
     emoji = "🟢" if direction == "long" else "🔴"
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     risk = abs(plan.entry - plan.sl)
+    price_line = ""
+    if market_price is not None:
+        dist = market_price - plan.entry
+        dist_pct = safe_div(dist, plan.entry) * 100
+        sign = "+" if dist >= 0 else "-"
+        price_line = (
+            f"Market price: <code>{fmt_px(market_price)}</code> "
+            f"({sign}{fmt_px(abs(dist))} / {sign}{abs(dist_pct):.2f}% from entry)\n"
+        )
     return (
         f"{emoji} <b>{ENGINE_NAME} v{__version__}</b>\n"
         f"<b>{coin} — {arrow}</b>\n\n"
         f"HTF Bias (H4): {htf.bias.upper()} | Zone swept: {zone_kind.upper()}\n"
         f"Setup: H4 SFP -> M15 MSS -> Breaker Entry\n\n"
-        f"Entry (breaker zone): {fmt_px(plan.entry)}\n"
-        f"Stop Loss (structure): {fmt_px(plan.sl)}\n"
-        f"TP1 (2R): {fmt_px(plan.tp1)}\n"
-        f"TP2 ({plan.r_multiple_tp2:.0f}R): {fmt_px(plan.tp2)}\n"
+        f"{price_line}"
+        f"Entry (breaker zone): <code>{fmt_px(plan.entry)}</code>\n"
+        f"Stop Loss (structure): <code>{fmt_px(plan.sl)}</code>\n"
+        f"TP1 (2R): <code>{fmt_px(plan.tp1)}</code>\n"
         f"Risk distance: {fmt_px(risk)}\n\n"
         f"{ts}"
     )
@@ -1031,9 +1041,11 @@ def main():
     signals_fired = 0
     for res in results:
         symbol, direction, plan = res["symbol"], res["direction"], res["plan"]
+        mark_cache = get_meta_and_asset_ctxs() or {}
+        market_price = (mark_cache.get(hl_coin(symbol)) or {}).get("mark_px")
         msg = format_signal(symbol, direction, plan,
                              HTFBias(direction == "long" and "bullish" or "bearish", 0, 0, 0, 0),
-                             res["zone_kind"])
+                             res["zone_kind"], market_price)
         msg_id = send_telegram(msg)
         if msg_id:
             update_cooldown(state, symbol, direction, bar_index_h4)
