@@ -3814,7 +3814,7 @@ def deduplicate_correlated(signals: list[tuple]) -> list[tuple]:
         if longs and shorts:
             best_long  = max(longs,  key=lambda t: priority_score(t[2]))
             best_short = max(shorts, key=lambda t: priority_score(t[2]))
-            loser = best_short if priority_score(best_long) >= priority_score(best_short) else best_long
+            loser = best_short if priority_score(best_long[2]) >= priority_score(best_short[2]) else best_long
             dropped_ids.add(id(loser))
             print(f"  [CORR CONFLICT] Group '{g}' has both long ({best_long[0]}) and "
                   f"short ({best_short[0]}) surviving dedup — dropping lower-priority "
