@@ -12,17 +12,6 @@
       "eq": 0.149565,
       "atr_h4": 0.00373697429899533
     },
-    "TAOUSDT": {
-      "direction": "long",
-      "zone_low": 199.13,
-      "zone_high": 202.76,
-      "sweep_extreme": 196.54,
-      "sfp_time": 1782864000000,
-      "range_low": 195.53,
-      "range_high": 210.89,
-      "eq": 203.20999999999998,
-      "atr_h4": 5.905554569165901
-    },
     "PENDLEUSDT": {
       "direction": "long",
       "zone_low": 1.2617,
