@@ -12,6 +12,17 @@
       "eq": 0.149565,
       "atr_h4": 0.00373697429899533
     },
+    "TAOUSDT": {
+      "direction": "long",
+      "zone_low": 199.13,
+      "zone_high": 202.76,
+      "sweep_extreme": 196.54,
+      "sfp_time": 1782864000000,
+      "range_low": 195.53,
+      "range_high": 210.89,
+      "eq": 203.20999999999998,
+      "atr_h4": 5.905554569165901
+    },
     "PENDLEUSDT": {
       "direction": "long",
       "zone_low": 1.2617,
@@ -36,23 +47,18 @@
       "tp2": 0.006721261856093418,
       "sl": 0.005834369071953291,
       "tp1_hit": false,
-      "resolved": false
-    },
+      "resolved": false,
+      "last_processed_candle_ts": 1783011600000
+    }
+  ],
+  "resolved_signals": [
     {
       "symbol": "TAOUSDT",
       "direction": "long",
-      "msg_id": 1283,
-      "bar_index": 1981123,
-      "signal_bar_time": 1783010700000,
-      "entry": 197.71,
-      "tp1": 202.4122218276664,
-      "tp2": 202.4122218276664,
-      "sl": 195.3588890861668,
-      "tp1_hit": false,
-      "resolved": false
+      "outcome": "tp2",
+      "resolved_at": 1783012521
     }
   ],
-  "resolved_signals": [],
   "signal_cooldowns": {
     "PENGUUSDT_long": 123820,
     "TAOUSDT_long": 123820
