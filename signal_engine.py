@@ -1,5 +1,5 @@
 """
-CASTELLAN PROTOCOL v1.2.0
+MERIDIAN v1.0.0
 --------------------------------------------------------------------
 An institutional Smart Money Concept execution engine trading a single,
 non-negotiable sequence on Hyperliquid perpetuals, run across two
@@ -30,7 +30,22 @@ with discipline. Signal quality is prioritized over signal frequency.
 Infrastructure (Hyperliquid REST API, hardcoded watchlist, Telegram
 delivery + reaction system, cron-per-run scan architecture, state.json
 persistence) mirrors the operator's existing engines. The trading model
-itself is entirely original to Castellan Protocol.
+itself is entirely original to Meridian.
+
+Signal quality controls:
+    - Scan results are ranked by a quality metric (TP2 R-multiple, then
+      HTF POI confluence quality) before truncation to
+      MAX_SIGNALS_PER_SCAN, rather than truncating in whatever order
+      symbols happened to resolve in.
+    - A sector/correlated-asset diversification cap (MAX_PER_SECTOR)
+      stops a single scan from firing all its signal slots into one
+      correlated basket (e.g. all L1s).
+    - An aggregate outcome / win-rate summary is printed at the end of
+      every scan, computed from state["resolved_signals"].
+    - The HTF POI zone's confluence quality is carried through the
+      pending-setup -> MSS-confirmation handoff, and the SFP detector
+      explicitly breaks same-candle ties by zone quality instead of by
+      zone list order.
 --------------------------------------------------------------------
 """
 
@@ -40,8 +55,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
-__version__ = "1.2.0"
-ENGINE_NAME = "Castellan Protocol"
+__version__ = "1.0.0"
+ENGINE_NAME = "Meridian"
 
 # ── CONFIG ──────────────────────────────────────────────────────────
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
@@ -75,6 +90,23 @@ WATCHLIST = [
     "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
 ]
 
+# ── SECTOR MAP (used for max-one-per-sector diversification cap) ────
+# Mirrors the operator's Nyx Engine sector map 1:1 (same watchlist).
+SECTOR_MAP: dict[str, str] = {
+    "BTCUSDT":    "btc",
+    "ETHUSDT":    "eth",
+    "SOLUSDT":    "eth_l1", "AVAXUSDT": "eth_l1", "SUIUSDT": "eth_l1", "APTUSDT": "eth_l1",
+    "NEARUSDT":   "eth_l1",
+    "BNBUSDT":    "bnb",
+    "XRPUSDT":    "payments", "XLMUSDT": "payments", "TRXUSDT": "payments", "LTCUSDT": "payments",
+    "DOGEUSDT":   "meme",    "PENGUUSDT": "meme",
+    "ADAUSDT":    "layer1_alt", "DOTUSDT": "layer1_alt", "TAOUSDT": "layer1_alt",
+    "LINKUSDT":   "defi",    "AAVEUSDT": "defi", "UNIUSDT": "defi",
+    "ONDOUSDT":   "defi",    "PENDLEUSDT": "defi",
+    "HYPEUSDT":   "hype",
+    "ZECUSDT":    "privacy", "BCHUSDT": "privacy",
+}
+
 INTERVAL_MS = {
     "15m": 15 * 60 * 1000,
     "1h":  60 * 60 * 1000,
@@ -98,6 +130,7 @@ LIQUIDITY_ROOM_BUFFER_ATR_MULT = 0.50
 
 MAX_CONCURRENT_ACTIVE_SIGNALS = 10    # global cap across all combos combined
 MAX_SIGNALS_PER_SCAN = 2              # global cap across all combos combined
+MAX_PER_SECTOR       = 1              # diversification cap — see SECTOR_MAP
 
 
 # ── COMBO CONFIG ──────────────────────────────────────────────────────
@@ -621,7 +654,11 @@ def detect_sfp(candles_h4: list[dict], zones: list[POIZone], htf: HTFBias, combo
                 wick_ratio = safe_div(min(c["o"], c["c"]) - c["l"], rng)
                 if swept and rejected and wick_ratio >= combo.sfp_min_wick_ratio:
                     cand = SFPEvent("long", z, c["l"], i, c["t"])
-                    if best is None or cand.candle_index > best.candle_index:
+                    # Most recent sweep wins; among candidates on the same candle,
+                    # explicitly prefer the higher-confluence POI zone rather than
+                    # whichever zone happened to be first in the list.
+                    if best is None or (cand.candle_index, cand.zone.quality) > \
+                                        (best.candle_index, best.zone.quality):
                         best = cand
             elif htf.bias == "bearish" and z.kind == "supply":
                 swept = c["h"] > z.high and (c["h"] - z.high) <= combo.sfp_max_sweep_depth_atr_mult * a
@@ -629,7 +666,8 @@ def detect_sfp(candles_h4: list[dict], zones: list[POIZone], htf: HTFBias, combo
                 wick_ratio = safe_div(c["h"] - max(c["o"], c["c"]), rng)
                 if swept and rejected and wick_ratio >= combo.sfp_min_wick_ratio:
                     cand = SFPEvent("short", z, c["h"], i, c["t"])
-                    if best is None or cand.candle_index > best.candle_index:
+                    if best is None or (cand.candle_index, cand.zone.quality) > \
+                                        (best.candle_index, best.zone.quality):
                         best = cand
     return best
 
@@ -919,7 +957,8 @@ def process_symbol(symbol: str, combo: Combo, state: dict, bundle: tuple, refere
             return None
 
         zone = POIZone(setup["zone_low"], setup["zone_high"],
-                        "demand" if setup["direction"] == "long" else "supply", 0)
+                        "demand" if setup["direction"] == "long" else "supply", 0,
+                        quality=setup.get("zone_quality", 1))
         sfp = SFPEvent(setup["direction"], zone, setup["sweep_extreme"], 0, setup["sfp_time"])
         breaker = find_breaker_block(candles_exec, mss, combo)
         if breaker is None:
@@ -946,11 +985,12 @@ def process_symbol(symbol: str, combo: Combo, state: dict, bundle: tuple, refere
             print(f"    {tag}: setup confirmed but suppressed by cooldown / concurrency limit")
             return None
 
-        print(f"    CASTELLAN SIGNAL [{combo.label}]: {coin} {setup['direction'].upper()} "
+        print(f"    MERIDIAN SIGNAL [{combo.label}]: {coin} {setup['direction'].upper()} "
               f"entry={fmt_px(plan.entry)} sl={fmt_px(plan.sl)} "
               f"tp1={fmt_px(plan.tp1)} tp2={fmt_px(plan.tp2)} ({plan.r_multiple_tp2:.0f}R)")
         return {"symbol": symbol, "direction": setup["direction"], "plan": plan,
-                "zone_kind": zone.kind, "bar_index_exec": bar_index_exec, "combo": combo}
+                "zone_kind": zone.kind, "zone_quality": zone.quality,
+                "bar_index_exec": bar_index_exec, "combo": combo}
 
     # -- No pending setup: look for a fresh HTF bias -> POI -> SFP sequence --
     htf = compute_htf_bias(candles_htf, combo)
@@ -976,6 +1016,7 @@ def process_symbol(symbol: str, combo: Combo, state: dict, bundle: tuple, refere
 
     pending[symbol] = {
         "direction": sfp.direction, "zone_low": sfp.zone.low, "zone_high": sfp.zone.high,
+        "zone_quality": sfp.zone.quality,
         "sweep_extreme": sfp.sweep_extreme, "sfp_time": sfp.candle_time,
         "range_low": htf.range_low, "range_high": htf.range_high, "eq": htf.eq,
         "atr_h4": htf.atr_h4,
@@ -1080,6 +1121,50 @@ def check_active_signals(state: dict, reference_ms: int):
     state["active_signals"] = still_active
 
 
+def get_outcome_summary(state: dict) -> str:
+    """
+    Aggregate win-rate summary computed from state["resolved_signals"],
+    which check_active_signals() has already been populating all along.
+
+    Outcome semantics (see resolve() in check_active_signals):
+      "tp2"     -> full win (TP1 then TP2)
+      "tp1"     -> partial win (TP1 secured, later stopped out at/after BE)
+      "sl"      -> loss (stopped before TP1)
+      "expired" -> no outcome reached before max age — excluded from win rate
+    """
+    resolved = state.get("resolved_signals", [])
+    if not resolved:
+        return "[OUTCOMES] No resolved signals tracked yet."
+
+    counts = {"tp2": 0, "tp1": 0, "sl": 0, "expired": 0}
+    per_combo: dict[str, dict[str, int]] = {}
+    for r in resolved:
+        outcome = r.get("outcome", "expired")
+        counts[outcome] = counts.get(outcome, 0) + 1
+        combo_id = r.get("combo", "unknown")
+        bucket = per_combo.setdefault(combo_id, {"tp2": 0, "tp1": 0, "sl": 0, "expired": 0})
+        bucket[outcome] = bucket.get(outcome, 0) + 1
+
+    wins = counts["tp2"] + counts["tp1"]
+    losses = counts["sl"]
+    decided = wins + losses
+    win_rate = (wins / decided * 100) if decided else 0.0
+
+    lines = [
+        f"[OUTCOMES] {wins}W / {losses}L ({win_rate:.1f}%) — "
+        f"{counts['tp2']} full TP2, {counts['tp1']} partial TP1, "
+        f"{counts['expired']} expired — {len(resolved)} resolved total"
+    ]
+    for combo_id, bucket in per_combo.items():
+        c_wins = bucket["tp2"] + bucket["tp1"]
+        c_losses = bucket["sl"]
+        c_decided = c_wins + c_losses
+        c_rate = (c_wins / c_decided * 100) if c_decided else 0.0
+        label = COMBOS[combo_id].label if combo_id in COMBOS else combo_id
+        lines.append(f"           {label}: {c_wins}W / {c_losses}L ({c_rate:.1f}%)")
+    return "\n".join(lines)
+
+
 # ══════════════════════════════════════════════════════════════════
 # MAIN SCAN LOOP
 # ══════════════════════════════════════════════════════════════════
@@ -1150,7 +1235,30 @@ def main():
             except Exception as e:
                 print(f"    ERROR processing {sym} [{combo.label}]: {e}")
 
-    results = results[:MAX_SIGNALS_PER_SCAN]
+    # -- Rank before truncating: previously the top MAX_SIGNALS_PER_SCAN
+    #    results were whichever symbols happened to resolve first out of
+    #    process_symbol(), which has nothing to do with setup quality.
+    #    Rank by TP2 R-multiple first (bigger reward-to-risk = better setup),
+    #    then by HTF POI confluence quality as a tiebreak. --
+    results.sort(key=lambda r: (r["plan"].r_multiple_tp2, r["zone_quality"]), reverse=True)
+
+    # -- Diversification cap: don't let one correlated basket (e.g. every
+    #    L1 alt) eat every signal slot in the scan, mirroring Nyx's
+    #    MAX_PER_SECTOR cap. Applied after ranking, so within a sector the
+    #    highest-quality setup is still the one that gets through. --
+    diversified = []
+    sector_used: dict[str, int] = {}
+    for res in results:
+        if len(diversified) >= MAX_SIGNALS_PER_SCAN:
+            break
+        sector = SECTOR_MAP.get(res["symbol"], "other")
+        if sector_used.get(sector, 0) >= MAX_PER_SECTOR:
+            print(f"  [SKIP] {hl_coin(res['symbol'])} {res['direction'].upper()} "
+                  f"[{res['combo'].label}] — sector '{sector}' cap reached ({MAX_PER_SECTOR})")
+            continue
+        diversified.append(res)
+        sector_used[sector] = sector_used.get(sector, 0) + 1
+    results = diversified
 
     signals_fired = 0
     for res in results:
@@ -1192,6 +1300,7 @@ def main():
 
     save_state(state)
     print(f"Scan complete. {signals_fired} signal(s) fired.")
+    print(get_outcome_summary(state))
 
 if __name__ == "__main__":
     try:
