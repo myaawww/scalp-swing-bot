@@ -2,6 +2,17 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
+      "ETHUSDT": {
+        "direction": "long",
+        "zone_low": 1584.4,
+        "zone_high": 1606.8,
+        "sweep_extreme": 1552.0,
+        "sfp_time": 1782864000000,
+        "range_low": 1547.6,
+        "range_high": 1724.2,
+        "eq": 1635.9,
+        "atr_h4": 31.789429868588865
+      },
       "PENGUUSDT": {
         "direction": "long",
         "zone_low": 0.006064,
@@ -9,9 +20,9 @@
         "sweep_extreme": 0.005874,
         "sfp_time": 1782864000000,
         "range_low": 0.005874,
-        "range_high": 0.006375,
-        "eq": 0.0061245,
-        "atr_h4": 0.00018043435895395693
+        "range_high": 0.006542,
+        "eq": 0.006208,
+        "atr_h4": 0.00018054619239940643
       },
       "ADAUSDT": {
         "direction": "long",
@@ -22,18 +33,7 @@
         "range_low": 0.14111,
         "range_high": 0.15802,
         "eq": 0.149565,
-        "atr_h4": 0.003708258488212167
-      },
-      "PENDLEUSDT": {
-        "direction": "long",
-        "zone_low": 1.2617,
-        "zone_high": 1.2645,
-        "sweep_extreme": 1.2292,
-        "sfp_time": 1782691200000,
-        "range_low": 1.2223,
-        "range_high": 1.3876,
-        "eq": 1.3049499999999998,
-        "atr_h4": 0.048704814423007683
+        "atr_h4": 0.004004811494359646
       }
     },
     "12h_1h": {
