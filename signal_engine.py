@@ -491,8 +491,8 @@ def price_zone(price: float, htf: HTFBias) -> str:
 class POIZone:
     def __init__(self, low, high, kind, index, quality=1):
         self.low, self.high = min(low, high), max(low, high)
-        self.kind = kind          # "demand" | "supply"
-        self.index = index        # index of formation on candles_h4
+        self.kind = kind
+        self.index = index
         self.quality = quality
         self.mid = (self.low + self.high) / 2.0
 
@@ -627,7 +627,7 @@ def build_poi_zones(candles_h4: list[dict], candles_d: list[dict], htf: HTFBias,
 
 class SFPEvent:
     def __init__(self, direction, zone: POIZone, sweep_extreme, candle_index, candle_time):
-        self.direction = direction         # "long" | "short"
+        self.direction = direction
         self.zone = zone
         self.sweep_extreme = sweep_extreme
         self.candle_index = candle_index
