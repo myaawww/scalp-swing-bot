@@ -2,6 +2,17 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
+      "PENGUUSDT": {
+        "direction": "long",
+        "zone_low": 0.006064,
+        "zone_high": 0.006083,
+        "sweep_extreme": 0.005874,
+        "sfp_time": 1782864000000,
+        "range_low": 0.005874,
+        "range_high": 0.006375,
+        "eq": 0.0061245,
+        "atr_h4": 0.00018043435895395693
+      },
       "ADAUSDT": {
         "direction": "long",
         "zone_low": 0.1449,
@@ -11,7 +22,7 @@
         "range_low": 0.14111,
         "range_high": 0.15802,
         "eq": 0.149565,
-        "atr_h4": 0.003735047593262562
+        "atr_h4": 0.003708258488212167
       },
       "PENDLEUSDT": {
         "direction": "long",
@@ -22,7 +33,7 @@
         "range_low": 1.2223,
         "range_high": 1.3876,
         "eq": 1.3049499999999998,
-        "atr_h4": 0.0505590309361462
+        "atr_h4": 0.048704814423007683
       }
     },
     "12h_1h": {
@@ -36,6 +47,17 @@
         "range_high": 0.6854,
         "eq": 0.6195999999999999,
         "atr_h4": 0.02924652254174437
+      },
+      "AAVEUSDT": {
+        "direction": "short",
+        "zone_low": 87.899,
+        "zone_high": 88.353,
+        "sweep_extreme": 88.457,
+        "sfp_time": 1782993600000,
+        "range_low": 70.63,
+        "range_high": 99.255,
+        "eq": 84.9425,
+        "atr_h4": 4.865056013978607
       }
     }
   },
