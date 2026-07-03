@@ -12,7 +12,19 @@
         "range_low": 1547.6,
         "range_high": 1724.2,
         "eq": 1635.9,
-        "atr_h4": 30.98304186715786
+        "atr_h4": 31.14853891730758
+      },
+      "ONDOUSDT": {
+        "direction": "long",
+        "zone_low": 0.31284,
+        "zone_high": 0.31672,
+        "zone_quality": 1,
+        "sweep_extreme": 0.30298,
+        "sfp_time": 1782864000000,
+        "range_low": 0.30298,
+        "range_high": 0.33958,
+        "eq": 0.32128,
+        "atr_h4": 0.00718388187229594
       },
       "PENGUUSDT": {
         "direction": "long",
@@ -24,7 +36,7 @@
         "range_low": 0.005874,
         "range_high": 0.006542,
         "eq": 0.006208,
-        "atr_h4": 0.00017715003550884236
+        "atr_h4": 0.00019699646136693005
       },
       "ADAUSDT": {
         "direction": "long",
@@ -36,7 +48,7 @@
         "range_low": 0.14111,
         "range_high": 0.15802,
         "eq": 0.149565,
-        "atr_h4": 0.003981610655646419
+        "atr_h4": 0.0040572099030197935
       }
     },
     "12h_1h": {
