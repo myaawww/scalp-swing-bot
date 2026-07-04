@@ -679,6 +679,74 @@ def adaptive_sl_buffer(atr_val: float, vol_pctile: float, wick_allow: float,
     return max(atr_buffer, wick_allow * 1.15)
 
 
+TP_STRUCTURE_MIN_GAP_ATR = 0.4   # ignore levels closer than this to entry - noise, not a real obstacle
+TP_STRUCTURE_CLEARANCE_ATR = 0.1 # how far in front of an obstacle to place the trimmed target
+
+
+def collect_opposing_levels(bundle: dict, vp: dict) -> list[float]:
+    """Known resistance/support-style price levels a naive R-multiple
+    target could land on top of: swing highs/lows on 1h and 4h, clustered
+    liquidity pools, and the volume-profile value-area edges + POC. Used to
+    keep TP1/TP2 honest about where price has already proven it can stall
+    or reverse, instead of just projecting a distance and hoping.
+    """
+    c4h, c1h = bundle["4h"], bundle["1h"]
+    swings_4h = find_swings(c4h)
+    swings_1h = find_swings(c1h)
+    levels = [s.price for s in swings_4h] + [s.price for s in swings_1h]
+    levels += [p.price for p in build_liquidity_pools(c4h, swings_4h)]
+    levels += [p.price for p in build_liquidity_pools(c1h, swings_1h)]
+    levels += [vp["vah"], vp["val"], vp["poc"]]
+    return levels
+
+
+def clamp_tp_to_structure(entry: float, tp: float, direction: str, levels: list[float],
+                           atr_val: float) -> tuple[float, bool]:
+    """Pull a target back to just in front of the nearest known opposing
+    level instead of projecting straight through it. Returns (price, was_trimmed).
+    Levels within TP_STRUCTURE_MIN_GAP_ATR of entry are ignored - that's
+    already-priced-in structure the trade is starting from, not an obstacle
+    for a forward target.
+    """
+    min_gap = TP_STRUCTURE_MIN_GAP_ATR * atr_val
+    clearance = TP_STRUCTURE_CLEARANCE_ATR * atr_val
+    if direction == "long":
+        obstacles = [lv for lv in levels if entry + min_gap < lv < tp]
+        if not obstacles:
+            return tp, False
+        nearest = min(obstacles)
+        return max(entry + min_gap, nearest - clearance), True
+    else:
+        obstacles = [lv for lv in levels if tp < lv < entry - min_gap]
+        if not obstacles:
+            return tp, False
+        nearest = max(obstacles)
+        return min(entry - min_gap, nearest + clearance), True
+
+
+def enforce_tp_order(entry: float, tp1: float, tp2: float, direction: str) -> float:
+    """If clamping pulled TP2 in front of (or onto) TP1, push TP2 back out
+    to just past TP1 so the two targets stay correctly ordered."""
+    if direction == "long" and tp2 <= tp1:
+        return tp1 + max(0.05 * abs(tp1 - entry), 1e-9)
+    if direction == "short" and tp2 >= tp1:
+        return tp1 - max(0.05 * abs(tp1 - entry), 1e-9)
+    return tp2
+
+
+def apply_structure_aware_targets(entry: float, tp1: float, tp2: float, direction: str,
+                                   bundle: dict, vp: dict, atr_val: float,
+                                   confl: list[str]) -> tuple[float, float]:
+    """Shared TP1/TP2 post-processing for all three pathways."""
+    levels = collect_opposing_levels(bundle, vp)
+    tp1, trimmed1 = clamp_tp_to_structure(entry, tp1, direction, levels, atr_val)
+    tp2, trimmed2 = clamp_tp_to_structure(entry, tp2, direction, levels, atr_val)
+    tp2 = enforce_tp_order(entry, tp1, tp2, direction)
+    if trimmed1 or trimmed2:
+        confl.append("TP trimmed ahead of known liquidity/structure")
+    return tp1, tp2
+
+
 def pathway_liquidity_reversal(bundle: dict, regime: RegimeVector, vp: dict) -> Candidate | None:
     c4h, c1h, c15 = bundle["4h"], bundle["1h"], bundle["15m"]
     swings_4h = find_swings(c4h)
@@ -722,6 +790,7 @@ def pathway_liquidity_reversal(bundle: dict, regime: RegimeVector, vp: dict) -> 
                  f"price in HTF {pdz['zone']} zone"]
         if fresh:
             confl.append("fresh FVG supporting reaction")
+        tp1, tp2 = apply_structure_aware_targets(entry, tp1, tp2, direction, bundle, vp, atr_val, confl)
         return Candidate(direction, "reversal", entry, sl, tp1, tp2, tp3, confl, struct_4h, regime)
     return None
 
@@ -783,6 +852,7 @@ def pathway_structure_continuation(bundle: dict, regime: RegimeVector, vp: dict)
         return None
     confl = [f"4h structure trend = {struct_4h.bias}", "1h EMA stack aligned with trend",
              "pullback into value/FVG or VWAP support"]
+    tp1, tp2 = apply_structure_aware_targets(entry, tp1, tp2, direction, bundle, vp, atr_val, confl)
     return Candidate(direction, "continuation", entry, sl, tp1, tp2, tp3, confl, struct_4h, regime)
 
 
@@ -830,6 +900,7 @@ def pathway_momentum_breakout(bundle: dict, regime: RegimeVector, vp: dict) -> C
              "volatility expansion (Bollinger width rising)",
              f"volume surge ({ind15['vols'][-1] / (ind15['vol_sma'][-1] or 1):.1f}x avg)",
              f"clean break of {direction=='long' and 'range high' or 'range low'}"]
+    tp1, tp2 = apply_structure_aware_targets(entry, tp1, tp2, direction, bundle, vp, atr_val, confl)
     return Candidate(direction, "breakout", entry, sl, tp1, tp2, tp3, confl, struct_1h, regime)
 
 
