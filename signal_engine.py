@@ -1142,14 +1142,14 @@ def check_active_signals(state: dict, snapshot: dict):
                   (sig["direction"] == "short" and mid <= sig["tp1"])
         if hit_sl:
             record_outcome(state, sig, "loss")
-            send_telegram(f"\u26aa {sig['symbol']} {sig['direction'].upper()} stopped out.", sig.get("msg_id"))
+            send_telegram(f"\u26aa {sig['symbol']} {sig['direction'].upper()} \u2014 stopped out", sig.get("msg_id"))
         elif hit_tp2:
             record_outcome(state, sig, "win")
-            send_telegram(f"\u2705 {sig['symbol']} {sig['direction'].upper()} hit TP2. Target reached.", sig.get("msg_id"))
+            send_telegram(f"\u2705 {sig['symbol']} {sig['direction'].upper()} \u2014 TP2 hit", sig.get("msg_id"))
         else:
             if hit_tp1 and not sig.get("tp1_notified"):
                 sig["tp1_notified"] = True
-                send_telegram(f"\U0001F3AF {sig['symbol']} {sig['direction'].upper()} hit TP1 - consider trailing SL to entry.", sig.get("msg_id"))
+                send_telegram(f"\U0001F3AF {sig['symbol']} {sig['direction'].upper()} \u2014 TP1 hit, move SL to entry", sig.get("msg_id"))
             still_open.append(sig)
     state["active_signals"] = still_open
 
