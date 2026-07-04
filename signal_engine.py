@@ -113,6 +113,29 @@ RISK_MIN_R = 1.5               # minimum planned R:R to TP1
 WEIGHT_LEARNING_RATE = 0.04    # bounded self-tuning step for pathway weights
 WEIGHT_MIN, WEIGHT_MAX = 0.75, 1.30   # multiplicative bounds around neutral 1.0
 
+ENGINE_NAME = "HELIOS v1.0"
+
+# Daily win-rate summary: sent once per UTC day during the hour listed below.
+# The scan is triggered externally every 15 min, so this fires on the first
+# run that lands inside SUMMARY_HOUR_UTC and is gated by last_summary_date
+# in state so it can't double-fire within the same day.
+SUMMARY_HOUR_UTC = 8
+
+# --- Smarter stop-loss placement -------------------------------------------
+# Crypto regularly wicks through an "obvious" level to run stops before the
+# real move - a liquidity grab. Two adjustments make SL placement resistant
+# to that without just moving the stop arbitrarily far away:
+#   1. WICK_LOOKBACK_BARS of recent 15m history are scanned for how far price
+#      has actually poked beyond short-term swing points before reversing.
+#      The 75th percentile of that "overshoot" becomes a floor for the SL
+#      buffer, so a normal-sized hunt wick doesn't clip the stop.
+#   2. The ATR-based part of the buffer is scaled up when the symbol's own
+#      volatility percentile (regime.volatility_pctile) is elevated, since
+#      spike wicks are both more frequent and larger in that regime.
+WICK_LOOKBACK_BARS = 40
+WICK_OVERSHOOT_PERCENTILE = 0.75
+SL_VOL_SCALE_MAX = 0.6          # up to +60% buffer at max observed volatility
+
 
 # ============================================================================
 # HYPERLIQUID API LAYER
@@ -612,6 +635,46 @@ class Candidate:
     regime: RegimeVector
 
 
+def wick_overshoot_allowance(candles: list[dict], direction: str,
+                              lookback: int = WICK_LOOKBACK_BARS) -> float:
+    """Empirical stop-hunt depth: how far recent wicks have actually poked
+    beyond the prior local high/low before price reversed away from it.
+    Used as a floor for the SL buffer so an ordinary liquidity-grab wick
+    doesn't clip the stop right before the real move starts.
+    """
+    recent = candles[-lookback:]
+    if len(recent) < 10:
+        return 0.0
+    overshoots = []
+    for i in range(5, len(recent)):
+        window = recent[i - 5:i]
+        if direction == "long":
+            prior_low = min(x["l"] for x in window)
+            if recent[i]["l"] < prior_low:
+                overshoots.append(prior_low - recent[i]["l"])
+        else:
+            prior_high = max(x["h"] for x in window)
+            if recent[i]["h"] > prior_high:
+                overshoots.append(recent[i]["h"] - prior_high)
+    if not overshoots:
+        return 0.0
+    overshoots.sort()
+    idx = min(len(overshoots) - 1, int(len(overshoots) * WICK_OVERSHOOT_PERCENTILE))
+    return overshoots[idx]
+
+
+def adaptive_sl_buffer(atr_val: float, vol_pctile: float, wick_allow: float,
+                        base_atr_mult: float) -> float:
+    """Combine an ATR buffer (scaled up in elevated-volatility regimes) with
+    the empirical wick-overshoot floor, and take whichever is larger. This
+    is the piece that keeps stops from sitting exactly where the last few
+    hunt wicks have already reached.
+    """
+    vol_scale = 1.0 + SL_VOL_SCALE_MAX * max(0.0, min(1.0, vol_pctile))
+    atr_buffer = atr_val * base_atr_mult * vol_scale
+    return max(atr_buffer, wick_allow * 1.15)
+
+
 def pathway_liquidity_reversal(bundle: dict, regime: RegimeVector, vp: dict) -> Candidate | None:
     c4h, c1h, c15 = bundle["4h"], bundle["1h"], bundle["15m"]
     swings_4h = find_swings(c4h)
@@ -636,13 +699,15 @@ def pathway_liquidity_reversal(bundle: dict, regime: RegimeVector, vp: dict) -> 
                   (direction == "short" and f.direction == "bear"))]
         entry = c15[-1]["c"]
         atr_val = compute_indicators(c15)["atr"][-1]
+        wick_allow = wick_overshoot_allowance(c15, direction)
+        buffer = adaptive_sl_buffer(atr_val, regime.volatility_pctile, wick_allow, base_atr_mult=0.15)
         if direction == "long":
-            sl = min(sweep.price, entry - 0.6 * atr_val) - 0.15 * atr_val
+            sl = min(sweep.price, entry - 0.6 * atr_val) - buffer
             risk = entry - sl
             tp1, tp2 = entry + 1.5 * risk, entry + 2.5 * risk
             tp3 = max(struct_4h.recent_high, vp["vah"])
         else:
-            sl = max(sweep.price, entry + 0.6 * atr_val) + 0.15 * atr_val
+            sl = max(sweep.price, entry + 0.6 * atr_val) + buffer
             risk = sl - entry
             tp1, tp2 = entry - 1.5 * risk, entry - 2.5 * risk
             tp3 = min(struct_4h.recent_low, vp["val"])
@@ -685,14 +750,29 @@ def pathway_structure_continuation(bundle: dict, regime: RegimeVector, vp: dict)
         return None
     atr_val = compute_indicators(c15)["atr"][-1]
     entry = close
+    struct_1h = analyze_structure(c1h, find_swings(c1h))
+    wick_allow = wick_overshoot_allowance(c15, direction)
+    buffer = adaptive_sl_buffer(atr_val, regime.volatility_pctile, wick_allow, base_atr_mult=0.35)
+    vol_scale = 1.0 + SL_VOL_SCALE_MAX * max(0.0, min(1.0, regime.volatility_pctile))
+    max_risk = 2.4 * atr_val * vol_scale  # cap so an anchor far below/above price doesn't wreck R:R
     if direction == "long":
-        sl = entry - 1.3 * atr_val
+        # anchor beyond the swing/FVG that actually defines this pullback,
+        # not an arbitrary ATR distance from current price
+        anchor = min(struct_1h.recent_low, z.low) if fresh else struct_1h.recent_low
+        sl = anchor - buffer
         risk = entry - sl
+        if risk > max_risk:
+            sl = entry - max_risk
+            risk = max_risk
         tp1, tp2 = entry + 1.6 * risk, entry + 2.8 * risk
         tp3 = struct_4h.recent_high + 1.5 * atr_val
     else:
-        sl = entry + 1.3 * atr_val
+        anchor = max(struct_1h.recent_high, z.high) if fresh else struct_1h.recent_high
+        sl = anchor + buffer
         risk = sl - entry
+        if risk > max_risk:
+            sl = entry + max_risk
+            risk = max_risk
         tp1, tp2 = entry - 1.6 * risk, entry - 2.8 * risk
         tp3 = struct_4h.recent_low - 1.5 * atr_val
     if risk <= 0:
@@ -727,13 +807,16 @@ def pathway_momentum_breakout(bundle: dict, regime: RegimeVector, vp: dict) -> C
         return None
     atr_val = ind15["atr"][-1]
     entry = close
+    wick_allow = wick_overshoot_allowance(c15, direction)
+    buffer = adaptive_sl_buffer(atr_val, regime.volatility_pctile, wick_allow, base_atr_mult=0.5)
+    vol_scale = 1.0 + SL_VOL_SCALE_MAX * max(0.0, min(1.0, regime.volatility_pctile))
     if direction == "long":
-        sl = min(breakout_level - 0.5 * atr_val, entry - 1.1 * atr_val)
+        sl = min(breakout_level - buffer, entry - 1.1 * atr_val * vol_scale)
         risk = entry - sl
         tp1, tp2 = entry + 1.4 * risk, entry + 2.4 * risk
         tp3 = entry + 3.6 * risk
     else:
-        sl = max(breakout_level + 0.5 * atr_val, entry + 1.1 * atr_val)
+        sl = max(breakout_level + buffer, entry + 1.1 * atr_val * vol_scale)
         risk = sl - entry
         tp1, tp2 = entry - 1.4 * risk, entry - 2.4 * risk
         tp3 = entry - 3.6 * risk
@@ -932,33 +1015,37 @@ PATHWAY_LABEL = {"reversal": "Liquidity Reversal", "continuation": "Structure Co
                   "breakout": "Momentum Breakout"}
 
 
+def _esc(s: str) -> str:
+    """Escape text for Telegram HTML parse_mode."""
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def format_signal(symbol: str, cand: Candidate, confidence: float, grade: str, duration: str) -> str:
     arrow = "\U0001F7E2 LONG" if cand.direction == "long" else "\U0001F534 SHORT"
     risk = abs(cand.entry - cand.sl)
     rr1, rr2 = abs(cand.tp1 - cand.entry) / risk, abs(cand.tp2 - cand.entry) / risk
+    # Entry/SL/TP wrapped in <code> so Telegram renders them as tap-to-copy
     lines = [
         f"{arrow}  #{symbol}  [{duration}]",
         f"Grade: {grade}  |  Confidence: {confidence:.0f}%  {confidence_bar(confidence)}",
-        f"Pathway: {PATHWAY_LABEL[cand.pathway]}",
+        f"Pathway: {_esc(PATHWAY_LABEL[cand.pathway])}",
         "",
-        f"Entry:  {fmt_px(cand.entry)}",
-        f"SL:     {fmt_px(cand.sl)}",
-        f"TP1:    {fmt_px(cand.tp1)}  (R {rr1:.2f})",
-        f"TP2:    {fmt_px(cand.tp2)}  (R {rr2:.2f})",
+        f"Entry:  <code>{fmt_px(cand.entry)}</code>",
+        f"SL:     <code>{fmt_px(cand.sl)}</code>",
+        f"TP1:    <code>{fmt_px(cand.tp1)}</code>  (R {rr1:.2f})",
+        f"TP2:    <code>{fmt_px(cand.tp2)}</code>  (R {rr2:.2f})",
+        "",
+        "Confluences:",
     ]
-    if cand.tp3:
-        rr3 = abs(cand.tp3 - cand.entry) / risk
-        lines.append(f"TP3:    {fmt_px(cand.tp3)}  (R {rr3:.2f})")
-    lines += ["", "Confluences:"] + [f"  \u2022 {c}" for c in cand.raw_confluences]
+    lines += [f"  \u2022 {_esc(c)}" for c in cand.raw_confluences]
     lines.append("")
-    lines.append(f"BTC regime: {cand.regime.btc_bias}  |  Breadth: {cand.regime.breadth:.0%}  "
-                  f"|  Session weight: {cand.regime.session_weight:.2f}")
+    lines.append(f"Engine: {ENGINE_NAME}")
     return "\n".join(lines)
 
 
 def send_telegram(text: str, reply_to: int | None = None) -> int | None:
     try:
-        payload = {"chat_id": TG_CHAT_ID, "text": text}
+        payload = {"chat_id": TG_CHAT_ID, "text": text, "parse_mode": "HTML"}
         if reply_to:
             payload["reply_to_message_id"] = reply_to
         r = _session.post(f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage", json=payload, timeout=10)
@@ -1074,6 +1161,47 @@ def record_outcome(state: dict, sig: dict, result: str):
     })
 
 
+def maybe_send_daily_summary(state: dict):
+    """Send a win-rate summary once per UTC day, during SUMMARY_HOUR_UTC.
+    Gated by state["last_summary_date"] so repeated 15-min runs within that
+    hour don't send it more than once.
+    """
+    now = datetime.now(timezone.utc)
+    if now.hour != SUMMARY_HOUR_UTC:
+        return
+    today_str = now.strftime("%Y-%m-%d")
+    if state.get("last_summary_date") == today_str:
+        return
+
+    cutoff_ms = int(time.time() * 1000) - 24 * 3600 * 1000
+    closed = [h for h in state.get("signal_history", []) if h.get("closed_ms", 0) >= cutoff_ms]
+    total = len(closed)
+    wins = sum(1 for h in closed if h.get("result") == "win")
+    losses = total - wins
+    wr = (wins / total * 100) if total else 0.0
+    active = len(state.get("active_signals", []))
+
+    lines = [
+        f"\U0001F4CA 24H Win-Rate Summary \u2014 {ENGINE_NAME}",
+        "",
+        f"Closed signals: {total}  (\u2705 {wins} win  \u26aa {losses} loss)",
+        f"Win rate: {wr:.1f}%",
+        f"Currently active: {active}",
+    ]
+    by_pathway = {}
+    for h in closed:
+        by_pathway.setdefault(h.get("pathway", "?"), []).append(h)
+    if by_pathway:
+        lines += ["", "By pathway:"]
+        for pw, items in by_pathway.items():
+            w = sum(1 for h in items if h.get("result") == "win")
+            label = PATHWAY_LABEL.get(pw, pw)
+            lines.append(f"  \u2022 {label}: {w}/{len(items)} ({w / len(items) * 100:.0f}%)")
+
+    send_telegram("\n".join(lines))
+    state["last_summary_date"] = today_str
+
+
 # ============================================================================
 # MAIN SCAN
 # ============================================================================
@@ -1120,10 +1248,18 @@ def run_scan():
 
     tune_pathway_weights(state)
 
+    # A symbol with any open signal (scalp/intraday/swing - duration doesn't
+    # matter) is skipped entirely until that signal resolves via SL or TP2.
+    # Hitting TP1 does not free up the symbol - the signal is still open and
+    # trailing toward TP2/SL, so a new one on the same symbol would just be
+    # stacking risk on the same move.
+    symbols_with_open_signal = {s["symbol"] for s in state.get("active_signals", [])}
+    scan_universe = [sym for sym in WATCHLIST if sym not in symbols_with_open_signal]
+
     all_results: list[dict] = []
     with ThreadPoolExecutor(max_workers=SCAN_WORKERS) as ex:
         futs = {ex.submit(evaluate_symbol, sym, state, btc_bias, btc_trend_strength,
-                           breadth, snapshot, min_conf, bar_index): sym for sym in WATCHLIST}
+                           breadth, snapshot, min_conf, bar_index): sym for sym in scan_universe}
         for fut in as_completed(futs):
             try:
                 all_results.extend(fut.result())
@@ -1153,6 +1289,7 @@ def run_scan():
               f"conf={res['confidence']} grade={res['grade']}")
 
     check_active_signals(state, snapshot)
+    maybe_send_daily_summary(state)
 
     state["_prior_funding"] = {sym: v.get("funding", 0.0) for sym, v in snapshot.items()}
     prune_state(state)
