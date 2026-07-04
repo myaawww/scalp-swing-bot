@@ -1295,7 +1295,7 @@ def run_scan():
     check_active_signals(state, snapshot)
     maybe_send_daily_summary(state)
 
-    state["_prior_funding"] = {sym: v.get("funding", 0.0) for sym, v in snapshot.items()}
+    state["_prior_funding"] = {sym: snapshot.get(sym, {}).get("funding", 0.0) for sym in WATCHLIST}
     prune_state(state)
     state["last_scan_ms"] = reference_ms
     save_state(state)
