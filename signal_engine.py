@@ -105,6 +105,13 @@ ATR_PCT_MEMORY = 120           # bars of ATR% history kept per symbol for percen
 
 MIN_OI_USD = 400_000.0
 MAX_SPREAD_BPS = 12.0          # hard reject if book spread wider than this
+
+# --- Real OI-delta classification -------------------------------------------
+# Moves smaller than these are treated as "flat" / noise rather than a genuine
+# build or unwind, so the classification below isn't tripped by rounding-sized
+# wiggles between scans.
+OI_DELTA_FLAT_PCT = 0.005      # < 0.5% OI change since last scan = flat
+PRICE_DELTA_FLAT_PCT = 0.001   # < 0.1% price change since last scan = flat
 MAX_CONCURRENT_ACTIVE_SIGNALS = 20
 MAX_SIGNAL_HISTORY = 3000
 SIGNAL_HISTORY_MAX_AGE_DAYS = 30   # drop closed signals older than this, regardless of count
@@ -931,7 +938,8 @@ def historical_edge_score(state: dict, symbol: str, direction: str, pathway: str
 
 
 def score_candidate(cand: Candidate, bundle: dict, snapshot: dict, book: dict, vp: dict,
-                     symbol: str, state: dict, prior_funding: float | None) -> tuple[float, dict]:
+                     symbol: str, state: dict, prior_funding: float | None,
+                     prior_oi: float | None) -> tuple[float, dict]:
     ind1h = compute_indicators(bundle["1h"])
     ind1d = compute_indicators(bundle["1d"])
     r = cand.regime
@@ -964,14 +972,37 @@ def score_candidate(cand: Candidate, bundle: dict, snapshot: dict, book: dict, v
     elif abs(funding) > 0.001 and ((cand.direction == "long") == (funding > 0)):
         funding_score = 0.25
 
-    # OI delta: rising OI + price moving in trade direction = healthy;
-    # rising OI with price stalling/reversing = potential trap.
+    # OI delta: rising OI + price moving in trade direction = healthy
+    # continuation (new positions confirming the move); rising OI with price
+    # flat = pressure building without resolution yet (classic trap/exhaustion
+    # setup - whoever is on the wrong side gets squeezed out on the break);
+    # falling OI = positions unwinding/covering, so a resulting move is less
+    # trustworthy regardless of direction.
     oi_delta_score = 0.5
-    if prior_funding is not None:
-        oi_now = snap.get("oi_usd", 0.0)
-        # we approximate delta direction using funding momentum as a proxy
-        # when a true OI time-series isn't available in-state yet
-        oi_delta_score = 0.65 if abs(funding - prior_funding) < 0.0005 else 0.45
+    oi_now = snap.get("oi_usd", 0.0)
+    if prior_oi and prior_oi > 0 and len(bundle["15m"]) >= 2:
+        oi_change_pct = (oi_now - prior_oi) / prior_oi
+        prev_close = bundle["15m"][-2]["c"]
+        last_close = bundle["15m"][-1]["c"]
+        price_change_pct = (last_close - prev_close) / prev_close if prev_close else 0.0
+
+        oi_rising = oi_change_pct > OI_DELTA_FLAT_PCT
+        oi_falling = oi_change_pct < -OI_DELTA_FLAT_PCT
+        price_up = price_change_pct > PRICE_DELTA_FLAT_PCT
+        price_down = price_change_pct < -PRICE_DELTA_FLAT_PCT
+        price_with_trade = price_up if cand.direction == "long" else price_down
+        price_against_trade = price_down if cand.direction == "long" else price_up
+
+        if oi_rising and price_with_trade:
+            oi_delta_score = 0.85          # new positions confirming the move - healthy
+        elif oi_rising and price_against_trade:
+            oi_delta_score = 0.20          # new positions piling in against us - dangerous
+        elif oi_rising:
+            oi_delta_score = 0.30          # OI building, price undecided - trap/exhaustion setup
+        elif oi_falling:
+            oi_delta_score = 0.40          # unwind/covering - move is less trustworthy either way
+        else:
+            oi_delta_score = 0.5           # OI flat - no real signal here
 
     orderbook_score = 0.5
     if book.get("ok"):
@@ -989,8 +1020,8 @@ def score_candidate(cand: Candidate, bundle: dict, snapshot: dict, book: dict, v
 
     weights = {
         "structure": 0.18, "momentum": 0.10, "volume": 0.08, "htf": 0.13,
-        "regime": 0.16, "funding": 0.06, "oi_delta": 0.05, "orderbook": 0.10,
-        "vwap": 0.06, "edge": 0.08,
+        "regime": 0.16, "funding": 0.06, "oi_delta": 0.08, "orderbook": 0.10,
+        "vwap": 0.06, "edge": 0.05,
     }
     subs = {
         "structure": structure_score, "momentum": momentum_score, "volume": volume_score,
@@ -1152,6 +1183,7 @@ def evaluate_symbol(symbol: str, state: dict, btc_bias: str, btc_trend_strength:
             continue
 
     prior_funding = state.get("_prior_funding", {}).get(symbol)
+    prior_oi = state.get("_prior_oi", {}).get(symbol)
     results = []
     for cand in candidates:
         if not check_cooldown(state, symbol, cand.direction, bar_index):
@@ -1163,7 +1195,8 @@ def evaluate_symbol(symbol: str, state: dict, btc_bias: str, btc_trend_strength:
         rr1 = abs(cand.tp1 - cand.entry) / risk if risk else 0
         if rr1 < RISK_MIN_R:
             continue
-        confidence, subs = score_candidate(cand, bundle, snapshot, book, vp, symbol, state, prior_funding)
+        confidence, subs = score_candidate(cand, bundle, snapshot, book, vp, symbol, state,
+                                            prior_funding, prior_oi)
         if confidence < min_conf:
             continue
         atr_val = compute_indicators(bundle["15m"])["atr"][-1]
@@ -1367,6 +1400,7 @@ def run_scan():
     maybe_send_daily_summary(state)
 
     state["_prior_funding"] = {sym: snapshot.get(sym, {}).get("funding", 0.0) for sym in WATCHLIST}
+    state["_prior_oi"] = {sym: snapshot.get(sym, {}).get("oi_usd", 0.0) for sym in WATCHLIST}
     prune_state(state)
     state["last_scan_ms"] = reference_ms
     save_state(state)
