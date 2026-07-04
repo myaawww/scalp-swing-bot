@@ -107,6 +107,7 @@ MIN_OI_USD = 400_000.0
 MAX_SPREAD_BPS = 12.0          # hard reject if book spread wider than this
 MAX_CONCURRENT_ACTIVE_SIGNALS = 20
 MAX_SIGNAL_HISTORY = 3000
+SIGNAL_HISTORY_MAX_AGE_DAYS = 30   # drop closed signals older than this, regardless of count
 COOLDOWN_BARS_EXEC = 6         # 15m bars -> 90 min same-symbol/direction cooldown
 RISK_MIN_R = 1.5               # minimum planned R:R to TP1
 
@@ -401,12 +402,15 @@ def _default_state() -> dict:
 
 def save_state(state: dict):
     tmp = STATE_PATH.with_suffix(".tmp")
-    tmp.write_text(json.dumps(state, indent=None))
+    tmp.write_text(json.dumps(state, indent=2))
     tmp.replace(STATE_PATH)
 
 
 def prune_state(state: dict):
-    state["signal_history"] = state.get("signal_history", [])[-MAX_SIGNAL_HISTORY:]
+    cutoff_ms = int(time.time() * 1000) - SIGNAL_HISTORY_MAX_AGE_DAYS * 24 * 3600 * 1000
+    hist = state.get("signal_history", [])
+    hist = [h for h in hist if h.get("closed_ms", 0) >= cutoff_ms]
+    state["signal_history"] = hist[-MAX_SIGNAL_HISTORY:]
     for sym, mem in state.get("atr_pct_memory", {}).items():
         state["atr_pct_memory"][sym] = mem[-ATR_PCT_MEMORY:]
 
