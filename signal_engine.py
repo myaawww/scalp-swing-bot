@@ -106,12 +106,15 @@ ATR_PCT_MEMORY = 120           # bars of ATR% history kept per symbol for percen
 MIN_OI_USD = 400_000.0
 MAX_SPREAD_BPS = 12.0          # hard reject if book spread wider than this
 
-# --- Real OI-delta classification -------------------------------------------
-# Moves smaller than these are treated as "flat" / noise rather than a genuine
-# build or unwind, so the classification below isn't tripped by rounding-sized
-# wiggles between scans.
-OI_DELTA_FLAT_PCT = 0.005      # < 0.5% OI change since last scan = flat
-PRICE_DELTA_FLAT_PCT = 0.001   # < 0.1% price change since last scan = flat
+# --- Real OI-delta scoring ---------------------------------------------------
+# Continuous scaling anchors for the OI-delta sub-score (see score_candidate).
+# OI_DELTA_FLAT_PCT is the OI change at which conviction starts to register at
+# all; conviction then ramps up continuously and saturates at 4x that value.
+# PRICE_DELTA_FLAT_PCT plays the same role for price alignment, saturating at
+# 3x that value. These replace what used to be hard on/off thresholds, so a
+# barely-qualifying move no longer scores identically to an extreme one.
+OI_DELTA_FLAT_PCT = 0.005      # 0.5% OI change since last scan = conviction floor
+PRICE_DELTA_FLAT_PCT = 0.001   # 0.1% price change since last scan = alignment floor
 MAX_CONCURRENT_ACTIVE_SIGNALS = 20
 MAX_SIGNAL_HISTORY = 3000
 SIGNAL_HISTORY_MAX_AGE_DAYS = 30   # drop closed signals older than this, regardless of count
@@ -978,31 +981,40 @@ def score_candidate(cand: Candidate, bundle: dict, snapshot: dict, book: dict, v
     # setup - whoever is on the wrong side gets squeezed out on the break);
     # falling OI = positions unwinding/covering, so a resulting move is less
     # trustworthy regardless of direction.
+    #
+    # Scored continuously (matching momentum_score/volume_score/etc. below)
+    # rather than as discrete buckets: a barely-qualifying OI move gets only
+    # a small nudge off neutral, an extreme one gets close to the full anchor
+    # value. This removes the old cliff where a 0.49% vs 0.51% OI change (an
+    # essentially meaningless difference) produced wildly different scores.
     oi_delta_score = 0.5
     oi_now = snap.get("oi_usd", 0.0)
-    if prior_oi and prior_oi > 0 and len(bundle["15m"]) >= 2:
+    if prior_oi and prior_oi > 0 and oi_now > 0 and len(bundle["15m"]) >= 2:
         oi_change_pct = (oi_now - prior_oi) / prior_oi
         prev_close = bundle["15m"][-2]["c"]
         last_close = bundle["15m"][-1]["c"]
         price_change_pct = (last_close - prev_close) / prev_close if prev_close else 0.0
+        aligned_price_pct = price_change_pct if cand.direction == "long" else -price_change_pct
 
-        oi_rising = oi_change_pct > OI_DELTA_FLAT_PCT
-        oi_falling = oi_change_pct < -OI_DELTA_FLAT_PCT
-        price_up = price_change_pct > PRICE_DELTA_FLAT_PCT
-        price_down = price_change_pct < -PRICE_DELTA_FLAT_PCT
-        price_with_trade = price_up if cand.direction == "long" else price_down
-        price_against_trade = price_down if cand.direction == "long" else price_up
-
-        if oi_rising and price_with_trade:
-            oi_delta_score = 0.85          # new positions confirming the move - healthy
-        elif oi_rising and price_against_trade:
-            oi_delta_score = 0.20          # new positions piling in against us - dangerous
-        elif oi_rising:
-            oi_delta_score = 0.30          # OI building, price undecided - trap/exhaustion setup
-        elif oi_falling:
-            oi_delta_score = 0.40          # unwind/covering - move is less trustworthy either way
+        if oi_change_pct >= 0:
+            # OI building (or flat): price alignment decides healthy-continuation
+            # vs. trap vs. against, on a continuum. price_alignment: 0 = price
+            # moved strongly against the trade, 0.5 = flat, 1 = strongly with.
+            price_alignment = _norm(aligned_price_pct, -3 * PRICE_DELTA_FLAT_PCT, 3 * PRICE_DELTA_FLAT_PCT)
+            if price_alignment <= 0.5:
+                anchor_score = 0.20 + 0.20 * price_alignment            # against(0.20) -> flat/trap(0.30)
+            else:
+                anchor_score = 0.30 + 1.10 * (price_alignment - 0.5)    # flat/trap(0.30) -> with(0.85)
+            # how much OI actually built - a move right at the floor barely
+            # counts, a move at 4x the floor (or beyond) gets full conviction
+            oi_conviction = _norm(oi_change_pct, 0.0, 4 * OI_DELTA_FLAT_PCT)
+            oi_delta_score = 0.5 + oi_conviction * (anchor_score - 0.5)
         else:
-            oi_delta_score = 0.5           # OI flat - no real signal here
+            # OI unwinding: exits driving the move rather than fresh conviction,
+            # less trustworthy regardless of direction, scaled by how much
+            # unwound (full-scale unwind bottoms out at the old 0.40 anchor).
+            unwind_conviction = _norm(-oi_change_pct, 0.0, 4 * OI_DELTA_FLAT_PCT)
+            oi_delta_score = 0.5 - unwind_conviction * 0.10
 
     orderbook_score = 0.5
     if book.get("ok"):
