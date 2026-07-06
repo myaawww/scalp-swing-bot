@@ -1,16 +1,62 @@
 {
   "_version": 1,
-  "signal_history": [],
-  "active_signals": {},
-  "cooldowns": {},
+  "signal_history": [
+    {
+      "id": "NEARUSDT_long_1783352745826_542",
+      "symbol": "NEARUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 89.41,
+      "grade": "A+",
+      "entry": 2.078,
+      "stop_loss": 2.0698537867762745,
+      "tp1": 2.090219319835588,
+      "tp2": 2.100809397026431,
+      "result": "pending",
+      "ts": 1783352745.8264031
+    }
+  ],
+  "active_signals": {
+    "NEARUSDT_fast_1783352745826": {
+      "symbol": "NEARUSDT",
+      "direction": "long",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1684,
+      "hist_id": "NEARUSDT_long_1783352745826_542",
+      "entry": 2.078,
+      "stop_loss": 2.0698537867762745,
+      "tp1": 2.090219319835588,
+      "tp2": 2.100809397026431,
+      "tp3": 2.114657959506764,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783352745.8264098,
+      "ttl_hours": 30
+    }
+  },
+  "cooldowns": {
+    "NEARUSDT:long:fast": 1981503
+  },
   "post_loss_cooldown": {},
   "atr_pct_memory": {
     "NEARUSDT": [
+      0.026297041496995077,
       0.026297041496995077,
       0.026297041496995077
     ],
     "AAVEUSDT": [
       0.024274430929394655
+    ],
+    "ONDOUSDT": [
+      0.021894333056805153
+    ],
+    "AVAXUSDT": [
+      0.01711353126957256
     ]
   },
   "macro_calendar_cache": {
@@ -27,9 +73,9 @@
     ]
   },
   "governor": {
-    "threshold": 0.0,
-    "daily_count_ema": 5.0575,
-    "last_adjust_ts": 0.0
+    "threshold": -0.08,
+    "daily_count_ema": 4.298875,
+    "last_adjust_ts": 1783352743.4301248
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-06",
