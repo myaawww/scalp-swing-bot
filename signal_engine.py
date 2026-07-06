@@ -141,6 +141,11 @@ MAX_ENTRY_DRIFT_R   = 0.5   # re-checked against a live price fetch immediately 
 # ── OI / FUNDING (scoring bonus + liquidity gate, never a directional gate) ─
 OI_FUNDING_ENABLED       = True
 FUNDING_ALIGN_THRESHOLD  = 0.0001
+# OI spike check (PD-zone conditioned, ported from Vectis): if OI has grown
+# by more than this fraction since the previous scan, and the PD zone isn't
+# already the favourable one for this direction, treat it as counter-flow
+# and apply a score penalty (never a hard block).
+OI_SPIKE_BLOCK_PCT       = 0.05
 
 # ── BTC REGIME FILTER ────────────────────────────────────────────────────────
 BTC_REGIME_FILTER_ENABLED = True
@@ -323,8 +328,9 @@ class POI:
     low: float
     direction: str
     index: int
-    state: str = "fresh"
+    state: str = "fresh"          # fresh | partial | full | invalidated
     mitigation_pct: float = 0.0
+    touches: int = 0
 
 @dataclass
 class FVG:
@@ -332,6 +338,9 @@ class FVG:
     low: float
     direction: str
     index: int
+    state: str = "fresh"          # fresh | partial | full | invalidated
+    mitigation_pct: float = 0.0
+    touches: int = 0
 
 @dataclass
 class SweepEvent:
@@ -372,6 +381,7 @@ class NyxSignal:
     sweep_atr_ratio: float = 0.0
     displacement_atr_ratio: float = 0.0
     funding_rate: float | None = None
+    tp3_source: str = ""
     timestamp: str = ""
 
 
@@ -471,8 +481,12 @@ def fetch_all_mids() -> dict[str, float]:
 
 def fetch_all_market_ctx() -> None:
     """Funding + open interest (coins) + mark price in one call — used for
-    the OI liquidity gate, the funding scoring bonus, and available as a
-    price fallback."""
+    the OI liquidity gate, the funding scoring bonus, the PD-conditioned OI
+    spike check, and available as a price fallback.
+
+    prev_oi_usd is carried over from the existing entry (if any), mirroring
+    Vectis's fetch_all_oi_funding(), so compute_signal() can measure the OI
+    change in USD terms since the previous scan."""
     if not OI_FUNDING_ENABLED:
         return
     try:
@@ -486,10 +500,17 @@ def fetch_all_market_ctx() -> None:
             if not coin or i >= len(ctx_list):
                 continue
             ctx = ctx_list[i]
+            oi_coins = float(ctx["openInterest"]) if ctx.get("openInterest") is not None else None
+            mark_px  = float(ctx["markPx"]) if ctx.get("markPx") is not None else None
+            new_oi_usd = oi_coins * mark_px if oi_coins is not None and mark_px is not None else None
+            prev = _market_ctx.get(coin)
+            prev_oi_usd = prev.get("oi_usd") if prev else None
             _market_ctx[coin] = {
                 "funding_rate": float(ctx["funding"]) if ctx.get("funding") is not None else None,
-                "oi_coins":     float(ctx["openInterest"]) if ctx.get("openInterest") is not None else None,
-                "mark_px":      float(ctx["markPx"]) if ctx.get("markPx") is not None else None,
+                "oi_coins":     oi_coins,
+                "mark_px":      mark_px,
+                "oi_usd":       new_oi_usd,
+                "prev_oi_usd":  prev_oi_usd,
             }
         print(f"  [MARKET CTX] Fetched {len(_market_ctx)} assets")
     except Exception as e:
@@ -506,6 +527,22 @@ def get_open_interest_usd(symbol: str) -> float | None:
     if not row or row.get("oi_coins") is None or row.get("mark_px") is None:
         return None
     return row["oi_coins"] * row["mark_px"]
+
+
+def get_oi_delta_pct(symbol: str) -> float | None:
+    """OI % change (USD terms) since the previous scan's snapshot, or None
+    if unavailable -- first scan after startup, missing data, or OI/funding
+    disabled. Never makes an API call; relies on fetch_all_market_ctx()
+    having run first (ported from Vectis's get_oi_funding prev_oi delta)."""
+    if not OI_FUNDING_ENABLED:
+        return None
+    row = _market_ctx.get(hl_coin(symbol))
+    if not row:
+        return None
+    oi_now, oi_prev = row.get("oi_usd"), row.get("prev_oi_usd")
+    if not oi_now or not oi_prev or oi_prev <= 0:
+        return None
+    return (oi_now - oi_prev) / oi_prev
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -647,42 +684,74 @@ def htf_bias(candles: list[dict], atr_htf: float,
 # HTF DEALING RANGE / PREMIUM-DISCOUNT
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def premium_discount_zone(candles: list[dict], lookback: int) -> dict:
+def premium_discount_zone(candles: list[dict], lookback: int, combo: Combo | None = None) -> dict:
     window = candles[-lookback:]
     hi = max(c["h"] for c in window)
     lo = min(c["l"] for c in window)
     close = candles[-1]["c"]
     rng = hi - lo
     pct = (close - lo) / rng if rng > 0 else 0.5
-    return {"high": hi, "low": lo, "mid": (hi + lo) / 2, "pct": pct}
+    result = {"high": hi, "low": lo, "mid": (hi + lo) / 2, "pct": pct}
+    # Categorical zone label (ported from Vectis) -- kept optional/additive
+    # so existing callers that pass no combo are unaffected. Used by the
+    # PD-conditioned OI-spike check below, which needs "is this the
+    # favourable extreme" rather than just the raw pct threshold that the
+    # hard gate in compute_signal() already enforces.
+    if combo is not None:
+        if pct >= combo.premium_threshold:
+            result["zone"] = "premium"
+        elif pct <= combo.discount_threshold:
+            result["zone"] = "discount"
+        else:
+            result["zone"] = "equilibrium"
+    return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HTF POI (order block behind the most recent BOS in bias direction)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def compute_mitigation(candles_after: list[dict], zone_high: float, zone_low: float,
-                        direction: str) -> float:
-    if not candles_after:
-        return 0.0
-    height = zone_high - zone_low
-    if height <= 0:
-        return 1.0
+def _track_zone_lifecycle(zone_high, zone_low, direction, candles, start_idx, end_idx):
+    """
+    Full-lifespan lifecycle scan for an order-block or FVG zone (ported from
+    Vectis's _track_ob_lifecycle). Walks every candle from start_idx to
+    end_idx -- the zone's entire remaining life, not just a short
+    confirmation window -- and returns (deepest_mitigation_pct, touches,
+    invalidated).
+
+    invalidated goes True the moment a candle CLOSES beyond the zone's far
+    boundary and the scan stops early -- the zone has been structurally
+    broken, not just dipped into. Short of that, touches counts every
+    candle that wicked into the zone and deepest_mitigation_pct is the
+    deepest penetration reached, 0..1, for classify_zone_state() to grade.
+    """
+    zone_range = zone_high - zone_low
+    if zone_range <= 0:
+        return 1.0, 0, True
+
     deepest = 0.0
-    for c in candles_after:
+    touches = 0
+    for j in range(start_idx, end_idx):
+        c = candles[j]
         if direction == "bull":
             if c["c"] < zone_low:
-                return 1.0
-            pen = zone_high - c["l"]
+                return 1.0, touches, True
+            if c["l"] <= zone_high:
+                touches += 1
+                deepest = max(deepest, (zone_high - max(c["l"], zone_low)) / zone_range)
         else:
             if c["c"] > zone_high:
-                return 1.0
-            pen = c["h"] - zone_low
-        deepest = max(deepest, max(0.0, min(1.0, pen / height)))
-    return deepest
+                return 1.0, touches, True
+            if c["h"] >= zone_low:
+                touches += 1
+                deepest = max(deepest, (min(c["h"], zone_high) - zone_low) / zone_range)
+
+    return min(max(deepest, 0.0), 1.0), touches, False
 
 
-def classify_poi_state(mitig: float, combo: Combo) -> str:
+def classify_zone_state(mitig, invalidated, combo):
+    if invalidated:
+        return "invalidated"
     if mitig >= combo.poi_full_mitig:
         return "full"
     if mitig <= combo.poi_fresh_max_mitig:
@@ -711,9 +780,10 @@ def find_htf_poi(candles: list[dict], swings: list[SwingPoint], bias: str,
     if zone_high <= zone_low:
         return None
 
-    mitig = compute_mitigation(candles[pivot.index + 1:], zone_high, zone_low, bias)
-    state = classify_poi_state(mitig, combo)
-    if state == "full":
+    mitig, touches, invalidated = _track_zone_lifecycle(
+        zone_high, zone_low, bias, candles, pivot.index + 1, len(candles))
+    state = classify_zone_state(mitig, invalidated, combo)
+    if state in ("full", "invalidated"):
         return None
 
     if atr_htf > 0:
@@ -722,7 +792,7 @@ def find_htf_poi(candles: list[dict], swings: list[SwingPoint], bias: str,
             return None
 
     return POI(high=zone_high, low=zone_low, direction=bias, index=pivot.index,
-                state=state, mitigation_pct=mitig)
+                state=state, mitigation_pct=mitig, touches=touches)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -745,6 +815,130 @@ def find_htf_liquidity_pools(candles: list[dict], swings: list[SwingPoint], dire
         if not pools or abs(p - pools[-1]) > tol:
             pools.append(p)
     return pools
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TP3 EXTENDED LIQUIDITY LADDER (ported from Vectis's find_liquidity_tp3)
+# ═══════════════════════════════════════════════════════════════════════════════
+# find_htf_liquidity_pools() above just dedupes swing points within a
+# tolerance band -- fine for TP2, but TP3 is a "let it run" target and
+# benefits from Vectis's richer priority cascade: grade candidate levels by
+# how many times price has actually respected them (touch count), and only
+# ever draw toward liquidity that hasn't already been swept.
+
+def _pool_strength(touches: int) -> tuple[str, int]:
+    if touches >= 4:
+        return "very_strong", 3
+    if touches == 3:
+        return "strong", 2
+    return "normal", 1   # 2 touches
+
+
+def find_equal_level_pools(candles: list[dict], direction: str, lookback: int,
+                            tol: float) -> list[dict]:
+    """
+    Cluster nearby equal highs/lows into liquidity pools (ported from
+    Vectis's find_equal_levels). direction='long' clusters candle lows
+    (resting buy-side liquidity), 'short' clusters candle highs. Sorting
+    guarantees any cluster within `tol` is contiguous in the sorted array,
+    so one linear pass groups runs of any length (2, 3, 4+ touches) instead
+    of only adjacent pairs. Returns pools sorted strongest (most touches)
+    first.
+    """
+    window = candles[-lookback:] if len(candles) > lookback else candles
+    values = sorted(c["l"] for c in window) if direction == "long" else sorted(c["h"] for c in window)
+    if len(values) < 2:
+        return []
+
+    pools: list[dict] = []
+    cluster = [values[0]]
+    for v in values[1:]:
+        if abs(v - cluster[-1]) <= tol:
+            cluster.append(v)
+        else:
+            if len(cluster) >= 2:
+                strength, score = _pool_strength(len(cluster))
+                pools.append({"price": sum(cluster) / len(cluster), "touches": len(cluster),
+                              "strength": strength, "strength_score": score})
+            cluster = [v]
+    if len(cluster) >= 2:
+        strength, score = _pool_strength(len(cluster))
+        pools.append({"price": sum(cluster) / len(cluster), "touches": len(cluster),
+                      "strength": strength, "strength_score": score})
+
+    pools.sort(key=lambda p: -p["touches"])
+    return pools
+
+
+def _level_is_swept(candles: list[dict], level: float, side: str) -> bool:
+    """side='high' -> resting sell-side liquidity, swept if any candle has
+    already closed beyond it. side='low' -> resting buy-side liquidity,
+    swept if any candle has already closed below it."""
+    if side == "high":
+        return any(c["c"] > level for c in candles)
+    return any(c["c"] < level for c in candles)
+
+
+def _is_untouched_swing(level: float, candles: list[dict], formed_idx: int, side: str) -> bool:
+    """A swing is untouched if no candle since its formation has traded beyond it."""
+    for c in candles[formed_idx + 1:]:
+        if side == "high" and c["h"] >= level:
+            return False
+        if side == "low" and c["l"] <= level:
+            return False
+    return True
+
+
+def find_liquidity_tp3_ladder(direction: str, tp2: float, entry: float, risk: float,
+                               candles_htf: list[dict], swings_htf: list[SwingPoint],
+                               atr_htf: float, combo: Combo) -> tuple[float, str]:
+    """
+    TP3 -- extended liquidity target beyond TP2, ported from Vectis's
+    find_liquidity_tp3(). TP1/TP2-only leaves winners on the table when a
+    setup runs into a second, further-out liquidity pool. Searches a
+    priority cascade of resting liquidity, each tier excluding levels that
+    have already been swept, uncapped (TP3 is a "let it run" target, not a
+    guaranteed fill):
+
+      1. Strong equal-high/low cluster (3+ touches), unswept
+      2. Any liquidity pool (2+ touches), unswept
+      3. Untouched confirmed HTF swing high/low
+      4. Any HTF swing high/low beyond TP2 -- last-resort structural fallback
+      5. Fixed R:R extension (combo.tp3_fallback_rr) if nothing qualifies
+
+    Returns (tp3, source_label).
+    """
+    pool_side    = "short" if direction == "long" else "long"   # opposite-side resting liquidity
+    sweep_side   = "high"  if direction == "long" else "low"
+    beyond       = (lambda p: p > tp2) if direction == "long" else (lambda p: p < tp2)
+    pick_nearest = min if direction == "long" else max
+    fallback     = entry + risk * combo.tp3_fallback_rr if direction == "long" \
+        else entry - risk * combo.tp3_fallback_rr
+
+    tol = max(atr_htf * combo.pool_equal_tol_atr, entry * 0.0005)
+    pools = [p for p in find_equal_level_pools(candles_htf, pool_side, combo.pool_lookback_htf, tol)
+             if beyond(p["price"]) and not _level_is_swept(candles_htf, p["price"], sweep_side)]
+
+    strong_pools = [p for p in pools if p["strength_score"] >= 2]
+    if strong_pools:
+        best = pick_nearest(strong_pools, key=lambda p: p["price"])
+        return best["price"], f"Liquidity cluster beyond TP2 ({best['strength']}, {best['touches']} touches)"
+    if pools:
+        best = pick_nearest(pools, key=lambda p: p["price"])
+        return best["price"], f"Liquidity pool beyond TP2 ({best['strength']}, {best['touches']} touches)"
+
+    kind = "high" if direction == "long" else "low"
+    swing_candidates = [s for s in swings_htf if s.kind == kind and beyond(s.price)]
+    untouched = [s.price for s in swing_candidates
+                 if _is_untouched_swing(s.price, candles_htf, s.index, sweep_side)]
+    if untouched:
+        return pick_nearest(untouched), f"Untouched swing {sweep_side} beyond TP2"
+
+    all_swings = [s.price for s in swing_candidates]
+    if all_swings:
+        return pick_nearest(all_swings), f"Swing {sweep_side} beyond TP2"
+
+    return fallback, "Fixed R:R extension (no liquidity target beyond TP2)"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -887,6 +1081,13 @@ def detect_displacement(candles: list[dict], sweep: SweepEvent, bias: str,
 
 def find_freshest_fvg(candles: list[dict], start_idx: int, end_idx: int,
                        direction: str, atr_exec: float, combo: Combo) -> FVG | None:
+    """
+    Same full-lifespan lifecycle machinery as find_htf_poi() now runs on
+    FVGs too (ported from Vectis, which shares _track_ob_lifecycle between
+    order blocks and inverse-FVGs) -- state/mitigation_pct/touches are
+    computed from formation to the present bar, not just inferred from a
+    single binary fresh/not-fresh check.
+    """
     best: FVG | None = None
     lo_bound = max(1, start_idx)
     hi_bound = min(len(candles) - 1, end_idx)
@@ -895,13 +1096,21 @@ def find_freshest_fvg(candles: list[dict], start_idx: int, end_idx: int,
         if direction == "bull" and b["l"] > a["h"]:
             size = b["l"] - a["h"]
             if size >= combo.fvg_min_size_atr * atr_exec:
-                cand = FVG(high=b["l"], low=a["h"], direction="bull", index=i)
+                mitig, touches, invalidated = _track_zone_lifecycle(
+                    b["l"], a["h"], "bull", candles, i + 1, len(candles))
+                state = classify_zone_state(mitig, invalidated, combo)
+                cand = FVG(high=b["l"], low=a["h"], direction="bull", index=i,
+                           state=state, mitigation_pct=mitig, touches=touches)
                 if best is None or cand.index > best.index:
                     best = cand
         elif direction == "bear" and b["h"] < a["l"]:
             size = a["l"] - b["h"]
             if size >= combo.fvg_min_size_atr * atr_exec:
-                cand = FVG(high=a["l"], low=b["h"], direction="bear", index=i)
+                mitig, touches, invalidated = _track_zone_lifecycle(
+                    a["l"], b["h"], "bear", candles, i + 1, len(candles))
+                state = classify_zone_state(mitig, invalidated, combo)
+                cand = FVG(high=a["l"], low=b["h"], direction="bear", index=i,
+                           state=state, mitigation_pct=mitig, touches=touches)
                 if best is None or cand.index > best.index:
                     best = cand
     return best
@@ -924,12 +1133,6 @@ def compute_entry_zone(breaker_hi: float, breaker_lo: float, fvg: FVG | None,
             zone_hi, zone_lo = overlap_hi, overlap_lo
     exact_entry = (zone_hi + zone_lo) / 2
     return zone_hi, zone_lo, exact_entry
-
-
-def fvg_is_fresh(candles: list[dict], fvg: FVG, direction: str, combo: Combo) -> bool:
-    after = candles[fvg.index + 1:]
-    mitig = compute_mitigation(after, fvg.high, fvg.low, direction)
-    return mitig <= combo.poi_fresh_max_mitig
 
 
 def breaker_is_untouched(candles: list[dict], sweep_index: int, zone_hi: float,
@@ -1010,7 +1213,7 @@ def compute_signal(symbol: str, combo: Combo, btc_regime: str) -> NyxSignal | No
         return None
 
     # ── Premium/discount alignment (hard gate) ────────────────────────────
-    pd = premium_discount_zone(candles_htf, combo.pd_lookback)
+    pd = premium_discount_zone(candles_htf, combo.pd_lookback, combo)
     if bias == "bull" and pd["pct"] > combo.discount_threshold:
         _near_miss(symbol, combo, "PD_NOT_DISCOUNT_LONG", dir=direction,
                    pct=f"{pd['pct']:.2f}", threshold=combo.discount_threshold)
@@ -1044,8 +1247,8 @@ def compute_signal(symbol: str, combo: Combo, btc_regime: str) -> NyxSignal | No
     if fvg is None:
         _near_miss(symbol, combo, "NO_FVG", dir=direction)
         return None
-    if not fvg_is_fresh(candles_exec, fvg, bias, combo):
-        _near_miss(symbol, combo, "FVG_NOT_FRESH", dir=direction)
+    if fvg.state != "fresh":
+        _near_miss(symbol, combo, "FVG_NOT_FRESH", dir=direction, fvg_state=fvg.state)
         return None
 
     breaker_hi, breaker_lo = breaker_zone(candles_exec, sweep.index, bias)
@@ -1089,17 +1292,8 @@ def compute_signal(symbol: str, combo: Combo, btc_regime: str) -> NyxSignal | No
                    rr=f"{abs(tp2 - exact_entry) / risk:.2f}", min=combo.tp2_min_rr)
         return None
 
-    tp3 = None
-    for p in htf_pools:
-        if direction == "long" and p > tp2 and abs(p - exact_entry) / risk >= combo.tp2_min_rr * 1.5:
-            tp3 = p
-            break
-        if direction == "short" and p < tp2 and abs(p - exact_entry) / risk >= combo.tp2_min_rr * 1.5:
-            tp3 = p
-            break
-    if tp3 is None:
-        tp3 = exact_entry + risk * combo.tp3_fallback_rr if direction == "long" \
-            else exact_entry - risk * combo.tp3_fallback_rr
+    tp3, tp3_source = find_liquidity_tp3_ladder(
+        direction, tp2, exact_entry, risk, candles_htf, swings_htf, atr_htf, combo)
 
     # ── Confluence scoring ─────────────────────────────────────────────────
     # NOTE: no "Session" point here (fixed vs. Nyx v1) — session is already
@@ -1151,6 +1345,41 @@ def compute_signal(symbol: str, combo: Combo, btc_regime: str) -> NyxSignal | No
         elif direction == "short" and funding >= FUNDING_ALIGN_THRESHOLD:
             score += 1; combos_hit.append("Funding")
 
+    # ── OI spike check (PD-depth conditioned, soft penalty) ─────────────────
+    # Ported from Vectis. Rising OI alone is directionally ambiguous — new
+    # longs AND new shorts both raise OI — so a blanket delta-based penalty
+    # punishes setups regardless of *where* price is in the range. Only
+    # treat a spike as adverse ("counter-flow") when it's happening
+    # somewhere that doesn't already reflect strong positioning in our
+    # favour.
+    #
+    # "Favourable" is defined by DEPTH, not zone membership. The premium/
+    # discount hard gate above already forces every signal reaching this
+    # point into the admitted zone (discount-for-long, premium-for-short),
+    # so a check keyed on the categorical zone label (pd["zone"]) can never
+    # fire here -- it's guaranteed true for every candidate, which made the
+    # penalty branch below dead code. Instead we split the already-admitted
+    # zone into a deep half and a shallow half using pd["pct"], with cutoffs
+    # derived from the combo's own thresholds (no new hardcoded levels):
+    #   deep_discount_cutoff = discount_threshold / 2
+    #   deep_premium_cutoff  = premium_threshold + (1 - premium_threshold) / 2
+    # A shallow discount/premium print -- past the hard gate but closer to
+    # the equilibrium boundary than to the range extreme -- is still
+    # counter-flow-eligible for the penalty; only a genuinely deep print
+    # (pct near 0 for discount longs, near 1 for premium shorts) is exempt.
+    # pd["zone"] itself is untouched, still available for logging/diagnostics.
+    oi_delta_pct = get_oi_delta_pct(symbol)
+    if oi_delta_pct is not None and oi_delta_pct > OI_SPIKE_BLOCK_PCT:
+        deep_discount_cutoff = combo.discount_threshold / 2
+        deep_premium_cutoff  = combo.premium_threshold + (1 - combo.premium_threshold) / 2
+        counter_flow = (direction == "long"  and pd["pct"] > deep_discount_cutoff) or \
+                       (direction == "short" and pd["pct"] < deep_premium_cutoff)
+        if counter_flow:
+            score -= 2
+            combos_hit.append("OI_SPIKE_WARN")
+        else:
+            combos_hit.append("OI_SPIKE_PD_EXEMPT")
+
     min_score = get_min_confluence_score(combo)
     if score < min_score:
         _near_miss(symbol, combo, "CONFLUENCE_SCORE_TOO_LOW", dir=direction,
@@ -1172,7 +1401,7 @@ def compute_signal(symbol: str, combo: Combo, btc_regime: str) -> NyxSignal | No
         confluence=score, max_score=combo.theoretical_max_score, signal_grade=grade,
         combos_hit=combos_hit, h4_bias=bias, poi_state=poi.state,
         sweep_atr_ratio=sweep.atr_ratio, displacement_atr_ratio=disp.atr_ratio,
-        funding_rate=funding, timestamp=datetime.now(timezone.utc).isoformat(),
+        funding_rate=funding, tp3_source=tp3_source, timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -1217,7 +1446,8 @@ def format_signal_message(sig: NyxSignal, live_price: float | None = None) -> st
         f"<b>Stop Loss:</b> {fmt_price(sig.stop_loss)}\n"
         f"<b>TP1:</b> {fmt_price(sig.take_profit_1)} ({fmt_rr(sig.exact_entry, sig.stop_loss, sig.take_profit_1)})\n"
         f"<b>TP2:</b> {fmt_price(sig.take_profit_2)} ({fmt_rr(sig.exact_entry, sig.stop_loss, sig.take_profit_2)})\n"
-        + (f"<b>TP3:</b> {fmt_price(sig.take_profit_3)} ({fmt_rr(sig.exact_entry, sig.stop_loss, sig.take_profit_3)})\n"
+        + (f"<b>TP3:</b> {fmt_price(sig.take_profit_3)} ({fmt_rr(sig.exact_entry, sig.stop_loss, sig.take_profit_3)})"
+           f" <i>— {sig.tp3_source}</i>\n"
            if sig.take_profit_3 else "")
         + f"─────────────────────────\n"
         f"Sweep: {sig.sweep_atr_ratio:.2f} ATR  |  Displacement: {sig.displacement_atr_ratio:.2f} ATR\n"
