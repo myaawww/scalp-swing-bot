@@ -30,6 +30,21 @@
       "tp2": 98.36448843182154,
       "result": "pending",
       "ts": 1783353668.0481675
+    },
+    {
+      "id": "UNIUSDT_long_1783354544433_524",
+      "symbol": "UNIUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 90.75,
+      "grade": "A+",
+      "entry": 3.2274,
+      "stop_loss": 3.2190763838290684,
+      "tp1": 3.239885424256397,
+      "tp2": 3.2507061252786076,
+      "result": "pending",
+      "ts": 1783354544.4331315
     }
   ],
   "active_signals": {
@@ -45,7 +60,7 @@
       "tp1": 2.090219319835588,
       "tp2": 2.100809397026431,
       "tp3": 2.114657959506764,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "tp2_hit": false,
       "tp3_hit": false,
       "sl_hit": false,
@@ -72,11 +87,32 @@
       "resolved": false,
       "sent_at": 1783353668.0481744,
       "ttl_hours": 96
+    },
+    "UNIUSDT_fast_1783354544433": {
+      "symbol": "UNIUSDT",
+      "direction": "long",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1689,
+      "hist_id": "UNIUSDT_long_1783354544433_524",
+      "entry": 3.2274,
+      "stop_loss": 3.2190763838290684,
+      "tp1": 3.239885424256397,
+      "tp2": 3.2507061252786076,
+      "tp3": 3.2648562727691908,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783354544.4331386,
+      "ttl_hours": 30
     }
   },
   "cooldowns": {
     "NEARUSDT:long:fast": 1981503,
-    "AAVEUSDT:long:slow": 1981504
+    "AAVEUSDT:long:slow": 1981504,
+    "UNIUSDT:long:fast": 1981505
   },
   "post_loss_cooldown": {},
   "atr_pct_memory": {
@@ -90,7 +126,8 @@
       0.06543511637853244
     ],
     "ONDOUSDT": [
-      0.021894333056805153
+      0.021894333056805153,
+      0.022749675025922685
     ],
     "AVAXUSDT": [
       0.01711353126957256
@@ -114,7 +151,14 @@
       0.016828791378810187
     ],
     "APTUSDT": [
+      0.021400847399138986,
       0.021400847399138986
+    ],
+    "SUIUSDT": [
+      0.01992148071884754
+    ],
+    "UNIUSDT": [
+      0.022556570881948387
     ]
   },
   "macro_calendar_cache": {
@@ -132,7 +176,7 @@
   },
   "governor": {
     "threshold": -0.08,
-    "daily_count_ema": 3.8040437499999995,
+    "daily_count_ema": 3.5334371874999992,
     "last_adjust_ts": 1783352743.4301248
   },
   "last_scan_ts": 0.0,
