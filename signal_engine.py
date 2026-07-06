@@ -108,7 +108,7 @@ if not TG_CHAT_ID:
     raise RuntimeError("TG_CHAT_ID environment variable is required")
 
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 ENGINE_NAME = "Parallax"
 
 WATCHLIST = [
@@ -261,7 +261,7 @@ PIPELINES: dict[str, Pipeline] = {
         n_bias=180, n_trigger=220, session_gated=True,
         cooldown_hours=4, active_ttl_hours=30, fill_timeout_hours=6,
         hold_hint="intraday",
-        sl_buffer_atr=0.15, entry_max_dist_atr=0.60,
+        sl_buffer_atr=0.55, entry_max_dist_atr=0.60,
         tp1_min_rr=1.2, tp2_min_rr=2.2,
         tp1_fallback_rr=1.5, tp2_fallback_rr=2.8, tp3_fallback_rr=4.5,
         swing_left=2, swing_right=2,
@@ -271,7 +271,7 @@ PIPELINES: dict[str, Pipeline] = {
         n_bias=120, n_trigger=220, session_gated=False,
         cooldown_hours=14, active_ttl_hours=96, fill_timeout_hours=18,
         hold_hint="swing",
-        sl_buffer_atr=0.20, entry_max_dist_atr=0.80,
+        sl_buffer_atr=0.70, entry_max_dist_atr=0.80,
         tp1_min_rr=1.3, tp2_min_rr=2.5,
         tp1_fallback_rr=1.6, tp2_fallback_rr=3.2, tp3_fallback_rr=5.5,
         swing_left=3, swing_right=3,
@@ -1289,7 +1289,11 @@ def enforce_tp_order(entry: float, tp1: float, tp2: float, direction: str) -> fl
 def build_risk_plan(direction: str, entry: float, atr_val: float, vol_pctile: float,
                      pipeline: Pipeline, pools: list[LiquidityPool]) -> dict:
     sl_buf = adaptive_sl_buffer(atr_val, vol_pctile, pipeline)
-    risk = max(sl_buf, atr_val * 0.35)
+    # This floor exists only to guard against a degenerate (near-zero) buffer
+    # -- it must stay below every real sl_buf the pipelines can produce, or
+    # it silently overrides the vol-adaptive sizing above and every SL ends
+    # up at the same flat distance regardless of pipeline or vol regime.
+    risk = max(sl_buf, atr_val * 0.30)
     if direction == "long":
         sl = entry - risk
         tp1 = entry + risk * pipeline.tp1_fallback_rr
@@ -1562,10 +1566,14 @@ def pathway_momentum_breakout(symbol: str, bundle: dict, pipeline: Pipeline,
     swings = find_swings(trig_candles, ind["atr"], 2, 2)
     pools = build_liquidity_pools(swings)
     risk_plan = build_risk_plan(direction, entry, atr_val, 0.6, pipeline, pools)
+    # Zone is centered on exact_entry (same convention as the other two
+    # pathways, where entry is the POI midpoint) instead of pinning entry to
+    # one edge of the zone.
+    zone_pad = entry * 0.00075
     return Candidate(
         symbol=symbol, direction=direction, pipeline_id=pipeline.id, pathway="momentum_breakout",
-        entry_zone_high=entry * (1.0015 if direction == "long" else 1.0),
-        entry_zone_low=entry * (1.0 if direction == "long" else 0.9985),
+        entry_zone_high=entry + zone_pad,
+        entry_zone_low=entry - zone_pad,
         exact_entry=entry, stop_loss=risk_plan["stop_loss"], take_profit_1=risk_plan["tp1"],
         take_profit_2=risk_plan["tp2"], take_profit_3=risk_plan["tp3"], atr_val=atr_val,
         confluences=confluences, structure_quality=adx_v / 40.0, poi_state="n/a",
@@ -2167,7 +2175,8 @@ def check_active_signals(state: dict, all_mids: dict[str, float], bar_index: int
             continue
         direction = s["direction"]
 
-        if s["stop_loss"] and not s["sl_hit"]:
+        any_tp_hit = s["tp1_hit"] or s["tp2_hit"] or s["tp3_hit"]
+        if s["stop_loss"] and not s["sl_hit"] and not any_tp_hit:
             hit = (price <= s["stop_loss"]) if direction == "long" else (price >= s["stop_loss"])
             if hit:
                 s["sl_hit"] = True
