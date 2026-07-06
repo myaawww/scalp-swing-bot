@@ -1,1 +1,36 @@
-{}
+{
+  "_version": 1,
+  "signal_history": [],
+  "active_signals": {},
+  "cooldowns": {},
+  "post_loss_cooldown": {},
+  "atr_pct_memory": {
+    "NEARUSDT": [
+      0.026297041496995077
+    ],
+    "AAVEUSDT": [
+      0.024274430929394655
+    ]
+  },
+  "macro_calendar_cache": {
+    "fetched_at": 1783351565.5548291,
+    "events": [
+      {
+        "name": "FOMC Meeting Minutes",
+        "datetime_utc": "2026-07-08T14:00:00-04:00"
+      },
+      {
+        "name": "Unemployment Rate",
+        "datetime_utc": "2026-07-10T08:30:00-04:00"
+      }
+    ]
+  },
+  "governor": {
+    "threshold": 0.0,
+    "daily_count_ema": 5.95,
+    "last_adjust_ts": 0.0
+  },
+  "last_scan_ts": 0.0,
+  "last_summary_date": "2026-07-06",
+  "win_rate": {}
+}
