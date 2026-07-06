@@ -13,8 +13,9 @@
       "stop_loss": 2.0698537867762745,
       "tp1": 2.090219319835588,
       "tp2": 2.100809397026431,
-      "result": "pending",
-      "ts": 1783352745.8264031
+      "result": "loss",
+      "ts": 1783352745.8264031,
+      "resolved_ts": 1783355441.8253982
     },
     {
       "id": "AAVEUSDT_long_1783353668048_858",
@@ -43,31 +44,12 @@
       "stop_loss": 3.2190763838290684,
       "tp1": 3.239885424256397,
       "tp2": 3.2507061252786076,
-      "result": "pending",
-      "ts": 1783354544.4331315
+      "result": "loss",
+      "ts": 1783354544.4331315,
+      "resolved_ts": 1783355442.40975
     }
   ],
   "active_signals": {
-    "NEARUSDT_fast_1783352745826": {
-      "symbol": "NEARUSDT",
-      "direction": "long",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1684,
-      "hist_id": "NEARUSDT_long_1783352745826_542",
-      "entry": 2.078,
-      "stop_loss": 2.0698537867762745,
-      "tp1": 2.090219319835588,
-      "tp2": 2.100809397026431,
-      "tp3": 2.114657959506764,
-      "tp1_hit": true,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783352745.8264098,
-      "ttl_hours": 30
-    },
     "AAVEUSDT_slow_1783353668048": {
       "symbol": "AAVEUSDT",
       "direction": "long",
@@ -87,26 +69,6 @@
       "resolved": false,
       "sent_at": 1783353668.0481744,
       "ttl_hours": 96
-    },
-    "UNIUSDT_fast_1783354544433": {
-      "symbol": "UNIUSDT",
-      "direction": "long",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1689,
-      "hist_id": "UNIUSDT_long_1783354544433_524",
-      "entry": 3.2274,
-      "stop_loss": 3.2190763838290684,
-      "tp1": 3.239885424256397,
-      "tp2": 3.2507061252786076,
-      "tp3": 3.2648562727691908,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783354544.4331386,
-      "ttl_hours": 30
     }
   },
   "cooldowns": {
@@ -114,7 +76,10 @@
     "AAVEUSDT:long:slow": 1981504,
     "UNIUSDT:long:fast": 1981505
   },
-  "post_loss_cooldown": {},
+  "post_loss_cooldown": {
+    "loss_cd:NEARUSDT:long": 1981506,
+    "loss_cd:UNIUSDT:long": 1981506
+  },
   "atr_pct_memory": {
     "NEARUSDT": [
       0.026297041496995077,
@@ -175,9 +140,9 @@
     ]
   },
   "governor": {
-    "threshold": -0.08,
-    "daily_count_ema": 3.5334371874999992,
-    "last_adjust_ts": 1783352743.4301248
+    "threshold": -0.16,
+    "daily_count_ema": 3.453421609374999,
+    "last_adjust_ts": 1783355463.6063366
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-06",
