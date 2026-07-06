@@ -2017,6 +2017,13 @@ def fmt_px(v: float) -> str:
     return f"{v:.6f}"
 
 
+def fmt_px_copy(v: float) -> str:
+    """Same precision as fmt_px but with no thousands separators, so tapping
+    the <code> span in Telegram copies a clean number straight into an
+    exchange order field instead of one with a stray comma in it."""
+    return fmt_px(v).replace(",", "")
+
+
 def confidence_bar(confidence: float) -> str:
     filled = round(confidence / 10)
     return "█" * filled + "░" * (10 - filled)
@@ -2039,14 +2046,14 @@ def format_signal_message(sig: Signal) -> str:
         f"<b>{arrow} — {cand.symbol}</b>",
         f"<i>{ENGINE_NAME} v{VERSION} | {pipeline.label} | {cand.pathway.replace('_',' ').title()}</i>",
         "",
-        f"<b>Entry Zone:</b> {fmt_px(cand.entry_zone_low)} – {fmt_px(cand.entry_zone_high)}",
-        f"<b>Exact Entry:</b> {fmt_px(cand.exact_entry)}",
-        f"<b>Stop Loss:</b> {fmt_px(cand.stop_loss)}",
-        f"<b>TP1:</b> {fmt_px(cand.take_profit_1)}  (RR {cand.rr():.2f})",
-        f"<b>TP2:</b> {fmt_px(cand.take_profit_2)}",
+        f"<b>Entry Zone:</b> <code>{fmt_px_copy(cand.entry_zone_low)}</code> – <code>{fmt_px_copy(cand.entry_zone_high)}</code>",
+        f"<b>Exact Entry:</b> <code>{fmt_px_copy(cand.exact_entry)}</code>",
+        f"<b>Stop Loss:</b> <code>{fmt_px_copy(cand.stop_loss)}</code>",
+        f"<b>TP1:</b> <code>{fmt_px_copy(cand.take_profit_1)}</code>  (RR {cand.rr():.2f})",
+        f"<b>TP2:</b> <code>{fmt_px_copy(cand.take_profit_2)}</code>",
     ]
     if cand.take_profit_3:
-        lines.append(f"<b>TP3 (runner):</b> {fmt_px(cand.take_profit_3)}")
+        lines.append(f"<b>TP3 (runner):</b> <code>{fmt_px_copy(cand.take_profit_3)}</code>")
     lines += [
         "",
         f"<b>Confidence:</b> {sig.confidence:.1f}% {confidence_bar(sig.confidence)}",
