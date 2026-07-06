@@ -29,8 +29,9 @@
       "stop_loss": 95.88715986505578,
       "tp1": 97.42074421591077,
       "tp2": 98.36448843182154,
-      "result": "pending",
-      "ts": 1783353668.0481675
+      "result": "loss",
+      "ts": 1783353668.0481675,
+      "resolved_ts": 1783359920.6479928
     },
     {
       "id": "UNIUSDT_long_1783354544433_524",
@@ -49,28 +50,7 @@
       "resolved_ts": 1783355442.40975
     }
   ],
-  "active_signals": {
-    "AAVEUSDT_slow_1783353668048": {
-      "symbol": "AAVEUSDT",
-      "direction": "long",
-      "pipeline_id": "slow",
-      "pathway": "momentum_breakout",
-      "message_id": 1687,
-      "hist_id": "AAVEUSDT_long_1783353668048_858",
-      "entry": 96.477,
-      "stop_loss": 95.88715986505578,
-      "tp1": 97.42074421591077,
-      "tp2": 98.36448843182154,
-      "tp3": 99.72112074219326,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783353668.0481744,
-      "ttl_hours": 96
-    }
-  },
+  "active_signals": {},
   "cooldowns": {
     "NEARUSDT:long:fast": 1981503,
     "AAVEUSDT:long:slow": 1981504,
@@ -78,7 +58,8 @@
   },
   "post_loss_cooldown": {
     "loss_cd:NEARUSDT:long": 1981506,
-    "loss_cd:UNIUSDT:long": 1981506
+    "loss_cd:UNIUSDT:long": 1981506,
+    "loss_cd:AAVEUSDT:long": 1981511
   },
   "atr_pct_memory": {
     "NEARUSDT": [
@@ -140,9 +121,9 @@
     ]
   },
   "governor": {
-    "threshold": -0.24,
-    "daily_count_ema": 3.2366889139788073,
-    "last_adjust_ts": 1783357276.9807365
+    "threshold": -0.32,
+    "daily_count_ema": 3.2011855768819863,
+    "last_adjust_ts": 1783359943.1406314
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-06",
