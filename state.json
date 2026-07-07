@@ -175,6 +175,21 @@
       "result": "loss",
       "ts": 1783445460.6258726,
       "resolved_ts": 1783448120.6385255
+    },
+    {
+      "id": "PENGUUSDT_short_1783462541102_866",
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "slow",
+      "confidence": 79.99,
+      "grade": "A",
+      "entry": 0.006454,
+      "stop_loss": 0.006510783640956728,
+      "tp1": 0.006363146174469234,
+      "tp2": 0.006272292348938469,
+      "result": "pending",
+      "ts": 1783462541.102996
     }
   ],
   "active_signals": {
@@ -197,7 +212,28 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783461600000
+      "last_checked_ms": 1783462500000
+    },
+    "PENGUUSDT_slow_1783462541102": {
+      "symbol": "PENGUUSDT",
+      "direction": "short",
+      "pipeline_id": "slow",
+      "pathway": "momentum_breakout",
+      "message_id": 1794,
+      "hist_id": "PENGUUSDT_short_1783462541102_866",
+      "entry": 0.006454,
+      "stop_loss": 0.006510783640956728,
+      "tp1": 0.006363146174469234,
+      "tp2": 0.006272292348938469,
+      "tp3": 0.006141689974737993,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783462541.1030042,
+      "ttl_hours": 96,
+      "last_checked_ms": 1783462541103
     }
   },
   "cooldowns": {
@@ -210,7 +246,8 @@
     "ADAUSDT:short:fast": 1981595,
     "TRXUSDT:long:fast": 1981603,
     "ZECUSDT:long:slow": 1981604,
-    "SOLUSDT:long:fast": 1981606
+    "SOLUSDT:long:fast": 1981606,
+    "PENGUUSDT:short:slow": 1981625
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -236,6 +273,7 @@
     "HYPEUSDT": [
       0.02123256820076283,
       0.020754249673210916,
+      0.06892571048026912,
       0.06892571048026912
     ],
     "XLMUSDT": [
@@ -263,6 +301,7 @@
       0.01754707416778757
     ],
     "PENGUUSDT": [
+      0.0700448130089544,
       0.0700448130089544
     ]
   },
@@ -281,7 +320,7 @@
   },
   "governor": {
     "threshold": -1.0999999999999996,
-    "daily_count_ema": 10.8317010774264,
+    "daily_count_ema": 10.85694591581244,
     "last_adjust_ts": 1783460741.3639169
   },
   "last_scan_ts": 0.0,
