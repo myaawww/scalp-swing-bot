@@ -128,8 +128,8 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 3.984274367016082,
-    "last_adjust_ts": 1783431065.5143182
+    "daily_count_ema": 4.1366332119636695,
+    "last_adjust_ts": 1783432871.6090455
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-07",
