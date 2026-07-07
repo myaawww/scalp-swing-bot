@@ -173,14 +173,14 @@
       "tp1": 0.33256987664104726,
       "tp2": 0.33283843639662153,
       "tp3": 0.3331896299231417,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "tp2_hit": false,
       "tp3_hit": false,
       "sl_hit": false,
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783442743894
+      "last_checked_ms": 1783444500000
     },
     "ZECUSDT_slow_1783443672462": {
       "symbol": "ZECUSDT",
@@ -276,7 +276,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 7.041953048450291,
+    "daily_count_ema": 7.485660091182748,
     "last_adjust_ts": 1783435541.4509091
   },
   "last_scan_ts": 0.0,
