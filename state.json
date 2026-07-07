@@ -93,8 +93,9 @@
       "stop_loss": 91.01126943204066,
       "tp1": 90.04809585193901,
       "tp2": 89.54724559028615,
-      "result": "pending",
-      "ts": 1783435543.6468003
+      "result": "loss",
+      "ts": 1783435543.6468003,
+      "resolved_ts": 1783437324.314745
     },
     {
       "id": "ADAUSDT_short_1783435544051_509",
@@ -108,54 +109,12 @@
       "stop_loss": 0.17611180866109594,
       "tp1": 0.1746572870083561,
       "tp2": 0.17390093574893137,
-      "result": "pending",
-      "ts": 1783435544.0516152
+      "result": "loss",
+      "ts": 1783435544.0516152,
+      "resolved_ts": 1783437325.0304823
     }
   ],
-  "active_signals": {
-    "AAVEUSDT_fast_1783435543646": {
-      "symbol": "AAVEUSDT",
-      "direction": "short",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1749,
-      "hist_id": "AAVEUSDT_short_1783435543646_768",
-      "entry": 90.626,
-      "stop_loss": 91.01126943204066,
-      "tp1": 90.04809585193901,
-      "tp2": 89.54724559028615,
-      "tp3": 88.89228755581703,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783435543.6468072,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783435543646
-    },
-    "ADAUSDT_fast_1783435544051": {
-      "symbol": "ADAUSDT",
-      "direction": "short",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1750,
-      "hist_id": "ADAUSDT_short_1783435544051_509",
-      "entry": 0.17553,
-      "stop_loss": 0.17611180866109594,
-      "tp1": 0.1746572870083561,
-      "tp2": 0.17390093574893137,
-      "tp3": 0.17291186102506828,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783435544.0516212,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783435544051
-    }
-  },
+  "active_signals": {},
   "cooldowns": {
     "APTUSDT:long:fast": 1981565,
     "ZECUSDT:long:fast": 1981576,
@@ -169,7 +128,9 @@
     "loss_cd:ZECUSDT:long": 1981578,
     "loss_cd:HYPEUSDT:long": 1981579,
     "loss_cd:XLMUSDT:short": 1981583,
-    "loss_cd:PENDLEUSDT:long": 1981590
+    "loss_cd:PENDLEUSDT:long": 1981590,
+    "loss_cd:AAVEUSDT:short": 1981597,
+    "loss_cd:ADAUSDT:short": 1981597
   },
   "atr_pct_memory": {
     "APTUSDT": [
@@ -210,7 +171,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 4.84931714060261,
+    "daily_count_ema": 5.171919569512218,
     "last_adjust_ts": 1783435541.4509091
   },
   "last_scan_ts": 0.0,
