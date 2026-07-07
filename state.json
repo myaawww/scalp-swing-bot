@@ -1,15 +1,70 @@
 {
   "_version": 1,
-  "signal_history": [],
-  "active_signals": {},
-  "cooldowns": {},
+  "signal_history": [
+    {
+      "id": "APTUSDT_long_1783408542396_224",
+      "symbol": "APTUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 88.58,
+      "grade": "A+",
+      "entry": 0.6359,
+      "stop_loss": 0.6340947127633113,
+      "tp1": 0.638607930855033,
+      "tp2": 0.6409548042627283,
+      "result": "pending",
+      "ts": 1783408542.396842
+    }
+  ],
+  "active_signals": {
+    "APTUSDT_fast_1783408542396": {
+      "symbol": "APTUSDT",
+      "direction": "long",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1715,
+      "hist_id": "APTUSDT_long_1783408542396_224",
+      "entry": 0.6359,
+      "stop_loss": 0.6340947127633113,
+      "tp1": 0.638607930855033,
+      "tp2": 0.6409548042627283,
+      "tp3": 0.644023792565099,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783408542.3968487,
+      "ttl_hours": 30
+    }
+  },
+  "cooldowns": {
+    "APTUSDT:long:fast": 1981565
+  },
   "post_loss_cooldown": {},
-  "atr_pct_memory": {},
-  "macro_calendar_cache": {},
+  "atr_pct_memory": {
+    "APTUSDT": [
+      0.02173413428392634
+    ]
+  },
+  "macro_calendar_cache": {
+    "fetched_at": 1783408541.3608491,
+    "events": [
+      {
+        "name": "FOMC Meeting Minutes",
+        "datetime_utc": "2026-07-08T14:00:00-04:00"
+      },
+      {
+        "name": "Unemployment Rate",
+        "datetime_utc": "2026-07-10T08:30:00-04:00"
+      }
+    ]
+  },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 0.0012714553187179287,
-    "last_adjust_ts": 1783406737.4632478
+    "daily_count_ema": 0.0010807370209102393,
+    "last_adjust_ts": 1783408540.52289
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-06",
