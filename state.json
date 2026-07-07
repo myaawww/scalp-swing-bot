@@ -156,8 +156,9 @@
       "stop_loss": 499.6350230195489,
       "tp1": 515.2739631687217,
       "tp2": 524.8979263374434,
-      "result": "pending",
-      "ts": 1783443672.4626105
+      "result": "loss",
+      "ts": 1783443672.4626105,
+      "resolved_ts": 1783448119.872774
     },
     {
       "id": "SOLUSDT_long_1783445460625_917",
@@ -171,8 +172,9 @@
       "stop_loss": 82.32770993697166,
       "tp1": 82.93843509454253,
       "tp2": 83.25601217647939,
-      "result": "pending",
-      "ts": 1783445460.6258726
+      "result": "loss",
+      "ts": 1783445460.6258726,
+      "resolved_ts": 1783448120.6385255
     }
   ],
   "active_signals": {
@@ -195,49 +197,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783447200000
-    },
-    "ZECUSDT_slow_1783443672462": {
-      "symbol": "ZECUSDT",
-      "direction": "long",
-      "pipeline_id": "slow",
-      "pathway": "momentum_breakout",
-      "message_id": 1769,
-      "hist_id": "ZECUSDT_long_1783443672462_928",
-      "entry": 505.65,
-      "stop_loss": 499.6350230195489,
-      "tp1": 515.2739631687217,
-      "tp2": 524.8979263374434,
-      "tp3": 538.7323733924809,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783443672.4626174,
-      "ttl_hours": 96,
-      "last_checked_ms": 1783447200000
-    },
-    "SOLUSDT_fast_1783445460625": {
-      "symbol": "SOLUSDT",
-      "direction": "long",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1775,
-      "hist_id": "SOLUSDT_long_1783445460625_917",
-      "entry": 82.572,
-      "stop_loss": 82.32770993697166,
-      "tp1": 82.93843509454253,
-      "tp2": 83.25601217647939,
-      "tp3": 83.67130528362758,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783445460.625879,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783447200000
+      "last_checked_ms": 1783448100000
     }
   },
   "cooldowns": {
@@ -253,12 +213,13 @@
     "SOLUSDT:long:fast": 1981606
   },
   "post_loss_cooldown": {
-    "loss_cd:ZECUSDT:long": 1981578,
+    "loss_cd:ZECUSDT:long": 1981609,
     "loss_cd:HYPEUSDT:long": 1981579,
     "loss_cd:XLMUSDT:short": 1981583,
     "loss_cd:PENDLEUSDT:long": 1981590,
     "loss_cd:AAVEUSDT:short": 1981597,
-    "loss_cd:ADAUSDT:short": 1981597
+    "loss_cd:ADAUSDT:short": 1981597,
+    "loss_cd:SOLUSDT:long": 1981609
   },
   "atr_pct_memory": {
     "APTUSDT": [
@@ -316,7 +277,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 8.733381003497604,
+    "daily_count_ema": 9.073373852972964,
     "last_adjust_ts": 1783435541.4509091
   },
   "last_scan_ts": 0.0,
