@@ -31,6 +31,21 @@
       "tp2": 459.604935,
       "result": "pending",
       "ts": 1783418467.7741632
+    },
+    {
+      "id": "HYPEUSDT_long_1783419347031_143",
+      "symbol": "HYPEUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 59.52,
+      "grade": "B",
+      "entry": 71.751,
+      "stop_loss": 71.53331311010294,
+      "tp1": 72.07753033484559,
+      "tp2": 72.36052329171177,
+      "result": "pending",
+      "ts": 1783419347.0315607
     }
   ],
   "active_signals": {
@@ -54,11 +69,33 @@
       "sent_at": 1783418467.7741692,
       "ttl_hours": 30,
       "last_checked_ms": 1783418467774
+    },
+    "HYPEUSDT_fast_1783419347031": {
+      "symbol": "HYPEUSDT",
+      "direction": "long",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1729,
+      "hist_id": "HYPEUSDT_long_1783419347031_143",
+      "entry": 71.751,
+      "stop_loss": 71.53331311010294,
+      "tp1": 72.07753033484559,
+      "tp2": 72.36052329171177,
+      "tp3": 72.73059100453678,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783419347.0315673,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783419347031
     }
   },
   "cooldowns": {
     "APTUSDT:long:fast": 1981565,
-    "ZECUSDT:long:fast": 1981576
+    "ZECUSDT:long:fast": 1981576,
+    "HYPEUSDT:long:fast": 1981577
   },
   "post_loss_cooldown": {},
   "atr_pct_memory": {
@@ -67,10 +104,13 @@
     ],
     "ZECUSDT": [
       0.02516087606433099
+    ],
+    "HYPEUSDT": [
+      0.02123256820076283
     ]
   },
   "macro_calendar_cache": {
-    "fetched_at": 1783408541.3608491,
+    "fetched_at": 1783419345.347284,
     "events": [
       {
         "name": "FOMC Meeting Minutes",
@@ -84,7 +124,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 0.8328376103490404,
+    "daily_count_ema": 1.0079119687966842,
     "last_adjust_ts": 1783418465.6171632
   },
   "last_scan_ts": 0.0,
