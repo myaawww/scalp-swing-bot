@@ -8,7 +8,7 @@
   "macro_calendar_cache": {},
   "governor": {
     "threshold": -1.28,
-    "daily_count_ema": 0.008938692436854027,
+    "daily_count_ema": 0.007597888571325923,
     "last_adjust_ts": 1783395941.590444
   },
   "last_scan_ts": 0.0,
