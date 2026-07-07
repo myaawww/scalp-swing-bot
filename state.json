@@ -48,13 +48,51 @@
       "result": "loss",
       "ts": 1783419347.0315607,
       "resolved_ts": 1783421117.826688
+    },
+    {
+      "id": "XLMUSDT_short_1783422942248_432",
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 90.25,
+      "grade": "A+",
+      "entry": 0.1929,
+      "stop_loss": 0.19329454573239402,
+      "tp1": 0.19230818140140896,
+      "tp2": 0.19179527194929671,
+      "result": "pending",
+      "ts": 1783422942.2482908
     }
   ],
-  "active_signals": {},
+  "active_signals": {
+    "XLMUSDT_fast_1783422942248": {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1734,
+      "hist_id": "XLMUSDT_short_1783422942248_432",
+      "entry": 0.1929,
+      "stop_loss": 0.19329454573239402,
+      "tp1": 0.19230818140140896,
+      "tp2": 0.19179527194929671,
+      "tp3": 0.1911245442042269,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783422942.2482975,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783422942248
+    }
+  },
   "cooldowns": {
     "APTUSDT:long:fast": 1981565,
     "ZECUSDT:long:fast": 1981576,
-    "HYPEUSDT:long:fast": 1981577
+    "HYPEUSDT:long:fast": 1981577,
+    "XLMUSDT:short:fast": 1981581
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981578,
@@ -69,6 +107,9 @@
     ],
     "HYPEUSDT": [
       0.02123256820076283
+    ],
+    "XLMUSDT": [
+      0.025414051091740084
     ]
   },
   "macro_calendar_cache": {
@@ -86,7 +127,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 1.7766089378372636,
+    "daily_count_ema": 1.960117597161674,
     "last_adjust_ts": 1783421171.2427258
   },
   "last_scan_ts": 0.0,
