@@ -29,8 +29,9 @@
       "stop_loss": 455.8254032216888,
       "tp1": 459.0868951674667,
       "tp2": 459.604935,
-      "result": "pending",
-      "ts": 1783418467.7741632
+      "result": "loss",
+      "ts": 1783418467.7741632,
+      "resolved_ts": 1783420242.044727
     },
     {
       "id": "HYPEUSDT_long_1783419347031_143",
@@ -49,27 +50,6 @@
     }
   ],
   "active_signals": {
-    "ZECUSDT_fast_1783418467774": {
-      "symbol": "ZECUSDT",
-      "direction": "long",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1728,
-      "hist_id": "ZECUSDT_long_1783418467774_830",
-      "entry": 457.13,
-      "stop_loss": 455.8254032216888,
-      "tp1": 459.0868951674667,
-      "tp2": 459.604935,
-      "tp3": 463.0006855024002,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783418467.7741692,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783418467774
-    },
     "HYPEUSDT_fast_1783419347031": {
       "symbol": "HYPEUSDT",
       "direction": "long",
@@ -97,7 +77,9 @@
     "ZECUSDT:long:fast": 1981576,
     "HYPEUSDT:long:fast": 1981577
   },
-  "post_loss_cooldown": {},
+  "post_loss_cooldown": {
+    "loss_cd:ZECUSDT:long": 1981578
+  },
   "atr_pct_memory": {
     "APTUSDT": [
       0.02173413428392634
@@ -124,7 +106,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 1.0079119687966842,
+    "daily_count_ema": 1.3067251734771816,
     "last_adjust_ts": 1783418465.6171632
   },
   "last_scan_ts": 0.0,
