@@ -64,14 +64,52 @@
       "result": "loss",
       "ts": 1783422942.2482908,
       "resolved_ts": 1783424719.7385373
+    },
+    {
+      "id": "PENDLEUSDT_long_1783429271031_259",
+      "symbol": "PENDLEUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "slow",
+      "confidence": 63.62,
+      "grade": "B",
+      "entry": 1.4983,
+      "stop_loss": 1.4845258219079476,
+      "tp1": 1.5203386849472835,
+      "tp2": 1.5423773698945673,
+      "result": "pending",
+      "ts": 1783429271.031811
     }
   ],
-  "active_signals": {},
+  "active_signals": {
+    "PENDLEUSDT_slow_1783429271031": {
+      "symbol": "PENDLEUSDT",
+      "direction": "long",
+      "pipeline_id": "slow",
+      "pathway": "momentum_breakout",
+      "message_id": 1741,
+      "hist_id": "PENDLEUSDT_long_1783429271031_259",
+      "entry": 1.4983,
+      "stop_loss": 1.4845258219079476,
+      "tp1": 1.5203386849472835,
+      "tp2": 1.5423773698945673,
+      "tp3": 1.5740579795062875,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783429271.0318174,
+      "ttl_hours": 96,
+      "last_checked_ms": 1783429271031
+    }
+  },
   "cooldowns": {
     "APTUSDT:long:fast": 1981565,
     "ZECUSDT:long:fast": 1981576,
     "HYPEUSDT:long:fast": 1981577,
-    "XLMUSDT:short:fast": 1981581
+    "XLMUSDT:short:fast": 1981581,
+    "PENDLEUSDT:long:slow": 1981588
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981578,
@@ -90,6 +128,9 @@
     ],
     "XLMUSDT": [
       0.025414051091740084
+    ],
+    "PENDLEUSDT": [
+      0.07338210639597739
     ]
   },
   "macro_calendar_cache": {
@@ -107,7 +148,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 3.230659339837564,
+    "daily_count_ema": 3.3460604388619295,
     "last_adjust_ts": 1783428342.6762164
   },
   "last_scan_ts": 0.0,
