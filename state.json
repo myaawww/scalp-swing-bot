@@ -77,33 +77,12 @@
       "stop_loss": 1.4845258219079476,
       "tp1": 1.5203386849472835,
       "tp2": 1.5423773698945673,
-      "result": "pending",
-      "ts": 1783429271.031811
+      "result": "loss",
+      "ts": 1783429271.031811,
+      "resolved_ts": 1783431044.9490907
     }
   ],
-  "active_signals": {
-    "PENDLEUSDT_slow_1783429271031": {
-      "symbol": "PENDLEUSDT",
-      "direction": "long",
-      "pipeline_id": "slow",
-      "pathway": "momentum_breakout",
-      "message_id": 1741,
-      "hist_id": "PENDLEUSDT_long_1783429271031_259",
-      "entry": 1.4983,
-      "stop_loss": 1.4845258219079476,
-      "tp1": 1.5203386849472835,
-      "tp2": 1.5423773698945673,
-      "tp3": 1.5740579795062875,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783429271.0318174,
-      "ttl_hours": 96,
-      "last_checked_ms": 1783429271031
-    }
-  },
+  "active_signals": {},
   "cooldowns": {
     "APTUSDT:long:fast": 1981565,
     "ZECUSDT:long:fast": 1981576,
@@ -114,7 +93,8 @@
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981578,
     "loss_cd:HYPEUSDT:long": 1981579,
-    "loss_cd:XLMUSDT:short": 1981583
+    "loss_cd:XLMUSDT:short": 1981583,
+    "loss_cd:PENDLEUSDT:long": 1981590
   },
   "atr_pct_memory": {
     "APTUSDT": [
@@ -148,8 +128,8 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 3.59415137303264,
-    "last_adjust_ts": 1783428342.6762164
+    "daily_count_ema": 3.805028667077744,
+    "last_adjust_ts": 1783431065.5143182
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-07",
