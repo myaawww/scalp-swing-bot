@@ -197,7 +197,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783460700000
+      "last_checked_ms": 1783461600000
     }
   },
   "cooldowns": {
@@ -235,7 +235,8 @@
     ],
     "HYPEUSDT": [
       0.02123256820076283,
-      0.020754249673210916
+      0.020754249673210916,
+      0.06892571048026912
     ],
     "XLMUSDT": [
       0.025414051091740084
@@ -260,10 +261,13 @@
     ],
     "SOLUSDT": [
       0.01754707416778757
+    ],
+    "PENGUUSDT": [
+      0.0700448130089544
     ]
   },
   "macro_calendar_cache": {
-    "fetched_at": 1783435542.1607797,
+    "fetched_at": 1783461663.5619872,
     "events": [
       {
         "name": "FOMC Meeting Minutes",
@@ -277,7 +281,7 @@
   },
   "governor": {
     "threshold": -1.0999999999999996,
-    "daily_count_ema": 10.80200126756047,
+    "daily_count_ema": 10.8317010774264,
     "last_adjust_ts": 1783460741.3639169
   },
   "last_scan_ts": 0.0,
