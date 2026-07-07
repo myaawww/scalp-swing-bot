@@ -7,9 +7,9 @@
   "atr_pct_memory": {},
   "macro_calendar_cache": {},
   "governor": {
-    "threshold": -1.28,
-    "daily_count_ema": 0.007597888571325923,
-    "last_adjust_ts": 1783395941.590444
+    "threshold": -1.36,
+    "daily_count_ema": 0.006458205285627034,
+    "last_adjust_ts": 1783398670.1992137
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-06",
