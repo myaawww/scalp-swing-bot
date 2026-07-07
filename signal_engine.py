@@ -1,10 +1,6 @@
 """
-PARALLAX ENGINE v1.0.0
+PARALLAX ENGINE v1.1.1
 ================================================================================
-A ground-up synthesis, not a merge. Every reference engine in this fleet
-(Nyx, Axis, Helios, Crucible Alpha, Meridian, Kairos, Vectis) was read for its
-strongest proven idea and its known failure mode; Parallax keeps the former,
-fixes the latter, and adds what none of them had.
 
 PHILOSOPHY
     A single setup, seen from a single timeframe, is an opinion. Parallax's
@@ -108,7 +104,7 @@ if not TG_CHAT_ID:
     raise RuntimeError("TG_CHAT_ID environment variable is required")
 
 HL_INFO_URL = "https://api.hyperliquid.xyz/info"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 ENGINE_NAME = "Parallax"
 
 WATCHLIST = [
@@ -2149,6 +2145,9 @@ def track_signal(state: dict, sig: Signal, message_id: Optional[int], hist_id: s
         "tp1": cand.take_profit_1, "tp2": cand.take_profit_2, "tp3": cand.take_profit_3,
         "tp1_hit": False, "tp2_hit": False, "tp3_hit": False, "sl_hit": False,
         "resolved": False, "sent_at": time.time(), "ttl_hours": pipeline.active_ttl_hours,
+        # Candle-close watermark consumed by check_active_signals -- only
+        # candles at/after this timestamp still need to be scanned for a hit.
+        "last_checked_ms": int(time.time() * 1000),
     }
 
 
@@ -2163,62 +2162,102 @@ def record_outcome(state: dict, hist_id: str, symbol: str, direction: str, bar_i
         record_loss_cooldown(state, symbol, direction, bar_index)
 
 
-def check_active_signals(state: dict, all_mids: dict[str, float], bar_index: int) -> None:
+def check_active_signals(state: dict, bar_index: int) -> None:
+    """Resolve active signals off closed 15m candle ranges, never off a
+    single live price snapshot. A point-in-time price can miss an
+    intra-period SL or TP touch entirely if price round-trips between two
+    15-minute runs -- and, worse, can report a hit out of order: e.g.
+    flashing a TP1 win for a signal that was actually stopped out earlier in
+    that same gap, simply because by the time the next snapshot was taken
+    price had already recovered past SL and gone on to tag TP1. Walking
+    every closed candle since the last check in chronological order, and
+    always resolving stop loss before take-profit within a given candle,
+    keeps both the presence and the sequencing of a hit correct."""
     active = state.get("active_signals", {})
     if not active:
         return
+
+    tf = "15m"  # finest interval this file fetches; matches the cron cadence
+    tf_ms = INTERVAL_MS[tf]
+    now_ms = int(time.time() * 1000)
+
+    # One candle fetch per symbol per run, sized to cover the oldest gap
+    # among that symbol's unresolved signals, shared by every signal on it.
+    unresolved_by_symbol: dict[str, list[str]] = {}
+    for key, s in active.items():
+        if not s.get("resolved"):
+            unresolved_by_symbol.setdefault(s["symbol"], []).append(key)
+
+    candles_by_symbol: dict[str, list[dict]] = {}
+    for symbol, keys in unresolved_by_symbol.items():
+        oldest_since_ms = min(
+            active[k].get("last_checked_ms", int(active[k]["sent_at"] * 1000)) for k in keys
+        )
+        gap_candles = max(0, now_ms - oldest_since_ms) // tf_ms
+        n_needed = min(600, max(2, gap_candles + 3))
+        try:
+            candles_by_symbol[symbol] = get_candles(symbol, tf, n_needed)
+        except Exception as e:
+            print(f"[TRACK CANDLES ERROR] {symbol}: {e}")
+            candles_by_symbol[symbol] = []
+
     for key, s in list(active.items()):
         if s.get("resolved"):
             continue
-        price = all_mids.get(hl_coin(s["symbol"]))
-        if price is None:
-            continue
         direction = s["direction"]
+        since_ms = s.get("last_checked_ms", int(s["sent_at"] * 1000))
+        candles = [c for c in candles_by_symbol.get(s["symbol"], []) if c["t"] >= since_ms]
 
-        any_tp_hit = s["tp1_hit"] or s["tp2_hit"] or s["tp3_hit"]
-        if s["stop_loss"] and not s["sl_hit"] and not any_tp_hit:
-            hit = (price <= s["stop_loss"]) if direction == "long" else (price >= s["stop_loss"])
-            if hit:
-                s["sl_hit"] = True
-                react_to_message(s["message_id"], "❌")
-                reply_telegram(f"❌ {s['symbol']} hit Stop Loss.", s["message_id"])
-                record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "loss")
-                s["resolved"] = True
-                continue
+        for c in candles:
+            lo, hi = c["l"], c["h"]
+            any_tp_hit = s["tp1_hit"] or s["tp2_hit"] or s["tp3_hit"]
 
-        if s["tp1"] and not s["tp1_hit"]:
-            hit = (price >= s["tp1"]) if direction == "long" else (price <= s["tp1"])
-            if hit:
-                s["tp1_hit"] = True
-                react_to_message(s["message_id"], "✅")
-                reply_telegram(f"✅ {s['symbol']} hit TP1.", s["message_id"])
-                if not s["tp2"]:
+            if s["stop_loss"] and not s["sl_hit"] and not any_tp_hit:
+                hit = (lo <= s["stop_loss"]) if direction == "long" else (hi >= s["stop_loss"])
+                if hit:
+                    s["sl_hit"] = True
+                    react_to_message(s["message_id"], "❌")
+                    reply_telegram(f"❌ {s['symbol']} hit Stop Loss.", s["message_id"])
+                    record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "loss")
+                    s["resolved"] = True
+                    break  # SL closes the trade -- nothing later in this or any later candle matters
+
+            if s["tp1"] and not s["tp1_hit"]:
+                hit = (hi >= s["tp1"]) if direction == "long" else (lo <= s["tp1"])
+                if hit:
+                    s["tp1_hit"] = True
+                    react_to_message(s["message_id"], "✅")
+                    reply_telegram(f"✅ {s['symbol']} hit TP1.", s["message_id"])
+                    if not s["tp2"]:
+                        record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "win")
+                        s["resolved"] = True
+                        break
+
+            if s["tp2"] and s["tp1_hit"] and not s["tp2_hit"]:
+                hit = (hi >= s["tp2"]) if direction == "long" else (lo <= s["tp2"])
+                if hit:
+                    s["tp2_hit"] = True
+                    react_to_message(s["message_id"], "🎯")
+                    reply_telegram(f"🎯 {s['symbol']} hit TP2.", s["message_id"])
+                    if not s["tp3"]:
+                        record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "win")
+                        s["resolved"] = True
+                        break
+
+            if s["tp3"] and s["tp2_hit"] and not s["tp3_hit"]:
+                hit = (hi >= s["tp3"]) if direction == "long" else (lo <= s["tp3"])
+                if hit:
+                    s["tp3_hit"] = True
+                    react_to_message(s["message_id"], "🏆")
+                    reply_telegram(f"🏆 {s['symbol']} hit TP3 (full runner).", s["message_id"])
                     record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "win")
                     s["resolved"] = True
-                    continue
+                    break
 
-        if s["tp2"] and s["tp1_hit"] and not s["tp2_hit"]:
-            hit = (price >= s["tp2"]) if direction == "long" else (price <= s["tp2"])
-            if hit:
-                s["tp2_hit"] = True
-                react_to_message(s["message_id"], "🎯")
-                reply_telegram(f"🎯 {s['symbol']} hit TP2.", s["message_id"])
-                if not s["tp3"]:
-                    record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "win")
-                    s["resolved"] = True
-                    continue
+        if candles:
+            s["last_checked_ms"] = candles[-1]["t"] + tf_ms
 
-        if s["tp3"] and s["tp2_hit"] and not s["tp3_hit"]:
-            hit = (price >= s["tp3"]) if direction == "long" else (price <= s["tp3"])
-            if hit:
-                s["tp3_hit"] = True
-                react_to_message(s["message_id"], "🏆")
-                reply_telegram(f"🏆 {s['symbol']} hit TP3 (full runner).", s["message_id"])
-                record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index, "win")
-                s["resolved"] = True
-                continue
-
-        if time.time() - s["sent_at"] > s.get("ttl_hours", 96) * 3600:
+        if not s["resolved"] and time.time() - s["sent_at"] > s.get("ttl_hours", 96) * 3600:
             record_outcome(state, s["hist_id"], s["symbol"], direction, bar_index,
                            "win" if s["tp1_hit"] else "timeout")
             s["resolved"] = True
@@ -2555,12 +2594,11 @@ def main() -> None:
     _shutdown_state_ref.update(state)
     print(f"\n{get_win_rate_summary(state)}")
 
-    all_mids = fetch_all_mids()
     bar_index = _bar_index_now()
     if state.get("active_signals"):
         print(f"\n[TRACKING] Checking {len(state['active_signals'])} active signal(s)...")
         try:
-            check_active_signals(state, all_mids, bar_index)
+            check_active_signals(state, bar_index)
         except Exception as e:
             print(f"[TRACK ERROR] {e}")
     else:
