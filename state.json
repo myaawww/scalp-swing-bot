@@ -158,6 +158,21 @@
       "tp2": 524.8979263374434,
       "result": "pending",
       "ts": 1783443672.4626105
+    },
+    {
+      "id": "SOLUSDT_long_1783445460625_917",
+      "symbol": "SOLUSDT",
+      "direction": "long",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 79.05,
+      "grade": "A",
+      "entry": 82.572,
+      "stop_loss": 82.32770993697166,
+      "tp1": 82.93843509454253,
+      "tp2": 83.25601217647939,
+      "result": "pending",
+      "ts": 1783445460.6258726
     }
   ],
   "active_signals": {
@@ -174,13 +189,13 @@
       "tp2": 0.33283843639662153,
       "tp3": 0.3331896299231417,
       "tp1_hit": true,
-      "tp2_hit": false,
+      "tp2_hit": true,
       "tp3_hit": false,
       "sl_hit": false,
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783444500000
+      "last_checked_ms": 1783445400000
     },
     "ZECUSDT_slow_1783443672462": {
       "symbol": "ZECUSDT",
@@ -201,7 +216,28 @@
       "resolved": false,
       "sent_at": 1783443672.4626174,
       "ttl_hours": 96,
-      "last_checked_ms": 1783443672462
+      "last_checked_ms": 1783445400000
+    },
+    "SOLUSDT_fast_1783445460625": {
+      "symbol": "SOLUSDT",
+      "direction": "long",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1775,
+      "hist_id": "SOLUSDT_long_1783445460625_917",
+      "entry": 82.572,
+      "stop_loss": 82.32770993697166,
+      "tp1": 82.93843509454253,
+      "tp2": 83.25601217647939,
+      "tp3": 83.67130528362758,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783445460.625879,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783445460625
     }
   },
   "cooldowns": {
@@ -213,7 +249,8 @@
     "AAVEUSDT:short:fast": 1981595,
     "ADAUSDT:short:fast": 1981595,
     "TRXUSDT:long:fast": 1981603,
-    "ZECUSDT:long:slow": 1981604
+    "ZECUSDT:long:slow": 1981604,
+    "SOLUSDT:long:fast": 1981606
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981578,
@@ -259,6 +296,9 @@
     ],
     "UNIUSDT": [
       0.022843699558793416
+    ],
+    "SOLUSDT": [
+      0.01754707416778757
     ]
   },
   "macro_calendar_cache": {
@@ -276,7 +316,7 @@
   },
   "governor": {
     "threshold": -1.5,
-    "daily_count_ema": 7.485660091182748,
+    "daily_count_ema": 7.862811077505335,
     "last_adjust_ts": 1783435541.4509091
   },
   "last_scan_ts": 0.0,
