@@ -197,7 +197,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783458000000
+      "last_checked_ms": 1783458900000
     }
   },
   "cooldowns": {
@@ -276,9 +276,9 @@
     ]
   },
   "governor": {
-    "threshold": -1.2599999999999998,
-    "daily_count_ema": 10.677592131179273,
-    "last_adjust_ts": 1783457138.870333
+    "threshold": -1.1799999999999997,
+    "daily_count_ema": 10.725953311502382,
+    "last_adjust_ts": 1783458940.2198396
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-07",
