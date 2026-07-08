@@ -220,6 +220,21 @@
       "tp2": 0.1682355578024416,
       "result": "pending",
       "ts": 1783478740.8209443
+    },
+    {
+      "id": "LINKUSDT_short_1783479668005_415",
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "slow",
+      "confidence": 90.17,
+      "grade": "A+",
+      "entry": 7.7142,
+      "stop_loss": 7.766406426442437,
+      "tp1": 7.630669717692101,
+      "tp2": 7.5471394353842,
+      "result": "pending",
+      "ts": 1783479668.0051117
     }
   ],
   "active_signals": {
@@ -242,7 +257,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783478700000
+      "last_checked_ms": 1783479600000
     },
     "PENGUUSDT_slow_1783462541102": {
       "symbol": "PENGUUSDT",
@@ -263,7 +278,7 @@
       "resolved": false,
       "sent_at": 1783462541.1030042,
       "ttl_hours": 96,
-      "last_checked_ms": 1783478700000
+      "last_checked_ms": 1783479600000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -284,7 +299,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783478700000
+      "last_checked_ms": 1783479600000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -306,6 +321,27 @@
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
       "last_checked_ms": 1783478740820
+    },
+    "LINKUSDT_slow_1783479668005": {
+      "symbol": "LINKUSDT",
+      "direction": "short",
+      "pipeline_id": "slow",
+      "pathway": "momentum_breakout",
+      "message_id": 1825,
+      "hist_id": "LINKUSDT_short_1783479668005_415",
+      "entry": 7.7142,
+      "stop_loss": 7.766406426442437,
+      "tp1": 7.630669717692101,
+      "tp2": 7.5471394353842,
+      "tp3": 7.427064654566595,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783479668.0051184,
+      "ttl_hours": 96,
+      "last_checked_ms": 1783479668005
     }
   },
   "cooldowns": {
@@ -321,7 +357,8 @@
     "SOLUSDT:long:fast": 1981606,
     "PENGUUSDT:short:slow": 1981625,
     "HYPEUSDT:short:slow": 1981626,
-    "ADAUSDT:short:slow": 1981643
+    "ADAUSDT:short:slow": 1981643,
+    "LINKUSDT:short:slow": 1981644
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -410,6 +447,9 @@
       0.04551584014973173,
       0.04551584014973173,
       0.04551584014973173
+    ],
+    "LINKUSDT": [
+      0.04803311092185645
     ]
   },
   "macro_calendar_cache": {
@@ -426,9 +466,9 @@
     ]
   },
   "governor": {
-    "threshold": -0.5399999999999998,
-    "daily_count_ema": 12.875565828869098,
-    "last_adjust_ts": 1783476941.1314914
+    "threshold": -0.4599999999999998,
+    "daily_count_ema": 13.044230954538733,
+    "last_adjust_ts": 1783479666.3042083
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-07",
