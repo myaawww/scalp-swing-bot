@@ -1,0 +1,39 @@
+name: Backtest
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Backtest lookback (days)"
+        default: "180"
+      holdout_days:
+        description: "Locked holdout window (days)"
+        default: "30"
+  schedule:
+    - cron: "0 6 * * 1"   # weekly, Monday 06:00 UTC
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install requests
+
+      - name: Run backtest
+        run: |
+          python signal_engine.py --backtest \
+            --days ${{ github.event.inputs.days || '180' }} \
+            --holdout-days ${{ github.event.inputs.holdout_days || '30' }} \
+            | tee backtest_report.txt | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backtest-report
+          path: backtest_report.txt
