@@ -314,6 +314,21 @@
       "tp2": 463.90548199992793,
       "result": "pending",
       "ts": 1783499472.6473746
+    },
+    {
+      "id": "SOLUSDT_short_1783500341876_977",
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 94.65,
+      "grade": "A+",
+      "entry": 77.11,
+      "stop_loss": 77.31032943069962,
+      "tp1": 76.80950585395057,
+      "tp2": 76.54907759404107,
+      "result": "pending",
+      "ts": 1783500341.876944
     }
   ],
   "active_signals": {
@@ -336,7 +351,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783499400000
+      "last_checked_ms": 1783500300000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -357,7 +372,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783499400000
+      "last_checked_ms": 1783500300000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -378,7 +393,7 @@
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783499400000
+      "last_checked_ms": 1783500300000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -399,7 +414,7 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783499400000
+      "last_checked_ms": 1783500300000
     },
     "TAOUSDT_fast_1783499472312": {
       "symbol": "TAOUSDT",
@@ -442,6 +457,27 @@
       "sent_at": 1783499472.6473808,
       "ttl_hours": 30,
       "last_checked_ms": 1783499472647
+    },
+    "SOLUSDT_fast_1783500341876": {
+      "symbol": "SOLUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1854,
+      "hist_id": "SOLUSDT_short_1783500341876_977",
+      "entry": 77.11,
+      "stop_loss": 77.31032943069962,
+      "tp1": 76.80950585395057,
+      "tp2": 76.54907759404107,
+      "tp3": 76.2085175618517,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783500341.8769505,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783500341876
     }
   },
   "cooldowns": {
@@ -463,7 +499,8 @@
     "TRXUSDT:short:fast": 1981660,
     "AAVEUSDT:long:fast": 1981663,
     "TAOUSDT:short:fast": 1981666,
-    "ZECUSDT:short:fast": 1981666
+    "ZECUSDT:short:fast": 1981666,
+    "SOLUSDT:short:fast": 1981667
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -498,6 +535,7 @@
     ],
     "XLMUSDT": [
       0.025414051091740084,
+      0.025097925633194185,
       0.025097925633194185
     ],
     "PENDLEUSDT": [
@@ -532,7 +570,8 @@
       0.05090762509694767,
       0.05090762509694767,
       0.05090762509694767,
-      0.05090762509694767
+      0.05090762509694767,
+      0.01927027649688729
     ],
     "PENGUUSDT": [
       0.0700448130089544,
@@ -565,6 +604,7 @@
     ],
     "LINKUSDT": [
       0.04803311092185645,
+      0.01892743033239448,
       0.01892743033239448
     ],
     "ONDOUSDT": [
@@ -572,6 +612,12 @@
     ],
     "BNBUSDT": [
       0.01312402621864372
+    ],
+    "BTCUSDT": [
+      0.013231148924519159
+    ],
+    "SUIUSDT": [
+      0.02171620319846121
     ]
   },
   "macro_calendar_cache": {
@@ -589,7 +635,7 @@
   },
   "governor": {
     "threshold": 0.18000000000000027,
-    "daily_count_ema": 16.200787503206083,
+    "daily_count_ema": 16.62066937772517,
     "last_adjust_ts": 1783498544.2005954
   },
   "last_scan_ts": 0.0,
