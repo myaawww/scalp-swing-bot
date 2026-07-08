@@ -303,7 +303,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "PENGUUSDT_slow_1783462541102": {
       "symbol": "PENGUUSDT",
@@ -324,7 +324,7 @@
       "resolved": false,
       "sent_at": 1783462541.1030042,
       "ttl_hours": 96,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -345,7 +345,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -366,7 +366,7 @@
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -387,7 +387,7 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "TRXUSDT_fast_1783494074035": {
       "symbol": "TRXUSDT",
@@ -408,7 +408,7 @@
       "resolved": false,
       "sent_at": 1783494074.0357049,
       "ttl_hours": 30,
-      "last_checked_ms": 1783496700000
+      "last_checked_ms": 1783497600000
     },
     "AAVEUSDT_fast_1783496740505": {
       "symbol": "AAVEUSDT",
@@ -564,10 +564,10 @@
   },
   "governor": {
     "threshold": 0.10000000000000027,
-    "daily_count_ema": 15.698615922175588,
+    "daily_count_ema": 15.89382353384925,
     "last_adjust_ts": 1783495867.0942352
   },
   "last_scan_ts": 0.0,
-  "last_summary_date": "2026-07-07",
+  "last_summary_date": "2026-07-08",
   "win_rate": {}
 }
