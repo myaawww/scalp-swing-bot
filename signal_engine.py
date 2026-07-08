@@ -127,6 +127,10 @@ MAX_SIGNALS_PER_DAY = int(os.environ.get("VANTAGE_MAX_SIGNALS_PER_DAY", "16"))
 BASE_SCORE_THRESHOLD = 66.0
 MIN_RR = 1.4
 
+# Hard liquidity filters (tune these directly, or override via env vars without editing code)
+MIN_DAY_VOLUME_USD = float(os.environ.get("VANTAGE_MIN_DAY_VOLUME_USD", "1000000"))       # was 3,000,000
+LIQUIDITY_FLOOR_BASE_USD = float(os.environ.get("VANTAGE_LIQUIDITY_FLOOR_BASE_USD", "75000"))  # was 150,000
+
 FEE_TAKER = 0.00045   # Hyperliquid taker fee (per side, approx as of engine design)
 FEE_MAKER = 0.00015
 SLIPPAGE_EST_PCT = 0.0006  # conservative estimate for liquid majors; widened for illiquid alts in backtester
@@ -711,7 +715,7 @@ def adaptive_sl_multiple(regime: RegimeVector) -> float:
 
 
 def adaptive_liquidity_floor(regime: RegimeVector) -> float:
-    base = 150_000.0
+    base = LIQUIDITY_FLOOR_BASE_USD
     if regime.is_choppy():
         base *= 1.4
     if regime.is_high_vol():
@@ -1301,7 +1305,7 @@ def dedup_correlated(ranked: list[Candidate], clusters: list[set[str]]) -> list[
 def passes_hard_filters(symbol: str, snapshot: dict, atr_pct: float, cand: Candidate,
                          regime: RegimeVector, orderbook: dict) -> tuple[bool, str]:
     info = snapshot.get(symbol, {})
-    if info.get("day_vol", 0.0) < 3_000_000:
+    if info.get("day_vol", 0.0) < MIN_DAY_VOLUME_USD:
         return False, "day volume too low"
     if orderbook.get("ok") and orderbook.get("depth_usd", 0) < adaptive_liquidity_floor(regime):
         return False, "orderbook depth below adaptive liquidity floor"
