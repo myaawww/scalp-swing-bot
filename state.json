@@ -257,7 +257,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783482300000
+      "last_checked_ms": 1783483200000
     },
     "PENGUUSDT_slow_1783462541102": {
       "symbol": "PENGUUSDT",
@@ -278,7 +278,7 @@
       "resolved": false,
       "sent_at": 1783462541.1030042,
       "ttl_hours": 96,
-      "last_checked_ms": 1783482300000
+      "last_checked_ms": 1783483200000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -299,7 +299,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783482300000
+      "last_checked_ms": 1783483200000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -313,14 +313,14 @@
       "tp1": 0.17049777890122078,
       "tp2": 0.1682355578024416,
       "tp3": 0.16498361497294647,
-      "tp1_hit": false,
+      "tp1_hit": true,
       "tp2_hit": false,
       "tp3_hit": false,
       "sl_hit": false,
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783482300000
+      "last_checked_ms": 1783483200000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -341,7 +341,7 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783482300000
+      "last_checked_ms": 1783483200000
     }
   },
   "cooldowns": {
@@ -467,7 +467,7 @@
   },
   "governor": {
     "threshold": -0.3799999999999998,
-    "daily_count_ema": 13.798913334956097,
+    "daily_count_ema": 13.979076334712682,
     "last_adjust_ts": 1783482337.2906044
   },
   "last_scan_ts": 0.0,
