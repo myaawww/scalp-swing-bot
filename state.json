@@ -329,8 +329,9 @@
       "stop_loss": 77.31032943069962,
       "tp1": 76.80950585395057,
       "tp2": 76.54907759404107,
-      "result": "pending",
-      "ts": 1783500341.876944
+      "result": "loss",
+      "ts": 1783500341.876944,
+      "resolved_ts": 1783502124.99606
     },
     {
       "id": "XLMUSDT_short_1783501279957_617",
@@ -346,6 +347,51 @@
       "tp2": 0.17869728824109143,
       "result": "pending",
       "ts": 1783501279.957415
+    },
+    {
+      "id": "AAVEUSDT_short_1783502148651_704",
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 94.24,
+      "grade": "A+",
+      "entry": 86.674,
+      "stop_loss": 86.99046175258319,
+      "tp1": 86.19930737112524,
+      "tp2": 85.78790709276711,
+      "result": "pending",
+      "ts": 1783502148.6518211
+    },
+    {
+      "id": "ADAUSDT_short_1783502149029_933",
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 93.74,
+      "grade": "A+",
+      "entry": 0.1657,
+      "stop_loss": 0.16618645994723216,
+      "tp1": 0.16497031007915175,
+      "tp2": 0.16433791214774993,
+      "result": "pending",
+      "ts": 1783502149.0292447
+    },
+    {
+      "id": "BCHUSDT_short_1783502149397_570",
+      "symbol": "BCHUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 60.19,
+      "grade": "B",
+      "entry": 233.12,
+      "stop_loss": 233.86694984944208,
+      "tp1": 231.9995752258369,
+      "tp2": 231.0285404215622,
+      "result": "pending",
+      "ts": 1783502149.3975508
     }
   ],
   "active_signals": {
@@ -368,7 +414,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783501200000
+      "last_checked_ms": 1783502100000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -389,7 +435,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783501200000
+      "last_checked_ms": 1783502100000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -410,7 +456,7 @@
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783501200000
+      "last_checked_ms": 1783502100000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -431,28 +477,7 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783501200000
-    },
-    "SOLUSDT_fast_1783500341876": {
-      "symbol": "SOLUSDT",
-      "direction": "short",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1854,
-      "hist_id": "SOLUSDT_short_1783500341876_977",
-      "entry": 77.11,
-      "stop_loss": 77.31032943069962,
-      "tp1": 76.80950585395057,
-      "tp2": 76.54907759404107,
-      "tp3": 76.2085175618517,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783500341.8769505,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783500341876
+      "last_checked_ms": 1783502100000
     },
     "XLMUSDT_slow_1783501279957": {
       "symbol": "XLMUSDT",
@@ -474,6 +499,69 @@
       "sent_at": 1783501279.9574208,
       "ttl_hours": 96,
       "last_checked_ms": 1783501279957
+    },
+    "AAVEUSDT_fast_1783502148651": {
+      "symbol": "AAVEUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1863,
+      "hist_id": "AAVEUSDT_short_1783502148651_704",
+      "entry": 86.674,
+      "stop_loss": 86.99046175258319,
+      "tp1": 86.19930737112524,
+      "tp2": 85.78790709276711,
+      "tp3": 85.24992211337572,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783502148.651827,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783502148651
+    },
+    "ADAUSDT_fast_1783502149029": {
+      "symbol": "ADAUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1864,
+      "hist_id": "ADAUSDT_short_1783502149029_933",
+      "entry": 0.1657,
+      "stop_loss": 0.16618645994723216,
+      "tp1": 0.16497031007915175,
+      "tp2": 0.16433791214774993,
+      "tp3": 0.16351093023745525,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783502149.0292504,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783502149029
+    },
+    "BCHUSDT_fast_1783502149397": {
+      "symbol": "BCHUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1865,
+      "hist_id": "BCHUSDT_short_1783502149397_570",
+      "entry": 233.12,
+      "stop_loss": 233.86694984944208,
+      "tp1": 231.9995752258369,
+      "tp2": 231.0285404215622,
+      "tp3": 229.7587256775107,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783502149.3975568,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783502149397
     }
   },
   "cooldowns": {
@@ -482,8 +570,8 @@
     "HYPEUSDT:long:fast": 1981577,
     "XLMUSDT:short:fast": 1981581,
     "PENDLEUSDT:long:slow": 1981588,
-    "AAVEUSDT:short:fast": 1981595,
-    "ADAUSDT:short:fast": 1981595,
+    "AAVEUSDT:short:fast": 1981669,
+    "ADAUSDT:short:fast": 1981669,
     "TRXUSDT:long:fast": 1981603,
     "ZECUSDT:long:slow": 1981604,
     "SOLUSDT:long:fast": 1981606,
@@ -497,7 +585,8 @@
     "TAOUSDT:short:fast": 1981666,
     "ZECUSDT:short:fast": 1981666,
     "SOLUSDT:short:fast": 1981667,
-    "XLMUSDT:short:slow": 1981668
+    "XLMUSDT:short:slow": 1981668,
+    "BCHUSDT:short:fast": 1981669
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -510,7 +599,8 @@
     "loss_cd:UNIUSDT:long": 1981658,
     "loss_cd:AAVEUSDT:long": 1981665,
     "loss_cd:TAOUSDT:short": 1981668,
-    "loss_cd:ZECUSDT:short": 1981668
+    "loss_cd:ZECUSDT:short": 1981668,
+    "loss_cd:SOLUSDT:short": 1981669
   },
   "atr_pct_memory": {
     "APTUSDT": [
@@ -547,12 +637,14 @@
       0.06780159994335619,
       0.06780159994335619,
       0.06780159994335619,
-      0.06780159994335619
+      0.06780159994335619,
+      0.027249777271030683
     ],
     "AAVEUSDT": [
       0.028583237385139314,
       0.030963813295365995,
-      0.030963813295365995
+      0.030963813295365995,
+      0.029674593406558442
     ],
     "LTCUSDT": [
       0.016385615725426107
@@ -578,6 +670,7 @@
       0.0700448130089544
     ],
     "NEARUSDT": [
+      0.08533562928689524,
       0.08533562928689524,
       0.08533562928689524,
       0.08533562928689524,
@@ -610,6 +703,7 @@
     ],
     "ONDOUSDT": [
       0.0247031820148617,
+      0.06580934367660737,
       0.06580934367660737
     ],
     "BNBUSDT": [
@@ -620,6 +714,9 @@
     ],
     "SUIUSDT": [
       0.02171620319846121
+    ],
+    "BCHUSDT": [
+      0.024019557655465613
     ]
   },
   "macro_calendar_cache": {
@@ -637,7 +734,7 @@
   },
   "governor": {
     "threshold": 0.2600000000000003,
-    "daily_count_ema": 17.127568971066395,
+    "daily_count_ema": 17.708433625406435,
     "last_adjust_ts": 1783501275.871105
   },
   "last_scan_ts": 0.0,
