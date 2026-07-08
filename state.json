@@ -251,6 +251,21 @@
       "result": "loss",
       "ts": 1783490470.7060518,
       "resolved_ts": 1783492239.2178557
+    },
+    {
+      "id": "TRXUSDT_short_1783494074035_774",
+      "symbol": "TRXUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "fast",
+      "confidence": 93.0,
+      "grade": "A+",
+      "entry": 0.32877,
+      "stop_loss": 0.3289662251619743,
+      "tp1": 0.3284756622570385,
+      "tp2": 0.3282205695464719,
+      "result": "pending",
+      "ts": 1783494074.0356975
     }
   ],
   "active_signals": {
@@ -273,7 +288,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783493100000
+      "last_checked_ms": 1783494000000
     },
     "PENGUUSDT_slow_1783462541102": {
       "symbol": "PENGUUSDT",
@@ -294,7 +309,7 @@
       "resolved": false,
       "sent_at": 1783462541.1030042,
       "ttl_hours": 96,
-      "last_checked_ms": 1783493100000
+      "last_checked_ms": 1783494000000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -315,7 +330,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783493100000
+      "last_checked_ms": 1783494000000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -336,7 +351,7 @@
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783493100000
+      "last_checked_ms": 1783494000000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -357,7 +372,28 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783493100000
+      "last_checked_ms": 1783494000000
+    },
+    "TRXUSDT_fast_1783494074035": {
+      "symbol": "TRXUSDT",
+      "direction": "short",
+      "pipeline_id": "fast",
+      "pathway": "momentum_breakout",
+      "message_id": 1835,
+      "hist_id": "TRXUSDT_short_1783494074035_774",
+      "entry": 0.32877,
+      "stop_loss": 0.3289662251619743,
+      "tp1": 0.3284756622570385,
+      "tp2": 0.3282205695464719,
+      "tp3": 0.3278869867711155,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783494074.0357049,
+      "ttl_hours": 30,
+      "last_checked_ms": 1783494074035
     }
   },
   "cooldowns": {
@@ -375,7 +411,8 @@
     "HYPEUSDT:short:slow": 1981626,
     "ADAUSDT:short:slow": 1981643,
     "LINKUSDT:short:slow": 1981644,
-    "UNIUSDT:long:slow": 1981656
+    "UNIUSDT:long:slow": 1981656,
+    "TRXUSDT:short:fast": 1981660
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -426,7 +463,8 @@
       0.016385615725426107
     ],
     "TRXUSDT": [
-      0.005270150639411766
+      0.005270150639411766,
+      0.0055742353668087295
     ],
     "UNIUSDT": [
       0.022843699558793416,
@@ -486,7 +524,7 @@
   },
   "governor": {
     "threshold": 0.020000000000000268,
-    "daily_count_ema": 15.215030322291328,
+    "daily_count_ema": 15.33277577394763,
     "last_adjust_ts": 1783493166.972506
   },
   "last_scan_ts": 0.0,
