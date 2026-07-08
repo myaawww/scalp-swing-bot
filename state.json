@@ -297,8 +297,9 @@
       "stop_loss": 205.74896451708273,
       "tp1": 204.1265532243759,
       "tp2": 203.28289935216833,
-      "result": "pending",
-      "ts": 1783499472.312697
+      "result": "loss",
+      "ts": 1783499472.312697,
+      "resolved_ts": 1783501254.532555
     },
     {
       "id": "ZECUSDT_short_1783499472647_747",
@@ -312,8 +313,9 @@
       "stop_loss": 472.0544707143115,
       "tp1": 466.69329392853285,
       "tp2": 463.90548199992793,
-      "result": "pending",
-      "ts": 1783499472.6473746
+      "result": "loss",
+      "ts": 1783499472.6473746,
+      "resolved_ts": 1783501255.2193687
     },
     {
       "id": "SOLUSDT_short_1783500341876_977",
@@ -329,6 +331,21 @@
       "tp2": 76.54907759404107,
       "result": "pending",
       "ts": 1783500341.876944
+    },
+    {
+      "id": "XLMUSDT_short_1783501279957_617",
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "pathway": "momentum_breakout",
+      "pipeline_id": "slow",
+      "confidence": 93.41,
+      "grade": "A+",
+      "entry": 0.18307,
+      "stop_loss": 0.18443647242465894,
+      "tp1": 0.18088364412054572,
+      "tp2": 0.17869728824109143,
+      "result": "pending",
+      "ts": 1783501279.957415
     }
   ],
   "active_signals": {
@@ -351,7 +368,7 @@
       "resolved": false,
       "sent_at": 1783442743.8943307,
       "ttl_hours": 30,
-      "last_checked_ms": 1783500300000
+      "last_checked_ms": 1783501200000
     },
     "HYPEUSDT_slow_1783463463118": {
       "symbol": "HYPEUSDT",
@@ -372,7 +389,7 @@
       "resolved": false,
       "sent_at": 1783463463.118208,
       "ttl_hours": 96,
-      "last_checked_ms": 1783500300000
+      "last_checked_ms": 1783501200000
     },
     "ADAUSDT_slow_1783478740820": {
       "symbol": "ADAUSDT",
@@ -393,7 +410,7 @@
       "resolved": false,
       "sent_at": 1783478740.8209507,
       "ttl_hours": 96,
-      "last_checked_ms": 1783500300000
+      "last_checked_ms": 1783501200000
     },
     "LINKUSDT_slow_1783479668005": {
       "symbol": "LINKUSDT",
@@ -414,49 +431,7 @@
       "resolved": false,
       "sent_at": 1783479668.0051184,
       "ttl_hours": 96,
-      "last_checked_ms": 1783500300000
-    },
-    "TAOUSDT_fast_1783499472312": {
-      "symbol": "TAOUSDT",
-      "direction": "short",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1851,
-      "hist_id": "TAOUSDT_short_1783499472312_501",
-      "entry": 205.1,
-      "stop_loss": 205.74896451708273,
-      "tp1": 204.1265532243759,
-      "tp2": 203.28289935216833,
-      "tp3": 202.17965967312767,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783499472.3127031,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783499472312
-    },
-    "ZECUSDT_fast_1783499472647": {
-      "symbol": "ZECUSDT",
-      "direction": "short",
-      "pipeline_id": "fast",
-      "pathway": "momentum_breakout",
-      "message_id": 1852,
-      "hist_id": "ZECUSDT_short_1783499472647_747",
-      "entry": 469.91,
-      "stop_loss": 472.0544707143115,
-      "tp1": 466.69329392853285,
-      "tp2": 463.90548199992793,
-      "tp3": 460.25988178559845,
-      "tp1_hit": false,
-      "tp2_hit": false,
-      "tp3_hit": false,
-      "sl_hit": false,
-      "resolved": false,
-      "sent_at": 1783499472.6473808,
-      "ttl_hours": 30,
-      "last_checked_ms": 1783499472647
+      "last_checked_ms": 1783501200000
     },
     "SOLUSDT_fast_1783500341876": {
       "symbol": "SOLUSDT",
@@ -478,6 +453,27 @@
       "sent_at": 1783500341.8769505,
       "ttl_hours": 30,
       "last_checked_ms": 1783500341876
+    },
+    "XLMUSDT_slow_1783501279957": {
+      "symbol": "XLMUSDT",
+      "direction": "short",
+      "pipeline_id": "slow",
+      "pathway": "momentum_breakout",
+      "message_id": 1860,
+      "hist_id": "XLMUSDT_short_1783501279957_617",
+      "entry": 0.18307,
+      "stop_loss": 0.18443647242465894,
+      "tp1": 0.18088364412054572,
+      "tp2": 0.17869728824109143,
+      "tp3": 0.17555440166437591,
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "tp3_hit": false,
+      "sl_hit": false,
+      "resolved": false,
+      "sent_at": 1783501279.9574208,
+      "ttl_hours": 96,
+      "last_checked_ms": 1783501279957
     }
   },
   "cooldowns": {
@@ -500,7 +496,8 @@
     "AAVEUSDT:long:fast": 1981663,
     "TAOUSDT:short:fast": 1981666,
     "ZECUSDT:short:fast": 1981666,
-    "SOLUSDT:short:fast": 1981667
+    "SOLUSDT:short:fast": 1981667,
+    "XLMUSDT:short:slow": 1981668
   },
   "post_loss_cooldown": {
     "loss_cd:ZECUSDT:long": 1981609,
@@ -511,7 +508,9 @@
     "loss_cd:ADAUSDT:short": 1981597,
     "loss_cd:SOLUSDT:long": 1981609,
     "loss_cd:UNIUSDT:long": 1981658,
-    "loss_cd:AAVEUSDT:long": 1981665
+    "loss_cd:AAVEUSDT:long": 1981665,
+    "loss_cd:TAOUSDT:short": 1981668,
+    "loss_cd:ZECUSDT:short": 1981668
   },
   "atr_pct_memory": {
     "APTUSDT": [
@@ -536,7 +535,8 @@
     "XLMUSDT": [
       0.025414051091740084,
       0.025097925633194185,
-      0.025097925633194185
+      0.025097925633194185,
+      0.07553608571883363
     ],
     "PENDLEUSDT": [
       0.07338210639597739,
@@ -581,6 +581,7 @@
       0.08533562928689524,
       0.08533562928689524,
       0.08533562928689524,
+      0.08533562928689524,
       0.08533562928689524
     ],
     "DOTUSDT": [
@@ -608,7 +609,8 @@
       0.01892743033239448
     ],
     "ONDOUSDT": [
-      0.0247031820148617
+      0.0247031820148617,
+      0.06580934367660737
     ],
     "BNBUSDT": [
       0.01312402621864372
@@ -621,7 +623,7 @@
     ]
   },
   "macro_calendar_cache": {
-    "fetched_at": 1783490469.9195051,
+    "fetched_at": 1783501277.2206578,
     "events": [
       {
         "name": "FOMC Meeting Minutes",
@@ -634,9 +636,9 @@
     ]
   },
   "governor": {
-    "threshold": 0.18000000000000027,
-    "daily_count_ema": 16.62066937772517,
-    "last_adjust_ts": 1783498544.2005954
+    "threshold": 0.2600000000000003,
+    "daily_count_ema": 17.127568971066395,
+    "last_adjust_ts": 1783501275.871105
   },
   "last_scan_ts": 0.0,
   "last_summary_date": "2026-07-08",
