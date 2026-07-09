@@ -1,1 +1,63 @@
-{}
+{
+  "meta": {
+    "engine": "CHAMELEON-X",
+    "version": "1.0.0",
+    "last_run_utc": null,
+    "last_run_id": null
+  },
+  "watchlist": {
+    "core": [
+      "BTC",
+      "ETH",
+      "HYPE",
+      "ZEC",
+      "NEAR",
+      "ONDO",
+      "SUI",
+      "PENGU",
+      "BNB",
+      "SOL",
+      "TRX",
+      "BCH",
+      "DOGE",
+      "ADA",
+      "DOT",
+      "TAO",
+      "AVAX",
+      "LINK",
+      "AAVE",
+      "XRP",
+      "XLM",
+      "UNI",
+      "LTC",
+      "APT",
+      "PENDLE"
+    ],
+    "dynamic_extension": [],
+    "last_refreshed_ms": 0,
+    "excluded_low_liquidity": []
+  },
+  "candle_cache": {},
+  "adaptive": {
+    "base_threshold": 62.0,
+    "current_threshold": 62.0,
+    "chaos_index_ema": 40.0,
+    "rolling_win_rate_30": 0.5,
+    "signals_today": 0,
+    "daily_target_min": 5,
+    "date_utc": "2026-07-09",
+    "last_20_outcomes": []
+  },
+  "open_signals": [],
+  "closed_signals_30d": [],
+  "daily_summary": {
+    "last_sent_date_utc": null
+  },
+  "symbol_cooldowns": {},
+  "next_signal_id": 1,
+  "run_lock": {
+    "locked": false,
+    "locked_at_ms": 0,
+    "run_id": null
+  }
+}
