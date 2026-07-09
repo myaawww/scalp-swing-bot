@@ -2,8 +2,8 @@
   "meta": {
     "engine": "CHAMELEON-X",
     "version": "1.0.0",
-    "last_run_utc": "2026-07-09T16:30:30.859000+00:00",
-    "last_run_id": "run_20260709_163030"
+    "last_run_utc": "2026-07-09T16:45:17.711000+00:00",
+    "last_run_id": "run_20260709_164517"
   },
   "watchlist": {
     "core": [
@@ -240,7 +240,7 @@
   "adaptive": {
     "base_threshold": 62.0,
     "current_threshold": 62.0,
-    "chaos_index_ema": 53.413161986317824,
+    "chaos_index_ema": 53.41316198631783,
     "rolling_win_rate_30": 0.5,
     "signals_today": 8,
     "daily_target_min": 5,
@@ -269,7 +269,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 2,
@@ -292,7 +292,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 3,
@@ -315,7 +315,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 4,
@@ -338,7 +338,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 5,
@@ -361,7 +361,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 6,
@@ -384,7 +384,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 7,
@@ -407,7 +407,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     },
     {
       "id": 8,
@@ -430,7 +430,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783614630859
+      "last_checked_ms": 1783615517711
     }
   ],
   "closed_signals_30d": [],
