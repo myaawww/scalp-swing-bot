@@ -2,8 +2,8 @@
   "meta": {
     "engine": "CHAMELEON-X",
     "version": "1.0.0",
-    "last_run_utc": "2026-07-09T17:00:35.680000+00:00",
-    "last_run_id": "run_20260709_170035"
+    "last_run_utc": "2026-07-09T17:15:17.790000+00:00",
+    "last_run_id": "run_20260709_171517"
   },
   "watchlist": {
     "core": [
@@ -242,7 +242,7 @@
     "current_threshold": 62.0,
     "chaos_index_ema": 53.41316198631783,
     "rolling_win_rate_30": 0.5,
-    "signals_today": 9,
+    "signals_today": 10,
     "daily_target_min": 5,
     "date_utc": "2026-07-09",
     "last_20_outcomes": []
@@ -269,7 +269,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 2,
@@ -292,7 +292,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 3,
@@ -315,7 +315,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 4,
@@ -338,7 +338,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 5,
@@ -361,7 +361,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 6,
@@ -384,7 +384,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 7,
@@ -407,7 +407,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 8,
@@ -430,7 +430,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
     },
     {
       "id": 9,
@@ -453,7 +453,30 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783616435680
+      "last_checked_ms": 1783617317790
+    },
+    {
+      "id": 10,
+      "symbol": "ZEC",
+      "direction": "LONG",
+      "style": "intraday",
+      "entry_low": 470.2,
+      "entry_high": 470.44017863641676,
+      "sl": 464.65810159871455,
+      "sl_original": 464.65810159871455,
+      "tp1": 478.71,
+      "tp2": 485.21,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T17:15:17.790000+00:00",
+      "opened_ms": 1783617317790,
+      "bars_since_open": 0,
+      "telegram_message_id": 2022,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 69.27016022263743,
+      "regime_at_entry": "bullish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783617317790
     }
   ],
   "closed_signals_30d": [],
@@ -468,9 +491,10 @@
     "XLM": "2026-07-09T18:24:39.446000+00:00",
     "NEAR": "2026-07-09T18:30:30.859000+00:00",
     "BTC": "2026-07-09T18:30:30.859000+00:00",
-    "DOT": "2026-07-09T19:00:35.680000+00:00"
+    "DOT": "2026-07-09T19:00:35.680000+00:00",
+    "ZEC": "2026-07-09T19:15:17.790000+00:00"
   },
-  "next_signal_id": 10,
+  "next_signal_id": 11,
   "run_lock": {
     "locked": false,
     "locked_at_ms": 0,
