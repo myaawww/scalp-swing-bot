@@ -2,18 +2,6 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
-      "HYPEUSDT": {
-        "direction": "short",
-        "zone_low": 70.461,
-        "zone_high": 70.838,
-        "zone_quality": 1,
-        "sweep_extreme": 72.0,
-        "sfp_time": 1783382400000,
-        "range_low": 68.21,
-        "range_high": 72.914,
-        "eq": 70.562,
-        "atr_h4": 1.6104001564687547
-      },
       "BNBUSDT": {
         "direction": "short",
         "zone_low": 578.72,
@@ -24,23 +12,10 @@
         "range_low": 560.06,
         "range_high": 591.9,
         "eq": 575.98,
-        "atr_h4": 7.239870336670111
+        "atr_h4": 7.062736710422864
       }
     },
-    "12h_1h": {
-      "APTUSDT": {
-        "direction": "long",
-        "zone_low": 0.5743,
-        "zone_high": 0.5779,
-        "zone_quality": 1,
-        "sweep_extreme": 0.559,
-        "sfp_time": 1782864000000,
-        "range_low": 0.5538,
-        "range_high": 0.6457,
-        "eq": 0.59975,
-        "atr_h4": 0.02732780672487069
-      }
-    }
+    "12h_1h": {}
   },
   "active_signals": [],
   "resolved_signals": [],
