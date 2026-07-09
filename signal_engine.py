@@ -1073,6 +1073,18 @@ def _one_liner(direction: str, pattern: str, regime: str, notes: list) -> str:
     return f"{dir_word} {pattern_word} in a {regime} regime -- {tail}."
 
 
+def _setup_tag_line(c: "Candidate") -> str:
+    """Compact tag-style setup summary for the Telegram message -- pattern
+    name plus up to two short confirmation tags, e.g. 'Pullback Continuation
+    · Pin Bar · LH/LL structure'. Regime/direction are shown elsewhere in the
+    message already, so they're left out here to keep it short."""
+    tags = [c.pattern.replace("_", " ").title()]
+    tags.extend(n[0].upper() + n[1:] for n in c.score.notes[:2])
+    if c.is_countertrend:
+        tags.append("Countertrend")
+    return " · ".join(tags)
+
+
 def detect_setups_for_timeframe(symbol: str, style: str, regime: RegimeRead,
                                  ind_setup: Indicators, ind_trigger: Indicators,
                                  ref_candles_for_sl: list, chaos_index: float,
@@ -1367,13 +1379,15 @@ def fmt_num(v: float) -> str:
 
 
 def format_signal_message(signal_id: int, c: Candidate) -> str:
-    """Section 12 template, reproduced exactly (HTML parse_mode, <pre>
-    block for copy-paste-friendly levels)."""
+    """Section 12 template (HTML parse_mode). Each price is wrapped in its
+    own <code> span rather than one shared <pre> block, so tapping/clicking
+    any single number in Telegram copies just that value."""
     direction_word = "LONG" if c.direction == "long" else "SHORT"
     dot = "🟢" if c.direction == "long" else "🔴"
     style_word = "Intraday" if c.style == "intraday" else "Swing"
     regime_word = c.regime.capitalize()
     lv = c.levels
+    entry_exact = (lv.entry_low + lv.entry_high) / 2.0
 
     lines = [
         f"🦎 <b>{ENGINE_NAME}</b> — Signal #{signal_id}",
@@ -1381,19 +1395,21 @@ def format_signal_message(signal_id: int, c: Candidate) -> str:
         f"<b>{c.symbol}-PERP · {direction_word}</b> {dot}",
         f"Style: {style_word}  |  Regime: {regime_word}",
         "",
-        "<pre>",
-        f"ENTRY   {fmt_num(lv.entry_low)}–{fmt_num(lv.entry_high)}",
-        f"SL      {fmt_num(lv.sl)}",
-        f"TP1     {fmt_num(lv.tp1)}",
+        # Each price lives in its own <code> chip (not one shared <pre>
+        # block) so tapping/clicking a single number in Telegram copies
+        # just that number, not the whole block.
+        f"ENTRY ZONE   <code>{fmt_num(lv.entry_low)}</code>–<code>{fmt_num(lv.entry_high)}</code>",
+        f"ENTRY EXACT  <code>{fmt_num(entry_exact)}</code>",
+        f"SL           <code>{fmt_num(lv.sl)}</code>",
+        f"TP1          <code>{fmt_num(lv.tp1)}</code>",
     ]
     if lv.tp2 is not None:
-        lines.append(f"TP2     {fmt_num(lv.tp2)}")
-    lines.append("</pre>")
+        lines.append(f"TP2          <code>{fmt_num(lv.tp2)}</code>")
     lines.append("")
     rr_line = f"R:R → TP1 {lv.rr1:.2f}R" + (f" | TP2 {lv.rr2:.2f}R" if lv.rr2 is not None else "")
     lines.append(rr_line)
     lines.append(f"Confluence: {c.score.total:.0f}/100")
-    lines.append(f"Setup: {c.reason}")
+    lines.append(f"Setup: {_setup_tag_line(c)}")
     expiry_bars = SIGNAL_EXPIRY_BARS
     lines.append(f"Valid until: {expiry_bars} candles or invalidation")
     lines.append("")
