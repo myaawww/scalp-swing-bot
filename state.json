@@ -2,8 +2,8 @@
   "meta": {
     "engine": "CHAMELEON-X",
     "version": "1.0.0",
-    "last_run_utc": null,
-    "last_run_id": null
+    "last_run_utc": "2026-07-09T16:24:39.446000+00:00",
+    "last_run_id": "run_20260709_162439"
   },
   "watchlist": {
     "core": [
@@ -33,28 +33,372 @@
       "APT",
       "PENDLE"
     ],
-    "dynamic_extension": [],
-    "last_refreshed_ms": 0,
-    "excluded_low_liquidity": []
+    "dynamic_extension": [
+      "ARB",
+      "FARTCOIN",
+      "LDO",
+      "LIT",
+      "VVV",
+      "WLD",
+      "XPL",
+      "ZRO",
+      "kPEPE"
+    ],
+    "last_refreshed_ms": 1783614279446,
+    "excluded_low_liquidity": [
+      "ATOM",
+      "MATIC",
+      "DYDX",
+      "AVAX",
+      "BNB",
+      "APE",
+      "OP",
+      "LTC",
+      "DOGE",
+      "INJ",
+      "CRV",
+      "LINK",
+      "STX",
+      "RNDR",
+      "CFX",
+      "FTM",
+      "GMX",
+      "SNX",
+      "BCH",
+      "APT",
+      "COMP",
+      "MKR",
+      "FXS",
+      "HPOS",
+      "RLB",
+      "UNIBOT",
+      "YGG",
+      "TRX",
+      "kSHIB",
+      "SEI",
+      "RUNE",
+      "OX",
+      "FRIEND",
+      "SHIA",
+      "CYBER",
+      "BLZ",
+      "DOT",
+      "BANANA",
+      "TRB",
+      "FTT",
+      "LOOM",
+      "OGN",
+      "RDNT",
+      "ARK",
+      "BNT",
+      "CANTO",
+      "REQ",
+      "BIGTIME",
+      "KAS",
+      "ORBS"
+    ],
+    "last_refreshed_utc": "2026-07-09T16:24:39.446000+00:00"
   },
-  "candle_cache": {},
+  "candle_cache": {
+    "AAVE": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ADA": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "APT": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "AVAX": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "BCH": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ARB": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "BNB": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "DOT": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "DOGE": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "BTC": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ETH": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "FARTCOIN": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "HYPE": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "LDO": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "LINK": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "LIT": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "LTC": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "NEAR": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ONDO": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "PENDLE": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "PENGU": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "SOL": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "SUI": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "TAO": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "TRX": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "UNI": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "VVV": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "XLM": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "WLD": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "XPL": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "XRP": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ZEC": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "ZRO": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    },
+    "kPEPE": {
+      "4h_last_open_bar": 1783612800000,
+      "1h_last_open_bar": 1783612800000
+    }
+  },
   "adaptive": {
     "base_threshold": 62.0,
-    "current_threshold": 62.0,
-    "chaos_index_ema": 40.0,
+    "current_threshold": 59.0,
+    "chaos_index_ema": 48.12918908261686,
     "rolling_win_rate_30": 0.5,
-    "signals_today": 0,
+    "signals_today": 6,
     "daily_target_min": 5,
     "date_utc": "2026-07-09",
     "last_20_outcomes": []
   },
-  "open_signals": [],
+  "open_signals": [
+    {
+      "id": 1,
+      "symbol": "DOGE",
+      "direction": "SHORT",
+      "style": "swing",
+      "entry_low": 0.07246021222038937,
+      "entry_high": 0.072497,
+      "sl": 0.07299630317500055,
+      "sl_original": 0.07299630317500055,
+      "tp1": 0.071955,
+      "tp2": 0.071626,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2006,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 69.14949697435944,
+      "regime_at_entry": "bearish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    },
+    {
+      "id": 2,
+      "symbol": "ONDO",
+      "direction": "SHORT",
+      "style": "swing",
+      "entry_low": 0.31648532697728265,
+      "entry_high": 0.31671,
+      "sl": 0.3211208544230682,
+      "sl_original": 0.3211208544230682,
+      "tp1": 0.31081,
+      "tp2": 0.30949,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2007,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 66.57130931500845,
+      "regime_at_entry": "bearish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    },
+    {
+      "id": 3,
+      "symbol": "WLD",
+      "direction": "SHORT",
+      "style": "swing",
+      "entry_low": 0.38221529640004037,
+      "entry_high": 0.38258,
+      "sl": 0.3881713411624829,
+      "sl_original": 0.3881713411624829,
+      "tp1": 0.37048,
+      "tp2": 0.36445,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2008,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 61.88456756812086,
+      "regime_at_entry": "bearish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    },
+    {
+      "id": 4,
+      "symbol": "HYPE",
+      "direction": "SHORT",
+      "style": "swing",
+      "entry_low": 67.51410973984731,
+      "entry_high": 67.58,
+      "sl": 68.95548378826219,
+      "sl_original": 68.95548378826219,
+      "tp1": 66.1,
+      "tp2": 65.474,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2009,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 61.80144715160854,
+      "regime_at_entry": "neutral",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    },
+    {
+      "id": 5,
+      "symbol": "XLM",
+      "direction": "SHORT",
+      "style": "intraday",
+      "entry_low": 0.181404347329522,
+      "entry_high": 0.18146,
+      "sl": 0.18228219,
+      "sl_original": 0.18228219,
+      "tp1": 0.18037,
+      "tp2": 0.18014,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2010,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 60.65952131390914,
+      "regime_at_entry": "bearish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    },
+    {
+      "id": 6,
+      "symbol": "ONDO",
+      "direction": "SHORT",
+      "style": "intraday",
+      "entry_low": 0.3161359236226082,
+      "entry_high": 0.31626,
+      "sl": 0.31896439,
+      "sl_original": 0.31896439,
+      "tp1": 0.31227,
+      "tp2": 0.30937,
+      "status": "PENDING",
+      "opened_utc": "2026-07-09T16:24:39.446000+00:00",
+      "opened_ms": 1783614279446,
+      "bars_since_open": 0,
+      "telegram_message_id": 2011,
+      "telegram_chat_id": "-1003892716834",
+      "confluence_score": 60.57130931500844,
+      "regime_at_entry": "bearish",
+      "reaction_state": null,
+      "tp1_hit": false,
+      "last_checked_ms": 1783614279446
+    }
+  ],
   "closed_signals_30d": [],
   "daily_summary": {
-    "last_sent_date_utc": null
+    "last_sent_date_utc": "2026-07-09"
   },
-  "symbol_cooldowns": {},
-  "next_signal_id": 1,
+  "symbol_cooldowns": {
+    "DOGE": "2026-07-09T18:24:39.446000+00:00",
+    "ONDO": "2026-07-09T18:24:39.446000+00:00",
+    "WLD": "2026-07-09T18:24:39.446000+00:00",
+    "HYPE": "2026-07-09T18:24:39.446000+00:00",
+    "XLM": "2026-07-09T18:24:39.446000+00:00"
+  },
+  "next_signal_id": 7,
   "run_lock": {
     "locked": false,
     "locked_at_ms": 0,
