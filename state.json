@@ -2,8 +2,8 @@
   "meta": {
     "engine": "CHAMELEON-X",
     "version": "1.0.0",
-    "last_run_utc": "2026-07-09T17:15:17.790000+00:00",
-    "last_run_id": "run_20260709_171517"
+    "last_run_utc": "2026-07-09T17:30:33.785000+00:00",
+    "last_run_id": "run_20260709_173033"
   },
   "watchlist": {
     "core": [
@@ -269,7 +269,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 2,
@@ -292,7 +292,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 3,
@@ -315,7 +315,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 4,
@@ -338,7 +338,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 5,
@@ -361,7 +361,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 6,
@@ -384,7 +384,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 7,
@@ -407,7 +407,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 8,
@@ -430,7 +430,7 @@
       "regime_at_entry": "neutral",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 9,
@@ -453,7 +453,7 @@
       "regime_at_entry": "bearish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     },
     {
       "id": 10,
@@ -476,7 +476,7 @@
       "regime_at_entry": "bullish",
       "reaction_state": null,
       "tp1_hit": false,
-      "last_checked_ms": 1783617317790
+      "last_checked_ms": 1783618233785
     }
   ],
   "closed_signals_30d": [],
