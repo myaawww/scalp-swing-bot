@@ -349,9 +349,6 @@ def resolve_dynamic_watchlist(state: dict, reference_ms: int) -> list:
         key=lambda t: (t[1] + t[2]), reverse=True,
     )
     top = [sym for sym, _, _ in ranked[:DYNAMIC_TOP_N]]
-    excluded = [sym for sym, vlm, _ in
-                sorted(ctxs.items(), key=lambda kv: kv[1]["day_ntl_vlm"])
-                if False]  # placeholder kept for schema shape; see below
     excluded_low_liq = [sym for sym, c in ctxs.items() if c["day_ntl_vlm"] < DYNAMIC_MIN_DAY_NTL_VLM]
 
     dynamic_extension = sorted(set(top) - set(CORE_WATCHLIST))
