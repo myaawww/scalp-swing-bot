@@ -25,6 +25,18 @@
         "range_high": 591.9,
         "eq": 575.98,
         "atr_h4": 7.239870336670111
+      },
+      "TRXUSDT": {
+        "direction": "long",
+        "zone_low": 0.32791,
+        "zone_high": 0.33011,
+        "zone_quality": 3,
+        "sweep_extreme": 0.32758,
+        "sfp_time": 1783555200000,
+        "range_low": 0.32625,
+        "range_high": 0.33313,
+        "eq": 0.32969,
+        "atr_h4": 0.0019891051751760804
       }
     },
     "12h_1h": {
