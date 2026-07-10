@@ -12,7 +12,7 @@
         "range_low": 1713.0,
         "range_high": 1813.3,
         "eq": 1763.15,
-        "atr_h4": 27.481509635208848
+        "atr_h4": 26.76140113500985
       },
       "BNBUSDT": {
         "direction": "short",
@@ -24,10 +24,23 @@
         "range_low": 560.06,
         "range_high": 586.91,
         "eq": 573.4849999999999,
-        "atr_h4": 6.247677552202863
+        "atr_h4": 6.149271760111474
       }
     },
-    "12h_1h": {}
+    "12h_1h": {
+      "DOTUSDT": {
+        "direction": "long",
+        "zone_low": 0.82242,
+        "zone_high": 0.83429,
+        "zone_quality": 3,
+        "sweep_extreme": 0.81993,
+        "sfp_time": 1783555200000,
+        "range_low": 0.80059,
+        "range_high": 0.90697,
+        "eq": 0.85378,
+        "atr_h4": 0.032504739879356044
+      }
+    }
   },
   "active_signals": [
     {
@@ -44,7 +57,7 @@
       "sl": 65.81173965029345,
       "tp2_reference_only": 71.44952069941311,
       "resolved": false,
-      "last_processed_candle_ts": 1783711800000
+      "last_processed_candle_ts": 1783712700000
     }
   ],
   "resolved_signals": [],
