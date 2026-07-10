@@ -14,18 +14,6 @@
         "eq": 1763.15,
         "atr_h4": 26.88008761087111
       },
-      "HYPEUSDT": {
-        "direction": "long",
-        "zone_low": 67.395,
-        "zone_high": 67.706,
-        "zone_quality": 1,
-        "sweep_extreme": 66.1,
-        "sfp_time": 1783540800000,
-        "range_low": 66.1,
-        "range_high": 72.914,
-        "eq": 69.507,
-        "atr_h4": 1.4413017485327704
-      },
       "SUIUSDT": {
         "direction": "long",
         "zone_low": 0.72082,
@@ -63,24 +51,29 @@
         "atr_h4": 0.045735442609608934
       }
     },
-    "12h_1h": {
-      "DOTUSDT": {
-        "direction": "long",
-        "zone_low": 0.82242,
-        "zone_high": 0.83429,
-        "zone_quality": 3,
-        "sweep_extreme": 0.81993,
-        "sfp_time": 1783555200000,
-        "range_low": 0.80059,
-        "range_high": 0.90697,
-        "eq": 0.85378,
-        "atr_h4": 0.032504739879356044
-      }
-    }
+    "12h_1h": {}
   },
-  "active_signals": [],
+  "active_signals": [
+    {
+      "symbol": "HYPEUSDT",
+      "direction": "long",
+      "msg_id": 2143,
+      "combo": "h4_15m",
+      "exec_tf": "15m",
+      "signal_max_age_hours": 24,
+      "bar_index": 1981873,
+      "signal_bar_time": 1783685700000,
+      "entry": 67.691,
+      "tp1": 71.44952069941311,
+      "sl": 65.81173965029345,
+      "tp2_reference_only": 71.44952069941311,
+      "resolved": false
+    }
+  ],
   "resolved_signals": [],
-  "signal_cooldowns": {},
+  "signal_cooldowns": {
+    "h4_15m:HYPEUSDT_long": 123867
+  },
   "signal_history": [],
   "last_daily_summary_date": "2026-07-10"
 }
