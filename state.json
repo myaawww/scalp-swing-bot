@@ -51,7 +51,20 @@
         "atr_h4": 0.045735442609608934
       }
     },
-    "12h_1h": {}
+    "12h_1h": {
+      "DOTUSDT": {
+        "direction": "long",
+        "zone_low": 0.82242,
+        "zone_high": 0.83429,
+        "zone_quality": 3,
+        "sweep_extreme": 0.81993,
+        "sfp_time": 1783555200000,
+        "range_low": 0.80059,
+        "range_high": 0.90697,
+        "eq": 0.85378,
+        "atr_h4": 0.032504739879356044
+      }
+    }
   },
   "active_signals": [
     {
@@ -68,7 +81,7 @@
       "sl": 65.81173965029345,
       "tp2_reference_only": 71.44952069941311,
       "resolved": false,
-      "last_processed_candle_ts": 1783695600000
+      "last_processed_candle_ts": 1783696500000
     }
   ],
   "resolved_signals": [],
