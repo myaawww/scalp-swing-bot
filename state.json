@@ -1,1 +1,147 @@
-{}
+{
+  "open_trades": [
+    {
+      "id": "BTC-1783670799",
+      "engine": "Range",
+      "symbol": "BTC",
+      "direction": "short",
+      "entry": 64013.0,
+      "sl": 64367.90257826252,
+      "tp1": 62979.25,
+      "tp2": 61894.0,
+      "confidence": 0.53,
+      "score": 0.6748660000000001,
+      "expected_rr": 5.970652595351388,
+      "confluences": [
+        "range resistance"
+      ],
+      "regime": "ranging",
+      "status": "PENDING",
+      "opened_ts": 1783670799.9032161,
+      "tg_message_id": 2097,
+      "tp1_hit": false,
+      "be_moved": false
+    },
+    {
+      "id": "APT-1783670800",
+      "engine": "BreakerBlock",
+      "symbol": "APT",
+      "direction": "long",
+      "entry": 0.6295,
+      "sl": 0.6275684555139425,
+      "tp1": 0.6326182918227158,
+      "tp2": 0.6347,
+      "confidence": 0.58,
+      "score": 0.6684380079340628,
+      "expected_rr": 2.6921461232373347,
+      "confluences": [
+        "bullish breaker retest"
+      ],
+      "regime": "reversal",
+      "status": "PENDING",
+      "opened_ts": 1783670800.5827336,
+      "tg_message_id": 2098,
+      "tp1_hit": false,
+      "be_moved": false
+    },
+    {
+      "id": "DOT-1783670801",
+      "engine": "LiquiditySweep",
+      "symbol": "DOT",
+      "direction": "short",
+      "entry": 0.84911,
+      "sl": 0.853292491337847,
+      "tp1": 0.8448050404233803,
+      "tp2": 0.8418,
+      "confidence": 0.6,
+      "score": 0.646097415877612,
+      "expected_rr": 1.747762137330092,
+      "confluences": [
+        "resistance liquidity swept",
+        "wick rejection"
+      ],
+      "regime": "reversal",
+      "status": "PENDING",
+      "opened_ts": 1783670801.3221452,
+      "tg_message_id": 2099,
+      "tp1_hit": false,
+      "be_moved": false
+    }
+  ],
+  "engine_stats": {
+    "LiquiditySweep": {
+      "wins": 0,
+      "losses": 2,
+      "gross_win": 0.0,
+      "gross_loss": 2.0,
+      "rr_sum": -2.0,
+      "hold_minutes_sum": 0.18722532192866007,
+      "n": 2,
+      "weight": 1.0
+    }
+  },
+  "regime_stats": {
+    "ranging": {
+      "wins": 0,
+      "losses": 2
+    }
+  },
+  "confidence_calibration": {
+    "bins": {
+      "6": {
+        "wins": 0,
+        "n": 2
+      }
+    }
+  },
+  "daily_signal_counts": {
+    "2026-07-10": 5
+  },
+  "signal_count_ema": 6.3,
+  "recent_signal_directions": [
+    {
+      "symbol": "XRP",
+      "direction": "long",
+      "ts": 1783670798.451383,
+      "cluster": "alt"
+    },
+    {
+      "symbol": "BCH",
+      "direction": "short",
+      "ts": 1783670798.451383,
+      "cluster": "alt"
+    },
+    {
+      "symbol": "BTC",
+      "direction": "short",
+      "ts": 1783670798.451383,
+      "cluster": "majors"
+    },
+    {
+      "symbol": "BCH",
+      "direction": "short",
+      "ts": 1783670798.451383,
+      "cluster": "alt"
+    },
+    {
+      "symbol": "APT",
+      "direction": "long",
+      "ts": 1783670798.451383,
+      "cluster": "l1"
+    },
+    {
+      "symbol": "DOT",
+      "direction": "short",
+      "ts": 1783670798.451383,
+      "cluster": "l1"
+    },
+    {
+      "symbol": "DOT",
+      "direction": "short",
+      "ts": 1783670798.451383,
+      "cluster": "l1"
+    }
+  ],
+  "last_summary_date": "2026-07-10",
+  "version": "1.0.1"
+}
