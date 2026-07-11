@@ -1824,6 +1824,9 @@ def update_engine_learning(state: dict, sig: dict, result: str) -> None:
     if result == "tp2":
         stats["wins"] += 1
         stats["gross_profit_r"] += max(r, 0.0)
+    elif result == "tp1_stop":
+        stats["wins"] += 1  # TP1 was already banked; original SL hit afterward doesn't erase the win
+        stats["gross_profit_r"] += max(r, 0.0)
     elif result == "breakeven":
         stats["wins"] += 1  # TP1 was already banked before the stop moved to breakeven
         stats["gross_profit_r"] += max(r, 0.0)
@@ -1843,7 +1846,7 @@ def update_engine_learning(state: dict, sig: dict, result: str) -> None:
         return  # a scratch confirms neither the entry thesis nor the confidence estimate -- exclude from calibration
 
     predicted_p = sig["confidence"] / 100.0
-    actual = 1.0 if result == "tp2" else 0.0
+    actual = 1.0 if result in ("tp2", "tp1_stop") else 0.0
     brier = (predicted_p - actual) ** 2
     stats["calibration_error"] = round(0.9 * stats["calibration_error"] + 0.1 * brier, 4)
 
@@ -1922,19 +1925,26 @@ def check_active_signals(state: dict, market_prices: dict[str, float], candle_bu
                 result = "tp2"
             elif hit_tp1:
                 sig["status"] = "tp1"
-                sig["sl"] = sig["entry"]  # move stop to breakeven after TP1
+                # SL is intentionally left at its ORIGINAL level -- do not move it to
+                # entry. A pullback to entry after a partial take-profit is normal price
+                # action and must not be able to close the trade out on its own; see the
+                # "tp1_stop" result below for how a later original-SL hit is scored.
                 if telegram_enabled and sig.get("tg_message_id"):
                     react_to_message(sig["tg_message_id"], "tp1")
                     reply_to_telegram(sig["tg_message_id"],
                                        f"🔥 <b>TP1 hit</b> on {sig['symbol']} ({sig['engine']}) -- "
-                                       f"SL moved to breakeven @ <code>{fmt_px(sig['entry'])}</code>")
+                                       f"SL stays at <code>{fmt_px(sig['sl'])}</code> -- unchanged. "
+                                       f"(Feel free to move your own stop to entry manually if you'd "
+                                       f"like to lock in breakeven yourself.)")
                 still_active.append(sig)
                 continue
         elif sig["status"] == "tp1":
-            # sig["sl"] now equals entry, so hit_sl here means the breakeven stop
-            # was hit, not the original SL -- must not be labeled a loss.
+            # SL was never moved, so hit_sl here means the ORIGINAL stop was hit after
+            # TP1 already banked partial profit. That's still a win overall -- the trade
+            # is credited at TP1's R, not scored as a loss just because the runner
+            # portion gave back to the original stop.
             if hit_sl:
-                result = "breakeven"
+                result = "tp1_stop"
             elif hit_tp2:
                 result = "tp2"
 
@@ -1942,18 +1952,24 @@ def check_active_signals(state: dict, market_prices: dict[str, float], candle_bu
             sig["status"] = "closed"
             sig["result"] = result
             sig["closed_at"] = datetime.now(timezone.utc).isoformat()
-            sig["_close_price"] = {"tp2": sig["tp2"], "breakeven": sig["entry"]}.get(result, sig["sl"])
+            sig["_close_price"] = {"tp2": sig["tp2"], "tp1_stop": sig["tp1"]}.get(result, sig["sl"])
             opened = datetime.fromisoformat(sig.get("filled_at", sig["opened_at"]))
             sig["_hold_secs"] = (datetime.now(timezone.utc) - opened).total_seconds()
             update_engine_learning(state, sig, result)
             state["signal_history"].append(sig)
             if telegram_enabled and sig.get("tg_message_id"):
                 r_final = _r_multiple(sig, sig["_close_price"])
-                labels = {"tp2": "🏆 TP2 -- full close", "sl": "😭 SL hit", "breakeven": "🤝 Breakeven stop"}
                 react_to_message(sig["tg_message_id"], result)
-                reply_to_telegram(sig["tg_message_id"],
-                                   f"{labels.get(result, result.upper())} on {sig['symbol']} ({sig['engine']}) "
-                                   f"-- {r_final:+.2f}R")
+                if result == "tp1_stop":
+                    reply_to_telegram(sig["tg_message_id"],
+                                       f"🔒 <b>TP1 secured -- WIN</b> on {sig['symbol']} ({sig['engine']}) -- "
+                                       f"original SL was hit afterward on the runner, but TP1's "
+                                       f"{r_final:+.2f}R stays banked as the trade result.")
+                else:
+                    labels = {"tp2": "🏆 TP2 hit -- WIN", "sl": "😭 SL hit -- LOSS"}
+                    reply_to_telegram(sig["tg_message_id"],
+                                       f"{labels.get(result, result.upper())} on {sig['symbol']} ({sig['engine']}) "
+                                       f"-- {r_final:+.2f}R")
         else:
             still_active.append(sig)
     state["active_signals"] = still_active
@@ -1964,7 +1980,8 @@ def check_active_signals(state: dict, market_prices: dict[str, float], candle_bu
 # ==============================================================================
 
 TELEGRAM_API_BASE = "https://api.telegram.org"
-REACTION_EMOJIS = {"activated": "⚡", "tp1": "🔥", "tp2": "🏆", "sl": "😭", "breakeven": "🤝", "cancelled": "🤷"}
+REACTION_EMOJIS = {"activated": "⚡", "tp1": "🔥", "tp2": "🏆", "sl": "😭", "breakeven": "🤝", "cancelled": "🤷",
+                   "tp1_stop": "🔒"}
 
 
 def telegram_enabled() -> bool:
@@ -2060,7 +2077,7 @@ def build_daily_summary(state: dict, now: datetime) -> str:
     todays = [h for h in state["signal_history"] if h.get("closed_at", "").startswith(today_str)
               or h.get("opened_at", "").startswith(today_str)]
     total = len(todays)
-    wins = sum(1 for h in todays if h.get("result") in ("tp2", "breakeven"))
+    wins = sum(1 for h in todays if h.get("result") in ("tp2", "breakeven", "tp1_stop"))
     losses = sum(1 for h in todays if h.get("result") == "sl")
     breakevens = sum(1 for h in todays if h.get("result") == "breakeven")
     win_rate = safe_div(wins, max(wins + losses, 1), 0.0) * 100
@@ -2078,9 +2095,9 @@ def build_daily_summary(state: dict, now: datetime) -> str:
         by_engine.setdefault(h["engine"], [0, 0, 0])
         result = h.get("result")
         by_regime[rk][0] += 1
-        by_regime[rk][1] += 1 if result in ("tp2", "breakeven") else 0
+        by_regime[rk][1] += 1 if result in ("tp2", "breakeven", "tp1_stop") else 0
         by_engine[h["engine"]][0] += 1
-        by_engine[h["engine"]][1] += 1 if result in ("tp2", "breakeven") else 0
+        by_engine[h["engine"]][1] += 1 if result in ("tp2", "breakeven", "tp1_stop") else 0
         if result == "breakeven":
             by_regime[rk][2] += 1
             by_engine[h["engine"]][2] += 1
