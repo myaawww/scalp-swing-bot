@@ -1,1 +1,181 @@
-{}
+{
+  "schema_version": 1,
+  "created_at": "2026-07-11T09:40:47.797317+00:00",
+  "active_signals": [
+    {
+      "id": "6125bdccc1d3",
+      "engine": "BreakerBlock",
+      "symbol": "ETH",
+      "direction": "long",
+      "entry": 1800.87988,
+      "sl": 1792.444991,
+      "tp1": 1813.532214,
+      "tp2": 1834.0,
+      "confidence": 79.0,
+      "expected_rr": 2.47,
+      "score": 75.182,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "failed OB flipped to breaker",
+        "post-BOS retest"
+      ],
+      "opened_at": "2026-07-11T09:42:06.461009+00:00",
+      "status": "activated",
+      "tg_message_id": 2221,
+      "mae_r": -0.17544747773205868,
+      "mfe_r": 0.0
+    },
+    {
+      "id": "fa724787b067",
+      "engine": "LiquiditySweep",
+      "symbol": "UNI",
+      "direction": "long",
+      "entry": 3.544325,
+      "sl": 3.511219,
+      "tp1": 3.593985,
+      "tp2": 3.6995,
+      "confidence": 76,
+      "expected_rr": 2.77,
+      "score": 72.273,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "equal highs/lows swept",
+        "reclaim close"
+      ],
+      "opened_at": "2026-07-11T09:42:07.118025+00:00",
+      "status": "activated",
+      "tg_message_id": 2222,
+      "mae_r": 0.0,
+      "mfe_r": 0.029450854829938554
+    },
+    {
+      "id": "43f2e251ab62",
+      "engine": "SMC",
+      "symbol": "ADA",
+      "direction": "short",
+      "entry": 0.167929,
+      "sl": 0.168347,
+      "tp1": 0.167302,
+      "tp2": 0.16534,
+      "confidence": 74,
+      "expected_rr": 3.38,
+      "score": 70.123,
+      "regime": {
+        "trend_direction": "down",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "liquidity sweep",
+        "MSS confirmation",
+        "discount zone"
+      ],
+      "opened_at": "2026-07-11T09:42:07.782562+00:00",
+      "status": "activated",
+      "tg_message_id": 2223,
+      "mae_r": -0.6961722488038571,
+      "mfe_r": 0.0
+    }
+  ],
+  "signal_history": [],
+  "engine_stats": {},
+  "cooldowns": {
+    "ETH:long": 300,
+    "UNI:long": 300,
+    "ADA:short": 300
+  },
+  "atr_pct_memory": {
+    "BTC": [
+      0.1053147963944159
+    ],
+    "ETH": [
+      0.14560615323870837
+    ],
+    "HYPE": [
+      0.3225553183734009
+    ],
+    "ZEC": [
+      0.3591437320877666
+    ],
+    "NEAR": [
+      0.35184792036180934
+    ],
+    "ONDO": [
+      0.4041372053093648
+    ],
+    "SUI": [
+      0.36258593832393016
+    ],
+    "PENGU": [
+      0.2620878676756528
+    ],
+    "BNB": [
+      0.1301171338447363
+    ],
+    "SOL": [
+      0.17775024072010207
+    ],
+    "TRX": [
+      0.08006431912101934
+    ],
+    "BCH": [
+      0.25018915070201525
+    ],
+    "DOGE": [
+      0.1618307566570478
+    ],
+    "ADA": [
+      0.23108689266270396
+    ],
+    "DOT": [
+      0.2965904440081882
+    ],
+    "TAO": [
+      0.27251354889716944
+    ],
+    "AVAX": [
+      0.15444585926130322
+    ],
+    "LINK": [
+      0.1772525062156037
+    ],
+    "AAVE": [
+      0.42434628157644005
+    ],
+    "XRP": [
+      0.1384205279971283
+    ],
+    "XLM": [
+      0.26150676426994635
+    ],
+    "UNI": [
+      0.4344985538291295
+    ],
+    "LTC": [
+      0.15738641565153963
+    ],
+    "APT": [
+      0.2515008640382991
+    ],
+    "PENDLE": [
+      0.5288918928191679
+    ]
+  },
+  "confidence_calibration": {
+    "buckets": {}
+  },
+  "last_daily_summary_date": "2026-07-11",
+  "run_count": 1,
+  "last_run_at": "2026-07-11T09:42:08.116453+00:00"
+}
