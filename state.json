@@ -2,18 +2,6 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
-      "ETHUSDT": {
-        "direction": "long",
-        "zone_low": 1750.6,
-        "zone_high": 1768.6,
-        "zone_quality": 2,
-        "sweep_extreme": 1744.7,
-        "sfp_time": 1783483200000,
-        "range_low": 1713.0,
-        "range_high": 1813.3,
-        "eq": 1763.15,
-        "atr_h4": 25.44272987100657
-      },
       "BNBUSDT": {
         "direction": "short",
         "zone_low": 578.72,
@@ -24,7 +12,7 @@
         "range_low": 560.06,
         "range_high": 586.91,
         "eq": 573.4849999999999,
-        "atr_h4": 5.871466556870222
+        "atr_h4": 5.658504657415586
       }
     },
     "12h_1h": {}
@@ -44,7 +32,7 @@
       "sl": 65.81173965029345,
       "tp2_reference_only": 71.44952069941311,
       "resolved": false,
-      "last_processed_candle_ts": 1783740600000
+      "last_processed_candle_ts": 1783741500000
     }
   ],
   "resolved_signals": [],
