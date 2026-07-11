@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Aurelius Adaptive Signal Engine (ASE) — v1.0.0
+Aurelius Adaptive Signal Engine (ASE) — v1.1.1
 
 Multi-engine SMC/adaptive trading signal system for Hyperliquid perpetuals.
 Single-file, cron/GitHub Actions friendly. Requires the third-party
@@ -32,7 +32,7 @@ except ImportError:  # pragma: no cover - hard dependency, documented in require
 
 ENGINE_NAME = "Aurelius Adaptive Signal Engine"
 ENGINE_SHORT = "Aurelius ASE"
-ENGINE_VERSION = "1.0.0"
+ENGINE_VERSION = "1.1.1"
 
 # ==============================================================================
 # SECTION: CONFIGURATION
@@ -1075,14 +1075,31 @@ def validate_sl_tp_against_candles(direction: str, entry: float, sl: float, tp1:
     return True
 
 
-def avoids_obvious_liquidity(direction: str, sl: float, pools: dict, atr_val: float) -> bool:
-    """Reject setups whose SL sits exactly on top of an obvious resting-liquidity cluster."""
+def avoids_obvious_liquidity(direction: str, sl: float, pools_htf: dict, pools_ltf: dict, atr_val: float) -> bool:
+    """Reject setups whose SL sits exactly on top of an obvious resting-liquidity cluster,
+    checking both HTF swing pools (major stop-hunt targets) and LTF pools (the equal
+    highs/lows visible on the execution timeframe itself, which shorter-term hunts target)."""
     buffer = atr_val * 0.15
-    pool_side = pools.get("sell_side" if direction == "long" else "buy_side", [])
-    for level, count in pool_side:
-        if count >= 2 and abs(sl - level) <= buffer:
-            return False
+    side = "sell_side" if direction == "long" else "buy_side"
+    for pools in (pools_htf, pools_ltf):
+        for level, count in pools.get(side, []):
+            if count >= 2 and abs(sl - level) <= buffer:
+                return False
     return True
+
+
+def push_sl_clear_of_liquidity(direction: str, sl: float, pools_htf: dict, pools_ltf: dict,
+                                atr_val: float, max_iterations: int = 4) -> float:
+    """Repeatedly nudge SL further away until it's clear of every obvious liquidity cluster
+    (HTF and LTF), instead of a single one-shot nudge that could still land on a second
+    cluster. Capped at max_iterations so a pathological run of tightly-stacked pool levels
+    can't push the stop out indefinitely."""
+    step = atr_val * 0.2
+    for _ in range(max_iterations):
+        if avoids_obvious_liquidity(direction, sl, pools_htf, pools_ltf, atr_val):
+            return sl
+        sl = sl - step if direction == "long" else sl + step
+    return sl
 
 
 def compute_expected_rr(direction: str, entry: float, sl: float, tp1: float, tp2: float) -> float:
@@ -1184,6 +1201,7 @@ class SymbolAnalysis:
     zones_ltf: list[Zone]
     breaker_zones: list[Zone]
     pools_htf: dict
+    pools_ltf: dict
     pd_zone: dict
     market_price: float
     ind_ltf: dict
@@ -1214,25 +1232,33 @@ def build_symbol_analysis(symbol: str, bundle: dict, ctx: AdaptiveContext, refer
     breaker_zones = derive_breaker_blocks(zones_htf, structure_htf, htf)
 
     pools_htf = build_liquidity_pools(swings_htf)
+    pools_ltf = build_liquidity_pools(swings_ltf)
     pd_zone = premium_discount_zone(daily, 60)
 
     return SymbolAnalysis(symbol, bundle, ctx, structure_htf, structure_ltf, zones_htf, zones_ltf,
-                           breaker_zones, pools_htf, pd_zone, market_price, ind_ltf, ind_htf, ind_d)
+                           breaker_zones, pools_htf, pools_ltf, pd_zone, market_price, ind_ltf, ind_htf, ind_d)
 
 
 def _finalize(engine_name: str, symbol: str, direction: str, entry: float, sl: float,
               confidence: float, confluences: list[str], regimes: list[str],
-              sa: SymbolAnalysis, meta: Optional[dict] = None) -> Optional[Candidate]:
+              sa: SymbolAnalysis, meta: Optional[dict] = None, market_style: bool = True) -> Optional[Candidate]:
     # Resolve the entry we're actually going to publish *before* deriving SL/TP from
     # it, so every downstream distance is consistent with the final entry.
     atr_val = sa.ind_ltf["atr"][-1] if sa.ind_ltf["atr"] else 0.0
     entry = clamp_entry_to_market(entry, sa.market_price)
     sl = enforce_min_stop_distance(direction, entry, sl, atr_val)
-    entry = apply_favorable_entry_offset(direction, entry, sa.market_price, atr_val, sl)
+    # Only rest a favorable limit offset for engines whose entry isn't already anchored to a
+    # specific structural boundary (order block / breaker / FVG / OB-retest zone). For those,
+    # entry == market_price only because the trigger condition requires price to be touching
+    # the zone right now -- nudging it further would push toward or past the zone edge that
+    # justified the trade in the first place, not just improve R:R the way it does for a
+    # market-chase entry.
+    if market_style:
+        entry = apply_favorable_entry_offset(direction, entry, sa.market_price, atr_val, sl)
 
     tp1, tp2 = build_take_profits(direction, entry, sl, sa.pools_htf, sa.zones_htf)
-    if not avoids_obvious_liquidity(direction, sl, sa.pools_htf, atr_val):
-        sl = sl - atr_val * 0.2 if direction == "long" else sl + atr_val * 0.2
+    if not avoids_obvious_liquidity(direction, sl, sa.pools_htf, sa.pools_ltf, atr_val):
+        sl = push_sl_clear_of_liquidity(direction, sl, sa.pools_htf, sa.pools_ltf, atr_val)
         tp1, tp2 = build_take_profits(direction, entry, sl, sa.pools_htf, sa.zones_htf)  # SL moved -- re-derive
     if not validate_sl_tp_against_candles(direction, entry, sl, tp1, tp2, sa.bundle[TF_LTF_EXEC]):
         return None
@@ -1348,7 +1374,7 @@ def engine_pullback(sa: SymbolAnalysis) -> list[Candidate]:
     confidence = 62 + zone.quality * 15 + (5 if sa.pd_zone["zone"] == ("discount" if direction == "long" else "premium") else 0)
     cand = _finalize("Pullback", sa.symbol, direction, price, sl, confidence,
                       ["HTF order block retest", f"zone quality {zone.quality:.2f}"],
-                      ["trending", "pullback"], sa)
+                      ["trending", "pullback"], sa, market_style=False)
     return [cand] if cand else []
 
 
@@ -1389,7 +1415,7 @@ def engine_order_block(sa: SymbolAnalysis) -> list[Candidate]:
         confidence = 60 + z.quality * 18
         cand = _finalize("OrderBlock", sa.symbol, direction, price, sl, confidence,
                           [f"untested {z.direction} OB", f"quality {z.quality:.2f}"],
-                          ["trending", "ranging"], sa)
+                          ["trending", "ranging"], sa, market_style=False)
         if cand:
             out.append(cand)
             break  # one high-quality OB signal per symbol is enough
@@ -1410,7 +1436,8 @@ def engine_breaker_block(sa: SymbolAnalysis) -> list[Candidate]:
         sl = (z.bottom - atr_val * 0.25) if direction == "long" else (z.top + atr_val * 0.25)
         confidence = 63 + z.quality * 16
         cand = _finalize("BreakerBlock", sa.symbol, direction, price, sl, confidence,
-                          ["failed OB flipped to breaker", "post-BOS retest"], ["reversal", "trending"], sa)
+                          ["failed OB flipped to breaker", "post-BOS retest"], ["reversal", "trending"], sa,
+                          market_style=False)
         if cand:
             out.append(cand)
             break
@@ -1436,7 +1463,8 @@ def engine_fair_value_gap(sa: SymbolAnalysis) -> list[Candidate]:
         sl = (z.bottom - atr_val * 0.2) if direction == "long" else (z.top + atr_val * 0.2)
         confidence = 58 + z.quality * 18
         cand = _finalize("FairValueGap", sa.symbol, direction, price, sl, confidence,
-                          ["LTF FVG fill", f"quality {z.quality:.2f}"], ["trending", "pullback"], sa)
+                          ["LTF FVG fill", f"quality {z.quality:.2f}"], ["trending", "pullback"], sa,
+                          market_style=False)
         if cand:
             out.append(cand)
             break
