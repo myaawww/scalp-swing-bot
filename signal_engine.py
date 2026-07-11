@@ -1020,14 +1020,37 @@ class Candidate:
     meta: dict = field(default_factory=dict)
 
 
-def structure_based_sl(direction: str, candles: list[dict], atr_val: float, buffer_mult: float = 0.25,
-                        lookback: int = 8) -> float:
-    """SL beyond the most recent structural swing low/high, using candle wicks only -- never midpoint."""
+def structure_based_sl(direction: str, candles: list[dict], atr_val: float, buffer_mult: float = 1.0,
+                        lookback: int = 20) -> float:
+    """SL beyond the most recent structural swing low/high, using candle wicks only -- never
+    midpoint. Widened from the original scalp-style defaults (0.25x buffer / 8-candle lookback)
+    -- a longer lookback captures a more meaningful swing instead of the last hour or two of
+    noise, and a bigger ATR buffer keeps ordinary wicks from tagging the stop immediately."""
     seg = candles[-lookback:]
     buffer = max(atr_val * buffer_mult, 1e-9)
     if direction == "long":
         return min(c["l"] for c in seg) - buffer
     return max(c["h"] for c in seg) + buffer
+
+
+STOP_MIN_PCT_OF_PRICE = 0.006   # hard floor: SL must be at least 0.6% away from entry
+STOP_MIN_ATR_MULT = 1.0         # ...and at least 1x ATR away from entry, whichever is larger
+
+
+def enforce_min_stop_distance(direction: str, entry: float, sl: float, atr_val: float,
+                               min_pct_of_price: float = STOP_MIN_PCT_OF_PRICE,
+                               min_atr_mult: float = STOP_MIN_ATR_MULT) -> float:
+    """Widen (never tighten) a candidate SL so it's never closer to entry than both a minimum
+    % of price and a minimum ATR multiple -- whichever is larger. Every engine's stop, however
+    it was computed, passes through this last-mile safety net in _finalize(), so a quiet
+    low-volatility period or an unusually tight structural swing can never produce a stop so
+    small that ordinary noise sweeps it before the trade has any real room to work."""
+    if entry <= 0:
+        return sl
+    min_dist = max(entry * min_pct_of_price, atr_val * min_atr_mult)
+    if direction == "long":
+        return min(sl, entry - min_dist)   # further below entry = wider
+    return max(sl, entry + min_dist)       # further above entry = wider
 
 
 def validate_sl_tp_against_candles(direction: str, entry: float, sl: float, tp1: float, tp2: float,
@@ -1079,20 +1102,39 @@ def clamp_entry_to_market(entry: float, market_price: float, max_dev_pct: float 
     return market_price if dev_pct > max_dev_pct else entry
 
 
-ENTRY_SLIPPAGE_BUFFER_PCT = 0.0006  # ~6bps: a real fill always has some spread/slippage
+ENTRY_AT_MARKET_TOLERANCE_PCT = 0.0006  # ~6bps: below this, treat entry as "at market" (i.e. a market-style fire)
+ENTRY_LIMIT_OFFSET_ATR_FRACTION = 0.15  # rest the limit this fraction of ATR away from market, on the favorable side
+ENTRY_LIMIT_OFFSET_MAX_PCT = 0.004      # hard cap (~0.4%) so illiquid/ultra-volatile symbols don't rest unrealistically far
+ENTRY_LIMIT_OFFSET_MAX_STOP_FRACTION = 0.3  # never let the offset eat more than 30% of the entry-to-SL risk distance
 
 
-def apply_entry_slippage_buffer(direction: str, entry: float, market_price: float,
-                                 buffer_pct: float = ENTRY_SLIPPAGE_BUFFER_PCT) -> float:
-    """If entry sits at (or within a hair of) the live mark price, nudge it a small
-    realistic distance away. A signal whose entry equals the current price is
-    already stale by the time it's read, and can't be told apart from SL/TP levels
-    that happen to sit on the mark price too."""
+def apply_favorable_entry_offset(direction: str, entry: float, market_price: float, atr_val: float,
+                                  sl: float, atr_fraction: float = ENTRY_LIMIT_OFFSET_ATR_FRACTION,
+                                  max_pct: float = ENTRY_LIMIT_OFFSET_MAX_PCT,
+                                  tolerance_pct: float = ENTRY_AT_MARKET_TOLERANCE_PCT) -> float:
+    """For engines that fire at (or within a hair of) the live mark price -- a market-style
+    entry -- rest the order a small, ATR-scaled distance on the favorable side instead:
+    longs a touch below market, shorts a touch above. This turns a market-chase entry into
+    a resting limit that waits for a small pullback/retest, improving realized R:R on every
+    fill (the fill itself is confirmed later in check_active_signals via the "pending" status
+    -- this function only decides where the resting price sits).
+
+    Zone-based engines (order blocks, FVGs, breakers, pullback/mean-reversion setups) already
+    place entry away from market by design and are left untouched here -- the tolerance check
+    below naturally skips them.
+    """
     if market_price <= 0 or entry <= 0:
         return entry
-    if abs(entry - market_price) / market_price > buffer_pct:
-        return entry  # already meaningfully away from market -- leave it alone
-    return market_price * (1 + buffer_pct) if direction == "long" else market_price * (1 - buffer_pct)
+    if abs(entry - market_price) / market_price > tolerance_pct:
+        return entry  # already a structural/zone entry away from market -- leave it alone
+
+    offset = atr_val * atr_fraction if atr_val > 0 else market_price * max_pct * 0.5
+    offset = min(offset, market_price * max_pct)
+    if sl > 0:
+        stop_dist = abs(entry - sl)
+        if stop_dist > 0:
+            offset = min(offset, stop_dist * ENTRY_LIMIT_OFFSET_MAX_STOP_FRACTION)
+    return market_price - offset if direction == "long" else market_price + offset
 
 
 def build_take_profits(direction: str, entry: float, sl: float, pools: dict, zones: list[Zone],
@@ -1183,10 +1225,11 @@ def _finalize(engine_name: str, symbol: str, direction: str, entry: float, sl: f
               sa: SymbolAnalysis, meta: Optional[dict] = None) -> Optional[Candidate]:
     # Resolve the entry we're actually going to publish *before* deriving SL/TP from
     # it, so every downstream distance is consistent with the final entry.
-    entry = clamp_entry_to_market(entry, sa.market_price)
-    entry = apply_entry_slippage_buffer(direction, entry, sa.market_price)
-
     atr_val = sa.ind_ltf["atr"][-1] if sa.ind_ltf["atr"] else 0.0
+    entry = clamp_entry_to_market(entry, sa.market_price)
+    sl = enforce_min_stop_distance(direction, entry, sl, atr_val)
+    entry = apply_favorable_entry_offset(direction, entry, sa.market_price, atr_val, sl)
+
     tp1, tp2 = build_take_profits(direction, entry, sl, sa.pools_htf, sa.zones_htf)
     if not avoids_obvious_liquidity(direction, sl, sa.pools_htf, atr_val):
         sl = sl - atr_val * 0.2 if direction == "long" else sl + atr_val * 0.2
@@ -1244,7 +1287,7 @@ def engine_trend_continuation(sa: SymbolAnalysis) -> list[Candidate]:
     if not rsi_ok:
         return []
     atr_val = ind["atr"][-1]
-    sl = structure_based_sl(direction, ltf, atr_val, buffer_mult=0.3, lookback=6)
+    sl = structure_based_sl(direction, ltf, atr_val, buffer_mult=1.0, lookback=20)
     confidence = 60 + min(20, ctx.trend_strength - 18) + (6 if ctx.breadth * (1 if direction == "long" else -1) > 0.2 else 0)
     cand = _finalize("TrendContinuation", sa.symbol, direction, price, sl, confidence,
                       ["EMA20 pullback", f"ADX {ctx.trend_strength:.0f}", "HTF trend aligned"],
@@ -1267,7 +1310,7 @@ def engine_breakout(sa: SymbolAnalysis) -> list[Candidate]:
     out = []
     if last["c"] > hi and vol_confirm:
         atr_val = ind["atr"][-1]
-        sl = max(hi - atr_val * 0.5, structure_based_sl("long", ltf, atr_val))
+        sl = min(hi - atr_val * 1.0, structure_based_sl("long", ltf, atr_val))
         confidence = 58 + (10 if sa.ctx.volatility_state == "expansion" else 0) + (8 if sa.pd_zone["zone"] != "premium" else -5)
         cand = _finalize("Breakout", sa.symbol, "long", last["c"], sl, confidence,
                           ["range high breakout", "volume confirmation"], ["breakout", "volatility_expansion"], sa)
@@ -1275,7 +1318,7 @@ def engine_breakout(sa: SymbolAnalysis) -> list[Candidate]:
             out.append(cand)
     if last["c"] < lo and vol_confirm:
         atr_val = ind["atr"][-1]
-        sl = min(lo + atr_val * 0.5, structure_based_sl("short", ltf, atr_val))
+        sl = max(lo + atr_val * 1.0, structure_based_sl("short", ltf, atr_val))
         confidence = 58 + (10 if sa.ctx.volatility_state == "expansion" else 0) + (8 if sa.pd_zone["zone"] != "discount" else -5)
         cand = _finalize("Breakout", sa.symbol, "short", last["c"], sl, confidence,
                           ["range low breakdown", "volume confirmation"], ["breakout", "volatility_expansion"], sa)
@@ -1412,14 +1455,14 @@ def engine_momentum(sa: SymbolAnalysis) -> list[Candidate]:
     strong_down = ind["rsi"][-1] < 42 and ind["adx"][-1] > 22 and roc < -0.3
     atr_val = ind["atr"][-1]
     if strong_up:
-        sl = structure_based_sl("long", sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=0.35, lookback=5)
+        sl = structure_based_sl("long", sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=1.1, lookback=18)
         confidence = 58 + min(20, (ind["rsi"][-1] - 58))
         cand = _finalize("Momentum", sa.symbol, "long", sa.market_price, sl, confidence,
                           [f"RSI {ind['rsi'][-1]:.0f}", f"ROC {roc:.2f}%"], ["trending", "high_volatility"], sa)
         if cand:
             out.append(cand)
     if strong_down:
-        sl = structure_based_sl("short", sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=0.35, lookback=5)
+        sl = structure_based_sl("short", sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=1.1, lookback=18)
         confidence = 58 + min(20, (42 - ind["rsi"][-1]))
         cand = _finalize("Momentum", sa.symbol, "short", sa.market_price, sl, confidence,
                           [f"RSI {ind['rsi'][-1]:.0f}", f"ROC {roc:.2f}%"], ["trending", "high_volatility"], sa)
@@ -1440,7 +1483,7 @@ def engine_reversal(sa: SymbolAnalysis) -> list[Candidate]:
         return []
     direction = "long" if div == "bullish" else "short"
     atr_val = sa.ind_ltf["atr"][-1]
-    sl = structure_based_sl(direction, sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=0.3, lookback=8)
+    sl = structure_based_sl(direction, sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=1.0, lookback=24)
     confidence = 61 + (10 if sa.ctx.is_ranging else 0)
     cand = _finalize("Reversal", sa.symbol, direction, sa.market_price, sl, confidence,
                       [f"RSI {div} divergence", f"{sa.pd_zone['zone']} zone"], ["reversal", "ranging"], sa)
@@ -1527,7 +1570,7 @@ def engine_volatility_expansion(sa: SymbolAnalysis) -> list[Candidate]:
         return []
     direction = "long" if ind["closes"][-1] > ind["closes"][-2] else "short"
     atr_val = ind["atr"][-1]
-    sl = structure_based_sl(direction, sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=0.4, lookback=6)
+    sl = structure_based_sl(direction, sa.bundle[TF_LTF_EXEC], atr_val, buffer_mult=1.2, lookback=20)
     confidence = 59 + (10 if sa.ctx.volatility_state == "expansion" else 0)
     cand = _finalize("VolatilityExpansion", sa.symbol, direction, sa.market_price, sl, confidence,
                       ["Bollinger squeeze release", "directional close"], ["volatility_expansion"], sa)
@@ -1714,6 +1757,8 @@ def _default_engine_stats() -> dict:
 def record_signal_history(state: dict, cand: Candidate, score: float, sa: SymbolAnalysis,
                            msg_id: Optional[int]) -> str:
     sig_id = hashlib.sha1(f"{cand.symbol}{cand.engine}{time.time()}".encode()).hexdigest()[:12]
+    at_market = sa.market_price > 0 and abs(cand.entry - sa.market_price) / sa.market_price <= ENTRY_AT_MARKET_TOLERANCE_PCT
+    ltf_candles = sa.bundle.get(TF_LTF_EXEC) or []
     entry_rec = {
         "id": sig_id, "engine": cand.engine, "symbol": cand.symbol, "direction": cand.direction,
         "entry": cand.entry, "sl": cand.sl, "tp1": cand.tp1, "tp2": cand.tp2,
@@ -1721,7 +1766,15 @@ def record_signal_history(state: dict, cand: Candidate, score: float, sa: Symbol
         "regime": {"trend_direction": sa.ctx.trend_direction, "is_ranging": sa.ctx.is_ranging,
                     "volatility_state": sa.ctx.volatility_state, "btc_regime": sa.ctx.btc_regime},
         "confluences": cand.confluences, "opened_at": datetime.now(timezone.utc).isoformat(),
-        "status": "activated", "tg_message_id": msg_id, "mae_r": 0.0, "mfe_r": 0.0,
+        # Entries that rest away from market (the new favorable offset, or a zone-based entry
+        # from SMC/OrderBlock/FVG/etc.) aren't necessarily filled yet -- wait for price to
+        # actually trade through the level before treating the trade as live.
+        "status": "activated" if at_market else "pending",
+        "tg_message_id": msg_id, "mae_r": 0.0, "mfe_r": 0.0,
+        # The candle this signal was derived from -- check_active_signals must not evaluate
+        # SL/TP/fill against this same candle, since that candle's range already produced the
+        # signal and can't be used to also confirm the entry was hit at a realistic time.
+        "signal_bar_ts": ltf_candles[-1]["t"] if ltf_candles else None,
     }
     state["active_signals"].append(entry_rec)
     return sig_id
@@ -1772,6 +1825,9 @@ def update_engine_learning(state: dict, sig: dict, result: str) -> None:
     cal["wins"] += 1 if actual == 1.0 else 0
 
 
+PENDING_FILL_MAX_CHECKS = 12  # how many check cycles a resting entry gets before it's cancelled as unfilled
+
+
 def check_active_signals(state: dict, market_prices: dict[str, float], candle_bundles: dict[str, dict],
                           telegram_enabled: bool) -> None:
     still_active = []
@@ -1785,6 +1841,40 @@ def check_active_signals(state: dict, market_prices: dict[str, float], candle_bu
         hi = recent["h"] if recent else price
         lo = recent["l"] if recent else price
         cur = recent["c"] if recent else price
+
+        if recent is not None and sig.get("signal_bar_ts") is not None and recent.get("t") == sig["signal_bar_ts"]:
+            # This is the same candle the signal was generated from -- its range already
+            # produced the signal and can't also be used to confirm a fill or a TP/SL hit
+            # at a realistic time. Wait for the next candle before evaluating anything.
+            still_active.append(sig)
+            continue
+
+        if sig["status"] == "pending":
+            # Resting entry hasn't been confirmed filled yet. Don't score MFE/MAE or
+            # anything else against it until price actually trades through the level.
+            sig["_pending_checks"] = sig.get("_pending_checks", 0) + 1
+            hit_entry = (lo <= sig["entry"]) if sig["direction"] == "long" else (hi >= sig["entry"])
+            # If the stop level is reached before the resting entry ever fills, the setup
+            # that justified this order no longer holds -- cancel rather than pretend we
+            # were filled at a price the trade thesis has already invalidated.
+            hit_sl_unfilled = (lo <= sig["sl"]) if sig["direction"] == "long" else (hi >= sig["sl"])
+            if hit_entry:
+                sig["status"] = "activated"
+                sig["filled_at"] = datetime.now(timezone.utc).isoformat()
+                still_active.append(sig)
+                continue
+            if hit_sl_unfilled or sig["_pending_checks"] > PENDING_FILL_MAX_CHECKS:
+                sig["status"] = "closed"
+                sig["result"] = "cancelled"
+                sig["closed_at"] = datetime.now(timezone.utc).isoformat()
+                state["signal_history"].append(sig)  # kept for audit trail; excluded from win/loss stats
+                if telegram_enabled and sig.get("tg_message_id"):
+                    react_to_message(sig["tg_message_id"], "cancelled")
+                    reply_to_telegram(sig["tg_message_id"],
+                                       f"🤷 Entry never filled on {sig['symbol']} ({sig['engine']}) -- signal cancelled.")
+                continue
+            still_active.append(sig)
+            continue
 
         r_now = _r_multiple(sig, cur)
         sig["mfe_r"] = max(sig.get("mfe_r", 0.0), r_now)
@@ -1825,7 +1915,7 @@ def check_active_signals(state: dict, market_prices: dict[str, float], candle_bu
             sig["result"] = result
             sig["closed_at"] = datetime.now(timezone.utc).isoformat()
             sig["_close_price"] = {"tp2": sig["tp2"], "breakeven": sig["entry"]}.get(result, sig["sl"])
-            opened = datetime.fromisoformat(sig["opened_at"])
+            opened = datetime.fromisoformat(sig.get("filled_at", sig["opened_at"]))
             sig["_hold_secs"] = (datetime.now(timezone.utc) - opened).total_seconds()
             update_engine_learning(state, sig, result)
             state["signal_history"].append(sig)
