@@ -27,7 +27,7 @@
       "opened_at": "2026-07-11T10:16:35.167271+00:00",
       "status": "activated",
       "tg_message_id": 2238,
-      "mae_r": -0.24249969183681405,
+      "mae_r": -0.6610258230089749,
       "mfe_r": 0.7598304057474694,
       "signal_bar_ts": 1783764000000
     },
@@ -63,65 +63,6 @@
       "filled_at": "2026-07-11T10:46:37.371134+00:00"
     },
     {
-      "id": "abb9e50f0d32",
-      "engine": "BreakerBlock",
-      "symbol": "ETH",
-      "direction": "long",
-      "entry": 1797.695642,
-      "sl": 1797.695642,
-      "tp1": 1813.272004,
-      "tp2": 1834.0,
-      "confidence": 79.0,
-      "expected_rr": 2.3,
-      "score": 63.414,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "failed OB flipped to breaker",
-        "post-BOS retest"
-      ],
-      "opened_at": "2026-07-11T10:31:51.777038+00:00",
-      "status": "tp1",
-      "tg_message_id": 2242,
-      "mae_r": -0.02847025329338628,
-      "mfe_r": 1.5797357187939405,
-      "signal_bar_ts": 1783764900000
-    },
-    {
-      "id": "ff811c759dc1",
-      "engine": "TrendContinuation",
-      "symbol": "BCH",
-      "direction": "long",
-      "entry": 245.847113,
-      "sl": 245.847113,
-      "tp1": 249.546654,
-      "tp2": 251.0,
-      "confidence": 82.29,
-      "expected_rr": 1.74,
-      "score": 63.226,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "EMA20 pullback",
-        "ADX 34",
-        "HTF trend aligned"
-      ],
-      "opened_at": "2026-07-11T10:31:52.465079+00:00",
-      "status": "tp1",
-      "tg_message_id": 2243,
-      "mae_r": -0.14073892670213584,
-      "mfe_r": 1.5540656862478728,
-      "signal_bar_ts": 1783764900000
-    },
-    {
       "id": "a54f29e31d14",
       "engine": "TrendContinuation",
       "symbol": "LTC",
@@ -147,70 +88,9 @@
       "opened_at": "2026-07-11T10:46:35.947820+00:00",
       "status": "tp1",
       "tg_message_id": 2244,
-      "mae_r": -0.21448899227009724,
+      "mae_r": -0.5772373533580458,
       "mfe_r": 1.7525794400212125,
       "signal_bar_ts": 1783765800000
-    },
-    {
-      "id": "04cb248588c5",
-      "engine": "LiquiditySweep",
-      "symbol": "BNB",
-      "direction": "long",
-      "entry": 577.879347,
-      "sl": 577.879347,
-      "tp1": 582.915277,
-      "tp2": 584.93,
-      "confidence": 64,
-      "expected_rr": 1.74,
-      "score": 67.699,
-      "regime": {
-        "trend_direction": "flat",
-        "is_ranging": true,
-        "volatility_state": "normal",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "equal highs/lows swept",
-        "reclaim close"
-      ],
-      "opened_at": "2026-07-11T10:46:36.641856+00:00",
-      "status": "tp1",
-      "tg_message_id": 2245,
-      "mae_r": -0.02959145286062185,
-      "mfe_r": 1.2422688319467028,
-      "signal_bar_ts": 1783765800000
-    },
-    {
-      "id": "ec3bcfe1242b",
-      "engine": "SMC",
-      "symbol": "PENDLE",
-      "direction": "long",
-      "entry": 1.577553,
-      "sl": 1.528386,
-      "tp1": 1.651303,
-      "tp2": 1.9009,
-      "confidence": 79,
-      "expected_rr": 3.53,
-      "score": 59.769,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "liquidity sweep",
-        "MSS confirmation",
-        "discount zone"
-      ],
-      "opened_at": "2026-07-11T11:01:51.758499+00:00",
-      "status": "activated",
-      "tg_message_id": 2249,
-      "mae_r": -0.6722598490857694,
-      "mfe_r": 0.3162080257083001,
-      "signal_bar_ts": 1783766700000,
-      "_pending_checks": 1,
-      "filled_at": "2026-07-11T11:16:32.732514+00:00"
     },
     {
       "id": "4acaccd6dcf2",
@@ -237,22 +117,81 @@
       "opened_at": "2026-07-11T15:01:56.789940+00:00",
       "status": "activated",
       "tg_message_id": 2284,
-      "mae_r": -0.7491201608848833,
+      "mae_r": -0.8999497234791338,
       "mfe_r": 0.025138260432375076,
       "signal_bar_ts": 1783781100000
     },
     {
-      "id": "57116530c44e",
-      "engine": "MeanReversion",
-      "symbol": "DOGE",
+      "id": "22bac7223bcf",
+      "engine": "LiquiditySweep",
+      "symbol": "ADA",
       "direction": "long",
-      "entry": 0.074243,
-      "sl": 0.073796,
-      "tp1": 0.074913,
-      "tp2": 0.075551,
+      "entry": 0.166384,
+      "sl": 0.165511,
+      "tp1": 0.167694,
+      "tp2": 0.16864,
+      "confidence": 78,
+      "expected_rr": 1.93,
+      "score": 55.012,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "normal",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "equal highs/lows swept",
+        "reclaim close"
+      ],
+      "opened_at": "2026-07-11T23:31:53.131105+00:00",
+      "status": "pending",
+      "tg_message_id": 2371,
+      "mae_r": 0.0,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783811700000
+    },
+    {
+      "id": "57a90d5a811a",
+      "engine": "SMC",
+      "symbol": "SUI",
+      "direction": "long",
+      "entry": 0.730842,
+      "sl": 0.726862,
+      "tp1": 0.736811,
+      "tp2": 0.74511,
+      "confidence": 79,
+      "expected_rr": 2.33,
+      "score": 54.009,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "liquidity sweep",
+        "MSS confirmation",
+        "discount zone"
+      ],
+      "opened_at": "2026-07-11T23:31:53.747487+00:00",
+      "status": "activated",
+      "tg_message_id": 2372,
+      "mae_r": 0.0,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783811700000
+    },
+    {
+      "id": "174013c5071b",
+      "engine": "MeanReversion",
+      "symbol": "SOL",
+      "direction": "long",
+      "entry": 76.979,
+      "sl": 76.517126,
+      "tp1": 77.671811,
+      "tp2": 78.812,
       "confidence": 75,
-      "expected_rr": 2.07,
-      "score": 56.105,
+      "expected_rr": 2.49,
+      "score": 53.135,
       "regime": {
         "trend_direction": "flat",
         "is_ranging": true,
@@ -260,15 +199,15 @@
         "btc_regime": "bull_trend"
       },
       "confluences": [
-        "deviation z=-3.67",
+        "deviation z=-4.00",
         "RSI oversold"
       ],
-      "opened_at": "2026-07-11T23:16:34.434094+00:00",
-      "status": "activated",
-      "tg_message_id": 2367,
+      "opened_at": "2026-07-11T23:31:54.374758+00:00",
+      "status": "pending",
+      "tg_message_id": 2373,
       "mae_r": 0.0,
       "mfe_r": 0.0,
-      "signal_bar_ts": 1783810800000
+      "signal_bar_ts": 1783811700000
     }
   ],
   "signal_history": [
@@ -611,83 +550,252 @@
       "closed_at": "2026-07-11T23:16:36.131448+00:00",
       "_close_price": 1.107117,
       "_hold_secs": 4480.631554
+    },
+    {
+      "id": "abb9e50f0d32",
+      "engine": "BreakerBlock",
+      "symbol": "ETH",
+      "direction": "long",
+      "entry": 1797.695642,
+      "sl": 1797.695642,
+      "tp1": 1813.272004,
+      "tp2": 1834.0,
+      "confidence": 79.0,
+      "expected_rr": 2.3,
+      "score": 63.414,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "failed OB flipped to breaker",
+        "post-BOS retest"
+      ],
+      "opened_at": "2026-07-11T10:31:51.777038+00:00",
+      "status": "closed",
+      "tg_message_id": 2242,
+      "mae_r": -0.02847025329338628,
+      "mfe_r": 1.5797357187939405,
+      "signal_bar_ts": 1783764900000,
+      "result": "tp1_stop",
+      "closed_at": "2026-07-11T23:31:54.374932+00:00",
+      "_close_price": 1813.272004,
+      "_hold_secs": 46802.597903
+    },
+    {
+      "id": "ff811c759dc1",
+      "engine": "TrendContinuation",
+      "symbol": "BCH",
+      "direction": "long",
+      "entry": 245.847113,
+      "sl": 245.847113,
+      "tp1": 249.546654,
+      "tp2": 251.0,
+      "confidence": 82.29,
+      "expected_rr": 1.74,
+      "score": 63.226,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "EMA20 pullback",
+        "ADX 34",
+        "HTF trend aligned"
+      ],
+      "opened_at": "2026-07-11T10:31:52.465079+00:00",
+      "status": "closed",
+      "tg_message_id": 2243,
+      "mae_r": -0.14073892670213584,
+      "mfe_r": 1.5540656862478728,
+      "signal_bar_ts": 1783764900000,
+      "result": "tp1_stop",
+      "closed_at": "2026-07-11T23:31:55.159056+00:00",
+      "_close_price": 249.546654,
+      "_hold_secs": 46802.693996
+    },
+    {
+      "id": "04cb248588c5",
+      "engine": "LiquiditySweep",
+      "symbol": "BNB",
+      "direction": "long",
+      "entry": 577.879347,
+      "sl": 577.879347,
+      "tp1": 582.915277,
+      "tp2": 584.93,
+      "confidence": 64,
+      "expected_rr": 1.74,
+      "score": 67.699,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "normal",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "equal highs/lows swept",
+        "reclaim close"
+      ],
+      "opened_at": "2026-07-11T10:46:36.641856+00:00",
+      "status": "closed",
+      "tg_message_id": 2245,
+      "mae_r": -0.02959145286062185,
+      "mfe_r": 1.2422688319467028,
+      "signal_bar_ts": 1783765800000,
+      "result": "tp1_stop",
+      "closed_at": "2026-07-11T23:31:55.970490+00:00",
+      "_close_price": 582.915277,
+      "_hold_secs": 45919.328654
+    },
+    {
+      "id": "ec3bcfe1242b",
+      "engine": "SMC",
+      "symbol": "PENDLE",
+      "direction": "long",
+      "entry": 1.577553,
+      "sl": 1.528386,
+      "tp1": 1.651303,
+      "tp2": 1.9009,
+      "confidence": 79,
+      "expected_rr": 3.53,
+      "score": 59.769,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "liquidity sweep",
+        "MSS confirmation",
+        "discount zone"
+      ],
+      "opened_at": "2026-07-11T11:01:51.758499+00:00",
+      "status": "closed",
+      "tg_message_id": 2249,
+      "mae_r": -0.9631053348790859,
+      "mfe_r": 0.3162080257083001,
+      "signal_bar_ts": 1783766700000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-11T11:16:32.732514+00:00",
+      "result": "sl",
+      "closed_at": "2026-07-11T23:31:59.950407+00:00",
+      "_close_price": 1.528386,
+      "_hold_secs": 44127.217914
+    },
+    {
+      "id": "57116530c44e",
+      "engine": "MeanReversion",
+      "symbol": "DOGE",
+      "direction": "long",
+      "entry": 0.074243,
+      "sl": 0.073796,
+      "tp1": 0.074913,
+      "tp2": 0.075551,
+      "confidence": 75,
+      "expected_rr": 2.07,
+      "score": 56.105,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "deviation z=-3.67",
+        "RSI oversold"
+      ],
+      "opened_at": "2026-07-11T23:16:34.434094+00:00",
+      "status": "closed",
+      "tg_message_id": 2367,
+      "mae_r": -1.2639821029082914,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783810800000,
+      "result": "sl",
+      "closed_at": "2026-07-11T23:32:00.762187+00:00",
+      "_close_price": 0.073796,
+      "_hold_secs": 926.328114
     }
   ],
   "engine_stats": {
     "LiquiditySweep": {
-      "n": 3,
-      "wins": 3,
+      "n": 4,
+      "wins": 4,
       "losses": 0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 0.0,
       "profit_factor": 0.0,
       "sum_rr": 0.0,
       "avg_rr": 0.0,
-      "sum_hold_secs": 50387.32344,
-      "avg_hold_secs": 16795.77448,
-      "calibration_error": 0.1263,
-      "mae_sum": -0.15009560229445995,
-      "mfe_sum": 5.180643130974428
+      "sum_hold_secs": 96306.65209399999,
+      "avg_hold_secs": 24076.663023499998,
+      "calibration_error": 0.1266,
+      "mae_sum": -0.1796870551550818,
+      "mfe_sum": 6.42291196292113
     },
     "MeanReversion": {
-      "n": 1,
+      "n": 2,
       "wins": 0,
-      "losses": 1,
+      "losses": 2,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 1.0,
+      "gross_loss_r": 2.0,
       "profit_factor": 0.0,
-      "sum_rr": -1.0,
+      "sum_rr": -2.0,
       "avg_rr": -1.0,
-      "sum_hold_secs": 1803.572963,
-      "avg_hold_secs": 1803.572963,
-      "calibration_error": 0.184,
-      "mae_sum": -0.5797773654916412,
+      "sum_hold_secs": 2729.901077,
+      "avg_hold_secs": 1364.9505385,
+      "calibration_error": 0.2218,
+      "mae_sum": -1.8437594683999325,
       "mfe_sum": 0.0
     },
     "TrendContinuation": {
-      "n": 1,
-      "wins": 1,
+      "n": 2,
+      "wins": 2,
       "losses": 0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 0.0,
       "profit_factor": 0.0,
       "sum_rr": 0.0,
       "avg_rr": 0.0,
-      "sum_hold_secs": 18880.563907,
-      "avg_hold_secs": 18880.563907,
-      "calibration_error": 0.1399,
-      "mae_sum": 0.0,
-      "mfe_sum": 1.4370278610930138
+      "sum_hold_secs": 65683.257903,
+      "avg_hold_secs": 32841.6289515,
+      "calibration_error": 0.129,
+      "mae_sum": -0.14073892670213584,
+      "mfe_sum": 2.9910935473408866
     },
     "BreakerBlock": {
-      "n": 2,
-      "wins": 1,
+      "n": 3,
+      "wins": 2,
       "losses": 1,
       "gross_profit_r": 0.0,
       "gross_loss_r": 1.0,
       "profit_factor": 0.0,
       "sum_rr": -1.0,
-      "avg_rr": -0.5,
-      "sum_hold_secs": 83676.925448,
-      "avg_hold_secs": 41838.462724,
-      "calibration_error": 0.1821,
-      "mae_sum": -1.0214939631152973,
-      "mfe_sum": 1.3602460540728496
+      "avg_rr": -0.3333333333333333,
+      "sum_hold_secs": 130479.523351,
+      "avg_hold_secs": 43493.17445033333,
+      "calibration_error": 0.1683,
+      "mae_sum": -1.0499642164086835,
+      "mfe_sum": 2.93998177286679
     },
     "SMC": {
-      "n": 3,
+      "n": 4,
       "wins": 0,
-      "losses": 3,
+      "losses": 4,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 3.0,
+      "gross_loss_r": 4.0,
       "profit_factor": 0.0,
-      "sum_rr": -3.0,
+      "sum_rr": -4.0,
       "avg_rr": -1.0,
-      "sum_hold_secs": 33281.819895,
-      "avg_hold_secs": 11093.939965,
-      "calibration_error": 0.2912,
-      "mae_sum": -3.6839890370429806,
-      "mfe_sum": 0.4581358609794718
+      "sum_hold_secs": 77409.037809,
+      "avg_hold_secs": 19352.25945225,
+      "calibration_error": 0.3245,
+      "mae_sum": -4.6470943719220665,
+      "mfe_sum": 0.7743438866877719
     }
   },
   "cooldowns": {
@@ -709,7 +817,10 @@
     "ONDO:long": 300,
     "XRP:long": 300,
     "AVAX:long": 300,
-    "DOGE:long": 300
+    "DOGE:long": 300,
+    "ADA:long": 300,
+    "SUI:long": 300,
+    "SOL:long": 300
   },
   "atr_pct_memory": {
     "BTC": [
@@ -765,7 +876,8 @@
       0.123839077788166,
       0.1278499345311202,
       0.1275319464278711,
-      0.137586646496736
+      0.137586646496736,
+      0.16727688106684543
     ],
     "ETH": [
       0.14786198751516055,
@@ -820,7 +932,8 @@
       0.23401662196707768,
       0.23439789319104534,
       0.23204979671025472,
-      0.24969550013918973
+      0.24969550013918973,
+      0.3063352819395182
     ],
     "HYPE": [
       0.3088658421709603,
@@ -875,7 +988,8 @@
       0.35204513954244315,
       0.3548476475399879,
       0.3501012441029969,
-      0.35727968667712895
+      0.35727968667712895,
+      0.38342703362606956
     ],
     "ZEC": [
       0.4241344423418278,
@@ -930,7 +1044,8 @@
       0.8152758109488539,
       0.7952606461612983,
       0.7899752088715495,
-      0.7846661480665863
+      0.7846661480665863,
+      0.8128955020643549
     ],
     "NEAR": [
       0.36840563269977544,
@@ -985,7 +1100,8 @@
       0.40111198156820804,
       0.4063099709033023,
       0.39631077447236807,
-      0.4233950495740939
+      0.4233950495740939,
+      0.4833374601713868
     ],
     "ONDO": [
       0.41165384285377465,
@@ -1040,7 +1156,8 @@
       0.33152416660884904,
       0.34170783604102245,
       0.3326367423953952,
-      0.3679002059800225
+      0.3679002059800225,
+      0.45261113917001344
     ],
     "SUI": [
       0.37639078614420846,
@@ -1095,7 +1212,8 @@
       0.2941031311921552,
       0.3032968604363911,
       0.2920576589882232,
-      0.3183424308343149
+      0.3183424308343149,
+      0.37160371817151294
     ],
     "PENGU": [
       0.27074750855527624,
@@ -1150,7 +1268,8 @@
       0.3524514518659729,
       0.3580093538538159,
       0.3524630911911272,
-      0.4001862862626559
+      0.4001862862626559,
+      0.5279992241278662
     ],
     "BNB": [
       0.1299501228284625,
@@ -1205,7 +1324,8 @@
       0.12318782749989733,
       0.12780984737002285,
       0.12507080384121919,
-      0.13806183797865765
+      0.13806183797865765,
+      0.16661987427516164
     ],
     "SOL": [
       0.18229406041446558,
@@ -1260,7 +1380,8 @@
       0.23138304076077437,
       0.2315687186455782,
       0.23127060842178143,
-      0.2579154913226571
+      0.2579154913226571,
+      0.3094672728639997
     ],
     "TRX": [
       0.07629219546595338,
@@ -1315,7 +1436,8 @@
       0.06062888697241503,
       0.06217225619347718,
       0.06208543915771044,
-      0.06330186643184339
+      0.06330186643184339,
+      0.06555067343258762
     ],
     "BCH": [
       0.25095251264972435,
@@ -1370,7 +1492,8 @@
       0.34210290921491543,
       0.33344546498459443,
       0.33259779442375764,
-      0.34279949691294487
+      0.34279949691294487,
+      0.39206102904147655
     ],
     "DOGE": [
       0.17332754549797605,
@@ -1425,7 +1548,8 @@
       0.22870413492097844,
       0.2343272120541015,
       0.22948886089692158,
-      0.2636906580725107
+      0.2636906580725107,
+      0.32050326702314236
     ],
     "ADA": [
       0.24536614272412197,
@@ -1480,7 +1604,8 @@
       0.4350138458019054,
       0.44756140989751086,
       0.4284249350072999,
-      0.45496490976436554
+      0.45496490976436554,
+      0.5027449059435437
     ],
     "DOT": [
       0.30491732072718536,
@@ -1535,7 +1660,8 @@
       0.36174066459466997,
       0.3544488516142307,
       0.3509029268452852,
-      0.37343069176633104
+      0.37343069176633104,
+      0.44644246302314033
     ],
     "TAO": [
       0.28419208987475314,
@@ -1590,7 +1716,8 @@
       0.32427201799696015,
       0.32106516653517364,
       0.3213381435190711,
-      0.35144446193436796
+      0.35144446193436796,
+      0.4233915325765991
     ],
     "AVAX": [
       0.15377388462623764,
@@ -1645,7 +1772,8 @@
       0.21890117206562537,
       0.21856332697298453,
       0.22782574286081017,
-      0.2481386755648519
+      0.2481386755648519,
+      0.33197400797148013
     ],
     "LINK": [
       0.1776918559579936,
@@ -1700,7 +1828,8 @@
       0.2237746115812025,
       0.2252365616145659,
       0.21920828666432962,
-      0.23485546566479826
+      0.23485546566479826,
+      0.277169414489073
     ],
     "AAVE": [
       0.4189067368046054,
@@ -1755,7 +1884,8 @@
       0.6375786890046989,
       0.6316030867334539,
       0.6299284857506486,
-      0.6355640406185099
+      0.6355640406185099,
+      0.6718135169071455
     ],
     "XRP": [
       0.14741595005195138,
@@ -1810,7 +1940,8 @@
       0.1990651780129293,
       0.20160296408339778,
       0.1943902202745174,
-      0.211373427997945
+      0.211373427997945,
+      0.2431310512787555
     ],
     "XLM": [
       0.298828392149656,
@@ -1865,7 +1996,8 @@
       0.3087869599341893,
       0.31831578542955863,
       0.3194882035146077,
-      0.34724449440531585
+      0.34724449440531585,
+      0.42223014206543297
     ],
     "UNI": [
       0.39667495568842126,
@@ -1920,7 +2052,8 @@
       0.841201930795534,
       0.8282287705293776,
       0.7892923888616182,
-      0.8119041946687472
+      0.8119041946687472,
+      0.8295605652903718
     ],
     "LTC": [
       0.1602079502392261,
@@ -1975,7 +2108,8 @@
       0.20269056594094934,
       0.20181143551570613,
       0.19772125000100915,
-      0.20661995425049837
+      0.20661995425049837,
+      0.2440448993347908
     ],
     "APT": [
       0.24481001423182105,
@@ -2030,7 +2164,8 @@
       0.334285001549156,
       0.3365637814962086,
       0.32532982766482454,
-      0.35434357664844585
+      0.35434357664844585,
+      0.43334514395473267
     ],
     "PENDLE": [
       0.5150352570214328,
@@ -2085,26 +2220,27 @@
       0.44368971872400165,
       0.45044316875143925,
       0.45442065568808204,
-      0.4715889080182719
+      0.4715889080182719,
+      0.5264857016787471
     ]
   },
   "confidence_calibration": {
     "buckets": {
       "70": {
-        "n": 7,
-        "wins": 5
+        "n": 10,
+        "wins": 6
       },
       "60": {
-        "n": 1,
-        "wins": 0
+        "n": 2,
+        "wins": 1
       },
       "80": {
-        "n": 2,
-        "wins": 0
+        "n": 3,
+        "wins": 1
       }
     }
   },
   "last_daily_summary_date": "2026-07-11",
-  "run_count": 53,
-  "last_run_at": "2026-07-11T23:16:36.998292+00:00"
+  "run_count": 54,
+  "last_run_at": "2026-07-11T23:32:01.392521+00:00"
 }
