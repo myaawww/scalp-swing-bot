@@ -1,1 +1,25 @@
-{}
+{
+  "_version": 1,
+  "pending_setups": {
+    "h4_15m": {
+      "AVAXUSDT": {
+        "direction": "short",
+        "zone_low": 6.5455,
+        "zone_high": 6.7282,
+        "zone_quality": 2,
+        "sweep_extreme": 6.7555,
+        "sfp_time": 1783728000000,
+        "range_low": 6.3147,
+        "range_high": 6.839,
+        "eq": 6.57685,
+        "atr_h4": 0.10851563924445887
+      }
+    },
+    "12h_1h": {}
+  },
+  "active_signals": [],
+  "resolved_signals": [],
+  "signal_cooldowns": {},
+  "signal_history": [],
+  "last_daily_summary_date": "2026-07-12"
+}
