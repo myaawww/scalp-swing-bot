@@ -3,35 +3,6 @@
   "created_at": "2026-07-11T10:15:17.304311+00:00",
   "active_signals": [
     {
-      "id": "9176b203b9a4",
-      "engine": "BreakerBlock",
-      "symbol": "BTC",
-      "direction": "long",
-      "entry": 64182.96792,
-      "sl": 63807.842,
-      "tp1": 64745.656801,
-      "tp2": 65587.0,
-      "confidence": 79.0,
-      "expected_rr": 2.4,
-      "score": 63.783,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "failed OB flipped to breaker",
-        "post-BOS retest"
-      ],
-      "opened_at": "2026-07-11T10:16:35.167271+00:00",
-      "status": "activated",
-      "tg_message_id": 2238,
-      "mae_r": -0.9595922350553573,
-      "mfe_r": 0.7598304057474694,
-      "signal_bar_ts": 1783764000000
-    },
-    {
       "id": "cb7d4159bc43",
       "engine": "Momentum",
       "symbol": "AAVE",
@@ -63,158 +34,6 @@
       "filled_at": "2026-07-11T10:46:37.371134+00:00"
     },
     {
-      "id": "4acaccd6dcf2",
-      "engine": "BreakerBlock",
-      "symbol": "TRX",
-      "direction": "long",
-      "entry": 0.33145,
-      "sl": 0.329461,
-      "tp1": 0.334433,
-      "tp2": 0.33561,
-      "confidence": 77.6,
-      "expected_rr": 1.74,
-      "score": 79.689,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "normal",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "failed OB flipped to breaker",
-        "post-BOS retest"
-      ],
-      "opened_at": "2026-07-11T15:01:56.789940+00:00",
-      "status": "activated",
-      "tg_message_id": 2284,
-      "mae_r": -0.9150326797385756,
-      "mfe_r": 0.025138260432375076,
-      "signal_bar_ts": 1783781100000
-    },
-    {
-      "id": "22bac7223bcf",
-      "engine": "LiquiditySweep",
-      "symbol": "ADA",
-      "direction": "long",
-      "entry": 0.166384,
-      "sl": 0.165511,
-      "tp1": 0.167694,
-      "tp2": 0.16864,
-      "confidence": 78,
-      "expected_rr": 1.93,
-      "score": 55.012,
-      "regime": {
-        "trend_direction": "flat",
-        "is_ranging": true,
-        "volatility_state": "normal",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "equal highs/lows swept",
-        "reclaim close"
-      ],
-      "opened_at": "2026-07-11T23:31:53.131105+00:00",
-      "status": "activated",
-      "tg_message_id": 2371,
-      "mae_r": -0.8407789232531521,
-      "mfe_r": 0.0,
-      "signal_bar_ts": 1783811700000,
-      "_pending_checks": 1,
-      "filled_at": "2026-07-11T23:46:34.147295+00:00"
-    },
-    {
-      "id": "57a90d5a811a",
-      "engine": "SMC",
-      "symbol": "SUI",
-      "direction": "long",
-      "entry": 0.730842,
-      "sl": 0.726862,
-      "tp1": 0.736811,
-      "tp2": 0.74511,
-      "confidence": 79,
-      "expected_rr": 2.33,
-      "score": 54.009,
-      "regime": {
-        "trend_direction": "up",
-        "is_ranging": false,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "liquidity sweep",
-        "MSS confirmation",
-        "discount zone"
-      ],
-      "opened_at": "2026-07-11T23:31:53.747487+00:00",
-      "status": "activated",
-      "tg_message_id": 2372,
-      "mae_r": -0.46532663316582223,
-      "mfe_r": 0.20301507537689303,
-      "signal_bar_ts": 1783811700000
-    },
-    {
-      "id": "174013c5071b",
-      "engine": "MeanReversion",
-      "symbol": "SOL",
-      "direction": "long",
-      "entry": 76.979,
-      "sl": 76.517126,
-      "tp1": 77.671811,
-      "tp2": 78.812,
-      "confidence": 75,
-      "expected_rr": 2.49,
-      "score": 53.135,
-      "regime": {
-        "trend_direction": "flat",
-        "is_ranging": true,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "deviation z=-4.00",
-        "RSI oversold"
-      ],
-      "opened_at": "2026-07-11T23:31:54.374758+00:00",
-      "status": "activated",
-      "tg_message_id": 2373,
-      "mae_r": -0.4893109376150243,
-      "mfe_r": 0.0,
-      "signal_bar_ts": 1783811700000,
-      "_pending_checks": 1,
-      "filled_at": "2026-07-11T23:46:34.147309+00:00"
-    },
-    {
-      "id": "9104273e755d",
-      "engine": "MeanReversion",
-      "symbol": "TAO",
-      "direction": "long",
-      "entry": 209.072727,
-      "sl": 207.90504,
-      "tp1": 210.824257,
-      "tp2": 214.25,
-      "confidence": 75,
-      "expected_rr": 2.67,
-      "score": 53.128,
-      "regime": {
-        "trend_direction": "flat",
-        "is_ranging": true,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "deviation z=-3.65",
-        "RSI oversold"
-      ],
-      "opened_at": "2026-07-11T23:46:32.927017+00:00",
-      "status": "activated",
-      "tg_message_id": 2386,
-      "mae_r": 0.0,
-      "mfe_r": 0.0,
-      "signal_bar_ts": 1783812600000,
-      "_pending_checks": 1,
-      "filled_at": "2026-07-12T00:02:02.074250+00:00"
-    },
-    {
       "id": "76bf998a5b8d",
       "engine": "SMC",
       "symbol": "PENGU",
@@ -241,41 +60,10 @@
       "status": "activated",
       "tg_message_id": 2387,
       "mae_r": 0.0,
-      "mfe_r": 0.0,
+      "mfe_r": 0.17695473251028646,
       "signal_bar_ts": 1783812600000,
       "_pending_checks": 1,
       "filled_at": "2026-07-12T00:02:02.074263+00:00"
-    },
-    {
-      "id": "faf48c082c11",
-      "engine": "MeanReversion",
-      "symbol": "XLM",
-      "direction": "long",
-      "entry": 0.187629,
-      "sl": 0.186534,
-      "tp1": 0.189273,
-      "tp2": 0.19011,
-      "confidence": 75,
-      "expected_rr": 1.81,
-      "score": 50.817,
-      "regime": {
-        "trend_direction": "flat",
-        "is_ranging": true,
-        "volatility_state": "expansion",
-        "btc_regime": "bull_trend"
-      },
-      "confluences": [
-        "deviation z=-3.75",
-        "RSI oversold"
-      ],
-      "opened_at": "2026-07-11T23:46:34.147109+00:00",
-      "status": "activated",
-      "tg_message_id": 2388,
-      "mae_r": 0.0,
-      "mfe_r": 0.0,
-      "signal_bar_ts": 1783812600000,
-      "_pending_checks": 1,
-      "filled_at": "2026-07-12T00:02:02.074269+00:00"
     },
     {
       "id": "b8e3a3b7d586",
@@ -300,11 +88,13 @@
         "ROC -1.16%"
       ],
       "opened_at": "2026-07-12T00:02:00.456780+00:00",
-      "status": "pending",
+      "status": "activated",
       "tg_message_id": 2389,
       "mae_r": 0.0,
       "mfe_r": 0.0,
-      "signal_bar_ts": 1783813500000
+      "signal_bar_ts": 1783813500000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-12T00:21:43.717126+00:00"
     },
     {
       "id": "de48e93f9328",
@@ -330,11 +120,42 @@
         "discount zone"
       ],
       "opened_at": "2026-07-12T00:02:01.185683+00:00",
-      "status": "pending",
+      "status": "activated",
       "tg_message_id": 2390,
       "mae_r": 0.0,
       "mfe_r": 0.0,
-      "signal_bar_ts": 1783813500000
+      "signal_bar_ts": 1783813500000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-12T00:21:43.717147+00:00"
+    },
+    {
+      "id": "0bac2d2be3aa",
+      "engine": "LiquiditySweep",
+      "symbol": "APT",
+      "direction": "long",
+      "entry": 0.623171,
+      "sl": 0.619858,
+      "tp1": 0.62814,
+      "tp2": 0.6369,
+      "confidence": 78,
+      "expected_rr": 2.56,
+      "score": 41.159,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "equal highs/lows swept",
+        "reclaim close"
+      ],
+      "opened_at": "2026-07-12T00:21:35.003724+00:00",
+      "status": "pending",
+      "tg_message_id": 2398,
+      "mae_r": 0.0,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783814400000
     }
   ],
   "signal_history": [
@@ -880,37 +701,277 @@
       "closed_at": "2026-07-12T00:02:01.185851+00:00",
       "_close_price": 45.406459,
       "_hold_secs": 47725.23805
+    },
+    {
+      "id": "9176b203b9a4",
+      "engine": "BreakerBlock",
+      "symbol": "BTC",
+      "direction": "long",
+      "entry": 64182.96792,
+      "sl": 63807.842,
+      "tp1": 64745.656801,
+      "tp2": 65587.0,
+      "confidence": 79.0,
+      "expected_rr": 2.4,
+      "score": 63.783,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "failed OB flipped to breaker",
+        "post-BOS retest"
+      ],
+      "opened_at": "2026-07-11T10:16:35.167271+00:00",
+      "status": "closed",
+      "tg_message_id": 2238,
+      "mae_r": -1.0262365234585675,
+      "mfe_r": 0.7598304057474694,
+      "signal_bar_ts": 1783764000000,
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:35.003934+00:00",
+      "_close_price": 63807.842,
+      "_hold_secs": 50699.836678
+    },
+    {
+      "id": "4acaccd6dcf2",
+      "engine": "BreakerBlock",
+      "symbol": "TRX",
+      "direction": "long",
+      "entry": 0.33145,
+      "sl": 0.329461,
+      "tp1": 0.334433,
+      "tp2": 0.33561,
+      "confidence": 77.6,
+      "expected_rr": 1.74,
+      "score": 79.689,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "normal",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "failed OB flipped to breaker",
+        "post-BOS retest"
+      ],
+      "opened_at": "2026-07-11T15:01:56.789940+00:00",
+      "status": "closed",
+      "tg_message_id": 2284,
+      "mae_r": -1.040723981900451,
+      "mfe_r": 0.025138260432375076,
+      "signal_bar_ts": 1783781100000,
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:35.779110+00:00",
+      "_close_price": 0.329461,
+      "_hold_secs": 33578.989189
+    },
+    {
+      "id": "22bac7223bcf",
+      "engine": "LiquiditySweep",
+      "symbol": "ADA",
+      "direction": "long",
+      "entry": 0.166384,
+      "sl": 0.165511,
+      "tp1": 0.167694,
+      "tp2": 0.16864,
+      "confidence": 78,
+      "expected_rr": 1.93,
+      "score": 55.012,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "normal",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "equal highs/lows swept",
+        "reclaim close"
+      ],
+      "opened_at": "2026-07-11T23:31:53.131105+00:00",
+      "status": "closed",
+      "tg_message_id": 2371,
+      "mae_r": -2.6849942726231144,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783811700000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-11T23:46:34.147295+00:00",
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:36.588694+00:00",
+      "_close_price": 0.165511,
+      "_hold_secs": 2102.441418
+    },
+    {
+      "id": "57a90d5a811a",
+      "engine": "SMC",
+      "symbol": "SUI",
+      "direction": "long",
+      "entry": 0.730842,
+      "sl": 0.726862,
+      "tp1": 0.736811,
+      "tp2": 0.74511,
+      "confidence": 79,
+      "expected_rr": 2.33,
+      "score": 54.009,
+      "regime": {
+        "trend_direction": "up",
+        "is_ranging": false,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "liquidity sweep",
+        "MSS confirmation",
+        "discount zone"
+      ],
+      "opened_at": "2026-07-11T23:31:53.747487+00:00",
+      "status": "closed",
+      "tg_message_id": 2372,
+      "mae_r": -1.3949748743718655,
+      "mfe_r": 0.20301507537689303,
+      "signal_bar_ts": 1783811700000,
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:37.384168+00:00",
+      "_close_price": 0.726862,
+      "_hold_secs": 2983.6367
+    },
+    {
+      "id": "174013c5071b",
+      "engine": "MeanReversion",
+      "symbol": "SOL",
+      "direction": "long",
+      "entry": 76.979,
+      "sl": 76.517126,
+      "tp1": 77.671811,
+      "tp2": 78.812,
+      "confidence": 75,
+      "expected_rr": 2.49,
+      "score": 53.135,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "deviation z=-4.00",
+        "RSI oversold"
+      ],
+      "opened_at": "2026-07-11T23:31:54.374758+00:00",
+      "status": "closed",
+      "tg_message_id": 2373,
+      "mae_r": -1.2514235484136578,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783811700000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-11T23:46:34.147309+00:00",
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:38.165559+00:00",
+      "_close_price": 76.517126,
+      "_hold_secs": 2104.018268
+    },
+    {
+      "id": "9104273e755d",
+      "engine": "MeanReversion",
+      "symbol": "TAO",
+      "direction": "long",
+      "entry": 209.072727,
+      "sl": 207.90504,
+      "tp1": 210.824257,
+      "tp2": 214.25,
+      "confidence": 75,
+      "expected_rr": 2.67,
+      "score": 53.128,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "deviation z=-3.65",
+        "RSI oversold"
+      ],
+      "opened_at": "2026-07-11T23:46:32.927017+00:00",
+      "status": "closed",
+      "tg_message_id": 2386,
+      "mae_r": -2.657156412634602,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783812600000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-12T00:02:02.074250+00:00",
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:42.142447+00:00",
+      "_close_price": 207.90504,
+      "_hold_secs": 1180.068214
+    },
+    {
+      "id": "faf48c082c11",
+      "engine": "MeanReversion",
+      "symbol": "XLM",
+      "direction": "long",
+      "entry": 0.187629,
+      "sl": 0.186534,
+      "tp1": 0.189273,
+      "tp2": 0.19011,
+      "confidence": 75,
+      "expected_rr": 1.81,
+      "score": 50.817,
+      "regime": {
+        "trend_direction": "flat",
+        "is_ranging": true,
+        "volatility_state": "expansion",
+        "btc_regime": "bull_trend"
+      },
+      "confluences": [
+        "deviation z=-3.75",
+        "RSI oversold"
+      ],
+      "opened_at": "2026-07-11T23:46:34.147109+00:00",
+      "status": "closed",
+      "tg_message_id": 2388,
+      "mae_r": -2.6383561643836004,
+      "mfe_r": 0.0,
+      "signal_bar_ts": 1783812600000,
+      "_pending_checks": 1,
+      "filled_at": "2026-07-12T00:02:02.074269+00:00",
+      "result": "sl",
+      "closed_at": "2026-07-12T00:21:42.925546+00:00",
+      "_close_price": 0.186534,
+      "_hold_secs": 1180.851297
     }
   ],
   "engine_stats": {
     "LiquiditySweep": {
-      "n": 4,
+      "n": 5,
       "wins": 4,
-      "losses": 0,
+      "losses": 1,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 0.0,
+      "gross_loss_r": 1.0,
       "profit_factor": 0.0,
-      "sum_rr": 0.0,
-      "avg_rr": 0.0,
-      "sum_hold_secs": 96306.65209399999,
-      "avg_hold_secs": 24076.663023499998,
-      "calibration_error": 0.1266,
-      "mae_sum": -0.1796870551550818,
+      "sum_rr": -1.0,
+      "avg_rr": -0.2,
+      "sum_hold_secs": 98409.09351199999,
+      "avg_hold_secs": 19681.8187024,
+      "calibration_error": 0.1748,
+      "mae_sum": -2.864681327778196,
       "mfe_sum": 6.42291196292113
     },
     "MeanReversion": {
-      "n": 2,
+      "n": 5,
       "wins": 0,
-      "losses": 2,
+      "losses": 5,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 2.0,
+      "gross_loss_r": 5.0,
       "profit_factor": 0.0,
-      "sum_rr": -2.0,
+      "sum_rr": -5.0,
       "avg_rr": -1.0,
-      "sum_hold_secs": 2729.901077,
-      "avg_hold_secs": 1364.9505385,
-      "calibration_error": 0.2218,
-      "mae_sum": -1.8437594683999325,
+      "sum_hold_secs": 7194.838856,
+      "avg_hold_secs": 1438.9677712,
+      "calibration_error": 0.3142,
+      "mae_sum": -8.390695593831792,
       "mfe_sum": 0.0
     },
     "TrendContinuation": {
@@ -929,34 +990,34 @@
       "mfe_sum": 4.743672987362099
     },
     "BreakerBlock": {
-      "n": 3,
+      "n": 5,
       "wins": 2,
-      "losses": 1,
+      "losses": 3,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 1.0,
+      "gross_loss_r": 3.0,
       "profit_factor": 0.0,
-      "sum_rr": -1.0,
-      "avg_rr": -0.3333333333333333,
-      "sum_hold_secs": 130479.523351,
-      "avg_hold_secs": 43493.17445033333,
-      "calibration_error": 0.1683,
-      "mae_sum": -1.0499642164086835,
-      "mfe_sum": 2.93998177286679
+      "sum_rr": -3.0,
+      "avg_rr": -0.6,
+      "sum_hold_secs": 214758.34921800002,
+      "avg_hold_secs": 42951.6698436,
+      "calibration_error": 0.2527,
+      "mae_sum": -3.116924721767702,
+      "mfe_sum": 3.7249504390466344
     },
     "SMC": {
-      "n": 4,
+      "n": 5,
       "wins": 0,
-      "losses": 4,
+      "losses": 5,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 4.0,
+      "gross_loss_r": 5.0,
       "profit_factor": 0.0,
-      "sum_rr": -4.0,
+      "sum_rr": -5.0,
       "avg_rr": -1.0,
-      "sum_hold_secs": 77409.037809,
-      "avg_hold_secs": 19352.25945225,
-      "calibration_error": 0.3245,
-      "mae_sum": -4.6470943719220665,
-      "mfe_sum": 0.7743438866877719
+      "sum_hold_secs": 80392.674509,
+      "avg_hold_secs": 16078.534901800002,
+      "calibration_error": 0.3545,
+      "mae_sum": -6.0420692462939325,
+      "mfe_sum": 0.9773589620646649
     }
   },
   "cooldowns": {
@@ -986,7 +1047,8 @@
     "PENGU:short": 300,
     "XLM:long": 300,
     "DOT:short": 300,
-    "ONDO:short": 300
+    "ONDO:short": 300,
+    "APT:long": 300
   },
   "atr_pct_memory": {
     "BTC": [
@@ -1045,7 +1107,8 @@
       0.137586646496736,
       0.16727688106684543,
       0.17066055944234163,
-      0.1824424827620673
+      0.1824424827620673,
+      0.18369624829968048
     ],
     "ETH": [
       0.14786198751516055,
@@ -1103,7 +1166,8 @@
       0.24969550013918973,
       0.3063352819395182,
       0.32385879061579714,
-      0.32731016554149484
+      0.32731016554149484,
+      0.33616293023067395
     ],
     "HYPE": [
       0.3088658421709603,
@@ -1161,7 +1225,8 @@
       0.35727968667712895,
       0.38342703362606956,
       0.3840183606593472,
-      0.4062912974619378
+      0.4062912974619378,
+      0.4199930080865357
     ],
     "ZEC": [
       0.4241344423418278,
@@ -1219,7 +1284,8 @@
       0.7846661480665863,
       0.8128955020643549,
       0.8509207252847145,
-      0.8593469604820502
+      0.8593469604820502,
+      0.8630627896017777
     ],
     "NEAR": [
       0.36840563269977544,
@@ -1277,7 +1343,8 @@
       0.4233950495740939,
       0.4833374601713868,
       0.49714903365726193,
-      0.5068971553403356
+      0.5068971553403356,
+      0.521398796047302
     ],
     "ONDO": [
       0.41165384285377465,
@@ -1335,7 +1402,8 @@
       0.3679002059800225,
       0.45261113917001344,
       0.4482200356991502,
-      0.45669809985272575
+      0.45669809985272575,
+      0.47254047334104443
     ],
     "SUI": [
       0.37639078614420846,
@@ -1393,7 +1461,8 @@
       0.3183424308343149,
       0.37160371817151294,
       0.3743042688594559,
-      0.3942025795430242
+      0.3942025795430242,
+      0.4181388134191165
     ],
     "PENGU": [
       0.27074750855527624,
@@ -1451,7 +1520,8 @@
       0.4001862862626559,
       0.5279992241278662,
       0.5328832004092596,
-      0.5597591171594535
+      0.5597591171594535,
+      0.5631672484746387
     ],
     "BNB": [
       0.1299501228284625,
@@ -1509,7 +1579,8 @@
       0.13806183797865765,
       0.16661987427516164,
       0.17102724410490264,
-      0.17709599417345728
+      0.17709599417345728,
+      0.21315382786596862
     ],
     "SOL": [
       0.18229406041446558,
@@ -1567,7 +1638,8 @@
       0.2579154913226571,
       0.3094672728639997,
       0.3118467912045363,
-      0.3244039468566981
+      0.3244039468566981,
+      0.3449718213463039
     ],
     "TRX": [
       0.07629219546595338,
@@ -1625,7 +1697,8 @@
       0.06330186643184339,
       0.06555067343258762,
       0.06882902759324486,
-      0.07437210855665784
+      0.07437210855665784,
+      0.07822025272542525
     ],
     "BCH": [
       0.25095251264972435,
@@ -1683,7 +1756,8 @@
       0.34279949691294487,
       0.39206102904147655,
       0.38166428301440014,
-      0.38667817470449695
+      0.38667817470449695,
+      0.3881096724423721
     ],
     "DOGE": [
       0.17332754549797605,
@@ -1741,7 +1815,8 @@
       0.2636906580725107,
       0.32050326702314236,
       0.33585187929578897,
-      0.3505286054264281
+      0.3505286054264281,
+      0.3904304591455404
     ],
     "ADA": [
       0.24536614272412197,
@@ -1799,7 +1874,8 @@
       0.45496490976436554,
       0.5027449059435437,
       0.5257243748965895,
-      0.5296889635313967
+      0.5296889635313967,
+      0.5680925812609849
     ],
     "DOT": [
       0.30491732072718536,
@@ -1857,7 +1933,8 @@
       0.37343069176633104,
       0.44644246302314033,
       0.46345896501619915,
-      0.4706380878324975
+      0.4706380878324975,
+      0.4919523326607939
     ],
     "TAO": [
       0.28419208987475314,
@@ -1915,7 +1992,8 @@
       0.35144446193436796,
       0.4233915325765991,
       0.4375382212660649,
-      0.4598957794860538
+      0.4598957794860538,
+      0.5205612107189989
     ],
     "AVAX": [
       0.15377388462623764,
@@ -1973,7 +2051,8 @@
       0.2481386755648519,
       0.33197400797148013,
       0.36604159916619344,
-      0.37061752328887726
+      0.37061752328887726,
+      0.4800678085820249
     ],
     "LINK": [
       0.1776918559579936,
@@ -2031,7 +2110,8 @@
       0.23485546566479826,
       0.277169414489073,
       0.28703734890994315,
-      0.298522364179457
+      0.298522364179457,
+      0.3137001045452034
     ],
     "AAVE": [
       0.4189067368046054,
@@ -2089,7 +2169,8 @@
       0.6355640406185099,
       0.6718135169071455,
       0.6764856021264731,
-      0.667304682960867
+      0.667304682960867,
+      0.6797537481041462
     ],
     "XRP": [
       0.14741595005195138,
@@ -2147,7 +2228,8 @@
       0.211373427997945,
       0.2431310512787555,
       0.25203068594849404,
-      0.264722437717722
+      0.264722437717722,
+      0.29177727104305423
     ],
     "XLM": [
       0.298828392149656,
@@ -2205,7 +2287,8 @@
       0.34724449440531585,
       0.42223014206543297,
       0.4282467983000736,
-      0.45583647805645616
+      0.45583647805645616,
+      0.5381156256713694
     ],
     "UNI": [
       0.39667495568842126,
@@ -2263,7 +2346,8 @@
       0.8119041946687472,
       0.8295605652903718,
       0.831476776700533,
-      0.8314118620927587
+      0.8314118620927587,
+      0.8170385802639516
     ],
     "LTC": [
       0.1602079502392261,
@@ -2321,7 +2405,8 @@
       0.20661995425049837,
       0.2440448993347908,
       0.24306331891025784,
-      0.26587930671182686
+      0.26587930671182686,
+      0.2987127209498934
     ],
     "APT": [
       0.24481001423182105,
@@ -2379,7 +2464,8 @@
       0.35434357664844585,
       0.43334514395473267,
       0.432957298159209,
-      0.44655366131580654
+      0.44655366131580654,
+      0.458736198963346
     ],
     "PENDLE": [
       0.5150352570214328,
@@ -2437,13 +2523,14 @@
       0.4715889080182719,
       0.5264857016787471,
       0.5164260237490317,
-      0.5289599561282116
+      0.5289599561282116,
+      0.5578384639785616
     ]
   },
   "confidence_calibration": {
     "buckets": {
       "70": {
-        "n": 10,
+        "n": 17,
         "wins": 6
       },
       "60": {
@@ -2457,6 +2544,6 @@
     }
   },
   "last_daily_summary_date": "2026-07-11",
-  "run_count": 56,
-  "last_run_at": "2026-07-12T00:02:02.074292+00:00"
+  "run_count": 57,
+  "last_run_at": "2026-07-12T00:21:43.717178+00:00"
 }
