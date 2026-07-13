@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-13T11:47:24.666575+00:00"
+    "last_run_ts": "2026-07-13T12:02:45.426084+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -335,70 +335,51 @@
         "baseline_avg_rr": null
       }
     },
-    "segment_stats": {},
-    "category_stats": {},
-    "calibration": {},
+    "segment_stats": {
+      "LTCUSDT|low_vol|15m|breaker_block": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      }
+    },
+    "category_stats": {
+      "regime_mismatch": {
+        "n": 1,
+        "n_since_last_gate": 1
+      }
+    },
+    "calibration": {
+      "calib|breaker_block|mid": {
+        "n": 1,
+        "wins": 0
+      }
+    },
     "totals": {
-      "signals": 0,
+      "signals": 1,
       "wins": 0,
-      "losses": 0,
+      "losses": 1,
       "expired": 0,
       "sum_r": 0.0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 0.0,
-      "sum_hold_minutes": 0.0
+      "sum_hold_minutes": 28.04246349732081
     }
   },
   "tier2": {
-    "trades": []
+    "trades": [
+      {
+        "id": "LTCUSDT:breaker_block:1783942358843",
+        "symbol": "LTCUSDT",
+        "engine": "breaker_block",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783944041.3913941,
+        "signal_ts": 1783942358.8435843
+      }
+    ]
   },
-  "active_signals": {
-    "LTCUSDT:breaker_block:1783942358843": {
-      "id": "LTCUSDT:breaker_block:1783942358843",
-      "symbol": "LTCUSDT",
-      "engine": "breaker_block",
-      "direction": "short",
-      "entry": 43.61,
-      "sl": 43.698,
-      "tp1": 43.382,
-      "tp2": 43.364399999999996,
-      "entry_kind": "pending",
-      "timeframe": "15m",
-      "confidence_raw": 0.65,
-      "regime_fit": [
-        "reversal",
-        "trending"
-      ],
-      "confluences": {
-        "breaker_confirmed_mss": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.7954545454545399,
-      "rr_tp1": 2.5909090909090797,
-      "rr_tp2": 2.790909090909096,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 6,
-      "entry_filled": false,
-      "score": 0.587519137274067,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1783942358.8435843,
-      "last_checked_ts": 1783942358843,
-      "sl_buffer_used": 0.04399999999999693,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 2760
-    }
-  },
+  "active_signals": {},
   "daily_summary_date": null
 }
