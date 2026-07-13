@@ -1747,7 +1747,7 @@ def evaluate_circuit_breaker(state: dict) -> None:
         cb["tripped"] = True
         cb["tripped_ts"] = time.time()
         send_telegram(
-            f"⚠️ *{ENGINE_NAME} CIRCUIT BREAKER TRIPPED*\n"
+            f"🤯 *{ENGINE_NAME} CIRCUIT BREAKER TRIPPED*\n"
             f"Rolling live win rate/PF has fallen materially below baseline.\n"
             f"Baseline WR: `{cb['baseline_wr']:.2%}` -> Live WR: `{wr:.2%}`\n"
             f"Automatic parameter adaptation is now FROZEN. Signal generation continues."
@@ -1755,12 +1755,51 @@ def evaluate_circuit_breaker(state: dict) -> None:
     elif cb["tripped"] and wr >= cb["baseline_wr"] and pf >= cb["baseline_pf"]:
         cb["tripped"] = False
         cb["tripped_ts"] = None
-        send_telegram(f"✅ *{ENGINE_NAME}* live performance recovered to baseline — adaptation resumed.")
+        send_telegram(f"👏 *{ENGINE_NAME}* live performance recovered to baseline — adaptation resumed.")
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 13 — TELEGRAM INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════
+# DECISION: reaction/status emojis used below are restricted to Telegram's
+# native quick-reaction set (per the user-supplied reaction picker) so every
+# emoji the engine sends can also be tapped back as a genuine reaction —
+# 🏆 win, 😭 loss, 👍 TP1 hit, 🤷 expired/no-fill, 🤯 circuit breaker tripped,
+# 👏 circuit breaker recovered.
+# DECISION: all underscore-bearing internal identifiers (engine names,
+# forensic category keys) are converted through _display_name() before ever
+# reaching a Telegram message — underscores stay in state.json/code only.
+
+_ACRONYM_DISPLAY_OVERRIDES = {"smc": "SMC"}
+
+
+def _display_name(identifier: str) -> str:
+    if identifier in _ACRONYM_DISPLAY_OVERRIDES:
+        return _ACRONYM_DISPLAY_OVERRIDES[identifier]
+    return identifier.replace("_", " ").title()
+
+
+def format_price(price: float) -> str:
+    """Decimal places scale with the symbol's own price magnitude so a $63k
+    BTC print doesn't render with the same precision as a sub-$1 altcoin:
+    >= $100 -> 2 decimals, $1-$100 -> 4 decimals, < $1 -> 6 decimals (the
+    Sec 17 hard cap). Trailing zeros are always trimmed, so a clean whole
+    number like 100.0 shows as `100`, never `100.00` — and no price is ever
+    rendered in scientific notation."""
+    if price == 0:
+        return "0"
+    abs_p = abs(price)
+    if abs_p >= 100:
+        decimals = 2
+    elif abs_p >= 1:
+        decimals = 4
+    else:
+        decimals = 6
+    s = f"{price:.{decimals}f}"
+    if "." in s:
+        s = s.rstrip("0").rstrip(".")
+    return s or "0"
+
 
 def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
@@ -1780,32 +1819,30 @@ def format_signal_message(cand: Candidate) -> str:
     arrow = "🟢 LONG" if cand.direction == "long" else "🔴 SHORT"
     return (
         f"*{ENGINE_NAME} {__version__}* — {cand.symbol}\n"
-        f"{arrow}  |  Tier: *{cand.tier}*  |  Engine: `{cand.engine}`\n"
+        f"{arrow}  |  Tier: *{cand.tier}*  |  Engine: `{_display_name(cand.engine)}`\n"
         f"Confidence: `{cand.confidence_raw:.0%}`  |  RR1: `{cand.rr_tp1:.2f}`  RR2: `{cand.rr_tp2:.2f}`\n"
-        f"Entry: `{cand.entry:.6g}`\n"
-        f"SL: `{cand.sl:.6g}`\n"
-        f"TP1: `{cand.tp1:.6g}`\n"
-        f"TP2: `{cand.tp2:.6g}`\n"
-        f"Entry type: {cand.entry_kind}"
+        f"Entry: `{format_price(cand.entry)}`\n"
+        f"SL: `{format_price(cand.sl)}`\n"
+        f"TP1: `{format_price(cand.tp1)}`\n"
+        f"TP2: `{format_price(cand.tp2)}`\n"
+        f"Entry type: {_display_name(cand.entry_kind)}"
     )
 
 
 def format_outcome_message(signal: dict) -> str:
     if signal["result"] == "expired":
-        return f"⌛ *{ENGINE_NAME}* {signal['symbol']} signal expired — never filled (no-fill, excluded from stats)."
+        return f"🤷 *{ENGINE_NAME}* {signal['symbol']} signal expired — never filled (no fill, excluded from stats)."
     if signal["result"] == "loss":
         return f"😭 *{ENGINE_NAME}* {signal['symbol']} — SL hit. LOSS ({signal['realized_r']:.2f}R)."
     if signal.get("note") == "tp1_secured_then_sl_hit":
-        return (f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP1 secured earlier; original SL later hit. "
+        return (f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP1 secured earlier, original SL later hit. "
                 f"Counts as a WIN, {signal['realized_r']:.2f}R credited at TP1.")
     return f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP2 hit. WIN ({signal['realized_r']:.2f}R)."
 
 
 def format_tp1_message(signal: dict) -> str:
-    return (f"🎯 *{ENGINE_NAME}* {signal['symbol']} — TP1 hit.\n"
-            f"SL remains at its original level, unchanged. You may manually move your own SL to "
-            f"entry if you wish to lock in breakeven yourself — the engine will not do this "
-            f"automatically.")
+    return (f"👍 *{ENGINE_NAME}* {signal['symbol']} — TP1 hit.\n"
+            f"SL unchanged. Move it to entry yourself for breakeven if you want.")
 
 
 def send_daily_summary(state: dict) -> None:
@@ -1816,7 +1853,7 @@ def send_daily_summary(state: dict) -> None:
     avg_rr = totals["sum_r"] / resolved if resolved else 0.0
     avg_hold = totals["sum_hold_minutes"] / resolved if resolved else 0.0
     cat_lines = "\n".join(
-        f"  {cat}: `{stats.get('n', 0)}`"
+        f"  {_display_name(cat)}: `{stats.get('n', 0)}`"
         for cat, stats in state["tier1"]["category_stats"].items()
     ) or "  (no resolved trades yet)"
     msg = (
