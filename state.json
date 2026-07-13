@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-13T11:17:19.775561+00:00"
+    "last_run_ts": "2026-07-13T11:32:39.501427+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -352,6 +352,53 @@
   "tier2": {
     "trades": []
   },
-  "active_signals": {},
+  "active_signals": {
+    "LTCUSDT:breaker_block:1783942358843": {
+      "id": "LTCUSDT:breaker_block:1783942358843",
+      "symbol": "LTCUSDT",
+      "engine": "breaker_block",
+      "direction": "short",
+      "entry": 43.61,
+      "sl": 43.698,
+      "tp1": 43.382,
+      "tp2": 43.364399999999996,
+      "entry_kind": "pending",
+      "timeframe": "15m",
+      "confidence_raw": 0.65,
+      "regime_fit": [
+        "reversal",
+        "trending"
+      ],
+      "confluences": {
+        "breaker_confirmed_mss": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.7954545454545399,
+      "rr_tp1": 2.5909090909090797,
+      "rr_tp2": 2.790909090909096,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 6,
+      "entry_filled": false,
+      "score": 0.587519137274067,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783942358.8435843,
+      "last_checked_ts": 1783942358843,
+      "sl_buffer_used": 0.04399999999999693,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 2760
+    }
+  },
   "daily_summary_date": null
 }
