@@ -14,6 +14,27 @@
 # every adaptive parameter, all persisted in a two-tier state.json.
 #
 # Design-decision comments are inline throughout, marked with `# DECISION:`.
+#
+# CHANGES (v1.1.0):
+#   1. BUGFIX: engine_mean_reversion and engine_range_trading independently
+#      override tp1 (to the BB mean / range mid-target) but were still using
+#      the tp2 that build_risk_plan() computed for its OWN internal tp1
+#      candidate. Those two tp1 values are unrelated, so tp2 had no
+#      guaranteed relationship to the tp1 actually shown to the user -- on
+#      some setups tp2 could land closer to entry than tp1, i.e. "TP2" paying
+#      out less than "TP1". Fixed by extracting the tp2-construction logic
+#      into extend_tp2() and having every engine call it AFTER its final tp1
+#      is locked in, so tp2 is always built as a further extension beyond
+#      whatever tp1 actually is. Also added an engine-agnostic safety-net
+#      check (_tp_ordering_sane(), applied in run_ensemble()) so this class
+#      of bug can never silently ship again, even from a future engine.
+#   2. WIDER RISK PROFILE: this engine's floors (RR_TP1_FLOOR, the ATR
+#      multiples gating min SL/TP1 distance, and the SL buffer band) were
+#      tuned tight enough to produce sub-1%-of-price stop/target distances on
+#      low-volatility majors (see e.g. the SUIUSDT scalp-sized signal that
+#      prompted this change). Widened per Sec 10/12 intent of giving swing
+#      setups room to actually be swings: see SECTION 0 for the new values
+#      and inline comments at each constant for the reasoning.
 
 from __future__ import annotations
 
@@ -34,7 +55,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -93,10 +114,27 @@ MAX_CORRELATED_CONCURRENT = 1
 MIN_SAMPLE_SIZE = int(os.getenv("MIN_SAMPLE_SIZE", "20"))  # Sec 13 min-sample gate, per segment/category
 TIER2_RETENTION_DAYS = 15  # Sec 5 raw-log pruning window
 
-RR_TP1_FLOOR = 1.5
-RR_TP1_CEIL_SOFT = 2.0  # informative target band, not a hard cap
-MIN_ENTRY_SL_ATR_MULT = 0.35   # min entry-to-SL distance, in ATR
-MIN_ENTRY_TP1_ATR_MULT = 0.55  # min entry-to-TP1 distance, in ATR
+# DECISION (v1.1.0): the original floors below produced technically-correct
+# but practically tiny RR plans on low-volatility assets/timeframes -- a
+# "swing" signal with a sub-1%-of-price SL/TP band is really a scalp in
+# disguise. These are widened to force genuinely bigger stop/target
+# distances, i.e. more room for price to breathe and bigger payouts, at the
+# cost of needing correspondingly smaller position size / lower leverage to
+# keep dollar risk constant. RR shape (reward relative to risk) is a
+# separate knob from these -- see RR_TP1_FLOOR / RR_TP2_EXTENSION below.
+RR_TP1_FLOOR = 2.5       # was 1.5 -- require a bigger first-target payout per unit of risk
+# DECISION (v1.1.0, structural-validity): this is ONLY used as TP1 when there is
+# no opposing structural pivot at all in view -- i.e. no chart level exists to
+# validate a target against. Left close to the original (2.0->2.2) rather than
+# pushed as far as the other floors: an unanchored RR projection shouldn't
+# reach as aggressively as a wall-confirmed one. The extra reward this
+# engine now targets is meant to come from TP2 (bounded by real structure in
+# extend_tp2 below), not from stretching a number that has no level behind it.
+RR_TP1_CEIL_SOFT = 2.2
+RR_TP2_EXTENSION = 2.5   # was hardcoded 1.2 -- TP2 = entry + risk*(rr1 + this), in RR units beyond TP1
+RR_TP2_FALLBACK_EXTENSION = 1.5  # was hardcoded 0.5 -- used only if wall-clipping pulls TP2 back to/under rr1
+MIN_ENTRY_SL_ATR_MULT = 0.9    # was 0.35 -- min entry-to-SL distance, in ATR (more room to not get wicked out)
+MIN_ENTRY_TP1_ATR_MULT = 1.4   # was 0.55 -- min entry-to-TP1 distance, in ATR (bigger first target)
 MAX_PENDING_ENTRY_ATR_MULT = 1.8  # cap on how far a pending zone entry may sit from market
 
 CIRCUIT_BREAKER_WINDOW = 30       # trades in rolling live-performance window
@@ -142,7 +180,11 @@ def default_state() -> dict:
                     name: {b: 1.0 for b in ["low", "mid", "high"]} for name in DEFAULT_ENGINE_NAMES
                 },
                 "sl_buffer_percentile": {  # per (asset, timeframe) adaptive-percentile SL buffer
-                    "default": {"pct": 0.65, "min": 0.35, "max": 0.90}
+                    # DECISION (v1.1.0): raised default/min pct so the SL buffer sits deeper
+                    # into the observed adverse-wick distribution by default -- was clamping
+                    # to razor-thin buffers on quiet assets. See also the ATR floor/ceiling
+                    # in adaptive_sl_buffer(), also widened.
+                    "default": {"pct": 0.80, "min": 0.55, "max": 0.95}
                 },
                 "filter_thresholds": {
                     "min_confluence_score": {"value": 0.42, "min": 0.28, "max": 0.65},
@@ -775,11 +817,13 @@ def adaptive_sl_buffer(view: TFView, state: dict, asset: str) -> float:
         wicks.append(body_bot - c["l"])
     wicks = sorted(w for w in wicks if w > 0)
     if not wicks:
-        return view.atr[-1] * 0.25
+        return view.atr[-1] * 0.6
     idx = clamp(int(pct * len(wicks)), 0, len(wicks) - 1)
     buf = wicks[idx]
     # floor/ceiling relative to ATR so buffer never collapses to ~0 or balloons unreasonably
-    return clamp(buf, 0.15 * view.atr[-1], 1.2 * view.atr[-1])
+    # DECISION (v1.1.0): raised floor from 0.15x/1.2x to 0.4x/2.0x ATR -- the old floor let
+    # the buffer (and therefore the whole SL) collapse to near-nothing on quiet candles.
+    return clamp(buf, 0.4 * view.atr[-1], 2.0 * view.atr[-1])
 
 
 def clip_target_to_liquidity_wall(direction: str, entry: float, raw_target: float,
@@ -801,6 +845,79 @@ def clip_target_to_liquidity_wall(direction: str, entry: float, raw_target: floa
     return min(candidates_between) if direction == "long" else max(candidates_between)
 
 
+def _farthest_structural_level(direction: str, entry: float, view: TFView) -> Optional[float]:
+    """The most extreme real structural level (swing pivot) currently visible
+    in this view, in the direction of the trade. Used as a hard sanity
+    ceiling on TP2: a 'let it run' second target still has to be a level the
+    chart has actually printed, not a bare RR-multiple extrapolated into
+    empty space where no one has ever traded before."""
+    levels = [p.price for p in view.pivots if
+              (p.kind == "high" and direction == "long" and p.price > entry) or
+              (p.kind == "low" and direction == "short" and p.price < entry)]
+    if not levels:
+        return None
+    return max(levels) if direction == "long" else min(levels)
+
+
+def extend_tp2(direction: str, entry: float, sl: float, risk: float, rr1: float,
+               view: TFView) -> tuple[float, float]:
+    """Build a TP2 that is guaranteed to sit strictly beyond whatever TP1/rr1
+    the caller has already locked in, wall-clipped like TP1 is, AND bounded
+    by real visible structure -- not just an unconstrained RR projection.
+
+    DECISION (v1.1.0 bugfix): this used to be inlined in build_risk_plan()
+    only, computed from THAT function's own internal tp1/rr1. Two engines
+    (mean_reversion, range_trading) build their own tp1 candidate (BB mean /
+    range interior target) that has nothing to do with build_risk_plan's
+    internal tp1, but were still taking build_risk_plan's tp2 as-is. Since
+    that tp2 was only ever guaranteed to beat build_risk_plan's own tp1, not
+    the engine's real, displayed tp1, TP2 could end up nearer to entry than
+    TP1 on those two engines. Extracting this so every engine calls it AFTER
+    its final tp1/rr1 is decided makes "tp2 nearer than tp1" structurally
+    impossible everywhere, not just in the default path.
+
+    DECISION (v1.1.0, structural-validity fix): widening RR_TP2_EXTENSION so
+    TP2 reaches further is only meaningful if that further price has some
+    real technical basis. clip_target_to_liquidity_wall() only pulls a
+    target BACK when a wall sits between entry and it -- it does nothing if
+    the target has run past every wall that exists. So a big RR extension
+    with no wall in between used to just produce a number, not a level. Now
+    bounded by _farthest_structural_level(): TP2 is never allowed past the
+    furthest real pivot this view has actually printed in the trade's
+    direction. If bounding by that ceiling erases the extension's edge over
+    TP1 (rr2 <= rr1), we step down to a smaller extension and try again
+    rather than either faking a bigger number or shipping tp2 == tp1.
+    """
+    ceiling = _farthest_structural_level(direction, entry, view)
+    wall_buffer = view.atr[-1] * 0.08
+
+    def _attempt(extension: float) -> tuple[float, float]:
+        raw = entry + risk * (rr1 + extension) if direction == "long" \
+            else entry - risk * (rr1 + extension)
+        tp = clip_target_to_liquidity_wall(direction, entry, raw, view)
+        if ceiling is not None:
+            if direction == "long" and tp > ceiling:
+                tp = ceiling - wall_buffer
+            if direction == "short" and tp < ceiling:
+                tp = ceiling + wall_buffer
+        return tp, _rr(entry, sl, tp, direction)
+
+    tp2, rr2 = _attempt(RR_TP2_EXTENSION)
+    if rr2 <= rr1:
+        tp2, rr2 = _attempt(RR_TP2_FALLBACK_EXTENSION)
+    if rr2 <= rr1:
+        # DECISION: even the fallback extension collapses once bounded by real
+        # structure -- there's no confirmed level beyond TP1 in this view to
+        # call a second target. Rather than fabricate a further price or
+        # violate the tp2>tp1 invariant, take a small, honest step past TP1
+        # itself and let the trade's conviction/tier reflect the thinner setup,
+        # instead of pretending a bigger reward is available than the chart
+        # actually supports.
+        tp2 = entry + risk * (rr1 + 0.2) if direction == "long" else entry - risk * (rr1 + 0.2)
+        rr2 = _rr(entry, sl, tp2, direction)
+    return tp2, rr2
+
+
 def build_risk_plan(direction: str, entry: float, structural_sl: float, view: TFView,
                      state: dict, asset: str) -> Optional[dict]:
     buf = adaptive_sl_buffer(view, state, asset)
@@ -819,7 +936,7 @@ def build_risk_plan(direction: str, entry: float, structural_sl: float, view: TF
                           (max(opp_pivots) if opp_pivots else None)
     raw_tp1 = nearest_structural if nearest_structural is not None else \
         (entry + risk * RR_TP1_CEIL_SOFT if direction == "long" else entry - risk * RR_TP1_CEIL_SOFT)
-    # never let TP1 fall below the 1.5 floor even if nearest structure is closer
+    # never let TP1 fall below the floor even if nearest structure is closer
     if direction == "long" and raw_tp1 < floor_tp1:
         raw_tp1 = floor_tp1
     if direction == "short" and raw_tp1 > floor_tp1:
@@ -829,15 +946,10 @@ def build_risk_plan(direction: str, entry: float, structural_sl: float, view: TF
     rr1 = _rr(entry, sl, tp1, direction)
     if rr1 < RR_TP1_FLOOR:
         # DECISION: clipping must never be used to justify shrinking below the
-        # floor — if clipping pushed RR under 1.5, reject the candidate (Sec 10).
+        # floor — if clipping pushed RR under the floor, reject the candidate (Sec 10).
         return None
 
-    raw_tp2 = entry + risk * (rr1 + 1.2) if direction == "long" else entry - risk * (rr1 + 1.2)
-    tp2 = clip_target_to_liquidity_wall(direction, entry, raw_tp2, view)
-    rr2 = _rr(entry, sl, tp2, direction)
-    if rr2 <= rr1:
-        tp2 = entry + risk * (rr1 + 0.5) if direction == "long" else entry - risk * (rr1 + 0.5)
-        rr2 = _rr(entry, sl, tp2, direction)
+    tp2, rr2 = extend_tp2(direction, entry, sl, risk, rr1, view)
 
     return {"sl": sl, "tp1": tp1, "tp2": tp2, "rr1": rr1, "rr2": rr2, "risk": risk}
 
@@ -1206,15 +1318,20 @@ def engine_mean_reversion(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
     plan = build_risk_plan(direction, entry, structural_sl, v, state, snap.symbol)
     if not plan or not passes_entry_placement_rules(entry, plan["sl"], plan["tp1"], v.atr[-1], direction, snap.mark_price):
         return out
+    rr_tp1 = _rr(entry, plan["sl"], mean, direction)
+    if rr_tp1 < RR_TP1_FLOOR:
+        return out
+    # BUGFIX (v1.1.0): tp1 here is the BB mean, NOT plan["tp1"] -- so tp2 must
+    # be rebuilt relative to rr_tp1/mean, not taken as plan["tp2"] (which was
+    # only ever guaranteed to beat plan's own internal tp1). See extend_tp2().
+    tp2, rr_tp2 = extend_tp2(direction, entry, plan["sl"], plan["risk"], rr_tp1, v)
     cand = Candidate(
         id=_new_id(snap.symbol, "mean_reversion"), symbol=snap.symbol, engine="mean_reversion", direction=direction,
-        entry=entry, sl=plan["sl"], tp1=mean, tp2=plan["tp2"], entry_kind="market",
+        entry=entry, sl=plan["sl"], tp1=mean, tp2=tp2, entry_kind="market",
         timeframe=v.tf, confidence_raw=0.45, regime_fit=["ranging", "consolidation", "low_vol"],
         confluences={"z_score_extreme": clamp((abs(z) - 1.8) / 2.0, 0.0, 1.0)},
-        rr_tp1=_rr(entry, plan["sl"], mean, direction), rr_tp2=plan["rr2"],
+        rr_tp1=rr_tp1, rr_tp2=rr_tp2,
     )
-    if cand.rr_tp1 < RR_TP1_FLOOR:
-        return out
     out.append(cand)
     return out
 
@@ -1248,12 +1365,15 @@ def engine_range_trading(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
     rr1 = _rr(entry, plan["sl"], target, direction)
     if rr1 < RR_TP1_FLOOR:
         return out
+    # BUGFIX (v1.1.0): tp1 here is the range interior target, NOT plan["tp1"]
+    # -- rebuild tp2 relative to rr1/target instead of taking plan["tp2"] as-is.
+    tp2, rr2 = extend_tp2(direction, entry, plan["sl"], plan["risk"], rr1, v)
     cand = Candidate(
         id=_new_id(snap.symbol, "range_trading"), symbol=snap.symbol, engine="range_trading", direction=direction,
-        entry=entry, sl=plan["sl"], tp1=target, tp2=plan["tp2"], entry_kind="market",
+        entry=entry, sl=plan["sl"], tp1=target, tp2=tp2, entry_kind="market",
         timeframe=v.tf, confidence_raw=0.45, regime_fit=["ranging", "consolidation", "low_vol"],
         confluences={"range_edge_proximity": clamp(1 - min(pos, 1 - pos) / 0.15, 0.0, 1.0)},
-        rr_tp1=rr1, rr_tp2=plan["rr2"],
+        rr_tp1=rr1, rr_tp2=rr2,
     )
     out.append(cand)
     return out
@@ -1302,13 +1422,34 @@ ENGINES = {
 }
 
 
+def _tp_ordering_sane(cand: Candidate) -> bool:
+    """Safety net (v1.1.0): tp2 must sit strictly beyond tp1 in the trade's
+    favor, for every engine, regardless of how each one derived its targets.
+    This is deliberately engine-agnostic and re-checked here (not just at
+    each engine's construction site) so this bug class can't silently
+    reappear if a future engine forgets to call extend_tp2() correctly."""
+    if cand.direction == "long":
+        return cand.tp2 > cand.tp1 > cand.entry
+    return cand.tp2 < cand.tp1 < cand.entry
+
+
 def run_ensemble(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
     candidates = []
     for name, fn in ENGINES.items():
         try:
-            candidates.extend(fn(snap, state))
+            produced = fn(snap, state)
         except Exception as e:
             log.warning(f"Engine {name} failed on {snap.symbol}: {e}")
+            continue
+        for cand in produced:
+            if not _tp_ordering_sane(cand):
+                log.error(
+                    f"REJECTED {snap.symbol}/{name}: tp ordering invalid "
+                    f"(entry={cand.entry} tp1={cand.tp1} tp2={cand.tp2} dir={cand.direction}) "
+                    f"— this indicates a bug in that engine's target construction."
+                )
+                continue
+            candidates.append(cand)
     return candidates
 
 
