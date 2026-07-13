@@ -49,6 +49,12 @@ if not TG_CHAT_ID:
     raise RuntimeError("TG_CHAT_ID environment variable is required")
 
 STATE_FILE = os.getenv("STATE_FILE", "state.json")
+# PERF (v1.1.2): candle cache lives in its own file, separate from state.json.
+# It's just a rebuildable performance cache (never learned/adaptive data), so
+# keeping it out of state.json keeps that file small, keeps diffs/backups of
+# the "real" state clean, and lets the cache be wiped independently without
+# touching any adaptive params or trade history.
+CANDLE_CACHE_FILE = os.getenv("CANDLE_CACHE_FILE", "candle_cache.json")
 SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "4"))
 HL_BASE_URL = "https://api.hyperliquid.xyz/info"
 HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.15"))
@@ -165,6 +171,9 @@ def default_state() -> dict:
         "tier2": {"trades": []},        # bounded raw log, pruned by age
         "active_signals": {},           # id -> signal dict (pending or filled, unresolved)
         "daily_summary_date": None,
+        # NOTE: the persisted candle cache (keyed "{coin}|{interval}" -> list of
+        # candle dicts) is intentionally NOT stored here — see CANDLE_CACHE_FILE /
+        # CandleCacheStore below. It's a rebuildable perf cache, not adaptive state.
     }
 
 
@@ -218,6 +227,47 @@ class StateStore:
             log.info(f"Pruned {pruned} aged-out Tier 2 trade records (Tier 1 aggregates unaffected).")
 
 
+class CandleCacheStore:
+    """Atomic, lock-guarded read/write for the candle cache, kept in its own
+    file (CANDLE_CACHE_FILE) separate from state.json. Same load/save
+    mechanics as StateStore (shared/exclusive flock + atomic tmp-file swap),
+    but with no schema merging — it's just {"{coin}|{interval}": [candle, ...]}.
+    """
+
+    def __init__(self, path: str):
+        self.path = Path(path)
+        self.cache: dict = {}
+
+    def load(self) -> dict:
+        if not self.path.exists():
+            log.info(f"No existing {self.path.name} — starting with an empty candle cache.")
+            self.cache = {}
+            return self.cache
+        try:
+            with open(self.path, "r") as f:
+                fcntl.flock(f, fcntl.LOCK_SH)
+                try:
+                    self.cache = json.load(f)
+                finally:
+                    fcntl.flock(f, fcntl.LOCK_UN)
+        except Exception as e:
+            log.error(f"Failed to load {self.path.name} ({e}); starting with an empty candle cache.")
+            self.cache = {}
+        return self.cache
+
+    def save(self) -> None:
+        tmp_path = self.path.with_suffix(".json.tmp")
+        with open(tmp_path, "w") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            try:
+                json.dump(self.cache, f, indent=2, default=str)
+                f.flush()
+                os.fsync(f.fileno())
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
+        os.replace(tmp_path, self.path)  # atomic swap
+
+
 def _deep_merge_defaults(loaded: dict, defaults: dict) -> dict:
     out = dict(defaults)
     for k, v in loaded.items():
@@ -246,15 +296,17 @@ def bounded_update(current: float, target_delta: float, lo: float, hi: float,
 # ═══════════════════════════════════════════════════════════════════════
 
 class _WeightedRateLimiter:
-    """Sliding-window budget matching HL's documented weight system
-    (candleSnapshot ~= weight 25, budget floor 900/min)."""
+    """Sliding-window budget matching HL's documented weight system: most info
+    requests (including candleSnapshot) cost 20 weight against a shared
+    aggregated budget of 1200/min (not 900 — that undercounted our real
+    headroom and caused unnecessary throttling sleeps)."""
 
-    def __init__(self, budget_per_min: int = 900):
+    def __init__(self, budget_per_min: int = 1200):
         self.budget = budget_per_min
         self.window: list[tuple[float, int]] = []
         self._last_call = 0.0
 
-    def acquire(self, weight: int = 25):
+    def acquire(self, weight: int = 20):
         now = time.time()
         if now - self._last_call < HL_MIN_INTERVAL_S:
             time.sleep(HL_MIN_INTERVAL_S - (now - self._last_call))
@@ -268,12 +320,21 @@ class _WeightedRateLimiter:
 
 
 class HyperliquidClient:
-    def __init__(self):
+    # PERF (v1.1.2): `cache` is now a persisted dict loaded from its own
+    # CANDLE_CACHE_FILE (via CandleCacheStore), not a fresh in-process dict
+    # that got thrown away every scan. Previously every 15-min run re-downloaded
+    # the full 260-320 bar lookback for all 25 symbols x 4 timeframes (~100
+    # calls, ~2000+ weight) — almost all of which was history that hadn't
+    # changed since the last run. With a warm cache we only need to ask for
+    # bars newer than the last one we already have, and for timeframes whose
+    # current candle can't have closed yet (e.g. a 4h candle 20 minutes after
+    # the last scan) we skip the network call entirely.
+    def __init__(self, cache: Optional[dict] = None):
         self.session = requests.Session()
         self.limiter = _WeightedRateLimiter()
-        self._candle_cache: dict[tuple[str, str], list[dict]] = {}
+        self._candle_cache: dict = cache if cache is not None else {}
 
-    def _post(self, payload: dict, weight: int = 25, retries: int = 4) -> Any:
+    def _post(self, payload: dict, weight: int = 20, retries: int = 4) -> Any:
         self.limiter.acquire(weight)
         backoff = 1.0
         for attempt in range(retries):
@@ -295,21 +356,44 @@ class HyperliquidClient:
 
     def candles(self, symbol: str, interval: str, n_bars: int) -> list[dict]:
         coin = symbol.replace("USDT", "")
-        cache_key = (coin, interval)
+        cache_key = f"{coin}|{interval}"
         end_ms = int(time.time() * 1000)
         interval_ms = _interval_to_ms(interval)
-        start_ms = end_ms - interval_ms * (n_bars + 5)
+        cached = self._candle_cache.get(cache_key) or []
+
+        if cached:
+            last_t = cached[-1]["t"]
+            # The cached last candle can only still be the freshest *closed*
+            # bar if the next one hasn't opened yet. If `now` hasn't reached
+            # last_t + interval_ms, nothing new could possibly exist on the
+            # exchange — skip the network call entirely (0 weight).
+            if end_ms < last_t + interval_ms:
+                return cached[-n_bars:]
+            # Otherwise fetch just the gap since our last cached bar (plus a
+            # small overlap in case the last cached bar was still forming),
+            # instead of the full n_bars history.
+            start_ms = last_t
+        else:
+            start_ms = end_ms - interval_ms * (n_bars + 5)
+
         payload = {"type": "candleSnapshot",
                    "req": {"coin": coin, "interval": interval, "startTime": start_ms, "endTime": end_ms}}
-        data = self._post(payload, weight=25)
+        data = self._post(payload, weight=20)
         if not data:
-            return self._candle_cache.get(cache_key, [])
-        candles = [{"t": c["t"], "o": float(c["o"]), "h": float(c["h"]),
-                    "l": float(c["l"]), "c": float(c["c"]), "v": float(c["v"])}
-                   for c in data]
-        candles.sort(key=lambda c: c["t"])
-        self._candle_cache[cache_key] = candles[-n_bars:]
-        return self._candle_cache[cache_key]
+            return cached[-n_bars:] if cached else []
+
+        fresh = [{"t": c["t"], "o": float(c["o"]), "h": float(c["h"]),
+                  "l": float(c["l"]), "c": float(c["c"]), "v": float(c["v"])}
+                 for c in data]
+
+        merged = {c["t"]: c for c in cached}
+        for c in fresh:
+            merged[c["t"]] = c
+        all_sorted = sorted(merged.values(), key=lambda c: c["t"])
+        # Keep a little more than n_bars cached so a couple of missed scan
+        # cycles can't force us back into a full-history refetch.
+        self._candle_cache[cache_key] = all_sorted[-(n_bars + 20):]
+        return self._candle_cache[cache_key][-n_bars:]
 
     def mark_prices(self) -> dict[str, float]:
         data = self._post({"type": "metaAndAssetCtxs"}, weight=20)
@@ -2116,13 +2200,18 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
 def main() -> None:
     store = StateStore(STATE_FILE)
     store.load()
-    hl = HyperliquidClient()
+    candle_store = CandleCacheStore(CANDLE_CACHE_FILE)
+    candle_store.load()
+    hl = HyperliquidClient(cache=candle_store.cache)
     try:
         run_scan(hl, store)
     except Exception as e:
         log.exception(f"Fatal error during scan: {e}")
         store.save()
+        candle_store.save()
         raise
+    else:
+        candle_store.save()
 
 
 if __name__ == "__main__":
