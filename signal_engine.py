@@ -1816,15 +1816,18 @@ def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
 
 
 def format_signal_message(cand: Candidate) -> str:
-    arrow = "🟢 LONG" if cand.direction == "long" else "🔴 SHORT"
+    dot = "🟢" if cand.direction == "long" else "🔴"
+    side = "LONG" if cand.direction == "long" else "SHORT"
     return (
-        f"*{ENGINE_NAME} {__version__}* — {cand.symbol}\n"
-        f"{arrow}  |  Tier: *{cand.tier}*  |  Engine: `{_display_name(cand.engine)}`\n"
-        f"Confidence: `{cand.confidence_raw:.0%}`  |  RR1: `{cand.rr_tp1:.2f}`  RR2: `{cand.rr_tp2:.2f}`\n"
+        f"*{ENGINE_NAME} {__version__}*\n"
+        f"{cand.symbol} | {side} {dot}\n\n"
+        f"Confidence: {cand.confidence_raw:.0%}  |  Tier: {cand.tier}\n"
+        f"Engine: {_display_name(cand.engine)}\n\n"
         f"Entry: `{format_price(cand.entry)}`\n"
         f"SL: `{format_price(cand.sl)}`\n"
         f"TP1: `{format_price(cand.tp1)}`\n"
-        f"TP2: `{format_price(cand.tp2)}`\n"
+        f"TP2: `{format_price(cand.tp2)}`\n\n"
+        f"RR1: {cand.rr_tp1:.2f}  RR2: {cand.rr_tp2:.2f}\n"
         f"Entry type: {_display_name(cand.entry_kind)}"
     )
 
