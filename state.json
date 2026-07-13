@@ -12,7 +12,19 @@
         "range_low": 6.28,
         "range_high": 6.839,
         "eq": 6.5595,
-        "atr_h4": 0.1102930889312356
+        "atr_h4": 0.10703643919171392
+      },
+      "AAVEUSDT": {
+        "direction": "short",
+        "zone_low": 95.35,
+        "zone_high": 96.952,
+        "zone_quality": 1,
+        "sweep_extreme": 97.6,
+        "sfp_time": 1783713600000,
+        "range_low": 85.939,
+        "range_high": 102.16,
+        "eq": 94.0495,
+        "atr_h4": 2.3913703365919434
       },
       "XRPUSDT": {
         "direction": "short",
@@ -24,7 +36,7 @@
         "range_low": 1.0692,
         "range_high": 1.1191,
         "eq": 1.09415,
-        "atr_h4": 0.013962041099133257
+        "atr_h4": 0.013764752466296697
       }
     },
     "12h_1h": {}
@@ -33,5 +45,5 @@
   "resolved_signals": [],
   "signal_cooldowns": {},
   "signal_history": [],
-  "last_daily_summary_date": "2026-07-12"
+  "last_daily_summary_date": "2026-07-13"
 }
