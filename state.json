@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.0.0",
-    "last_run_ts": "2026-07-13T08:17:21.539931+00:00"
+    "last_run_ts": "2026-07-13T08:32:38.921549+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -335,26 +335,70 @@
         "baseline_avg_rr": null
       }
     },
-    "segment_stats": {},
-    "category_stats": {},
-    "calibration": {},
+    "segment_stats": {
+      "ADAUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      },
+      "AAVEUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      }
+    },
+    "category_stats": {
+      "regime_mismatch": {
+        "n": 2,
+        "n_since_last_gate": 2
+      }
+    },
+    "calibration": {
+      "calib|fair_value_gap|mid": {
+        "n": 2,
+        "wins": 0
+      }
+    },
     "totals": {
-      "signals": 0,
+      "signals": 2,
       "wins": 0,
-      "losses": 0,
+      "losses": 2,
       "expired": 0,
       "sum_r": 0.0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 0.0,
-      "sum_hold_minutes": 0.0
+      "sum_hold_minutes": 26.454687424500783
     }
   },
   "tier2": {
-    "trades": []
+    "trades": [
+      {
+        "id": "ADAUSDT:fair_value_gap:1783930639965",
+        "symbol": "ADAUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783931433.534175,
+        "signal_ts": 1783930639.968043
+      },
+      {
+        "id": "AAVEUSDT:fair_value_gap:1783930639966",
+        "symbol": "AAVEUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783931434.211274,
+        "signal_ts": 1783930640.4961603
+      }
+    ]
   },
   "active_signals": {
-    "ADAUSDT:fair_value_gap:1783930639965": {
-      "id": "ADAUSDT:fair_value_gap:1783930639965",
+    "ADAUSDT:fair_value_gap:1783931557774": {
+      "id": "ADAUSDT:fair_value_gap:1783931557774",
       "symbol": "ADAUSDT",
       "engine": "fair_value_gap",
       "direction": "long",
@@ -386,7 +430,7 @@
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783930639.968043,
+      "signal_ts": 1783931557.7763999,
       "last_checked_ts": 0,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
@@ -397,17 +441,17 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2719
+      "tg_message_id": 2724
     },
-    "AAVEUSDT:fair_value_gap:1783930639966": {
-      "id": "AAVEUSDT:fair_value_gap:1783930639966",
+    "AAVEUSDT:fair_value_gap:1783931557775": {
+      "id": "AAVEUSDT:fair_value_gap:1783931557775",
       "symbol": "AAVEUSDT",
       "engine": "fair_value_gap",
       "direction": "long",
       "entry": 94.91550000000001,
-      "sl": 94.405,
+      "sl": 94.39899999999999,
       "tp1": 96.86,
-      "tp2": 97.11525,
+      "tp2": 97.11825000000002,
       "entry_kind": "pending",
       "timeframe": "1h",
       "confidence_raw": 0.5,
@@ -420,21 +464,21 @@
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 1.404505386875575,
-      "rr_tp1": 3.80901077375115,
-      "rr_tp2": 4.30901077375115,
+      "ev_estimate": 1.3823814133590593,
+      "rr_tp1": 3.7647628267181186,
+      "rr_tp2": 4.264762826718132,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": false,
-      "score": 0.6421672739148878,
+      "score": 0.6408721736290705,
       "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783930640.4961603,
+      "signal_ts": 1783931558.403569,
       "last_checked_ts": 0,
-      "sl_buffer_used": 0.3299999999999983,
+      "sl_buffer_used": 0.33600000000001273,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -443,7 +487,7 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2720
+      "tg_message_id": 2725
     }
   },
   "daily_summary_date": "2026-07-13"
