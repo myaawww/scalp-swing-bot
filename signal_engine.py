@@ -1,57 +1,13 @@
-# ORACLE — Adaptive Institutional-Grade Multi-Engine Signal Platform
-# v1.0.0
+# ORACLE — Adaptive Multi-Engine Signal Platform
+# v1.1.1
 #
-# A from-scratch synthesis engine. Runs a 13-specialist ensemble (SMC, Trend
-# Continuation, Breakout, Pullback, Liquidity Sweep, Order Block, Breaker
-# Block, Fair Value Gap, Momentum, Reversal, Mean Reversion, Range, Volatility
-# Expansion) whose candidates are ranked by a bounded continuous-blend
-# Decision Engine, gated through a composite Regime Vector, a mandatory
-# zone-selection sequence (HTF bias -> POI -> SFP purity -> MSS -> breaker),
-# adaptive-percentile SL / liquidity-wall-clipped TP risk plans, and an
-# entry-fill-verification + outcome-integrity layer that makes the two known
-# reference-engine bug classes (auto-breakeven stop-outs, phantom fills)
-# structurally impossible. A closed-taxonomy loss/win forensics loop drives
-# every adaptive parameter, all persisted in a two-tier state.json.
+# Multi-specialist engine ensemble, ranked by a bounded continuous-blend
+# Decision Engine and gated by a composite Regime Vector. Adaptive-percentile
+# SL / liquidity-wall-clipped TP risk plans, entry-fill verification, and a
+# closed-taxonomy win/loss forensics loop that drives every adaptive
+# parameter, persisted in a two-tier state.json.
 #
-# Design-decision comments are inline throughout, marked with `# DECISION:`.
-#
-# CHANGES (v1.1.1):
-#   3. BUGFIX: newly dispatched signals initialized last_checked_ts to 0
-#      (epoch). monitor_active_signals() treats any candle with
-#      t > last_checked_ts as "new" and replays it through fill/SL/TP checks,
-#      so the very first monitoring pass after dispatch treated the ENTIRE
-#      fetched candle window (up to 12 bars back) as new -- including candles
-#      from before the signal even existed. Since entry zones sit right near
-#      recent price by construction, those old candles frequently already
-#      touched TP1/TP2/SL in the past, so a signal could get filled AND
-#      resolved off history that predates it, one scan after being
-#      dispatched -- looking exactly like a TP/SL hit that never happened on
-#      the live chart. Fixed by flooring last_checked_ts at signal-creation
-#      time at dispatch (run_scan), plus a redundant floor at signal_ts inside
-#      monitor_active_signals() itself so any signal already sitting in
-#      state.json from a prior run (with last_checked_ts still 0) is also
-#      protected, not just newly-dispatched ones.
-#
-# CHANGES (v1.1.0):
-#   1. BUGFIX: engine_mean_reversion and engine_range_trading independently
-#      override tp1 (to the BB mean / range mid-target) but were still using
-#      the tp2 that build_risk_plan() computed for its OWN internal tp1
-#      candidate. Those two tp1 values are unrelated, so tp2 had no
-#      guaranteed relationship to the tp1 actually shown to the user -- on
-#      some setups tp2 could land closer to entry than tp1, i.e. "TP2" paying
-#      out less than "TP1". Fixed by extracting the tp2-construction logic
-#      into extend_tp2() and having every engine call it AFTER its final tp1
-#      is locked in, so tp2 is always built as a further extension beyond
-#      whatever tp1 actually is. Also added an engine-agnostic safety-net
-#      check (_tp_ordering_sane(), applied in run_ensemble()) so this class
-#      of bug can never silently ship again, even from a future engine.
-#   2. WIDER RISK PROFILE: this engine's floors (RR_TP1_FLOOR, the ATR
-#      multiples gating min SL/TP1 distance, and the SL buffer band) were
-#      tuned tight enough to produce sub-1%-of-price stop/target distances on
-#      low-volatility majors (see e.g. the SUIUSDT scalp-sized signal that
-#      prompted this change). Widened per Sec 10/12 intent of giving swing
-#      setups room to actually be swings: see SECTION 0 for the new values
-#      and inline comments at each constant for the reasoning.
+# Notable design choices are marked `# DECISION:`; fixed bugs `# BUGFIX:`.
 
 from __future__ import annotations
 
@@ -97,9 +53,7 @@ SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "4"))
 HL_BASE_URL = "https://api.hyperliquid.xyz/info"
 HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.15"))
 
-# DECISION: watchlist kept identical to the reference fleet (Kestrel/Aurelius/
-# Axis/Kairos) per the build instruction — this is shared infra, not a design
-# choice this engine should second-guess.
+# Watchlist mirrors the reference fleet (Kestrel/Aurelius/Axis/Kairos) — shared infra.
 WATCHLIST = [
     "BTCUSDT", "ETHUSDT", "HYPEUSDT", "ZECUSDT", "NEARUSDT",
     "ONDOUSDT", "SUIUSDT", "PENGUUSDT", "BNBUSDT", "SOLUSDT",
@@ -110,10 +64,7 @@ WATCHLIST = [
 MACRO_ASSET = "BTCUSDT"  # DECISION: BTC is the macro-bias anchor for the Regime Vector (Sec 6).
 MAJORS = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT"}
 
-# DECISION: 15m is the spec's forbidden-floor timeframe. Swing pipeline uses
-# 1D/4H/1H (macro/HTF/mid), intraday pipeline uses 4H/1H/15m — mirrors the
-# spec's suggested HTF/LTF split while giving each pipeline a distinct macro
-# anchor, satisfying Sec 7 without inventing an unnecessary third stack.
+# 15m is the spec's forbidden floor. Swing pipeline: 1D/4H/1H; intraday: 4H/1H/15m.
 TF_MACRO_SWING, TF_HTF_SWING, TF_LTF_SWING = "1d", "4h", "1h"
 TF_HTF_INTRADAY, TF_MID_INTRADAY, TF_LTF_INTRADAY = "4h", "1h", "15m"
 ALL_TFS = ["1d", "4h", "1h", "15m"]
@@ -124,29 +75,22 @@ EMA_FAST, EMA_SLOW, EMA_TREND = 21, 50, 200
 RSI_LEN, ATR_LEN, ADX_LEN, BB_LEN = 14, 14, 14, 20
 
 MAX_CONCURRENT_ACTIVE_SIGNALS = int(os.getenv("MAX_CONCURRENT_ACTIVE_SIGNALS", "8"))
-# DECISION: two assets sharing a correlation cluster may not both occupy an
-# active slot at once (Sec 14 correlation cap).
+# Correlated assets (majors) may not both occupy an active slot at once (Sec 14).
 MAX_CORRELATED_CONCURRENT = 1
 
 MIN_SAMPLE_SIZE = int(os.getenv("MIN_SAMPLE_SIZE", "20"))  # Sec 13 min-sample gate, per segment/category
 TIER2_RETENTION_DAYS = 15  # Sec 5 raw-log pruning window
 
-# DECISION (v1.1.0): the original floors below produced technically-correct
-# but practically tiny RR plans on low-volatility assets/timeframes -- a
-# "swing" signal with a sub-1%-of-price SL/TP band is really a scalp in
-# disguise. These are widened to force genuinely bigger stop/target
-# distances, i.e. more room for price to breathe and bigger payouts, at the
-# cost of needing correspondingly smaller position size / lower leverage to
-# keep dollar risk constant. RR shape (reward relative to risk) is a
-# separate knob from these -- see RR_TP1_FLOOR / RR_TP2_EXTENSION below.
+# DECISION (v1.1.0): old floors produced technically-valid but tiny RR plans
+# on low-vol assets/timeframes — a "swing" signal with a sub-1%-of-price
+# SL/TP band is really a scalp in disguise. Widened for genuinely bigger
+# stop/target distances (needs correspondingly smaller size to hold risk
+# constant). RR shape is a separate knob — see RR_TP1_FLOOR / RR_TP2_EXTENSION.
 RR_TP1_FLOOR = 2.5       # was 1.5 -- require a bigger first-target payout per unit of risk
-# DECISION (v1.1.0, structural-validity): this is ONLY used as TP1 when there is
-# no opposing structural pivot at all in view -- i.e. no chart level exists to
-# validate a target against. Left close to the original (2.0->2.2) rather than
-# pushed as far as the other floors: an unanchored RR projection shouldn't
-# reach as aggressively as a wall-confirmed one. The extra reward this
-# engine now targets is meant to come from TP2 (bounded by real structure in
-# extend_tp2 below), not from stretching a number that has no level behind it.
+# DECISION (v1.1.0): TP1 fallback used only when no opposing structural pivot
+# exists to validate a target against, so it's left close to the original
+# (2.0->2.2) rather than pushed as far as the floors above — an unanchored
+# projection shouldn't reach as aggressively as a wall-confirmed one.
 RR_TP1_CEIL_SOFT = 2.2
 RR_TP2_EXTENSION = 2.5   # was hardcoded 1.2 -- TP2 = entry + risk*(rr1 + this), in RR units beyond TP1
 RR_TP2_FALLBACK_EXTENSION = 1.5  # was hardcoded 0.5 -- used only if wall-clipping pulls TP2 back to/under rr1
@@ -161,11 +105,10 @@ CIRCUIT_BREAKER_PF_DROP = 0.35    # relative profit-factor drop that trips the b
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 1 — STATE PERSISTENCE (Tier 1 aggregates / Tier 2 raw log)
 # ═══════════════════════════════════════════════════════════════════════
-# DECISION: Tier 1 holds every adaptive parameter + incrementally-updated
-# aggregates (never rescanned from Tier 2). Tier 2 is a bounded/prunable raw
-# trade log used only for forensics/manual review. Pruning Tier 2 must never
-# change Tier 1 — verified structurally: only resolve_trade() mutates Tier 1,
-# and it does so once, at resolution time, from the single resolved trade.
+# Tier 1 holds adaptive params + incrementally-updated aggregates (never
+# rescanned from Tier 2). Tier 2 is a bounded, prunable raw trade log for
+# forensics only — pruning it can never change Tier 1, since only
+# resolve_trade() mutates Tier 1, once, at resolution time.
 
 DEFAULT_ENGINE_NAMES = [
     "smc", "trend_continuation", "breakout", "pullback", "liquidity_sweep",
@@ -197,10 +140,8 @@ def default_state() -> dict:
                     name: {b: 1.0 for b in ["low", "mid", "high"]} for name in DEFAULT_ENGINE_NAMES
                 },
                 "sl_buffer_percentile": {  # per (asset, timeframe) adaptive-percentile SL buffer
-                    # DECISION (v1.1.0): raised default/min pct so the SL buffer sits deeper
-                    # into the observed adverse-wick distribution by default -- was clamping
-                    # to razor-thin buffers on quiet assets. See also the ATR floor/ceiling
-                    # in adaptive_sl_buffer(), also widened.
+                    # DECISION (v1.1.0): raised default/min pct so the buffer sits deeper into
+                    # the adverse-wick distribution -- old default clamped too thin on quiet assets.
                     "default": {"pct": 0.80, "min": 0.55, "max": 0.95}
                 },
                 "filter_thresholds": {
@@ -838,8 +779,8 @@ def adaptive_sl_buffer(view: TFView, state: dict, asset: str) -> float:
     idx = clamp(int(pct * len(wicks)), 0, len(wicks) - 1)
     buf = wicks[idx]
     # floor/ceiling relative to ATR so buffer never collapses to ~0 or balloons unreasonably
-    # DECISION (v1.1.0): raised floor from 0.15x/1.2x to 0.4x/2.0x ATR -- the old floor let
-    # the buffer (and therefore the whole SL) collapse to near-nothing on quiet candles.
+    # DECISION (v1.1.0): raised floor 0.15x/1.2x -> 0.4x/2.0x ATR — old floor let the
+    # buffer (and the whole SL) collapse to near-nothing on quiet candles.
     return clamp(buf, 0.4 * view.atr[-1], 2.0 * view.atr[-1])
 
 
@@ -863,11 +804,9 @@ def clip_target_to_liquidity_wall(direction: str, entry: float, raw_target: floa
 
 
 def _farthest_structural_level(direction: str, entry: float, view: TFView) -> Optional[float]:
-    """The most extreme real structural level (swing pivot) currently visible
-    in this view, in the direction of the trade. Used as a hard sanity
-    ceiling on TP2: a 'let it run' second target still has to be a level the
-    chart has actually printed, not a bare RR-multiple extrapolated into
-    empty space where no one has ever traded before."""
+    """Most extreme real structural level (swing pivot) visible in this view, in
+    the trade's direction — a hard sanity ceiling on TP2 so a 'let it run' second
+    target is a level the chart has actually printed, not a bare RR extrapolation."""
     levels = [p.price for p in view.pivots if
               (p.kind == "high" and direction == "long" and p.price > entry) or
               (p.kind == "low" and direction == "short" and p.price < entry)]
@@ -878,32 +817,20 @@ def _farthest_structural_level(direction: str, entry: float, view: TFView) -> Op
 
 def extend_tp2(direction: str, entry: float, sl: float, risk: float, rr1: float,
                view: TFView) -> tuple[float, float]:
-    """Build a TP2 that is guaranteed to sit strictly beyond whatever TP1/rr1
-    the caller has already locked in, wall-clipped like TP1 is, AND bounded
-    by real visible structure -- not just an unconstrained RR projection.
+    """Build a TP2 that sits strictly beyond the caller's own tp1/rr1, wall-clipped
+    like TP1, and bounded by real visible structure rather than a bare RR projection.
 
-    DECISION (v1.1.0 bugfix): this used to be inlined in build_risk_plan()
-    only, computed from THAT function's own internal tp1/rr1. Two engines
-    (mean_reversion, range_trading) build their own tp1 candidate (BB mean /
-    range interior target) that has nothing to do with build_risk_plan's
-    internal tp1, but were still taking build_risk_plan's tp2 as-is. Since
-    that tp2 was only ever guaranteed to beat build_risk_plan's own tp1, not
-    the engine's real, displayed tp1, TP2 could end up nearer to entry than
-    TP1 on those two engines. Extracting this so every engine calls it AFTER
-    its final tp1/rr1 is decided makes "tp2 nearer than tp1" structurally
-    impossible everywhere, not just in the default path.
+    DECISION (v1.1.0 bugfix): extracted so every engine calls this AFTER its own
+    final tp1/rr1 is decided. mean_reversion and range_trading build their own tp1
+    (BB mean / range target) independent of build_risk_plan's internal tp1, so
+    taking build_risk_plan's tp2 as-is could put tp2 nearer to entry than the
+    engine's real tp1. Calling this uniformly makes that structurally impossible.
 
-    DECISION (v1.1.0, structural-validity fix): widening RR_TP2_EXTENSION so
-    TP2 reaches further is only meaningful if that further price has some
-    real technical basis. clip_target_to_liquidity_wall() only pulls a
-    target BACK when a wall sits between entry and it -- it does nothing if
-    the target has run past every wall that exists. So a big RR extension
-    with no wall in between used to just produce a number, not a level. Now
-    bounded by _farthest_structural_level(): TP2 is never allowed past the
-    furthest real pivot this view has actually printed in the trade's
-    direction. If bounding by that ceiling erases the extension's edge over
-    TP1 (rr2 <= rr1), we step down to a smaller extension and try again
-    rather than either faking a bigger number or shipping tp2 == tp1.
+    DECISION (v1.1.0): TP2 is capped at the furthest real pivot this view has
+    printed in the trade's direction (_farthest_structural_level), so a wider
+    RR_TP2_EXTENSION only reaches prices with actual chart backing. If bounding
+    erases the extension's edge over TP1 (rr2 <= rr1), step down to a smaller
+    extension rather than shipping tp2 <= tp1.
     """
     ceiling = _farthest_structural_level(direction, entry, view)
     wall_buffer = view.atr[-1] * 0.08
@@ -923,13 +850,9 @@ def extend_tp2(direction: str, entry: float, sl: float, risk: float, rr1: float,
     if rr2 <= rr1:
         tp2, rr2 = _attempt(RR_TP2_FALLBACK_EXTENSION)
     if rr2 <= rr1:
-        # DECISION: even the fallback extension collapses once bounded by real
-        # structure -- there's no confirmed level beyond TP1 in this view to
-        # call a second target. Rather than fabricate a further price or
-        # violate the tp2>tp1 invariant, take a small, honest step past TP1
-        # itself and let the trade's conviction/tier reflect the thinner setup,
-        # instead of pretending a bigger reward is available than the chart
-        # actually supports.
+        # DECISION: no confirmed level beyond TP1 in this view. Rather than fabricate
+        # a further price or violate tp2>tp1, take a small honest step past TP1 and
+        # let the trade's tier reflect the thinner setup.
         tp2 = entry + risk * (rr1 + 0.2) if direction == "long" else entry - risk * (rr1 + 0.2)
         rr2 = _rr(entry, sl, tp2, direction)
     return tp2, rr2
@@ -990,8 +913,8 @@ def passes_entry_placement_rules(entry: float, sl: float, tp1: float, atr_val: f
 # Each engine follows the mandatory zone-selection sequence where applicable
 # (HTF bias -> POI -> SFP purity -> MSS -> breaker, Sec 8) and emits
 # Candidates carrying entry_kind, regime_fit, and independent confluences.
-# DECISION: rather than duplicate zone/structure discovery per engine, every
-# engine consumes the shared TFView/Zone primitives built once in Section 4.
+# Every engine consumes the shared TFView/Zone primitives from Section 4
+# rather than duplicating zone/structure discovery.
 
 def _new_id(symbol: str, engine: str) -> str:
     return f"{symbol}:{engine}:{int(time.time() * 1000)}"
@@ -1440,11 +1363,9 @@ ENGINES = {
 
 
 def _tp_ordering_sane(cand: Candidate) -> bool:
-    """Safety net (v1.1.0): tp2 must sit strictly beyond tp1 in the trade's
-    favor, for every engine, regardless of how each one derived its targets.
-    This is deliberately engine-agnostic and re-checked here (not just at
-    each engine's construction site) so this bug class can't silently
-    reappear if a future engine forgets to call extend_tp2() correctly."""
+    """Safety net (v1.1.0): tp2 must sit strictly beyond tp1 in the trade's favor,
+    for every engine. Re-checked here, engine-agnostically, so this bug class
+    can't silently reappear if a future engine forgets to call extend_tp2()."""
     if cand.direction == "long":
         return cand.tp2 > cand.tp1 > cand.entry
     return cand.tp2 < cand.tp1 < cand.entry
@@ -1474,20 +1395,18 @@ def run_ensemble(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
 # SECTION 9 — DECISION ENGINE: continuous bounded blend + mandatory vetoes
 # ═══════════════════════════════════════════════════════════════════════
 # DECISION: exactly 7 terms in the blend (regime fit, MTF alignment, confluence
-# strength, historical segment performance, EV, RR, liquidity context) — a
-# small, documented, auditable set per Sec 4, each individually attributable.
-# Session weight and volatility percentile are folded into "regime fit" rather
-# than added as separate terms, since they are already components OF the
-# Regime Vector that regime_fit_score consumes — adding them again would be
-# exactly the correlated double-counting Sec 4 warns against.
+# strength, historical segment performance, EV, RR, liquidity context) — a small,
+# auditable set per Sec 4. Session weight and volatility percentile fold into
+# "regime fit" rather than being added separately, since they're already
+# components of the Regime Vector that regime_fit_score consumes — adding them
+# again would be the correlated double-counting Sec 4 warns against.
 
 def confluence_strength(cand: Candidate) -> float:
     if not cand.confluences:
         return 0.0
     vals = list(cand.confluences.values())
-    # DECISION: mean rather than sum — a weighted/additive blend per Sec 14,
-    # but bounded to 0..1 so it composes cleanly into the outer blend and one
-    # missing confluence merely lowers the mean rather than zeroing the score.
+    # DECISION: mean rather than sum, bounded 0..1, so one missing confluence
+    # lowers the average instead of zeroing the score.
     return clamp(sum(vals) / len(vals), 0.0, 1.0)
 
 
@@ -1654,11 +1573,9 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
             signal["entry_filled"] = True
             # fall through: same candle may also register SL/TP per conservative same-candle handling below
 
-    # DECISION: same-candle SL-vs-TP ambiguity resolved conservatively by
-    # checking SL first — this cannot manufacture a false stop-out relative to
-    # this engine's own SL placement (Sec 11) since the SL level itself is
-    # unaffected by evaluation order; it only affects which of two genuinely
-    # co-occurring touches is credited when both occur in the same bar.
+    # DECISION: same-candle SL-vs-TP ambiguity resolved conservatively by checking
+    # SL first — doesn't manufacture a false stop-out, only decides which of two
+    # genuinely co-occurring touches is credited within the same bar.
     if direction == "long":
         sl_hit = lo <= signal["sl"]
         tp1_hit = hi >= signal["tp1"] and not signal["tp1_hit"]
@@ -1919,14 +1836,12 @@ def evaluate_circuit_breaker(state: dict) -> None:
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 13 — TELEGRAM INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════
-# DECISION: reaction/status emojis used below are restricted to Telegram's
-# native quick-reaction set (per the user-supplied reaction picker) so every
-# emoji the engine sends can also be tapped back as a genuine reaction —
-# 🏆 win, 😭 loss, 👍 TP1 hit, 🤷 expired/no-fill, 🤯 circuit breaker tripped,
-# 👏 circuit breaker recovered.
-# DECISION: all underscore-bearing internal identifiers (engine names,
-# forensic category keys) are converted through _display_name() before ever
-# reaching a Telegram message — underscores stay in state.json/code only.
+# DECISION: reaction emojis are restricted to Telegram's native quick-reaction
+# set so every emoji sent can also be tapped back as a genuine reaction —
+# 🏆 win, 😭 loss, 👍 TP1 hit, 🤷 expired/no-fill, 🤯 breaker tripped, 👏 recovered.
+# DECISION: underscore-bearing internal identifiers (engine names, forensic
+# category keys) go through _display_name() before reaching Telegram —
+# underscores stay in state.json/code only.
 
 _ACRONYM_DISPLAY_OVERRIDES = {"smc": "SMC"}
 
@@ -1938,12 +1853,9 @@ def _display_name(identifier: str) -> str:
 
 
 def format_price(price: float) -> str:
-    """Decimal places scale with the symbol's own price magnitude so a $63k
-    BTC print doesn't render with the same precision as a sub-$1 altcoin:
-    >= $100 -> 2 decimals, $1-$100 -> 4 decimals, < $1 -> 6 decimals (the
-    Sec 17 hard cap). Trailing zeros are always trimmed, so a clean whole
-    number like 100.0 shows as `100`, never `100.00` — and no price is ever
-    rendered in scientific notation."""
+    """Decimal places scale with price magnitude (Sec 17 cap): >= $100 -> 2
+    decimals, $1-$100 -> 4, < $1 -> 6. Trailing zeros trimmed, never scientific
+    notation."""
     if price == 0:
         return "0"
     abs_p = abs(price)
@@ -1961,7 +1873,7 @@ def format_price(price: float) -> str:
 
 def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
     url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": TG_CHAT_ID, "text": text, "parse_mode": "HTML" if False else "Markdown"}
+    payload = {"chat_id": TG_CHAT_ID, "text": text, "parse_mode": "Markdown"}
     if reply_to:
         payload["reply_to_message_id"] = reply_to
     try:
@@ -1976,14 +1888,9 @@ def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
 def format_signal_message(cand: Candidate) -> str:
     dot = "🟢" if cand.direction == "long" else "🔴"
     side = "LONG" if cand.direction == "long" else "SHORT"
-    # DECISION (bugfix): recompute RR1/RR2 fresh from the final entry/SL/TP
-    # instead of trusting the rr_tp1/rr_tp2 fields captured at candidate-build
-    # time. Every engine currently keeps them in sync, but there was nothing
-    # structurally preventing a future engine (or an edge case in target
-    # clipping) from setting a tp without updating its matching rr, which
-    # would silently desync the displayed price from the displayed RR.
-    # Deriving both from the same source of truth at display time makes that
-    # class of bug structurally impossible.
+    # DECISION (bugfix): recompute RR1/RR2 fresh from final entry/SL/TP rather than
+    # trusting the candidate's stored rr_tp1/rr_tp2 — keeps displayed price and RR
+    # structurally impossible to desync, even if a future engine sets tp without sl.
     rr1 = _rr(cand.entry, cand.sl, cand.tp1, cand.direction)
     rr2 = _rr(cand.entry, cand.sl, cand.tp2, cand.direction)
     return (
@@ -2008,6 +1915,10 @@ def format_outcome_message(signal: dict) -> str:
     if signal.get("note") == "tp1_secured_then_sl_hit":
         return (f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP1 secured earlier, original SL later hit. "
                 f"Counts as a WIN, {signal['realized_r']:.2f}R credited at TP1.")
+    # DECISION (v1.1.1, safety-net): only "win" reaches here now — anything else
+    # must not silently be reported as a win (see the key-presence bugfix below).
+    if signal["result"] != "win":
+        raise ValueError(f"format_outcome_message called on unresolved/unrecognized signal result: {signal['result']!r}")
     return f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP2 hit. WIN ({signal['realized_r']:.2f}R)."
 
 
@@ -2043,28 +1954,16 @@ def send_daily_summary(state: dict) -> None:
 # ═══════════════════════════════════════════════════════════════════════
 
 def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
-    """Advances every unresolved active signal through the fill-verification +
-    outcome-integrity pipeline, one CLOSED LTF candle at a time, then routes
-    resolutions into the forensics/learning loop.
+    """Advances every unresolved active signal through fill-verification and
+    outcome-integrity, one CLOSED LTF candle at a time, then routes resolutions
+    into the forensics/learning loop.
 
-    BUGFIX (v1.0.1): the previous version fetched 3 candles and evaluated
-    only candles[-1]. Two problems with that:
-      1. hl.candles() requests endTime=now, so the exchange's snapshot
-         endpoint returns the still-forming/unclosed bar as the last element.
-         Evaluating SL/TP against an incomplete bar is unreliable, and worse
-         -- once that bar's start-timestamp got stamped into
-         last_checked_ts, the watermark check meant it could never be
-         re-evaluated once it actually closed with its true, final
-         high/low. The next run would just move on to whatever new bar was
-         forming by then, permanently skipping the real closed range.
-      2. Only the single newest candle was ever examined. Any scan gap
-         (restart, backoff, slow scan) that let more than one candle close
-         between checks meant every candle in between was silently ignored
-         -- a signal could resolve off a candle that had nothing to do with
-         what the chart actually shows as "the last candle."
-    Fix: only ever consider candles whose window has fully elapsed, and walk
-    through every closed candle since the last check, in chronological
-    order, stopping at the first one that actually resolves the trade.
+    BUGFIX (v1.0.1): previously fetched 3 candles and evaluated only the last —
+    but hl.candles() ends at now(), so that last candle could be still-forming,
+    and evaluating it risked permanently skipping the real closed range once
+    its watermark got stamped. Any missed scan cycle also silently dropped the
+    candles in between. Fix: only consider fully-closed candles, and walk every
+    closed candle since the last check in chronological order.
     """
     to_remove = []
     for sig_id, signal in list(state["active_signals"].items()):
@@ -2077,14 +1976,9 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
             continue
 
         closed = [c for c in candles if c["t"] + interval_ms <= now_ms]
-        # DECISION (v1.1.1, defense-in-depth): floor the watermark at the
-        # signal's own creation time, in addition to whatever last_checked_ts
-        # is stored. This is redundant with flooring last_checked_ts correctly
-        # at dispatch (see run_scan), but it also protects any signal already
-        # sitting in state.json from a prior run where last_checked_ts was
-        # written as 0 -- without this, those pre-existing signals would keep
-        # replaying candles from before they existed until they happen to
-        # resolve, even after the dispatch-time fix ships.
+        # DECISION (v1.1.1, defense-in-depth): floor the watermark at the signal's
+        # own creation time too, protecting any signal already in state.json from
+        # a prior run where last_checked_ts was written as 0.
         signal_ts_ms = int(signal.get("signal_ts", 0) * 1000)
         watermark = max(signal.get("last_checked_ts", 0), signal_ts_ms)
         new_candles = [c for c in closed if c["t"] > watermark]
@@ -2096,15 +1990,19 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
             signal = check_fill_and_resolve(signal, candle)
             signal["last_checked_ts"] = candle["t"]
 
-            if not was_tp1 and signal["tp1_hit"] and "result" not in signal:
+            if not was_tp1 and signal["tp1_hit"] and signal.get("result") is None:
                 send_telegram(format_tp1_message(signal), reply_to=signal.get("tg_message_id"))
 
-            if "result" in signal:
+            # BUGFIX (v1.1.1): "result" is always a key in signal (init to None at
+            # dispatch), so `"result" in signal` was always True — forcing every
+            # signal to force-resolve one scan after dispatch as a false "WIN
+            # (0.00R)". Must check the value, not key presence.
+            if signal.get("result") is not None:
                 # resolved on this candle — any later candles in this batch
                 # are chronologically irrelevant and must not be applied
                 break
 
-        if "result" in signal:
+        if signal.get("result") is not None:
             signal["resolved_ts"] = time.time()
             if signal["result"] == "expired":
                 state["tier1"]["totals"]["expired"] += 1
@@ -2153,10 +2051,9 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
               f"vol_pctile={regime.vol_pctile:.2f} trend={regime.trend_strength:.2f} "
               f"noise={regime.noise_index:.2f} breadth={regime.breadth:.2f}")
 
-    # DECISION: adaptive filter routing — tighten confluence threshold in
-    # noisy/chaotic regimes, relax slightly in clean ones (Sec 9), applied as
-    # a transient scan-local adjustment (not persisted) on top of the learned
-    # baseline threshold so cold-start quality never depends on this routing.
+    # DECISION: tighten confluence threshold in noisy/chaotic regimes, relax in
+    # clean ones (Sec 9) — a transient scan-local adjustment, not persisted, so
+    # cold-start quality never depends on it.
     base_threshold = state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"]
     if regime.noise_index > 0.65 or regime.vol_pctile > 0.85:
         state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"] = \
@@ -2186,19 +2083,8 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
         signal = cand.to_dict()
         signal.update({
             "tp1_hit": False, "tp1_hit_ts": None, "entry_filled": (cand.entry_kind == "market"),
-            # BUGFIX (v1.1.1): this used to be 0 (epoch). monitor_active_signals()
-            # treats any candle with t > last_checked_ts as "new" and replays it
-            # through fill/SL/TP checks. With a 0 floor, the very first monitoring
-            # pass after dispatch treated the ENTIRE fetched window (up to 12 bars,
-            # e.g. ~3h on 15m) as new -- including candles from before the signal
-            # even existed. Since entry zones sit right near recent price by
-            # construction, those old candles frequently already touched TP1/TP2/SL
-            # in the past, so a signal could get filled-and-resolved off history
-            # that predates it, one scan after being dispatched -- looking like a
-            # TP/SL hit that never happened on the live chart. Flooring this at
-            # signal-creation time (in ms, matching candle["t"]) means only candles
-            # that start at or after the signal actually went live are ever
-            # eligible to fill or resolve it.
+            # BUGFIX: floored at signal-creation time (not 0/epoch) so monitor_active_signals()
+            # can't replay pre-existing candles from before this signal existed.
             "result": None, "realized_r": 0.0, "signal_ts": time.time(),
             "last_checked_ts": int(time.time() * 1000),
             "sl_buffer_used": adaptive_sl_buffer(view, state, cand.symbol),
