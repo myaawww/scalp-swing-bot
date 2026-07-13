@@ -34,7 +34,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -1818,6 +1818,16 @@ def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
 def format_signal_message(cand: Candidate) -> str:
     dot = "🟢" if cand.direction == "long" else "🔴"
     side = "LONG" if cand.direction == "long" else "SHORT"
+    # DECISION (bugfix): recompute RR1/RR2 fresh from the final entry/SL/TP
+    # instead of trusting the rr_tp1/rr_tp2 fields captured at candidate-build
+    # time. Every engine currently keeps them in sync, but there was nothing
+    # structurally preventing a future engine (or an edge case in target
+    # clipping) from setting a tp without updating its matching rr, which
+    # would silently desync the displayed price from the displayed RR.
+    # Deriving both from the same source of truth at display time makes that
+    # class of bug structurally impossible.
+    rr1 = _rr(cand.entry, cand.sl, cand.tp1, cand.direction)
+    rr2 = _rr(cand.entry, cand.sl, cand.tp2, cand.direction)
     return (
         f"*{ENGINE_NAME} {__version__}*\n"
         f"{cand.symbol} | {side} {dot}\n\n"
@@ -1827,7 +1837,7 @@ def format_signal_message(cand: Candidate) -> str:
         f"SL: `{format_price(cand.sl)}`\n"
         f"TP1: `{format_price(cand.tp1)}`\n"
         f"TP2: `{format_price(cand.tp2)}`\n\n"
-        f"RR1: {cand.rr_tp1:.2f}  RR2: {cand.rr_tp2:.2f}\n"
+        f"RR1: {rr1:.2f}  RR2: {rr2:.2f}\n"
         f"Entry type: {_display_name(cand.entry_kind)}"
     )
 
@@ -1875,23 +1885,56 @@ def send_daily_summary(state: dict) -> None:
 # ═══════════════════════════════════════════════════════════════════════
 
 def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
-    """Advances every unresolved active signal by one fresh LTF candle,
-    through the fill-verification + outcome-integrity pipeline, then routes
-    resolutions into the forensics/learning loop."""
+    """Advances every unresolved active signal through the fill-verification +
+    outcome-integrity pipeline, one CLOSED LTF candle at a time, then routes
+    resolutions into the forensics/learning loop.
+
+    BUGFIX (v1.0.1): the previous version fetched 3 candles and evaluated
+    only candles[-1]. Two problems with that:
+      1. hl.candles() requests endTime=now, so the exchange's snapshot
+         endpoint returns the still-forming/unclosed bar as the last element.
+         Evaluating SL/TP against an incomplete bar is unreliable, and worse
+         -- once that bar's start-timestamp got stamped into
+         last_checked_ts, the watermark check meant it could never be
+         re-evaluated once it actually closed with its true, final
+         high/low. The next run would just move on to whatever new bar was
+         forming by then, permanently skipping the real closed range.
+      2. Only the single newest candle was ever examined. Any scan gap
+         (restart, backoff, slow scan) that let more than one candle close
+         between checks meant every candle in between was silently ignored
+         -- a signal could resolve off a candle that had nothing to do with
+         what the chart actually shows as "the last candle."
+    Fix: only ever consider candles whose window has fully elapsed, and walk
+    through every closed candle since the last check, in chronological
+    order, stopping at the first one that actually resolves the trade.
+    """
     to_remove = []
     for sig_id, signal in list(state["active_signals"].items()):
-        candles = hl.candles(signal["symbol"], signal["timeframe"], 3)
+        interval_ms = _interval_to_ms(signal["timeframe"])
+        now_ms = int(time.time() * 1000)
+        # fetch generously (not just 3) so a missed scan cycle can still be
+        # fully backfilled in one pass instead of losing candles
+        candles = hl.candles(signal["symbol"], signal["timeframe"], 12)
         if not candles:
             continue
-        latest = candles[-1]
-        if latest["t"] <= signal.get("last_checked_ts", 0):
-            continue  # no new closed candle yet — watermark-based scanning avoids duplicate work
-        was_tp1 = signal["tp1_hit"]
-        signal = check_fill_and_resolve(signal, latest)
-        signal["last_checked_ts"] = latest["t"]
 
-        if not was_tp1 and signal["tp1_hit"] and "result" not in signal:
-            send_telegram(format_tp1_message(signal), reply_to=signal.get("tg_message_id"))
+        closed = [c for c in candles if c["t"] + interval_ms <= now_ms]
+        new_candles = [c for c in closed if c["t"] > signal.get("last_checked_ts", 0)]
+        if not new_candles:
+            continue  # nothing new and fully closed yet — nothing to do
+
+        for candle in new_candles:
+            was_tp1 = signal["tp1_hit"]
+            signal = check_fill_and_resolve(signal, candle)
+            signal["last_checked_ts"] = candle["t"]
+
+            if not was_tp1 and signal["tp1_hit"] and "result" not in signal:
+                send_telegram(format_tp1_message(signal), reply_to=signal.get("tg_message_id"))
+
+            if "result" in signal:
+                # resolved on this candle — any later candles in this batch
+                # are chronologically irrelevant and must not be applied
+                break
 
         if "result" in signal:
             signal["resolved_ts"] = time.time()
