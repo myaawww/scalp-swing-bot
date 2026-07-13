@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-13T19:45:19.164125+00:00"
+    "last_run_ts": "2026-07-13T20:01:47.330290+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -352,6 +352,55 @@
   "tier2": {
     "trades": []
   },
-  "active_signals": {},
+  "active_signals": {
+    "PENGUUSDT:momentum:1783972906685": {
+      "id": "PENGUUSDT:momentum:1783972906685",
+      "symbol": "PENGUUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 0.005814,
+      "sl": 0.005992000000000001,
+      "tp1": 0.005368999999999997,
+      "tp2": 0.004923999999999994,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.33481365763089516,
+        "adx_strength": 0.6046757340798544
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.75,
+      "rr_tp1": 2.5,
+      "rr_tp2": 5.0,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.43306190738614364,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783972906.6879613,
+      "last_checked_ts": 1783972906687,
+      "sl_buffer_used": 2.300000000000045e-05,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": true,
+      "tg_message_id": 2828
+    }
+  },
   "daily_summary_date": null
 }
