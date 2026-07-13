@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-13T21:45:22.644676+00:00"
+    "last_run_ts": "2026-07-13T22:00:45.825310+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -389,7 +389,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1783972906.6879613,
-      "last_checked_ts": 1783972906687,
+      "last_checked_ts": 1783976400000,
       "sl_buffer_used": 2.300000000000045e-05,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -400,6 +400,54 @@
       "regime_label": "bear",
       "thin_margin_pass": true,
       "tg_message_id": 2828
+    },
+    "TRXUSDT:breakout:1783980045041": {
+      "id": "TRXUSDT:breakout:1783980045041",
+      "symbol": "TRXUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 0.32462,
+      "sl": 0.3250082375044214,
+      "tp1": 0.3236494062389465,
+      "tp2": 0.322678812477893,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.75,
+      "rr_tp1": 2.5,
+      "rr_tp2": 5.0,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.5766633468577317,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783980045.0444424,
+      "last_checked_ts": 1783980045044,
+      "sl_buffer_used": 0.00020000000000003348,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 2849
     }
   },
   "daily_summary_date": null
