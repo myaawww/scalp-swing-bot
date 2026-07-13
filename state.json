@@ -2,17 +2,41 @@
   "_version": 1,
   "pending_setups": {
     "h4_15m": {
+      "AVAXUSDT": {
+        "direction": "short",
+        "zone_low": 6.5455,
+        "zone_high": 6.7282,
+        "zone_quality": 2,
+        "sweep_extreme": 6.7555,
+        "sfp_time": 1783728000000,
+        "range_low": 6.28,
+        "range_high": 6.839,
+        "eq": 6.5595,
+        "atr_h4": 0.10679255837681792
+      },
       "AAVEUSDT": {
         "direction": "long",
         "zone_low": 93.824,
         "zone_high": 94.065,
-        "zone_quality": 1,
+        "zone_quality": 2,
         "sweep_extreme": 92.41,
         "sfp_time": 1783656000000,
         "range_low": 85.939,
         "range_high": 102.16,
         "eq": 94.0495,
-        "atr_h4": 2.4057357041293246
+        "atr_h4": 2.3958259775813926
+      },
+      "XRPUSDT": {
+        "direction": "short",
+        "zone_low": 1.0991,
+        "zone_high": 1.1108,
+        "zone_quality": 3,
+        "sweep_extreme": 1.1117,
+        "sfp_time": 1783656000000,
+        "range_low": 1.0692,
+        "range_high": 1.1191,
+        "eq": 1.09415,
+        "atr_h4": 0.012343736598047952
       }
     },
     "12h_1h": {}
