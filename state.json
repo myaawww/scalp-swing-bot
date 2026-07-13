@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.0.0",
-    "last_run_ts": "2026-07-13T09:02:50.617405+00:00"
+    "last_run_ts": "2026-07-13T09:17:31.819250+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -335,26 +335,164 @@
         "baseline_avg_rr": null
       }
     },
-    "segment_stats": {},
-    "category_stats": {},
-    "calibration": {},
+    "segment_stats": {
+      "ADAUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      },
+      "PENGUUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      },
+      "AAVEUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      },
+      "SUIUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      },
+      "XLMUSDT|low_vol|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": 0.0
+      }
+    },
+    "category_stats": {
+      "regime_mismatch": {
+        "n": 5,
+        "n_since_last_gate": 5
+      }
+    },
+    "calibration": {
+      "calib|fair_value_gap|mid": {
+        "n": 5,
+        "wins": 0
+      }
+    },
     "totals": {
-      "signals": 0,
+      "signals": 5,
       "wins": 0,
-      "losses": 0,
+      "losses": 5,
       "expired": 0,
-      "sum_r": 0.0,
+      "sum_r": -1.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 0.0,
-      "sum_hold_minutes": 0.0
+      "gross_loss_r": 1.0,
+      "sum_hold_minutes": 63.05177425543468
     }
   },
   "tier2": {
-    "trades": []
+    "trades": [
+      {
+        "id": "ADAUSDT:fair_value_gap:1783933367291",
+        "symbol": "ADAUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783934123.619803,
+        "signal_ts": 1783933367.2931457
+      },
+      {
+        "id": "PENGUUSDT:fair_value_gap:1783933367290",
+        "symbol": "PENGUUSDT",
+        "engine": "fair_value_gap",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783934124.464022,
+        "signal_ts": 1783933368.0171323
+      },
+      {
+        "id": "AAVEUSDT:fair_value_gap:1783933367291",
+        "symbol": "AAVEUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783934125.308654,
+        "signal_ts": 1783933368.6604111
+      },
+      {
+        "id": "SUIUSDT:fair_value_gap:1783933367289",
+        "symbol": "SUIUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783934126.0826268,
+        "signal_ts": 1783933369.3155048
+      },
+      {
+        "id": "XLMUSDT:fair_value_gap:1783933367292",
+        "symbol": "XLMUSDT",
+        "engine": "fair_value_gap",
+        "result": null,
+        "realized_r": 0.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1783934126.871143,
+        "signal_ts": 1783933369.9535997
+      }
+    ]
   },
   "active_signals": {
-    "ADAUSDT:fair_value_gap:1783933367291": {
-      "id": "ADAUSDT:fair_value_gap:1783933367291",
+    "PENGUUSDT:fair_value_gap:1783934248330": {
+      "id": "PENGUUSDT:fair_value_gap:1783934248330",
+      "symbol": "PENGUUSDT",
+      "engine": "fair_value_gap",
+      "direction": "long",
+      "entry": 0.0059655,
+      "sl": 0.005947,
+      "tp1": 0.006077,
+      "tp2": 0.00608625,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion"
+      ],
+      "confluences": {
+        "fvg_fill_reaction": 0.6
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 2.5135135135134563,
+      "rr_tp1": 6.027027027026913,
+      "rr_tp2": 6.5270270270268895,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": false,
+      "score": 0.6762001723894235,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783934248.3326266,
+      "last_checked_ts": 0,
+      "sl_buffer_used": 1.5000000000000256e-05,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 2743
+    },
+    "ADAUSDT:fair_value_gap:1783934248331": {
+      "id": "ADAUSDT:fair_value_gap:1783934248331",
       "symbol": "ADAUSDT",
       "engine": "fair_value_gap",
       "direction": "long",
@@ -386,7 +524,7 @@
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783933367.2931457,
+      "signal_ts": 1783934249.005258,
       "last_checked_ts": 0,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
@@ -397,63 +535,17 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2732
+      "tg_message_id": 2744
     },
-    "PENGUUSDT:fair_value_gap:1783933367290": {
-      "id": "PENGUUSDT:fair_value_gap:1783933367290",
-      "symbol": "PENGUUSDT",
-      "engine": "fair_value_gap",
-      "direction": "long",
-      "entry": 0.00597,
-      "sl": 0.005947,
-      "tp1": 0.006077,
-      "tp2": 0.0060885,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion"
-      ],
-      "confluences": {
-        "fvg_fill_reaction": 0.6
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.8260869565217885,
-      "rr_tp1": 4.652173913043577,
-      "rr_tp2": 5.152173913043596,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": false,
-      "score": 0.666432777022756,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1783933368.0171323,
-      "last_checked_ts": 0,
-      "sl_buffer_used": 1.5000000000000256e-05,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 2733
-    },
-    "AAVEUSDT:fair_value_gap:1783933367291": {
-      "id": "AAVEUSDT:fair_value_gap:1783933367291",
+    "AAVEUSDT:fair_value_gap:1783934248331": {
+      "id": "AAVEUSDT:fair_value_gap:1783934248331",
       "symbol": "AAVEUSDT",
       "engine": "fair_value_gap",
       "direction": "long",
-      "entry": 95.4725,
+      "entry": 95.437,
       "sl": 95.03099999999999,
       "tp1": 96.86,
-      "tp2": 97.08075,
+      "tp2": 97.063,
       "entry_kind": "pending",
       "timeframe": "1h",
       "confidence_raw": 0.5,
@@ -466,19 +558,19 @@
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 1.0713476783691818,
-      "rr_tp1": 3.1426953567383635,
-      "rr_tp2": 3.6426953567383475,
+      "ev_estimate": 1.2524630541871689,
+      "rr_tp1": 3.5049261083743377,
+      "rr_tp2": 4.004926108374337,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": false,
-      "score": 0.6224544922374805,
+      "score": 0.6332259932222413,
       "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783933368.6604111,
+      "signal_ts": 1783934249.674873,
       "last_checked_ts": 0,
       "sl_buffer_used": 0.3190000000000026,
       "mae": 0.0,
@@ -489,17 +581,17 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2734
+      "tg_message_id": 2745
     },
-    "SUIUSDT:fair_value_gap:1783933367289": {
-      "id": "SUIUSDT:fair_value_gap:1783933367289",
-      "symbol": "SUIUSDT",
+    "UNIUSDT:fair_value_gap:1783934248332": {
+      "id": "UNIUSDT:fair_value_gap:1783934248332",
+      "symbol": "UNIUSDT",
       "engine": "fair_value_gap",
       "direction": "long",
-      "entry": 0.73394,
-      "sl": 0.73188,
-      "tp1": 0.73879,
-      "tp2": 0.7398199999999999,
+      "entry": 3.5484,
+      "sl": 3.5236000000000005,
+      "tp1": 3.5895,
+      "tp2": 3.6019,
       "entry_kind": "pending",
       "timeframe": "1h",
       "confidence_raw": 0.5,
@@ -512,21 +604,21 @@
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.6771844660193602,
-      "rr_tp1": 2.3543689320387204,
-      "rr_tp2": 2.854368932038694,
+      "ev_estimate": 0.3286290322580844,
+      "rr_tp1": 1.6572580645161687,
+      "rr_tp2": 2.1572580645161774,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": false,
-      "score": 0.5411248900582014,
+      "score": 0.45577932999639753,
       "tier": "B",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783933369.3155048,
+      "signal_ts": 1783934250.5388072,
       "last_checked_ts": 0,
-      "sl_buffer_used": 0.0016100000000000003,
+      "sl_buffer_used": 0.014799999999999702,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -535,10 +627,10 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2735
+      "tg_message_id": 2746
     },
-    "XLMUSDT:fair_value_gap:1783933367292": {
-      "id": "XLMUSDT:fair_value_gap:1783933367292",
+    "XLMUSDT:fair_value_gap:1783934248332": {
+      "id": "XLMUSDT:fair_value_gap:1783934248332",
       "symbol": "XLMUSDT",
       "engine": "fair_value_gap",
       "direction": "short",
@@ -570,7 +662,7 @@
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1783933369.9535997,
+      "signal_ts": 1783934251.1864402,
       "last_checked_ts": 0,
       "sl_buffer_used": 0.00037999999999999146,
       "mae": 0.0,
@@ -581,7 +673,7 @@
       },
       "regime_label": "low_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 2736
+      "tg_message_id": 2747
     }
   },
   "daily_summary_date": null
