@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.0.0",
-    "last_run_ts": null
+    "last_run_ts": "2026-07-13T08:17:21.539931+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -352,6 +352,99 @@
   "tier2": {
     "trades": []
   },
-  "active_signals": {},
-  "daily_summary_date": null
+  "active_signals": {
+    "ADAUSDT:fair_value_gap:1783930639965": {
+      "id": "ADAUSDT:fair_value_gap:1783930639965",
+      "symbol": "ADAUSDT",
+      "engine": "fair_value_gap",
+      "direction": "long",
+      "entry": 0.159505,
+      "sl": 0.15895,
+      "tp1": 0.16259,
+      "tp2": 0.1628675,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion"
+      ],
+      "confluences": {
+        "fvg_fill_reaction": 0.6
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 2.2792792792792835,
+      "rr_tp1": 5.558558558558567,
+      "rr_tp2": 6.058558558558542,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": false,
+      "score": 0.6762001723894235,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783930639.968043,
+      "last_checked_ts": 0,
+      "sl_buffer_used": 0.00039000000000000146,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 2719
+    },
+    "AAVEUSDT:fair_value_gap:1783930639966": {
+      "id": "AAVEUSDT:fair_value_gap:1783930639966",
+      "symbol": "AAVEUSDT",
+      "engine": "fair_value_gap",
+      "direction": "long",
+      "entry": 94.91550000000001,
+      "sl": 94.405,
+      "tp1": 96.86,
+      "tp2": 97.11525,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion"
+      ],
+      "confluences": {
+        "fvg_fill_reaction": 0.6
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.404505386875575,
+      "rr_tp1": 3.80901077375115,
+      "rr_tp2": 4.30901077375115,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": false,
+      "score": 0.6421672739148878,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1783930640.4961603,
+      "last_checked_ts": 0,
+      "sl_buffer_used": 0.3299999999999983,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 2720
+    }
+  },
+  "daily_summary_date": "2026-07-13"
 }
