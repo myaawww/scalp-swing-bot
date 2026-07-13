@@ -15,6 +15,23 @@
 #
 # Design-decision comments are inline throughout, marked with `# DECISION:`.
 #
+# CHANGES (v1.1.1):
+#   3. BUGFIX: newly dispatched signals initialized last_checked_ts to 0
+#      (epoch). monitor_active_signals() treats any candle with
+#      t > last_checked_ts as "new" and replays it through fill/SL/TP checks,
+#      so the very first monitoring pass after dispatch treated the ENTIRE
+#      fetched candle window (up to 12 bars back) as new -- including candles
+#      from before the signal even existed. Since entry zones sit right near
+#      recent price by construction, those old candles frequently already
+#      touched TP1/TP2/SL in the past, so a signal could get filled AND
+#      resolved off history that predates it, one scan after being
+#      dispatched -- looking exactly like a TP/SL hit that never happened on
+#      the live chart. Fixed by flooring last_checked_ts at signal-creation
+#      time at dispatch (run_scan), plus a redundant floor at signal_ts inside
+#      monitor_active_signals() itself so any signal already sitting in
+#      state.json from a prior run (with last_checked_ts still 0) is also
+#      protected, not just newly-dispatched ones.
+#
 # CHANGES (v1.1.0):
 #   1. BUGFIX: engine_mean_reversion and engine_range_trading independently
 #      override tp1 (to the BB mean / range mid-target) but were still using
@@ -55,7 +72,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -2060,7 +2077,17 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
             continue
 
         closed = [c for c in candles if c["t"] + interval_ms <= now_ms]
-        new_candles = [c for c in closed if c["t"] > signal.get("last_checked_ts", 0)]
+        # DECISION (v1.1.1, defense-in-depth): floor the watermark at the
+        # signal's own creation time, in addition to whatever last_checked_ts
+        # is stored. This is redundant with flooring last_checked_ts correctly
+        # at dispatch (see run_scan), but it also protects any signal already
+        # sitting in state.json from a prior run where last_checked_ts was
+        # written as 0 -- without this, those pre-existing signals would keep
+        # replaying candles from before they existed until they happen to
+        # resolve, even after the dispatch-time fix ships.
+        signal_ts_ms = int(signal.get("signal_ts", 0) * 1000)
+        watermark = max(signal.get("last_checked_ts", 0), signal_ts_ms)
+        new_candles = [c for c in closed if c["t"] > watermark]
         if not new_candles:
             continue  # nothing new and fully closed yet — nothing to do
 
@@ -2159,7 +2186,21 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
         signal = cand.to_dict()
         signal.update({
             "tp1_hit": False, "tp1_hit_ts": None, "entry_filled": (cand.entry_kind == "market"),
-            "result": None, "realized_r": 0.0, "signal_ts": time.time(), "last_checked_ts": 0,
+            # BUGFIX (v1.1.1): this used to be 0 (epoch). monitor_active_signals()
+            # treats any candle with t > last_checked_ts as "new" and replays it
+            # through fill/SL/TP checks. With a 0 floor, the very first monitoring
+            # pass after dispatch treated the ENTIRE fetched window (up to 12 bars,
+            # e.g. ~3h on 15m) as new -- including candles from before the signal
+            # even existed. Since entry zones sit right near recent price by
+            # construction, those old candles frequently already touched TP1/TP2/SL
+            # in the past, so a signal could get filled-and-resolved off history
+            # that predates it, one scan after being dispatched -- looking like a
+            # TP/SL hit that never happened on the live chart. Flooring this at
+            # signal-creation time (in ms, matching candle["t"]) means only candles
+            # that start at or after the signal actually went live are ever
+            # eligible to fill or resolve it.
+            "result": None, "realized_r": 0.0, "signal_ts": time.time(),
+            "last_checked_ts": int(time.time() * 1000),
             "sl_buffer_used": adaptive_sl_buffer(view, state, cand.symbol),
             "mae": 0.0, "sfp_purity": cand.confluences.get("sfp_purity", cand.confluences.get("sweep_purity", 1.0)),
             "regime_at_entry": {"label": regime.label(), "macro_bias": regime.macro_bias},
