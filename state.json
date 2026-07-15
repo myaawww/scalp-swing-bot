@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-15T16:30:41.232069+00:00"
+    "last_run_ts": "2026-07-15T16:45:24.039844+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -370,11 +370,16 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.9511074686365006
+      },
+      "AVAXUSDT|high_vol|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.496524697168849
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 5,
+        "n": 6,
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
@@ -400,19 +405,19 @@
         "wins": 0
       },
       "calib|liquidity_sweep|high": {
-        "n": 1,
-        "wins": 1
+        "n": 2,
+        "wins": 2
       }
     },
     "totals": {
-      "signals": 7,
-      "wins": 5,
+      "signals": 8,
+      "wins": 6,
       "losses": 2,
       "expired": 0,
-      "sum_r": 11.954027176665731,
-      "gross_profit_r": 13.954027176665731,
+      "sum_r": 14.45055187383458,
+      "gross_profit_r": 16.45055187383458,
       "gross_loss_r": 2.0,
-      "sum_hold_minutes": 4483.482851763566
+      "sum_hold_minutes": 4707.990403187275
     }
   },
   "tier2": {
@@ -493,6 +498,17 @@
         "adaptive_delta": "engine_weights[liquidity_sweep] += step",
         "resolved_ts": 1784132124.6380727,
         "signal_ts": 1784122240.6789684
+      },
+      {
+        "id": "AVAXUSDT:liquidity_sweep:1784120450309",
+        "symbol": "AVAXUSDT",
+        "engine": "liquidity_sweep",
+        "result": "win",
+        "realized_r": 2.496524697168849,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_win_not_causally_attributable",
+        "resolved_ts": 1784133920.7645254,
+        "signal_ts": 1784120450.31144
       }
     ]
   },
@@ -688,53 +704,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 3202
-    },
-    "AVAXUSDT:liquidity_sweep:1784120450309": {
-      "id": "AVAXUSDT:liquidity_sweep:1784120450309",
-      "symbol": "AVAXUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 6.7414,
-      "sl": 6.778368903537011,
-      "tp1": 6.6565,
-      "tp2": 6.649106219292598,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.6879999891999907,
-      "regime_fit": [
-        "reversal",
-        "ranging",
-        "high_vol"
-      ],
-      "confluences": {
-        "sweep_purity": 0.5399999459999539
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6482623485844243,
-      "rr_tp1": 2.2965246971688487,
-      "rr_tp2": 2.496524697168849,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7030637804347524,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1784120450.31144,
-      "last_checked_ts": 1784132100000,
-      "sl_buffer_used": 0.008118903537011812,
-      "mae": 0.0,
-      "sfp_purity": 0.5399999459999539,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 3315
     }
   },
   "daily_summary_date": "2026-07-15"
