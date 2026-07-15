@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-15T18:45:27.552842+00:00"
+    "last_run_ts": "2026-07-15T19:00:47.276352+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -549,7 +549,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784034047.8401902,
-      "last_checked_ts": 1784134800000,
+      "last_checked_ts": 1784138400000,
       "sl_buffer_used": 6.156258347164279,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -597,7 +597,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784044902.271603,
-      "last_checked_ts": 1784134800000,
+      "last_checked_ts": 1784138400000,
       "sl_buffer_used": 157.0625208812085,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -645,7 +645,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784073703.1625779,
-      "last_checked_ts": 1784134800000,
+      "last_checked_ts": 1784138400000,
       "sl_buffer_used": 3.80505256471377,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -693,7 +693,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784084442.7319875,
-      "last_checked_ts": 1784134800000,
+      "last_checked_ts": 1784138400000,
       "sl_buffer_used": 1.1499999999999773,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -739,7 +739,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784134847.6177785,
-      "last_checked_ts": 1784140200000,
+      "last_checked_ts": 1784141100000,
       "sl_buffer_used": 0.0002408743243887103,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -750,6 +750,52 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 3402
+    },
+    "NEARUSDT:fair_value_gap:1784142046781": {
+      "id": "NEARUSDT:fair_value_gap:1784142046781",
+      "symbol": "NEARUSDT",
+      "engine": "fair_value_gap",
+      "direction": "short",
+      "entry": 2.05335,
+      "sl": 2.0784,
+      "tp1": 2.0014,
+      "tp2": 1.9963899999999999,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion"
+      ],
+      "confluences": {
+        "fvg_fill_reaction": 0.6
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5369261477046026,
+      "rr_tp1": 2.073852295409205,
+      "rr_tp2": 2.2738522954092053,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": false,
+      "score": 0.47952968477598246,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1784142046.7849247,
+      "last_checked_ts": 1784142046784,
+      "sl_buffer_used": 0.012399999999999967,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 3410
     }
   },
   "daily_summary_date": "2026-07-15"
