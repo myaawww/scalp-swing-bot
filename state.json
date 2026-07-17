@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-17T06:15:19.228584+00:00"
+    "last_run_ts": "2026-07-17T06:30:24.642970+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -395,6 +395,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "PENDLEUSDT|neutral|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -403,8 +408,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 5,
-        "n_since_last_gate": 5
+        "n": 6,
+        "n_since_last_gate": 6
       },
       "structural_invalidation_too_tight": {
         "n": 2,
@@ -413,7 +418,7 @@
     },
     "calibration": {
       "calib|breakout|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 2
       },
       "calib|momentum|mid": {
@@ -438,14 +443,14 @@
       }
     },
     "totals": {
-      "signals": 13,
+      "signals": 14,
       "wins": 6,
-      "losses": 7,
+      "losses": 8,
       "expired": 0,
-      "sum_r": 9.45055187383458,
+      "sum_r": 8.45055187383458,
       "gross_profit_r": 16.45055187383458,
-      "gross_loss_r": 7.0,
-      "sum_hold_minutes": 9325.364229381084
+      "gross_loss_r": 8.0,
+      "sum_hold_minutes": 9355.15796371301
     }
   },
   "tier2": {
@@ -592,6 +597,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1784260828.6639504,
         "signal_ts": 1784246497.0161207
+      },
+      {
+        "id": "PENDLEUSDT:breakout:1784268034079",
+        "symbol": "PENDLEUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1784269821.7041082,
+        "signal_ts": 1784268034.0800483
       }
     ]
   },
@@ -774,7 +790,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784134847.6177785,
-      "last_checked_ts": 1784268000000,
+      "last_checked_ts": 1784268900000,
       "sl_buffer_used": 0.0002408743243887103,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -881,54 +897,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 3686
-    },
-    "PENDLEUSDT:breakout:1784268034079": {
-      "id": "PENDLEUSDT:breakout:1784268034079",
-      "symbol": "PENDLEUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 1.5277,
-      "sl": 1.536512842875007,
-      "tp1": 1.5078,
-      "tp2": 1.5060374314249987,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6290340859494985,
-      "rr_tp1": 2.258068171898997,
-      "rr_tp2": 2.458068171898992,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.6459839279881442,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1784268034.0800483,
-      "last_checked_ts": 1784268034080,
-      "sl_buffer_used": 0.0040999999999999925,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "neutral",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "neutral",
-      "thin_margin_pass": false,
-      "tg_message_id": 3725
     },
     "LINKUSDT:momentum:1784268034077": {
       "id": "LINKUSDT:momentum:1784268034077",
