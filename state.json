@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-17T13:30:28.854135+00:00"
+    "last_run_ts": "2026-07-17T13:45:26.691349+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -790,7 +790,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784134847.6177785,
-      "last_checked_ts": 1784294100000,
+      "last_checked_ts": 1784295000000,
       "sl_buffer_used": 0.0002408743243887103,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -945,6 +945,54 @@
       "regime_label": "neutral",
       "thin_margin_pass": false,
       "tg_message_id": 3726
+    },
+    "PENDLEUSDT:breakout:1784295925922": {
+      "id": "PENDLEUSDT:breakout:1784295925922",
+      "symbol": "PENDLEUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 1.5023,
+      "sl": 1.5105041420158203,
+      "tp1": 1.4858917159683593,
+      "tp2": 1.4653813609288084,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5,
+      "rr_tp1": 2.0,
+      "rr_tp2": 4.500000000000013,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.6136139485233313,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1784295925.9233499,
+      "last_checked_ts": 1784295925923,
+      "sl_buffer_used": 0.0031233136126562573,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "neutral",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "neutral",
+      "thin_margin_pass": false,
+      "tg_message_id": 3764
     }
   },
   "daily_summary_date": "2026-07-17"
