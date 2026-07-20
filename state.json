@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-20T20:45:19.398422+00:00"
+    "last_run_ts": "2026-07-20T21:00:36.162065+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -425,11 +425,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "DOTUSDT|neutral|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.5804537521815587
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 7,
+        "n": 8,
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
@@ -451,8 +456,8 @@
         "wins": 0
       },
       "calib|fair_value_gap|mid": {
-        "n": 4,
-        "wins": 2
+        "n": 5,
+        "wins": 3
       },
       "calib|breaker_block|mid": {
         "n": 2,
@@ -468,14 +473,14 @@
       }
     },
     "totals": {
-      "signals": 20,
-      "wins": 7,
+      "signals": 21,
+      "wins": 8,
       "losses": 13,
       "expired": 0,
-      "sum_r": 5.450551873834581,
-      "gross_profit_r": 18.45055187383458,
+      "sum_r": 8.031005626016139,
+      "gross_profit_r": 21.03100562601614,
       "gross_loss_r": 13.0,
-      "sum_hold_minutes": 22959.616877210145
+      "sum_hold_minutes": 23498.45382194122
     }
   },
   "tier2": {
@@ -699,6 +704,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1784572223.1971157,
         "signal_ts": 1784566841.569136
+      },
+      {
+        "id": "DOTUSDT:fair_value_gap:1784548901343",
+        "symbol": "DOTUSDT",
+        "engine": "fair_value_gap",
+        "result": "win",
+        "realized_r": 2.5804537521815587,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_win_not_causally_attributable",
+        "resolved_ts": 1784581231.562256,
+        "signal_ts": 1784548901.3455722
       }
     ]
   },
@@ -739,7 +755,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784034047.8401902,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 6.156258347164279,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -787,7 +803,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784044902.271603,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 157.0625208812085,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -835,7 +851,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784084442.7319875,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 1.1499999999999773,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -883,7 +899,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784149244.3375638,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 0.00210586132427053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -931,7 +947,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784246496.3332682,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 0.3076448010240028,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -979,7 +995,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784397634.2733574,
-      "last_checked_ts": 1784574000000,
+      "last_checked_ts": 1784577600000,
       "sl_buffer_used": 0.1529999999999987,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -990,52 +1006,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 3916
-    },
-    "DOTUSDT:fair_value_gap:1784548901343": {
-      "id": "DOTUSDT:fair_value_gap:1784548901343",
-      "symbol": "DOTUSDT",
-      "engine": "fair_value_gap",
-      "direction": "long",
-      "entry": 0.81229,
-      "sl": 0.80656,
-      "tp1": 0.82593,
-      "tp2": 0.827076,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion"
-      ],
-      "confluences": {
-        "fvg_fill_reaction": 0.6
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6902268760907793,
-      "rr_tp1": 2.3804537521815585,
-      "rr_tp2": 2.5804537521815587,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.517139878420844,
-      "tier": "B",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1784563200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1784548901.3455722,
-      "last_checked_ts": 1784574000000,
-      "sl_buffer_used": 0.0025799999999999157,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "neutral",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "neutral",
-      "thin_margin_pass": false,
-      "tg_message_id": 4050
     }
   },
   "daily_summary_date": "2026-07-20"
