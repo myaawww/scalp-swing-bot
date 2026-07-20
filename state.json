@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-20T15:45:23.590055+00:00"
+    "last_run_ts": "2026-07-20T16:01:35.692498+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -415,6 +415,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "BCHUSDT|bull|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -423,8 +428,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 9,
-        "n_since_last_gate": 9
+        "n": 10,
+        "n_since_last_gate": 10
       },
       "structural_invalidation_too_tight": {
         "n": 2,
@@ -437,7 +442,7 @@
         "wins": 2
       },
       "calib|momentum|mid": {
-        "n": 5,
+        "n": 6,
         "wins": 0
       },
       "calib|fair_value_gap|mid": {
@@ -458,14 +463,14 @@
       }
     },
     "totals": {
-      "signals": 18,
+      "signals": 19,
       "wins": 7,
-      "losses": 11,
+      "losses": 12,
       "expired": 0,
-      "sum_r": 7.450551873834581,
+      "sum_r": 6.450551873834581,
       "gross_profit_r": 18.45055187383458,
-      "gross_loss_r": 11.0,
-      "sum_hold_minutes": 21999.892994121714
+      "gross_loss_r": 12.0,
+      "sum_hold_minutes": 22869.923077547555
     }
   },
   "tier2": {
@@ -667,6 +672,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1784548839.6868422,
         "signal_ts": 1784297721.2743037
+      },
+      {
+        "id": "BCHUSDT:momentum:1784511032240",
+        "symbol": "BCHUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1784563234.047242,
+        "signal_ts": 1784511032.2422364
       }
     ]
   },
@@ -707,7 +723,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784034047.8401902,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 6.156258347164279,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -755,7 +771,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784044902.271603,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 157.0625208812085,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -803,7 +819,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784084442.7319875,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 1.1499999999999773,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -851,7 +867,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784149244.3375638,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 0.00210586132427053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -899,7 +915,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784246496.3332682,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 0.3076448010240028,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -947,7 +963,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784397634.2733574,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 0.1529999999999987,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -958,54 +974,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 3916
-    },
-    "BCHUSDT:momentum:1784511032240": {
-      "id": "BCHUSDT:momentum:1784511032240",
-      "symbol": "BCHUSDT",
-      "engine": "momentum",
-      "direction": "short",
-      "entry": 213.52,
-      "sl": 218.47,
-      "tp1": 203.62000000000003,
-      "tp2": 191.24500000000006,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.4111997298818932,
-        "adx_strength": 0.7823193442262599
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5,
-      "rr_tp1": 2.0,
-      "rr_tp2": 4.5,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.46960829465467846,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1784511032.2422364,
-      "last_checked_ts": 1784556000000,
-      "sl_buffer_used": 0.6399999999999864,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bull",
-        "macro_bias": "bull"
-      },
-      "regime_label": "bull",
-      "thin_margin_pass": false,
-      "tg_message_id": 4003
     },
     "DOTUSDT:fair_value_gap:1784548901343": {
       "id": "DOTUSDT:fair_value_gap:1784548901343",
@@ -1041,7 +1009,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784548901.3455722,
-      "last_checked_ts": 1784556000000,
+      "last_checked_ts": 1784559600000,
       "sl_buffer_used": 0.0025799999999999157,
       "mae": 0.0,
       "sfp_purity": 1.0,
