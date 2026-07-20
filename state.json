@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-20T18:15:24.684029+00:00"
+    "last_run_ts": "2026-07-20T18:30:26.592870+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -420,6 +420,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "PENDLEUSDT|bull|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -428,8 +433,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 10,
-        "n_since_last_gate": 10
+        "n": 11,
+        "n_since_last_gate": 11
       },
       "structural_invalidation_too_tight": {
         "n": 2,
@@ -454,7 +459,7 @@
         "wins": 1
       },
       "calib|liquidity_sweep|high": {
-        "n": 2,
+        "n": 3,
         "wins": 2
       },
       "calib|range_trading|low": {
@@ -463,14 +468,14 @@
       }
     },
     "totals": {
-      "signals": 19,
+      "signals": 20,
       "wins": 7,
-      "losses": 12,
+      "losses": 13,
       "expired": 0,
-      "sum_r": 6.450551873834581,
+      "sum_r": 5.450551873834581,
       "gross_profit_r": 18.45055187383458,
-      "gross_loss_r": 12.0,
-      "sum_hold_minutes": 22869.923077547555
+      "gross_loss_r": 13.0,
+      "sum_hold_minutes": 22959.616877210145
     }
   },
   "tier2": {
@@ -683,6 +688,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1784563234.047242,
         "signal_ts": 1784511032.2422364
+      },
+      {
+        "id": "PENDLEUSDT:liquidity_sweep:1784566841568",
+        "symbol": "PENDLEUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1784572223.1971157,
+        "signal_ts": 1784566841.569136
       }
     ]
   },
@@ -1020,53 +1036,6 @@
       "regime_label": "neutral",
       "thin_margin_pass": false,
       "tg_message_id": 4050
-    },
-    "PENDLEUSDT:liquidity_sweep:1784566841568": {
-      "id": "PENDLEUSDT:liquidity_sweep:1784566841568",
-      "symbol": "PENDLEUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 1.6134,
-      "sl": 1.6236410999999997,
-      "tp1": 1.5827,
-      "tp2": 1.58065178,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.7429629026063354,
-      "regime_fit": [
-        "reversal",
-        "ranging",
-        "high_vol"
-      ],
-      "confluences": {
-        "sweep_purity": 0.8148145130316771
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.9988624268877662,
-      "rr_tp1": 2.9977248537755323,
-      "rr_tp2": 3.1977248537755414,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.66642770189498,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1784566841.569136,
-      "last_checked_ts": 1784570400000,
-      "sl_buffer_used": 0.005099999999999882,
-      "mae": 0.0,
-      "sfp_purity": 0.8148145130316771,
-      "regime_at_entry": {
-        "label": "bull",
-        "macro_bias": "bull"
-      },
-      "regime_label": "bull",
-      "thin_margin_pass": false,
-      "tg_message_id": 4085
     }
   },
   "daily_summary_date": "2026-07-20"
