@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.1",
-    "last_run_ts": "2026-07-21T00:45:24.541621+00:00"
+    "last_run_ts": "2026-07-21T01:00:35.483442+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -755,7 +755,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784034047.8401902,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 6.156258347164279,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -803,7 +803,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784044902.271603,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 157.0625208812085,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -851,7 +851,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784084442.7319875,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 1.1499999999999773,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -899,7 +899,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784149244.3375638,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 0.00210586132427053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -947,7 +947,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784246496.3332682,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 0.3076448010240028,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -995,7 +995,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1784397634.2733574,
-      "last_checked_ts": 1784588400000,
+      "last_checked_ts": 1784592000000,
       "sl_buffer_used": 0.1529999999999987,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1006,6 +1006,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 3916
+    },
+    "NEARUSDT:momentum:1784595634758": {
+      "id": "NEARUSDT:momentum:1784595634758",
+      "symbol": "NEARUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 1.9967,
+      "sl": 1.9464,
+      "tp1": 2.0972999999999997,
+      "tp2": 2.2230499999999997,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.3469510436115996,
+        "adx_strength": 0.7451062598021282
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.4999999999999978,
+      "rr_tp1": 1.9999999999999956,
+      "rr_tp2": 4.499999999999996,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.455850367965427,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1784595634.7617795,
+      "last_checked_ts": 1784595634761,
+      "sl_buffer_used": 0.009500000000000064,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 4124
     }
   },
   "daily_summary_date": "2026-07-20"
