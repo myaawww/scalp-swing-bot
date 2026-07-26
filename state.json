@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-26T12:45:29.152835+00:00"
+    "last_run_ts": "2026-07-26T13:00:35.714598+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -380,7 +380,7 @@
       "rr_tp2": 2.0354501223120103,
       "pending_bars_elapsed": 1,
       "pending_expiry_bars": 10,
-      "entry_filled": false,
+      "entry_filled": true,
       "score": 0.4943369139488565,
       "tier": "B",
       "tp1_hit": false,
@@ -388,7 +388,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785062720.6274493,
-      "last_checked_ts": 1785063600000,
+      "last_checked_ts": 1785067200000,
       "sl_buffer_used": 0.00022158237964398027,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -399,6 +399,54 @@
       "regime_label": "neutral",
       "thin_margin_pass": false,
       "tg_message_id": 4695
+    },
+    "APTUSDT:momentum:1785070834932": {
+      "id": "APTUSDT:momentum:1785070834932",
+      "symbol": "APTUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 0.634,
+      "sl": 0.6067480899914117,
+      "tp1": 0.6885038200171766,
+      "tp2": 0.7566335950386474,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.5898812104928592,
+        "adx_strength": 0.9514656949827175
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5,
+      "rr_tp1": 2.0,
+      "rr_tp2": 4.500000000000002,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.5169953009695664,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785070834.9327495,
+      "last_checked_ts": 1785070834932,
+      "sl_buffer_used": 0.0019519100085882695,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 4698
     }
   },
   "daily_summary_date": "2026-07-26"
