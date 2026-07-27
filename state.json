@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-27T15:45:21.566274+00:00"
+    "last_run_ts": "2026-07-27T16:01:46.708450+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -355,6 +355,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "APTUSDT|low_vol|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -363,8 +368,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 2,
-        "n_since_last_gate": 2
+        "n": 3,
+        "n_since_last_gate": 3
       }
     },
     "calibration": {
@@ -373,19 +378,19 @@
         "wins": 1
       },
       "calib|momentum|mid": {
-        "n": 3,
+        "n": 4,
         "wins": 1
       }
     },
     "totals": {
-      "signals": 4,
+      "signals": 5,
       "wins": 2,
-      "losses": 2,
+      "losses": 3,
       "expired": 1,
-      "sum_r": 2.0354501223120103,
+      "sum_r": 1.0354501223120103,
       "gross_profit_r": 4.03545012231201,
-      "gross_loss_r": 2.0,
-      "sum_hold_minutes": 4993.610445630549
+      "gross_loss_r": 3.0,
+      "sum_hold_minutes": 6613.760175351301
     }
   },
   "tier2": {
@@ -433,58 +438,21 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785164441.101136,
         "signal_ts": 1785117637.028851
+      },
+      {
+        "id": "APTUSDT:momentum:1785070834932",
+        "symbol": "APTUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785168043.9165328,
+        "signal_ts": 1785070834.9327495
       }
     ]
   },
   "active_signals": {
-    "APTUSDT:momentum:1785070834932": {
-      "id": "APTUSDT:momentum:1785070834932",
-      "symbol": "APTUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 0.634,
-      "sl": 0.6067480899914117,
-      "tp1": 0.6885038200171766,
-      "tp2": 0.7566335950386474,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.5898812104928592,
-        "adx_strength": 0.9514656949827175
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5,
-      "rr_tp1": 2.0,
-      "rr_tp2": 4.500000000000002,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5169953009695664,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785070834.9327495,
-      "last_checked_ts": 1785160800000,
-      "sl_buffer_used": 0.0019519100085882695,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 4698
-    },
     "UNIUSDT:momentum:1785081687298": {
       "id": "UNIUSDT:momentum:1785081687298",
       "symbol": "UNIUSDT",
@@ -521,7 +489,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785081687.2998924,
-      "last_checked_ts": 1785160800000,
+      "last_checked_ts": 1785164400000,
       "sl_buffer_used": 0.016839370855565267,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -569,7 +537,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785081687.9240675,
-      "last_checked_ts": 1785160800000,
+      "last_checked_ts": 1785164400000,
       "sl_buffer_used": 2.5250619269164694,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -615,7 +583,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785085232.7124403,
-      "last_checked_ts": 1785160800000,
+      "last_checked_ts": 1785164400000,
       "sl_buffer_used": 0.0018883382484898036,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -663,7 +631,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785162634.5666285,
-      "last_checked_ts": 1785166200000,
+      "last_checked_ts": 1785167100000,
       "sl_buffer_used": 0.0013916559876079252,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -722,6 +690,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 4814
+    },
+    "ADAUSDT:momentum:1785168106073": {
+      "id": "ADAUSDT:momentum:1785168106073",
+      "symbol": "ADAUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 0.15738,
+      "sl": 0.16630447613830335,
+      "tp1": 0.13953104772339328,
+      "tp2": 0.11721985737763489,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.6028360664838235,
+        "adx_strength": 0.6441949696504966
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5,
+      "rr_tp1": 2.0,
+      "rr_tp2": 4.5,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.49119088906160063,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785168106.0744126,
+      "last_checked_ts": 1785168106074,
+      "sl_buffer_used": 0.0005944761383033602,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 4817
     }
   },
   "daily_summary_date": "2026-07-27"
