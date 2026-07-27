@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-27T17:00:43.077907+00:00"
+    "last_run_ts": "2026-07-27T17:15:24.497148+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -360,6 +360,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "SUIUSDT|low_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -368,8 +373,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 3,
-        "n_since_last_gate": 3
+        "n": 4,
+        "n_since_last_gate": 4
       }
     },
     "calibration": {
@@ -380,17 +385,21 @@
       "calib|momentum|mid": {
         "n": 4,
         "wins": 1
+      },
+      "calib|breakout|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 5,
+      "signals": 6,
       "wins": 2,
-      "losses": 3,
+      "losses": 4,
       "expired": 1,
-      "sum_r": 1.0354501223120103,
+      "sum_r": 0.03545012231201028,
       "gross_profit_r": 4.03545012231201,
-      "gross_loss_r": 3.0,
-      "sum_hold_minutes": 6613.760175351301
+      "gross_loss_r": 4.0,
+      "sum_hold_minutes": 6778.531392741203
     }
   },
   "tier2": {
@@ -449,6 +458,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785168043.9165328,
         "signal_ts": 1785070834.9327495
+      },
+      {
+        "id": "SUIUSDT:breakout:1785162634564",
+        "symbol": "SUIUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785172520.8396719,
+        "signal_ts": 1785162634.5666285
       }
     ]
   },
@@ -594,54 +614,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 4717
-    },
-    "SUIUSDT:breakout:1785162634564": {
-      "id": "SUIUSDT:breakout:1785162634564",
-      "symbol": "SUIUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 0.70101,
-      "sl": 0.7057395699845098,
-      "tp1": 0.6915508600309804,
-      "tp2": 0.6797269350697059,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5,
-      "rr_tp1": 2.0,
-      "rr_tp2": 4.5,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5788810835125766,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785162634.5666285,
-      "last_checked_ts": 1785170700000,
-      "sl_buffer_used": 0.0013916559876079252,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 4802
     },
     "XLMUSDT:momentum:1785164445914": {
       "id": "XLMUSDT:momentum:1785164445914",
