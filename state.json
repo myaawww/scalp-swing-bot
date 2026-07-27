@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-27T18:00:51.688045+00:00"
+    "last_run_ts": "2026-07-27T18:15:23.294315+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -710,6 +710,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 4817
+    },
+    "TAOUSDT:range_trading:1785176122505": {
+      "id": "TAOUSDT:range_trading:1785176122505",
+      "symbol": "TAOUSDT",
+      "engine": "range_trading",
+      "direction": "long",
+      "entry": 193.63,
+      "sl": 191.99296286950477,
+      "tp1": 200.617,
+      "tp2": 200.94440742609905,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.4607268464243863
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.6340383397065388,
+      "rr_tp1": 4.268076679413078,
+      "rr_tp2": 4.468076679413085,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8007957770091264,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785176122.506631,
+      "last_checked_ts": 1785176122506,
+      "sl_buffer_used": 0.6887542767238135,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": true,
+      "tg_message_id": 4824
     }
   },
   "daily_summary_date": "2026-07-27"
