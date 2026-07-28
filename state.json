@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-28T13:45:23.118711+00:00"
+    "last_run_ts": "2026-07-28T14:00:51.180160+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -48,7 +48,7 @@
           "max": 2.0
         },
         "momentum": {
-          "weight": 1.03,
+          "weight": 1.06,
           "min": 0.35,
           "max": 2.0
         },
@@ -385,11 +385,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "BTCUSDT|bear|1h|momentum": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.240133779264224
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 3,
+        "n": 4,
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
@@ -407,8 +412,8 @@
         "wins": 1
       },
       "calib|momentum|mid": {
-        "n": 5,
-        "wins": 1
+        "n": 6,
+        "wins": 2
       },
       "calib|breakout|mid": {
         "n": 2,
@@ -424,14 +429,14 @@
       }
     },
     "totals": {
-      "signals": 10,
-      "wins": 3,
+      "signals": 11,
+      "wins": 4,
       "losses": 7,
       "expired": 1,
-      "sum_r": -0.9645498776879897,
-      "gross_profit_r": 6.03545012231201,
+      "sum_r": 1.2755839015762342,
+      "gross_profit_r": 8.275583901576233,
       "gross_loss_r": 7.0,
-      "sum_hold_minutes": 11337.378411988419
+      "sum_hold_minutes": 11742.781210982801
     }
   },
   "tier2": {
@@ -545,6 +550,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785222918.179832,
         "signal_ts": 1785193237.6443675
+      },
+      {
+        "id": "BTCUSDT:momentum:1785222922039",
+        "symbol": "BTCUSDT",
+        "engine": "momentum",
+        "result": "win",
+        "realized_r": 2.240133779264224,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[momentum] += step",
+        "resolved_ts": 1785247246.2112286,
+        "signal_ts": 1785222922.043289
       }
     ]
   },
@@ -585,7 +601,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785081687.2998924,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.016839370855565267,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -633,7 +649,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785164445.9147696,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.0005699676712143518,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -681,7 +697,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785168106.0744126,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.0005944761383033602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -729,7 +745,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785178836.7721846,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.00023183076358432067,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -777,7 +793,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785193238.3416245,
-      "last_checked_ts": 1785245400000,
+      "last_checked_ts": 1785246300000,
       "sl_buffer_used": 1.7999999999999787e-05,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -825,7 +841,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785193239.0773332,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.0030198350830193334,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -873,7 +889,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785200434.379246,
-      "last_checked_ts": 1785240000000,
+      "last_checked_ts": 1785243600000,
       "sl_buffer_used": 0.0030000000000000027,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -885,15 +901,15 @@
       "thin_margin_pass": false,
       "tg_message_id": 4855
     },
-    "BTCUSDT:momentum:1785222922039": {
-      "id": "BTCUSDT:momentum:1785222922039",
-      "symbol": "BTCUSDT",
+    "NEARUSDT:momentum:1785247250664": {
+      "id": "NEARUSDT:momentum:1785247250664",
+      "symbol": "NEARUSDT",
       "engine": "momentum",
       "direction": "short",
-      "entry": 63636.0,
-      "sl": 63935.0,
-      "tp1": 63026.0,
-      "tp2": 62966.2,
+      "entry": 1.6305,
+      "sl": 1.6921,
+      "tp1": 1.5073000000000003,
+      "tp2": 1.3533000000000006,
       "entry_kind": "market",
       "timeframe": "1h",
       "confidence_raw": 0.5,
@@ -903,26 +919,26 @@
         "high_vol"
       ],
       "confluences": {
-        "rsi_momentum": 0.2561109116575523,
-        "adx_strength": 0.7174705714733651
+        "rsi_momentum": 0.5363702543713447,
+        "adx_strength": 1
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.520066889632107,
-      "rr_tp1": 2.040133779264214,
-      "rr_tp2": 2.240133779264224,
+      "ev_estimate": 0.5,
+      "rr_tp1": 2.0,
+      "rr_tp2": 4.5,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.4580735113803436,
+      "score": 0.5472964651345689,
       "tier": "B",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1785222922.043289,
-      "last_checked_ts": 1785240000000,
-      "sl_buffer_used": 131.0,
+      "signal_ts": 1785247250.667359,
+      "last_checked_ts": 1785247250667,
+      "sl_buffer_used": 0.008399999999999963,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -931,7 +947,7 @@
       },
       "regime_label": "bear",
       "thin_margin_pass": false,
-      "tg_message_id": 4875
+      "tg_message_id": 4895
     }
   },
   "daily_summary_date": "2026-07-28"
