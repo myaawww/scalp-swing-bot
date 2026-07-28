@@ -1,5 +1,5 @@
 # ORACLE — Adaptive Multi-Engine Signal Platform
-# v1.1.2
+# v1.1.3
 #
 # Multi-specialist engine ensemble, ranked by a bounded continuous-blend
 # Decision Engine and gated by a composite Regime Vector. Adaptive-percentile
@@ -28,7 +28,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -94,7 +94,12 @@ TIER2_RETENTION_DAYS = 15  # Sec 5 raw-log pruning window
 # constant). RR shape is a separate knob — see RR_TP1_FLOOR / RR_TP2_EXTENSION.
 # DECISION (v1.1.2): the v1.1.0 bump to 2.5 overshot in live use — reverted to
 # the 1.8-2.0 band. 1.8 is the floor (was 1.5 pre-v1.1.0, then 2.5 in v1.1.0).
-RR_TP1_FLOOR = 1.8       # require a bigger first-target payout per unit of risk
+# DECISION (v1.1.3): raised to a hard 2:1 minimum on every dispatched trade.
+# Structural TP1s (real opposing pivots) still price wherever the chart
+# actually shows a level — this only raises the backstop that both
+# build_risk_plan() and the mean_reversion/range_trading engines fall back
+# to when the nearest real level pays out less than the minimum acceptable RR.
+RR_TP1_FLOOR = 2.0       # require a bigger first-target payout per unit of risk
 # DECISION (v1.1.0): TP1 fallback used only when no opposing structural pivot
 # exists to validate a target against, so it's left close to the original
 # (2.0->2.2) rather than pushed as far as the floors above — an unanchored
@@ -106,7 +111,13 @@ RR_TP1_FLOOR = 1.8       # require a bigger first-target payout per unit of risk
 # priced at the (higher) floor, never at the intended, less-aggressive soft
 # ceiling. Restored to 2.0 (top of the 1.8-2.0 band), above the new floor, so
 # the ceiling is reachable again and the two constants define a real band.
-RR_TP1_CEIL_SOFT = 2.0
+# DECISION (v1.1.3): RR_TP1_FLOOR moved to 2.0 in this same change, which would
+# have collapsed floor == ceiling and silently reproduced the exact bug noted
+# above — this time in assign_tier() too, where `rr1 >= RR_TP1_CEIL_SOFT` is
+# meant to separate "cleared the floor" from "meaningfully above it" for A+.
+# Bumped to 2.2 to keep the same 0.2 gap above the new floor and keep both
+# the build_risk_plan() band and the assign_tier() A+ check non-degenerate.
+RR_TP1_CEIL_SOFT = 2.2
 RR_TP2_EXTENSION = 2.5   # was hardcoded 1.2 -- TP2 = entry + risk*(rr1 + this), in RR units beyond TP1
 RR_TP2_FALLBACK_EXTENSION = 1.5  # was hardcoded 0.5 -- used only if wall-clipping pulls TP2 back to/under rr1
 MIN_ENTRY_SL_ATR_MULT = 0.9    # was 0.35 -- min entry-to-SL distance, in ATR (more room to not get wicked out)
@@ -1589,13 +1600,14 @@ def assign_tier(score: float, rr1: float) -> str:
     # DECISION (v1.1.2): this used to read `rr1 >= 1.8` back when RR_TP1_FLOOR
     # was 1.5, so it genuinely split candidates into "cleared the floor but
     # thin" (1.5-1.8, capped at tier A) vs. "real RR" (>=1.8, A+ eligible).
-    # With RR_TP1_FLOOR now back at 1.8, every candidate that reaches this
-    # function already has rr1 >= 1.8 by construction (build_risk_plan/
-    # engine_mean_reversion/engine_range_trading all reject below the floor),
-    # so a `>= 1.8` check here would always be true and the RR condition on
-    # A+ would silently stop discriminating anything. Bumped to RR_TP1_CEIL_SOFT
-    # (2.0, the top of the reverted 1.8-2.0 band) so A+ still requires RR
-    # meaningfully above the bare floor, not just clearing it.
+    # With RR_TP1_FLOOR now at the same value as this check, every candidate
+    # that reaches this function already clears the floor by construction
+    # (build_risk_plan/engine_mean_reversion/engine_range_trading all reject
+    # below it), so an equal-valued check here would always be true and the
+    # RR condition on A+ would silently stop discriminating anything. Kept
+    # pinned to RR_TP1_CEIL_SOFT, always held above RR_TP1_FLOOR (currently
+    # 2.2 vs. 2.0 — see those constants), so A+ still requires RR meaningfully
+    # above the bare floor, not just clearing it.
     if score >= 0.78 and rr1 >= RR_TP1_CEIL_SOFT:
         return "A+"
     if score >= 0.62:
