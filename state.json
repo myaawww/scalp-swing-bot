@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-28T15:15:34.052765+00:00"
+    "last_run_ts": "2026-07-28T15:30:31.307533+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.0,
+          "weight": 1.03,
           "min": 0.35,
           "max": 2.0
         },
@@ -390,11 +390,16 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.240133779264224
+      },
+      "PENGUUSDT|low_vol|15m|breakout": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 4,
+        "n": 5,
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
@@ -416,8 +421,8 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 2,
-        "wins": 0
+        "n": 3,
+        "wins": 1
       },
       "calib|fair_value_gap|mid": {
         "n": 1,
@@ -429,14 +434,14 @@
       }
     },
     "totals": {
-      "signals": 11,
-      "wins": 4,
+      "signals": 12,
+      "wins": 5,
       "losses": 7,
       "expired": 1,
-      "sum_r": 1.2755839015762342,
-      "gross_profit_r": 8.275583901576233,
+      "sum_r": 3.2755839015762342,
+      "gross_profit_r": 10.275583901576233,
       "gross_loss_r": 7.0,
-      "sum_hold_minutes": 11742.781210982801
+      "sum_hold_minutes": 12732.606262044113
     }
   },
   "tier2": {
@@ -561,6 +566,17 @@
         "adaptive_delta": "engine_weights[momentum] += step",
         "resolved_ts": 1785247246.2112286,
         "signal_ts": 1785222922.043289
+      },
+      {
+        "id": "PENGUUSDT:breakout:1785193237641",
+        "symbol": "PENGUUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 2.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1785252627.8446882,
+        "signal_ts": 1785193238.3416245
       }
     ]
   },
@@ -756,54 +772,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 4829
-    },
-    "PENGUUSDT:breakout:1785193237641": {
-      "id": "PENGUUSDT:breakout:1785193237641",
-      "symbol": "PENGUUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 0.005941,
-      "sl": 0.005994846649380263,
-      "tp1": 0.005833306701239474,
-      "tp2": 0.005698690077788817,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5,
-      "rr_tp1": 2.0,
-      "rr_tp2": 4.5,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5788810835125766,
-      "tier": "B",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1785245400000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785193238.3416245,
-      "last_checked_ts": 1785250800000,
-      "sl_buffer_used": 1.7999999999999787e-05,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 4839
     },
     "DOTUSDT:momentum:1785193237643": {
       "id": "DOTUSDT:momentum:1785193237643",
