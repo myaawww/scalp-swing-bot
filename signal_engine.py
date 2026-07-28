@@ -1,5 +1,5 @@
 # ORACLE — Adaptive Multi-Engine Signal Platform
-# v1.1.3
+# v2.0.0
 #
 # Multi-specialist engine ensemble, ranked by a bounded continuous-blend
 # Decision Engine and gated by a composite Regime Vector. Adaptive-percentile
@@ -28,7 +28,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "1.1.3"
+__version__ = "2.0.0"
 
 logging.basicConfig(
     level=logging.INFO,
