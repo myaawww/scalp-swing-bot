@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-29T04:45:29.696395+00:00"
+    "last_run_ts": "2026-07-29T05:00:38.270360+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -400,6 +400,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ETHUSDT|bear|1h|fair_value_gap": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -408,8 +413,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 7,
-        "n_since_last_gate": 7
+        "n": 8,
+        "n_since_last_gate": 8
       },
       "structural_invalidation_too_tight": {
         "n": 1,
@@ -430,7 +435,7 @@
         "wins": 1
       },
       "calib|fair_value_gap|mid": {
-        "n": 1,
+        "n": 2,
         "wins": 1
       },
       "calib|range_trading|low": {
@@ -439,14 +444,14 @@
       }
     },
     "totals": {
-      "signals": 13,
+      "signals": 14,
       "wins": 5,
-      "losses": 8,
+      "losses": 9,
       "expired": 1,
-      "sum_r": 2.2755839015762342,
+      "sum_r": 1.2755839015762342,
       "gross_profit_r": 10.275583901576233,
-      "gross_loss_r": 8.0,
-      "sum_hold_minutes": 14831.371770870686
+      "gross_loss_r": 9.0,
+      "sum_hold_minutes": 15610.240431022645
     }
   },
   "tier2": {
@@ -593,6 +598,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785294032.0049422,
         "signal_ts": 1785168106.0744126
+      },
+      {
+        "id": "ETHUSDT:fair_value_gap:1785254500611",
+        "symbol": "ETHUSDT",
+        "engine": "fair_value_gap",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785301232.7352192,
+        "signal_ts": 1785254500.6156101
       }
     ]
   },
@@ -633,7 +649,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785081687.2998924,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.016839370855565267,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -681,7 +697,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785164445.9147696,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.0005699676712143518,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -729,7 +745,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785178836.7721846,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.00023183076358432067,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -777,7 +793,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785193239.0773332,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.0030198350830193334,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -825,7 +841,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785200434.379246,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.0030000000000000027,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -873,7 +889,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785247250.667359,
-      "last_checked_ts": 1785294000000,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.008399999999999963,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -884,52 +900,6 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 4895
-    },
-    "ETHUSDT:fair_value_gap:1785254500611": {
-      "id": "ETHUSDT:fair_value_gap:1785254500611",
-      "symbol": "ETHUSDT",
-      "engine": "fair_value_gap",
-      "direction": "long",
-      "entry": 1904.65,
-      "sl": 1885.9045536814178,
-      "tp1": 1954.7,
-      "tp2": 1958.4490892637166,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion"
-      ],
-      "confluences": {
-        "fvg_fill_reaction": 0.6
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.834990886570294,
-      "rr_tp1": 2.669981773140588,
-      "rr_tp2": 2.869981773140593,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5524855187207359,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785254500.6156101,
-      "last_checked_ts": 1785294000000,
-      "sl_buffer_used": 6.595446318582124,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 4907
     },
     "TAOUSDT:pullback:1785295823957": {
       "id": "TAOUSDT:pullback:1785295823957",
@@ -956,7 +926,7 @@
       "ev_estimate": 0.776069237040377,
       "rr_tp1": 2.552138474080754,
       "rr_tp2": 2.752138474080751,
-      "pending_bars_elapsed": 0,
+      "pending_bars_elapsed": 1,
       "pending_expiry_bars": 10,
       "entry_filled": false,
       "score": 0.749208098155489,
@@ -966,7 +936,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785295823.9592452,
-      "last_checked_ts": 1785295823959,
+      "last_checked_ts": 1785297600000,
       "sl_buffer_used": 0.8308961919912297,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -977,6 +947,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 4916
+    },
+    "LTCUSDT:momentum:1785301237740": {
+      "id": "LTCUSDT:momentum:1785301237740",
+      "symbol": "LTCUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 45.183,
+      "sl": 46.514912711907385,
+      "tp1": 42.25279203380375,
+      "tp2": 38.92301025403529,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.34915672422906824,
+        "adx_strength": 0.6901226240696297
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000005,
+      "rr_tp1": 2.200000000000001,
+      "rr_tp2": 4.699999999999998,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.48232504819706484,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785301237.74063,
+      "last_checked_ts": 1785301237740,
+      "sl_buffer_used": 0.12691271190738562,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 4925
     }
   },
   "daily_summary_date": "2026-07-28"
