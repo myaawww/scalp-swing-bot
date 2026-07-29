@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-07-29T03:15:26.063260+00:00"
+    "last_run_ts": "2026-07-29T03:30:24.512498+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -930,6 +930,53 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 4907
+    },
+    "TAOUSDT:pullback:1785295823957": {
+      "id": "TAOUSDT:pullback:1785295823957",
+      "symbol": "TAOUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 193.33999999999997,
+      "sl": 191.36910380800876,
+      "tp1": 198.37,
+      "tp2": 198.76417923839824,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.601157055142198
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.776069237040377,
+      "rr_tp1": 2.552138474080754,
+      "rr_tp2": 2.752138474080751,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.749208098155489,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785295823.9592452,
+      "last_checked_ts": 1785295823959,
+      "sl_buffer_used": 0.8308961919912297,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 4916
     }
   },
   "daily_summary_date": "2026-07-28"
