@@ -1,5 +1,5 @@
 # ORACLE — Adaptive Multi-Engine Signal Platform
-# v2.0.0
+# v2.1.0
 #
 # Multi-specialist engine ensemble, ranked by a bounded continuous-blend
 # Decision Engine and gated by a composite Regime Vector. Adaptive-percentile
@@ -8,6 +8,31 @@
 # parameter, persisted in a two-tier state.json.
 #
 # Notable design choices are marked `# DECISION:`; fixed bugs `# BUGFIX:`.
+#
+# PATCH (v2.1.0) — forensic-loop responsiveness fix, based on a live state.json
+# post-mortem: 18 resolved signals, 11 of 13 losses (85%) diagnosed as
+# "regime_mismatch", concentrated in the `momentum` engine (7/7 of its losses).
+# Root cause was two compounding issues, both fixed here:
+#   1. `regime_fit_score()`'s mismatch base discount (0.25) was loose enough
+#      that a mismatched candidate could still pass every other filter and
+#      get taken; the adaptive punishment table (`regime_fit` mult) that was
+#      supposed to eventually push it under the hard-veto line moves in
+#      capped 0.06 steps (see `bounded_update`'s default max_step), so it
+#      would have taken on the order of 150+ same-category losses to ever
+#      cross the veto threshold on its own -- structurally unreachable at
+#      this engine's trade volume. Base discount tightened to 0.15.
+#   2. `apply_forensic_adaptive_response()` only ever acts once a category
+#      collects MIN_SAMPLE_SIZE (20) losses since its last correction. That's
+#      a reasonable bar for a genuinely ambiguous/noisy category, but a
+#      category that already accounts for the overwhelming majority of all
+#      losses is not ambiguous -- waiting for 20 samples in it while it's
+#      already >=60% of everything going wrong just bleeds more R for no
+#      statistical benefit. Added a dominance-triggered "fast gate" (Sec 13B
+#      below) that fires an early, evidence-scaled correction well before the
+#      slow gate would, without lowering the bar for genuinely marginal
+#      categories.
+# See the Sec 13B block near `apply_forensic_adaptive_response` for the fast
+# gate implementation, and `regime_fit_score` for the discount change.
 
 from __future__ import annotations
 
@@ -28,7 +53,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -86,6 +111,32 @@ MAX_CORRELATED_CONCURRENT = 1
 
 MIN_SAMPLE_SIZE = int(os.getenv("MIN_SAMPLE_SIZE", "20"))  # Sec 13 min-sample gate, per segment/category
 TIER2_RETENTION_DAYS = 15  # Sec 5 raw-log pruning window
+
+# Sec 13B (v2.1.0) — dominance-triggered fast gate for the forensic adaptive
+# response. Separate from MIN_SAMPLE_SIZE: the slow gate stays at 20 for
+# ordinary/ambiguous categories (unchanged), but a category that already
+# represents an overwhelming share of *all* resolved losses is not ambiguous
+# and shouldn't have to wait for 20 more of the same loss before the engine
+# reacts. Gated on both an absolute floor (FAST_GATE_MIN_N) and a dominance
+# share (FAST_GATE_DOMINANCE) so it can't fire off one or two early losses --
+# both conditions must hold, same as the slow gate requires real repetition.
+FORENSIC_FAST_GATE_MIN_N = int(os.getenv("FORENSIC_FAST_GATE_MIN_N", "5"))
+FORENSIC_FAST_GATE_DOMINANCE = float(os.getenv("FORENSIC_FAST_GATE_DOMINANCE", "0.60"))
+# Fast-gate corrections apply a bigger single step than the slow gate --
+# justified because dominance itself (>=60% of all losses) is already
+# stronger evidence than a bare 20-sample count would require, so a more
+# decisive correction is warranted, not just an earlier small one. Expressed
+# as a multiplier on each route's normal target_delta (STEP_SCALE) plus a
+# raised ceiling (MAX_STEP) for it to actually land at -- raising the
+# ceiling alone would do nothing on routes whose target_delta already sits
+# under the slow gate's default 0.06 cap.
+FORENSIC_FAST_GATE_STEP_SCALE = float(os.getenv("FORENSIC_FAST_GATE_STEP_SCALE", "3.0"))
+FORENSIC_FAST_GATE_MAX_STEP = float(os.getenv("FORENSIC_FAST_GATE_MAX_STEP", "0.25"))
+# After a fast-gate correction fires, require this many *additional* losses
+# in the category (still dominant) before it can fire again -- prevents the
+# fast path from re-firing on every single subsequent loss once a category
+# is already dominant.
+FORENSIC_FAST_GATE_COOLDOWN = int(os.getenv("FORENSIC_FAST_GATE_COOLDOWN", "5"))
 
 # DECISION (v1.1.0): old floors produced technically-valid but tiny RR plans
 # on low-vol assets/timeframes — a "swing" signal with a sub-1%-of-price
@@ -1519,7 +1570,17 @@ def regime_fit_score(cand: Candidate, regime: RegimeVector, state: dict) -> tupl
     veto_table = state["tier1"]["adaptive_params"]["regime_fit"].get(cand.engine, {})
     mult = veto_table.get(label, 1.0)
     matches = label in cand.regime_fit or regime.macro_bias in cand.regime_fit
-    base = 1.0 if matches else 0.25  # Sec 13 regime-fit veto: heavy discount, not necessarily hard-zero
+    # PATCH (v2.1.0): was 0.25. At 0.25, a mismatched candidate with a fully
+    # un-punished mult (1.0, the state every (engine, regime) pair starts at
+    # and stays at until the slow gate fires many times) scores 0.25 -- well
+    # above the 0.12 hard-veto floor below, so the veto term alone could
+    # never exclude a fresh mismatch; it only discounted it, letting it
+    # still win on other terms. Tightened so a fresh, unpunished mismatch
+    # sits close enough to the veto line that even one adaptive correction
+    # (slow or fast gate) pushes it under, rather than requiring the ~150
+    # same-category losses the old value implied at bounded_update's default
+    # step size.
+    base = 1.0 if matches else 0.15  # Sec 13 regime-fit veto: heavy discount, not necessarily hard-zero
     score = base * mult
     hard_veto = score < 0.12
     return clamp(score, 0.0, 1.0), hard_veto
@@ -1783,61 +1844,119 @@ def diagnose_trade(signal: dict, regime_at_entry: dict, state: dict) -> str:
     return "genuine_variance"
 
 
-def apply_forensic_adaptive_response(category: str, signal: dict, state: dict) -> str:
-    """Sec 13 rule 3: one diagnosis -> one deterministic parameter route.
-    Returns a human-readable description of the delta applied (or none)."""
+def _route_category_correction(category: str, signal: dict, state: dict,
+                                step_scale: float = 1.0) -> str:
+    """The actual Sec 13 rule-3 parameter route: one diagnosis -> one
+    deterministic parameter update. Factored out of apply_forensic_adaptive_
+    response (v2.1.0) so both the slow gate and the dominance fast gate (Sec
+    13B) can drive the same routing table at different step sizes.
+    step_scale=1.0 (slow gate) reproduces the original behavior exactly
+    (each route's own target_delta, capped at bounded_update's default 0.06).
+    The fast gate passes FORENSIC_FAST_GATE_STEP_SCALE, which scales *and*
+    raises the cap (FORENSIC_FAST_GATE_MAX_STEP) so the bigger target_delta
+    actually lands instead of being clamped back down to the same size."""
     params = state["tier1"]["adaptive_params"]
     engine = signal["engine"]
-    cat_stats = state["tier1"]["category_stats"].setdefault(category, {"n": 0, "n_since_last_gate": 0})
-    cat_stats["n"] += 1
-    cat_stats["n_since_last_gate"] += 1
-    if cat_stats["n_since_last_gate"] < MIN_SAMPLE_SIZE:
-        return "no_change_insufficient_category_samples"
-    cat_stats["n_since_last_gate"] = 0  # reset gate after acting
+    kw = {} if step_scale == 1.0 else {"max_step": FORENSIC_FAST_GATE_MAX_STEP}
 
     if category == "regime_mismatch":
         table = params["regime_fit"].setdefault(engine, {r: 1.0 for r in REGIMES})
         label = signal.get("regime_label", "neutral")
-        table[label] = bounded_update(table.get(label, 1.0), -0.08, 0.15, 1.0)
+        table[label] = bounded_update(table.get(label, 1.0), -0.08 * step_scale, 0.15, 1.0, **kw)
         return f"regime_fit[{engine}][{label}] -= step"
 
     if category == "structural_invalidation_too_tight":
         asset_cfg = params["sl_buffer_percentile"].setdefault(
             signal["symbol"], dict(params["sl_buffer_percentile"]["default"]))
-        asset_cfg["pct"] = bounded_update(asset_cfg["pct"], 0.05, asset_cfg["min"], asset_cfg["max"])
+        asset_cfg["pct"] = bounded_update(asset_cfg["pct"], 0.05 * step_scale, asset_cfg["min"], asset_cfg["max"], **kw)
         params["sl_buffer_percentile"][signal["symbol"]] = asset_cfg
         return f"sl_buffer_percentile[{signal['symbol']}] += step"
 
     if category == "chased_swept_liquidity":
         th = params["filter_thresholds"]["liquidity_sanity_gap_atr"]
-        th["value"] = bounded_update(th["value"], 0.05, th["min"], th["max"])
+        th["value"] = bounded_update(th["value"], 0.05 * step_scale, th["min"], th["max"], **kw)
         return "liquidity_sanity_gap_atr += step"
 
     if category == "mtf_conflict_ignored":
         th = params["filter_thresholds"]["mtf_alignment_weight"]
-        th["value"] = bounded_update(th["value"], 0.03, th["min"], th["max"])
+        th["value"] = bounded_update(th["value"], 0.03 * step_scale, th["min"], th["max"], **kw)
         return "mtf_alignment_weight += step"
 
     if category == "sfp_mss_sequence_violated":
         th = params["filter_thresholds"]["sfp_mss_strictness"]
-        th["value"] = bounded_update(th["value"], 0.05, th["min"], th["max"])
+        th["value"] = bounded_update(th["value"], 0.05 * step_scale, th["min"], th["max"], **kw)
         return "sfp_mss_strictness += step"
 
     if category == "confidence_miscalibration":
         bucket = "low" if signal["confidence_raw"] < 0.5 else "mid" if signal["confidence_raw"] < 0.68 else "high"
         table = params["confidence_calibration"].setdefault(engine, {"low": 1.0, "mid": 1.0, "high": 1.0})
-        table[bucket] = bounded_update(table[bucket], -0.06, 0.5, 1.3)
+        table[bucket] = bounded_update(table[bucket], -0.06 * step_scale, 0.5, 1.3, **kw)
         return f"confidence_calibration[{engine}][{bucket}] -= step"
 
     if category == "filter_over_permissiveness":
         th = params["filter_thresholds"]["min_confluence_score"]
-        th["value"] = bounded_update(th["value"], 0.04, th["min"], th["max"])
+        th["value"] = bounded_update(th["value"], 0.04 * step_scale, th["min"], th["max"], **kw)
         return "min_confluence_score += step"
 
     if category == "correct_read_poor_rr":
         return "no_change_logged_for_rr_floor_review"
 
     return "no_change_genuine_variance"
+
+
+def apply_forensic_adaptive_response(category: str, signal: dict, state: dict) -> str:
+    """Sec 13 rule 3 + Sec 13B (v2.1.0): one diagnosis -> one deterministic
+    parameter route, gated either by the slow 20-sample gate (unchanged,
+    for ordinary/ambiguous categories) or the new dominance fast gate (for a
+    category that already accounts for most of the book's losses -- see
+    FORENSIC_FAST_GATE_* constants). Returns a human-readable description of
+    the delta applied (or none)."""
+    cat_stats = state["tier1"]["category_stats"].setdefault(
+        category, {"n": 0, "n_since_last_gate": 0, "n_since_last_fast_gate": 0, "fast_gate_ever_fired": False})
+    # BUGFIX: backfill both new fields for state.json files written before v2.1.0.
+    cat_stats.setdefault("n_since_last_fast_gate", 0)
+    cat_stats.setdefault("fast_gate_ever_fired", False)
+    cat_stats["n"] += 1
+    cat_stats["n_since_last_gate"] += 1
+    cat_stats["n_since_last_fast_gate"] += 1
+
+    # NOTE: totals["losses"] hasn't been incremented for *this* trade yet --
+    # resolve_and_learn bumps it after this function returns -- so +1 here
+    # to reflect the count as it will be immediately after this resolution,
+    # not one loss stale.
+    total_losses_after_this = state["tier1"]["totals"]["losses"] + 1
+    is_dominant = (
+        cat_stats["n"] >= FORENSIC_FAST_GATE_MIN_N
+        and cat_stats["n"] / total_losses_after_this >= FORENSIC_FAST_GATE_DOMINANCE
+    )
+    slow_fires = cat_stats["n_since_last_gate"] >= MIN_SAMPLE_SIZE
+    # DECISION: the cooldown only governs the gap *between* fast-gate
+    # corrections (so an already-dominant category can't fast-fire on every
+    # single subsequent loss). It must NOT gate the *first* fast-gate
+    # correction for a category, or an already-badly-dominant category (like
+    # regime_mismatch at 11/13 losses in the state.json this patch was built
+    # against) would sit through one more full cooldown window before ever
+    # getting its first correction -- defeating the point of "fast".
+    fast_fires = (
+        is_dominant
+        and not slow_fires  # slow gate takes priority if both happen to line up
+        and (not cat_stats["fast_gate_ever_fired"] or cat_stats["n_since_last_fast_gate"] >= FORENSIC_FAST_GATE_COOLDOWN)
+    )
+
+    if not slow_fires and not fast_fires:
+        return "no_change_insufficient_category_samples"
+
+    if slow_fires:
+        cat_stats["n_since_last_gate"] = 0
+        cat_stats["n_since_last_fast_gate"] = 0  # a full correction also resets the fast cooldown
+        delta_desc = _route_category_correction(category, signal, state)
+    else:
+        cat_stats["n_since_last_fast_gate"] = 0
+        cat_stats["fast_gate_ever_fired"] = True
+        delta_desc = _route_category_correction(category, signal, state, step_scale=FORENSIC_FAST_GATE_STEP_SCALE)
+        delta_desc += f" (fast_gate, {cat_stats['n']}/{total_losses_after_this} losses = {category})"
+
+    return delta_desc
 
 
 def reinforce_win(signal: dict, state: dict) -> str:
@@ -1896,7 +2015,8 @@ def resolve_and_learn(signal: dict, state: dict) -> None:
     if signal["result"] == "win":
         calib["wins"] += 1
 
-    cat = state["tier1"]["category_stats"].setdefault(category, {"n": 0, "n_since_last_gate": 0})
+    cat = state["tier1"]["category_stats"].setdefault(
+        category, {"n": 0, "n_since_last_gate": 0, "n_since_last_fast_gate": 0})
     cat["n"] = cat.get("n", 0)  # already bumped inside apply_forensic_adaptive_response for losses
     if signal["result"] == "win":
         cat["n"] += 1
