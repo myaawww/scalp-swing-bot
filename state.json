@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "1.1.2",
-    "last_run_ts": "2026-08-02T04:45:24.978734+00:00"
+    "last_run_ts": "2026-08-02T05:00:40.619917+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -420,6 +420,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "LINKUSDT|low_vol|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -428,8 +433,8 @@
         "n_since_last_gate": 0
       },
       "regime_mismatch": {
-        "n": 10,
-        "n_since_last_gate": 10
+        "n": 11,
+        "n_since_last_gate": 11
       },
       "structural_invalidation_too_tight": {
         "n": 2,
@@ -442,7 +447,7 @@
         "wins": 1
       },
       "calib|momentum|mid": {
-        "n": 8,
+        "n": 9,
         "wins": 2
       },
       "calib|breakout|mid": {
@@ -459,14 +464,14 @@
       }
     },
     "totals": {
-      "signals": 17,
+      "signals": 18,
       "wins": 5,
-      "losses": 12,
+      "losses": 13,
       "expired": 1,
-      "sum_r": -1.7244160984237658,
+      "sum_r": -2.7244160984237658,
       "gross_profit_r": 10.275583901576233,
-      "gross_loss_r": 12.0,
-      "sum_hold_minutes": 20185.24610148271
+      "gross_loss_r": 13.0,
+      "sum_hold_minutes": 22525.24266311725
     }
   },
   "tier2": {
@@ -657,6 +662,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785477631.0924387,
         "signal_ts": 1785442525.0359511
+      },
+      {
+        "id": "LINKUSDT:momentum:1785506435932",
+        "symbol": "LINKUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785646835.7268388,
+        "signal_ts": 1785506435.9331408
       }
     ]
   },
@@ -697,7 +713,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785081687.2998924,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.016839370855565267,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -745,7 +761,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785164445.9147696,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.0005699676712143518,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -793,7 +809,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785178836.7721846,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.00023183076358432067,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -841,7 +857,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785193239.0773332,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.0030198350830193334,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -889,7 +905,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785200434.379246,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.0030000000000000027,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -937,7 +953,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785301237.74063,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.12691271190738562,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -985,7 +1001,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785340900.6805012,
-      "last_checked_ts": 1785639600000,
+      "last_checked_ts": 1785643200000,
       "sl_buffer_used": 0.007100000000000106,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -997,15 +1013,15 @@
       "thin_margin_pass": false,
       "tg_message_id": 4941
     },
-    "LINKUSDT:momentum:1785506435932": {
-      "id": "LINKUSDT:momentum:1785506435932",
-      "symbol": "LINKUSDT",
+    "ADAUSDT:momentum:1785646840123": {
+      "id": "ADAUSDT:momentum:1785646840123",
+      "symbol": "ADAUSDT",
       "engine": "momentum",
-      "direction": "short",
-      "entry": 8.1317,
-      "sl": 8.373800000000001,
-      "tp1": 7.599079999999999,
-      "tp2": 6.993829999999997,
+      "direction": "long",
+      "entry": 0.18326,
+      "sl": 0.17190238829861523,
+      "tp1": 0.20824674574304652,
+      "tp2": 0.23664077499650846,
       "entry_kind": "market",
       "timeframe": "1h",
       "confidence_raw": 0.5,
@@ -1015,35 +1031,35 @@
         "high_vol"
       ],
       "confluences": {
-        "rsi_momentum": 0.48191655573069964,
-        "adx_strength": 0.7100913566024174
+        "rsi_momentum": 0.5064776455421449,
+        "adx_strength": 0.8890219356692168
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000001,
-      "rr_tp1": 2.2,
-      "rr_tp2": 4.7,
+      "ev_estimate": 0.6000000000000008,
+      "rr_tp1": 2.2000000000000015,
+      "rr_tp2": 4.700000000000001,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.5042922426402163,
-      "tier": "B",
+      "score": 0.7566273327199755,
+      "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1785506435.9331408,
-      "last_checked_ts": 1785639600000,
-      "sl_buffer_used": 0.027300000000000324,
+      "signal_ts": 1785646840.124496,
+      "last_checked_ts": 1785646840124,
+      "sl_buffer_used": 0.0008676117013847683,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
-        "label": "low_vol",
+        "label": "high_vol",
         "macro_bias": "bull"
       },
-      "regime_label": "low_vol",
+      "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 5048
+      "tg_message_id": 5153
     }
   },
   "daily_summary_date": "2026-08-01"
