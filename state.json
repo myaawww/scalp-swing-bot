@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-03T00:45:20.971113+00:00"
+    "last_run_ts": "2026-08-03T01:00:42.211954+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -352,6 +352,55 @@
   "tier2": {
     "trades": []
   },
-  "active_signals": {},
+  "active_signals": {
+    "ONDOUSDT:momentum:1785718841540": {
+      "id": "ONDOUSDT:momentum:1785718841540",
+      "symbol": "ONDOUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 0.37492,
+      "sl": 0.39277,
+      "tp1": 0.3356499999999999,
+      "tp2": 0.2910249999999998,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.36997575560016344,
+        "adx_strength": 0.5172755945167243
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000003,
+      "rr_tp1": 2.2000000000000006,
+      "rr_tp2": 4.700000000000001,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.4053270194065241,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785718841.5444841,
+      "last_checked_ts": 1785718841544,
+      "sl_buffer_used": 0.0015999999999999903,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "neutral",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "neutral",
+      "thin_margin_pass": true,
+      "tg_message_id": 5205
+    }
+  },
   "daily_summary_date": null
 }
