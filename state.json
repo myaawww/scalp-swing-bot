@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-03T02:45:21.981316+00:00"
+    "last_run_ts": "2026-08-03T03:00:33.649976+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -389,7 +389,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785718841544,
+      "last_checked_ts": 1785722400000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -446,6 +446,53 @@
       "regime_label": "neutral",
       "thin_margin_pass": false,
       "tg_message_id": 5207
+    },
+    "TAOUSDT:range_trading:1785726033011": {
+      "id": "TAOUSDT:range_trading:1785726033011",
+      "symbol": "TAOUSDT",
+      "engine": "range_trading",
+      "direction": "long",
+      "entry": 190.56,
+      "sl": 189.3250256763494,
+      "tp1": 195.245,
+      "tp2": 195.49199486473012,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.43188405797100393
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.396800569161276,
+      "rr_tp1": 3.793601138322552,
+      "rr_tp2": 3.993601138322547,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.5694046986095137,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785726033.0126567,
+      "last_checked_ts": 1785726033012,
+      "sl_buffer_used": 0.5900000000000034,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "neutral",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "neutral",
+      "thin_margin_pass": true,
+      "tg_message_id": 5210
     }
   },
   "daily_summary_date": null
