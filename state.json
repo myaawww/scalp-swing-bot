@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-03T10:45:22.915606+00:00"
+    "last_run_ts": "2026-08-03T11:00:36.488669+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -366,7 +366,7 @@
       "signals": 1,
       "wins": 0,
       "losses": 1,
-      "expired": 0,
+      "expired": 1,
       "sum_r": -1.0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 1.0,
@@ -425,7 +425,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785747600000,
+      "last_checked_ts": 1785751200000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -436,52 +436,6 @@
       "regime_label": "neutral",
       "thin_margin_pass": true,
       "tg_message_id": 5205
-    },
-    "XLMUSDT:fair_value_gap:1785722431910": {
-      "id": "XLMUSDT:fair_value_gap:1785722431910",
-      "symbol": "XLMUSDT",
-      "engine": "fair_value_gap",
-      "direction": "short",
-      "entry": 0.17302,
-      "sl": 0.17382883952017347,
-      "tp1": 0.17048,
-      "tp2": 0.1703182320959653,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion"
-      ],
-      "confluences": {
-        "fvg_fill_reaction": 0.6
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.0701507756787654,
-      "rr_tp1": 3.1403015513575308,
-      "rr_tp2": 3.340301551357524,
-      "pending_bars_elapsed": 7,
-      "pending_expiry_bars": 8,
-      "entry_filled": false,
-      "score": 0.5618996562828654,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785722431.9113812,
-      "last_checked_ts": 1785747600000,
-      "sl_buffer_used": 0.00035883952017345196,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "neutral",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "neutral",
-      "thin_margin_pass": false,
-      "tg_message_id": 5207
     },
     "PENDLEUSDT:momentum:1785729690400": {
       "id": "PENDLEUSDT:momentum:1785729690400",
@@ -519,7 +473,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785729690.4012578,
-      "last_checked_ts": 1785747600000,
+      "last_checked_ts": 1785751200000,
       "sl_buffer_used": 0.004626763193950288,
       "mae": 0.0,
       "sfp_purity": 1.0,
