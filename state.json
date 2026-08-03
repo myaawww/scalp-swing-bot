@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-03T13:45:23.826869+00:00"
+    "last_run_ts": "2026-08-03T14:00:42.350371+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -425,7 +425,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785758400000,
+      "last_checked_ts": 1785762000000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -473,7 +473,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785729690.4012578,
-      "last_checked_ts": 1785758400000,
+      "last_checked_ts": 1785762000000,
       "sl_buffer_used": 0.004626763193950288,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -530,6 +530,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5256
+    },
+    "ADAUSDT:momentum:1785765641694": {
+      "id": "ADAUSDT:momentum:1785765641694",
+      "symbol": "ADAUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 0.19405,
+      "sl": 0.18053009028080763,
+      "tp1": 0.2237938013822232,
+      "tp2": 0.25759357568020413,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.3621915796012547,
+        "adx_strength": 0.5525069683741246
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.7,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.40894068706066633,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785765641.6964943,
+      "last_checked_ts": 1785765641696,
+      "sl_buffer_used": 0.0009999097191923602,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": true,
+      "tg_message_id": 5259
     }
   },
   "daily_summary_date": "2026-08-03"
