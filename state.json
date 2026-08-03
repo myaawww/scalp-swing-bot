@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-03T07:45:25.139845+00:00"
+    "last_run_ts": "2026-08-03T08:02:11.087806+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -335,22 +335,58 @@
         "baseline_avg_rr": null
       }
     },
-    "segment_stats": {},
-    "category_stats": {},
-    "calibration": {},
+    "segment_stats": {
+      "TAOUSDT|neutral|1h|range_trading": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      }
+    },
+    "category_stats": {
+      "regime_mismatch": {
+        "n": 1,
+        "n_since_last_gate": 1,
+        "by_key": {
+          "range_trading": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          }
+        }
+      }
+    },
+    "calibration": {
+      "calib|range_trading|low": {
+        "n": 1,
+        "wins": 0
+      }
+    },
     "totals": {
-      "signals": 0,
+      "signals": 1,
       "wins": 0,
-      "losses": 0,
+      "losses": 1,
       "expired": 0,
-      "sum_r": 0.0,
+      "sum_r": -1.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 0.0,
-      "sum_hold_minutes": 0.0
+      "gross_loss_r": 1.0,
+      "sum_hold_minutes": 300.594427617391
     }
   },
   "tier2": {
-    "trades": []
+    "trades": [
+      {
+        "id": "TAOUSDT:range_trading:1785726033011",
+        "symbol": "TAOUSDT",
+        "engine": "range_trading",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785744068.6783137,
+        "signal_ts": 1785726033.0126567
+      }
+    ]
   },
   "active_signals": {
     "ONDOUSDT:momentum:1785718841540": {
@@ -389,7 +425,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785736800000,
+      "last_checked_ts": 1785740400000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -425,7 +461,7 @@
       "ev_estimate": 1.0701507756787654,
       "rr_tp1": 3.1403015513575308,
       "rr_tp2": 3.340301551357524,
-      "pending_bars_elapsed": 4,
+      "pending_bars_elapsed": 5,
       "pending_expiry_bars": 8,
       "entry_filled": false,
       "score": 0.5618996562828654,
@@ -435,7 +471,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785722431.9113812,
-      "last_checked_ts": 1785736800000,
+      "last_checked_ts": 1785740400000,
       "sl_buffer_used": 0.00035883952017345196,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -446,53 +482,6 @@
       "regime_label": "neutral",
       "thin_margin_pass": false,
       "tg_message_id": 5207
-    },
-    "TAOUSDT:range_trading:1785726033011": {
-      "id": "TAOUSDT:range_trading:1785726033011",
-      "symbol": "TAOUSDT",
-      "engine": "range_trading",
-      "direction": "long",
-      "entry": 190.56,
-      "sl": 189.3250256763494,
-      "tp1": 195.245,
-      "tp2": 195.49199486473012,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.43188405797100393
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.396800569161276,
-      "rr_tp1": 3.793601138322552,
-      "rr_tp2": 3.993601138322547,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5694046986095137,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785726033.0126567,
-      "last_checked_ts": 1785736800000,
-      "sl_buffer_used": 0.5900000000000034,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "neutral",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "neutral",
-      "thin_margin_pass": true,
-      "tg_message_id": 5210
     },
     "PENDLEUSDT:momentum:1785729690400": {
       "id": "PENDLEUSDT:momentum:1785729690400",
@@ -530,7 +519,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785729690.4012578,
-      "last_checked_ts": 1785736800000,
+      "last_checked_ts": 1785740400000,
       "sl_buffer_used": 0.004626763193950288,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -543,5 +532,5 @@
       "tg_message_id": 5215
     }
   },
-  "daily_summary_date": null
+  "daily_summary_date": "2026-08-03"
 }
