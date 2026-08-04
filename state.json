@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-04T21:45:20.231461+00:00"
+    "last_run_ts": "2026-08-04T22:00:43.849751+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -531,7 +531,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -579,7 +579,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785729690.4012578,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.004626763193950288,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -627,7 +627,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785765641.6964943,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.0009999097191923602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -675,7 +675,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785780930.936216,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.0016999999999999238,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -723,7 +723,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785808835.1491866,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.02451428959027053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -771,7 +771,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785852040.0905528,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -819,7 +819,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785870041.5971284,
-      "last_checked_ts": 1785873600000,
+      "last_checked_ts": 1785877200000,
       "sl_buffer_used": 0.6848185425179132,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -830,6 +830,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5341
+    },
+    "DOTUSDT:momentum:1785880843125": {
+      "id": "DOTUSDT:momentum:1785880843125",
+      "symbol": "DOTUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 0.85363,
+      "sl": 0.8255710639881788,
+      "tp1": 0.9153596592260066,
+      "tp2": 0.9855069992555596,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.41889024423509824,
+        "adx_strength": 0.8213822636377223
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999996,
+      "rr_tp1": 2.1999999999999993,
+      "rr_tp2": 4.700000000000001,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.45245398158330796,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785880843.1270146,
+      "last_checked_ts": 1785880843127,
+      "sl_buffer_used": 0.0027789360118212043,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "ranging",
+        "macro_bias": "bull"
+      },
+      "regime_label": "ranging",
+      "thin_margin_pass": false,
+      "tg_message_id": 5344
     }
   },
   "daily_summary_date": "2026-08-04"
