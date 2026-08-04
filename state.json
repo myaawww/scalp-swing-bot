@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-04T14:45:30.153609+00:00"
+    "last_run_ts": "2026-08-04T15:00:41.429212+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -350,12 +350,17 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "NEARUSDT|low_vol|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "regime_mismatch": {
-        "n": 2,
-        "n_since_last_gate": 2,
+        "n": 3,
+        "n_since_last_gate": 3,
         "by_key": {
           "range_trading": {
             "n": 1,
@@ -364,6 +369,12 @@
             "fast_gate_ever_fired": false
           },
           "fair_value_gap": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          },
+          "momentum": {
             "n": 1,
             "n_since_last_gate": 1,
             "n_since_last_fast_gate": 1,
@@ -392,17 +403,21 @@
       "calib|fair_value_gap|mid": {
         "n": 1,
         "wins": 0
+      },
+      "calib|momentum|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 3,
+      "signals": 4,
       "wins": 0,
-      "losses": 3,
+      "losses": 4,
       "expired": 2,
-      "sum_r": -3.0,
+      "sum_r": -4.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 3.0,
-      "sum_hold_minutes": 1259.5557530800502
+      "gross_loss_r": 4.0,
+      "sum_hold_minutes": 1979.5553500850997
     }
   },
   "tier2": {
@@ -439,6 +454,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785848436.7992604,
         "signal_ts": 1785834038.3863933
+      },
+      {
+        "id": "NEARUSDT:momentum:1785812436409",
+        "symbol": "NEARUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785855636.3880305,
+        "signal_ts": 1785812436.4122102
       }
     ]
   },
@@ -479,7 +505,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785848400000,
+      "last_checked_ts": 1785852000000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -527,7 +553,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785729690.4012578,
-      "last_checked_ts": 1785848400000,
+      "last_checked_ts": 1785852000000,
       "sl_buffer_used": 0.004626763193950288,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -575,7 +601,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785765641.6964943,
-      "last_checked_ts": 1785848400000,
+      "last_checked_ts": 1785852000000,
       "sl_buffer_used": 0.0009999097191923602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -623,7 +649,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785780930.936216,
-      "last_checked_ts": 1785848400000,
+      "last_checked_ts": 1785852000000,
       "sl_buffer_used": 0.0016999999999999238,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -671,7 +697,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785808835.1491866,
-      "last_checked_ts": 1785848400000,
+      "last_checked_ts": 1785852000000,
       "sl_buffer_used": 0.02451428959027053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -682,54 +708,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5294
-    },
-    "NEARUSDT:momentum:1785812436409": {
-      "id": "NEARUSDT:momentum:1785812436409",
-      "symbol": "NEARUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 1.7593,
-      "sl": 1.7226000000000001,
-      "tp1": 1.84004,
-      "tp2": 1.93179,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.28926241025219723,
-        "adx_strength": 0.5677135913627082
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999988,
-      "rr_tp1": 2.1999999999999975,
-      "rr_tp2": 4.7,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.4013528793144968,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785812436.4122102,
-      "last_checked_ts": 1785848400000,
-      "sl_buffer_used": 0.005499999999999838,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": true,
-      "tg_message_id": 5298
     },
     "XLMUSDT:momentum:1785852040089": {
       "id": "XLMUSDT:momentum:1785852040089",
