@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-05T22:45:25.514675+00:00"
+    "last_run_ts": "2026-08-05T23:00:36.735599+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -365,6 +365,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "BNBUSDT|ranging|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -399,10 +404,16 @@
         }
       },
       "structural_invalidation_too_tight": {
-        "n": 1,
-        "n_since_last_gate": 1,
+        "n": 2,
+        "n_since_last_gate": 2,
         "by_key": {
           "UNIUSDT": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          },
+          "BNBUSDT": {
             "n": 1,
             "n_since_last_gate": 1,
             "n_since_last_fast_gate": 1,
@@ -427,17 +438,21 @@
       "calib|liquidity_sweep|high": {
         "n": 1,
         "wins": 0
+      },
+      "calib|trend_continuation|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 6,
+      "signals": 7,
       "wins": 0,
-      "losses": 6,
+      "losses": 7,
       "expired": 3,
-      "sum_r": -6.0,
+      "sum_r": -7.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 6.0,
-      "sum_hold_minutes": 5083.509835286935
+      "gross_loss_r": 7.0,
+      "sum_hold_minutes": 5833.581960252921
     }
   },
   "tier2": {
@@ -507,6 +522,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785913232.187739,
         "signal_ts": 1785729690.4012578
+      },
+      {
+        "id": "BNBUSDT:trend_continuation:1785925828004",
+        "symbol": "BNBUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1785970832.334181,
+        "signal_ts": 1785925828.006683
       }
     ]
   },
@@ -547,7 +573,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -595,7 +621,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785765641.6964943,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.0009999097191923602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -643,7 +669,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785780930.936216,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.0016999999999999238,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -691,7 +717,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785808835.1491866,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.02451428959027053,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -739,7 +765,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785852040.0905528,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -787,7 +813,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785870041.5971284,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.6848185425179132,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -835,7 +861,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785880843.1270146,
-      "last_checked_ts": 1785963600000,
+      "last_checked_ts": 1785967200000,
       "sl_buffer_used": 0.0027789360118212043,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -846,54 +872,6 @@
       "regime_label": "ranging",
       "thin_margin_pass": false,
       "tg_message_id": 5344
-    },
-    "BNBUSDT:trend_continuation:1785925828004": {
-      "id": "BNBUSDT:trend_continuation:1785925828004",
-      "symbol": "BNBUSDT",
-      "engine": "trend_continuation",
-      "direction": "long",
-      "entry": 596.45,
-      "sl": 593.7023884509257,
-      "tp1": 605.2,
-      "tp2": 605.7495223098149,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.0922920405083847,
-      "rr_tp1": 3.1845840810167694,
-      "rr_tp2": 3.384584081016761,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8766976916641871,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785925828.006683,
-      "last_checked_ts": 1785963600000,
-      "sl_buffer_used": 1.177611549074271,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "ranging",
-        "macro_bias": "bull"
-      },
-      "regime_label": "ranging",
-      "thin_margin_pass": false,
-      "tg_message_id": 5376
     }
   },
   "daily_summary_date": "2026-08-05"
