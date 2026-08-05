@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-05T08:30:34.172724+00:00"
+    "last_run_ts": "2026-08-05T08:45:29.549303+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -846,6 +846,52 @@
       "regime_label": "ranging",
       "thin_margin_pass": false,
       "tg_message_id": 5344
+    },
+    "HYPEUSDT:breaker_block:1785919528694": {
+      "id": "HYPEUSDT:breaker_block:1785919528694",
+      "symbol": "HYPEUSDT",
+      "engine": "breaker_block",
+      "direction": "long",
+      "entry": 57.6705,
+      "sl": 57.358687616838004,
+      "tp1": 58.35648724295638,
+      "tp2": 59.136018200861365,
+      "entry_kind": "pending",
+      "timeframe": "15m",
+      "confidence_raw": 0.65,
+      "regime_fit": [
+        "reversal",
+        "trending"
+      ],
+      "confluences": {
+        "breaker_confirmed_mss": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000045,
+      "rr_tp1": 2.200000000000009,
+      "rr_tp2": 4.700000000000009,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 6,
+      "entry_filled": false,
+      "score": 0.5556772342765703,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785919528.6973941,
+      "last_checked_ts": 1785919528697,
+      "sl_buffer_used": 0.12431238316199006,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "ranging",
+        "macro_bias": "bull"
+      },
+      "regime_label": "ranging",
+      "thin_margin_pass": false,
+      "tg_message_id": 5374
     }
   },
   "daily_summary_date": "2026-08-05"
