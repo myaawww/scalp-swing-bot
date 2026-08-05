@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-05T10:15:29.556651+00:00"
+    "last_run_ts": "2026-08-05T10:30:28.520679+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -433,7 +433,7 @@
       "signals": 6,
       "wins": 0,
       "losses": 6,
-      "expired": 2,
+      "expired": 3,
       "sum_r": -6.0,
       "gross_profit_r": 0.0,
       "gross_loss_r": 6.0,
@@ -847,42 +847,44 @@
       "thin_margin_pass": false,
       "tg_message_id": 5344
     },
-    "HYPEUSDT:breaker_block:1785919528694": {
-      "id": "HYPEUSDT:breaker_block:1785919528694",
-      "symbol": "HYPEUSDT",
-      "engine": "breaker_block",
+    "BNBUSDT:trend_continuation:1785925828004": {
+      "id": "BNBUSDT:trend_continuation:1785925828004",
+      "symbol": "BNBUSDT",
+      "engine": "trend_continuation",
       "direction": "long",
-      "entry": 57.6705,
-      "sl": 57.358687616838004,
-      "tp1": 58.35648724295638,
-      "tp2": 59.136018200861365,
-      "entry_kind": "pending",
-      "timeframe": "15m",
-      "confidence_raw": 0.65,
+      "entry": 596.45,
+      "sl": 593.7023884509257,
+      "tp1": 605.2,
+      "tp2": 605.7495223098149,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
       "regime_fit": [
-        "reversal",
-        "trending"
+        "trending",
+        "bull",
+        "bear"
       ],
       "confluences": {
-        "breaker_confirmed_mss": 1.0
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
       },
-      "mtf_alignment": 0.5,
+      "mtf_alignment": 0.85,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000045,
-      "rr_tp1": 2.200000000000009,
-      "rr_tp2": 4.700000000000009,
-      "pending_bars_elapsed": 5,
-      "pending_expiry_bars": 6,
-      "entry_filled": false,
-      "score": 0.5556772342765703,
-      "tier": "B",
+      "ev_estimate": 1.0922920405083847,
+      "rr_tp1": 3.1845840810167694,
+      "rr_tp2": 3.384584081016761,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8766976916641871,
+      "tier": "A+",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1785919528.6973941,
-      "last_checked_ts": 1785924000000,
-      "sl_buffer_used": 0.12431238316199006,
+      "signal_ts": 1785925828.006683,
+      "last_checked_ts": 1785925828006,
+      "sl_buffer_used": 1.177611549074271,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -891,7 +893,7 @@
       },
       "regime_label": "ranging",
       "thin_margin_pass": false,
-      "tg_message_id": 5374
+      "tg_message_id": 5376
     }
   },
   "daily_summary_date": "2026-08-05"
