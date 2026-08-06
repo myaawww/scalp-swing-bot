@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-06T09:45:22.468541+00:00"
+    "last_run_ts": "2026-08-06T10:00:39.354391+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -375,12 +375,17 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AVAXUSDT|low_vol|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "regime_mismatch": {
-        "n": 6,
-        "n_since_last_gate": 6,
+        "n": 7,
+        "n_since_last_gate": 7,
         "by_key": {
           "range_trading": {
             "n": 1,
@@ -395,9 +400,9 @@
             "fast_gate_ever_fired": false
           },
           "momentum": {
-            "n": 2,
-            "n_since_last_gate": 2,
-            "n_since_last_fast_gate": 2,
+            "n": 3,
+            "n_since_last_gate": 3,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": false
           },
           "liquidity_sweep": {
@@ -443,7 +448,7 @@
         "wins": 0
       },
       "calib|momentum|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 0
       },
       "calib|liquidity_sweep|high": {
@@ -460,14 +465,14 @@
       }
     },
     "totals": {
-      "signals": 8,
+      "signals": 9,
       "wins": 0,
-      "losses": 8,
+      "losses": 9,
       "expired": 3,
-      "sum_r": -8.0,
+      "sum_r": -9.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 8.0,
-      "sum_hold_minutes": 5863.7981696128845
+      "gross_loss_r": 9.0,
+      "sum_hold_minutes": 9223.782937363783
     }
   },
   "tier2": {
@@ -559,6 +564,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1785978038.4215655,
         "signal_ts": 1785976225.449004
+      },
+      {
+        "id": "AVAXUSDT:momentum:1785808835148",
+        "symbol": "AVAXUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786010434.2352517,
+        "signal_ts": 1785808835.1491866
       }
     ]
   },
@@ -599,7 +615,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -647,7 +663,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785765641.6964943,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.0009999097191923602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -695,7 +711,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785780930.936216,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.0016999999999999238,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -706,54 +722,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": true,
       "tg_message_id": 5273
-    },
-    "AVAXUSDT:momentum:1785808835148": {
-      "id": "AVAXUSDT:momentum:1785808835148",
-      "symbol": "AVAXUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 6.8773,
-      "sl": 6.520985710409729,
-      "tp1": 7.661191437098596,
-      "tp2": 8.551977161074273,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.6533127508400594,
-        "adx_strength": 0.7960814550062423
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999994,
-      "rr_tp1": 2.199999999999999,
-      "rr_tp2": 4.699999999999997,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.4808358752783292,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1785808835.1491866,
-      "last_checked_ts": 1786003200000,
-      "sl_buffer_used": 0.02451428959027053,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5294
     },
     "XLMUSDT:momentum:1785852040089": {
       "id": "XLMUSDT:momentum:1785852040089",
@@ -791,7 +759,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785852040.0905528,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -839,7 +807,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785870041.5971284,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.6848185425179132,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -887,7 +855,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785880843.1270146,
-      "last_checked_ts": 1786003200000,
+      "last_checked_ts": 1786006800000,
       "sl_buffer_used": 0.0027789360118212043,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -935,7 +903,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785980717.3905494,
-      "last_checked_ts": 1786008600000,
+      "last_checked_ts": 1786009500000,
       "sl_buffer_used": 0.1481680332524866,
       "mae": 0.0,
       "sfp_purity": 1.0,
