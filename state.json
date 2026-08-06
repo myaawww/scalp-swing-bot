@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-06T00:15:18.283887+00:00"
+    "last_run_ts": "2026-08-06T00:30:25.972872+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -872,6 +872,54 @@
       "regime_label": "ranging",
       "thin_margin_pass": false,
       "tg_message_id": 5344
+    },
+    "PENGUUSDT:breakout:1785976225446": {
+      "id": "PENGUUSDT:breakout:1785976225446",
+      "symbol": "PENGUUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 0.00634,
+      "sl": 0.006298382950011869,
+      "tp1": 0.00643155750997389,
+      "tp2": 0.006535600134944218,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.6999999999999895,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.5556772342765693,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1785976225.449004,
+      "last_checked_ts": 1785976225449,
+      "sl_buffer_used": 1.599999999999952e-05,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bull",
+        "macro_bias": "bull"
+      },
+      "regime_label": "bull",
+      "thin_margin_pass": false,
+      "tg_message_id": 5411
     }
   },
   "daily_summary_date": "2026-08-05"
