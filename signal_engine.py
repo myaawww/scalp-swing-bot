@@ -1528,10 +1528,21 @@ def regime_fit_score(cand: Candidate, regime: RegimeVector, state: dict) -> tupl
     veto_table = state["tier1"]["adaptive_params"]["regime_fit"].get(cand.engine, {})
     mult = veto_table.get(label, 1.0)
     matches = label in cand.regime_fit or regime.macro_bias in cand.regime_fit
-    # was 0.25 — too loose to ever cross the 0.12 hard-veto floor on its own;
-    # tightened so one adaptive correction can push a mismatch under it.
-    base = 1.0 if matches else 0.15  # heavy discount, not necessarily hard-zero
-    score = base * mult
+    # DECISION (v1.1.3): a regime mismatch is now a HARD veto, not a soft
+    # discount. Previously a mismatch only dropped this one term (weight 0.22
+    # of 7 terms) to 0.15, which a strong confluence/RR/EV elsewhere could
+    # still out-vote into a passable composite score — this is exactly how
+    # momentum/breakout kept firing in low_vol/ranging regimes they were
+    # never designed for (10 of 12 real losses were this pattern, 0 wins).
+    # An engine's regime_fit list is a claim about which conditions it
+    # actually works in; if the current regime isn't on that list, the
+    # signal is rejected outright rather than diluted into a still-tradeable
+    # score. adaptive_params["regime_fit"] mult still applies on TOP of a
+    # match (e.g. a learned partial discount for a regime that nominally
+    # matches but has underperformed) — it no longer rescues a mismatch.
+    if not matches:
+        return 0.0, True
+    score = 1.0 * mult
     hard_veto = score < 0.12
     return clamp(score, 0.0, 1.0), hard_veto
 
