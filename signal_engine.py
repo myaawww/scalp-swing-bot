@@ -1,12 +1,11 @@
 # ORACLE — Adaptive Multi-Engine Signal Platform
-# v2.1.1
+# v2.2.2
 #
 # Multi-specialist engine ensemble, ranked by a bounded continuous-blend
 # Decision Engine and gated by a composite Regime Vector. Adaptive-percentile
 # SL / liquidity-wall-clipped TP risk plans, entry-fill verification, and a
 # closed-taxonomy win/loss forensics loop that drives every adaptive
 # parameter, persisted in a two-tier state.json.
-#
 
 
 from __future__ import annotations
@@ -28,7 +27,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "2.1.2"
+__version__ = "2.2.2"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -63,7 +62,7 @@ WATCHLIST = [
     "TAOUSDT", "AVAXUSDT", "LINKUSDT", "AAVEUSDT", "XRPUSDT",
     "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
 ]
-MACRO_ASSET = "BTCUSDT"  # DECISION: BTC is the macro-bias anchor for the Regime Vector (Sec 6).
+MACRO_ASSET = "BTCUSDT"  # macro-bias anchor for the Regime Vector
 MAJORS = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT"}
 
 # 15m is the spec's forbidden floor. Swing pipeline: 1D/4H/1H; intraday: 4H/1H/15m.
@@ -77,58 +76,23 @@ EMA_FAST, EMA_SLOW, EMA_TREND = 21, 50, 200
 RSI_LEN, ATR_LEN, ADX_LEN, BB_LEN = 14, 14, 14, 20
 
 MAX_CONCURRENT_ACTIVE_SIGNALS = int(os.getenv("MAX_CONCURRENT_ACTIVE_SIGNALS", "8"))
-# Correlated assets (majors) may not both occupy an active slot at once (Sec 14).
-MAX_CORRELATED_CONCURRENT = 1
+MAX_CORRELATED_CONCURRENT = 1  # majors may not both occupy an active slot at once
 
-MIN_SAMPLE_SIZE = int(os.getenv("MIN_SAMPLE_SIZE", "20"))  # Sec 13 min-sample gate, per segment/category
-TIER2_RETENTION_DAYS = 15  # Sec 5 raw-log pruning window
+MIN_SAMPLE_SIZE = int(os.getenv("MIN_SAMPLE_SIZE", "20"))  # slow-gate min sample, per segment/category
+TIER2_RETENTION_DAYS = 15  # raw-log pruning window
 
-# Sec 13B — dominance-triggered fast gate: fires early (per-key) when a key
-# already accounts for most of a category's losses, instead of waiting for
-# the full MIN_SAMPLE_SIZE slow gate.
+# Fast gate: fires early (per-key) when a key already accounts for most of a
+# category's losses, instead of waiting for the full MIN_SAMPLE_SIZE slow gate.
 FORENSIC_FAST_GATE_MIN_N = int(os.getenv("FORENSIC_FAST_GATE_MIN_N", "5"))
 FORENSIC_FAST_GATE_DOMINANCE = float(os.getenv("FORENSIC_FAST_GATE_DOMINANCE", "0.60"))
-# Bigger single step than the slow gate, since dominance is already strong
-# evidence. STEP_SCALE multiplies each route's target_delta; MAX_STEP raises
-# bounded_update's cap so the bigger delta actually lands.
 FORENSIC_FAST_GATE_STEP_SCALE = float(os.getenv("FORENSIC_FAST_GATE_STEP_SCALE", "3.0"))
 FORENSIC_FAST_GATE_MAX_STEP = float(os.getenv("FORENSIC_FAST_GATE_MAX_STEP", "0.25"))
-# Losses required after a fast-gate fire before that key can fast-fire again.
-FORENSIC_FAST_GATE_COOLDOWN = int(os.getenv("FORENSIC_FAST_GATE_COOLDOWN", "5"))
+FORENSIC_FAST_GATE_COOLDOWN = int(os.getenv("FORENSIC_FAST_GATE_COOLDOWN", "5"))  # losses before a key can re-fire
 
-# DECISION (v1.1.0): old floors produced technically-valid but tiny RR plans
-# on low-vol assets/timeframes — a "swing" signal with a sub-1%-of-price
-# SL/TP band is really a scalp in disguise. Widened for genuinely bigger
-# stop/target distances (needs correspondingly smaller size to hold risk
-# constant). RR shape is a separate knob — see RR_TP1_FLOOR / RR_TP2_EXTENSION.
-# DECISION (v1.1.2): the v1.1.0 bump to 2.5 overshot in live use — reverted to
-# the 1.8-2.0 band. 1.8 is the floor (was 1.5 pre-v1.1.0, then 2.5 in v1.1.0).
-# DECISION (v1.1.3): raised to a hard 2:1 minimum on every dispatched trade.
-# Structural TP1s (real opposing pivots) still price wherever the chart
-# actually shows a level — this only raises the backstop that both
-# build_risk_plan() and the mean_reversion/range_trading engines fall back
-# to when the nearest real level pays out less than the minimum acceptable RR.
-RR_TP1_FLOOR = 2.0       # require a bigger first-target payout per unit of risk
-# DECISION (v1.1.0): TP1 fallback used only when no opposing structural pivot
-# exists to validate a target against, so it's left close to the original
-# (2.0->2.2) rather than pushed as far as the floors above — an unanchored
-# projection shouldn't reach as aggressively as a wall-confirmed one.
-# BUGFIX (v1.1.2): the v1.1.0 floor bump to 2.5 pushed RR_TP1_FLOOR above this
-# ceiling (2.2), which silently made this constant dead: in build_risk_plan(),
-# any unanchored raw_tp1 built from RR_TP1_CEIL_SOFT was always < floor_tp1 and
-# got clobbered by the floor override, so every unanchored TP1 was actually
-# priced at the (higher) floor, never at the intended, less-aggressive soft
-# ceiling. Restored to 2.0 (top of the 1.8-2.0 band), above the new floor, so
-# the ceiling is reachable again and the two constants define a real band.
-# DECISION (v1.1.3): RR_TP1_FLOOR moved to 2.0 in this same change, which would
-# have collapsed floor == ceiling and silently reproduced the exact bug noted
-# above — this time in assign_tier() too, where `rr1 >= RR_TP1_CEIL_SOFT` is
-# meant to separate "cleared the floor" from "meaningfully above it" for A+.
-# Bumped to 2.2 to keep the same 0.2 gap above the new floor and keep both
-# the build_risk_plan() band and the assign_tier() A+ check non-degenerate.
-RR_TP1_CEIL_SOFT = 2.2
-RR_TP2_EXTENSION = 2.5   # was hardcoded 1.2 -- TP2 = entry + risk*(rr1 + this), in RR units beyond TP1
-RR_TP2_FALLBACK_EXTENSION = 1.5  # was hardcoded 0.5 -- used only if wall-clipping pulls TP2 back to/under rr1
+RR_TP1_FLOOR = 2.0       # minimum acceptable reward:risk on every dispatched trade's first target
+RR_TP1_CEIL_SOFT = 2.2   # unanchored TP1 fallback target when no opposing structural pivot exists
+RR_TP2_EXTENSION = 2.5   # TP2 = entry + risk*(rr1 + this), in RR units beyond TP1
+RR_TP2_FALLBACK_EXTENSION = 1.5  # used only if wall-clipping pulls TP2 back to/under rr1
 MIN_ENTRY_SL_ATR_MULT = 0.9    # was 0.35 -- min entry-to-SL distance, in ATR (more room to not get wicked out)
 MIN_ENTRY_TP1_ATR_MULT = 1.4   # was 0.55 -- min entry-to-TP1 distance, in ATR (bigger first target)
 MAX_PENDING_ENTRY_ATR_MULT = 1.8  # cap on how far a pending zone entry may sit from market
@@ -175,8 +139,6 @@ def default_state() -> dict:
                     name: {b: 1.0 for b in ["low", "mid", "high"]} for name in DEFAULT_ENGINE_NAMES
                 },
                 "sl_buffer_percentile": {  # per (asset, timeframe) adaptive-percentile SL buffer
-                    # DECISION (v1.1.0): raised default/min pct so the buffer sits deeper into
-                    # the adverse-wick distribution -- old default clamped too thin on quiet assets.
                     "default": {"pct": 0.80, "min": 0.55, "max": 0.95}
                 },
                 "filter_thresholds": {
@@ -191,7 +153,7 @@ def default_state() -> dict:
                 },
             },
             "segment_stats": {},   # key "{asset}|{regime}|{tf}|{engine}" -> aggregate dict
-            "category_stats": {},  # failure/success category -> aggregate dict (Sec 13)
+            "category_stats": {},  # failure/success category -> aggregate dict
             "calibration": {},     # confidence bucket -> {n, wins}
             "totals": {"signals": 0, "wins": 0, "losses": 0, "expired": 0,
                        "sum_r": 0.0, "gross_profit_r": 0.0, "gross_loss_r": 0.0,
@@ -313,7 +275,7 @@ def clamp(x: float, lo: float, hi: float) -> float:
 
 def bounded_update(current: float, target_delta: float, lo: float, hi: float,
                     max_step: float = 0.06) -> float:
-    """Sec 5: every adaptive-parameter update is capped-step + bounded. Uses a
+    """every adaptive-parameter update is capped-step + bounded. Uses a
     fixed max fractional step per update (exponential-smoothing-style damping)
     so no single trade/category can swing a parameter far in one shot."""
     step = clamp(target_delta, -max_step, max_step)
@@ -397,7 +359,11 @@ class HyperliquidClient:
             # last_t + interval_ms, nothing new could possibly exist on the
             # exchange — skip the network call entirely (0 weight).
             if end_ms < last_t + interval_ms:
-                return cached[-n_bars:]
+                # Only return fully-closed bars — every caller (structure
+                # detection, ATR/ADX, SL/TP planning) must not see a still-
+                # forming bar that could repaint after this function returns.
+                closed = [c for c in cached if c["t"] + interval_ms <= end_ms]
+                return closed[-n_bars:]
             # Otherwise fetch just the gap since our last cached bar (plus a
             # small overlap in case the last cached bar was still forming),
             # instead of the full n_bars history.
@@ -409,7 +375,8 @@ class HyperliquidClient:
                    "req": {"coin": coin, "interval": interval, "startTime": start_ms, "endTime": end_ms}}
         data = self._post(payload, weight=20)
         if not data:
-            return cached[-n_bars:] if cached else []
+            closed = [c for c in cached if c["t"] + interval_ms <= end_ms]
+            return closed[-n_bars:] if closed else []
 
         fresh = [{"t": c["t"], "o": float(c["o"]), "h": float(c["h"]),
                   "l": float(c["l"]), "c": float(c["c"]), "v": float(c["v"])}
@@ -420,9 +387,13 @@ class HyperliquidClient:
             merged[c["t"]] = c
         all_sorted = sorted(merged.values(), key=lambda c: c["t"])
         # Keep a little more than n_bars cached so a couple of missed scan
-        # cycles can't force us back into a full-history refetch.
+        # cycles can't force us back into a full-history refetch. The cache
+        # itself intentionally still retains the forming bar (so the next
+        # call's gap-fetch/overlap logic keeps working) — only the returned
+        # slice is closed-only.
         self._candle_cache[cache_key] = all_sorted[-(n_bars + 20):]
-        return self._candle_cache[cache_key][-n_bars:]
+        closed = [c for c in self._candle_cache[cache_key] if c["t"] + interval_ms <= end_ms]
+        return closed[-n_bars:]
 
     def mark_prices(self) -> dict[str, float]:
         data = self._post({"type": "metaAndAssetCtxs"}, weight=20)
@@ -758,7 +729,7 @@ def collect_snapshot(hl: HyperliquidClient, symbol: str, mark: float) -> Optiona
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 5 — COMPOSITE REGIME VECTOR (Sec 6)
+# SECTION 5 — COMPOSITE REGIME VECTOR
 # ═══════════════════════════════════════════════════════════════════════
 
 @dataclass
@@ -783,9 +754,7 @@ class RegimeVector:
 
 
 def _session_weight_now() -> float:
-    # DECISION: London/NY overlap gets the highest historical-reliability
-    # weight; Asia-only gets the lowest, matching well-documented liquidity
-    # rhythm without needing external data.
+    # London/NY overlap = highest liquidity weight; Asia-only = lowest.
     h = datetime.now(timezone.utc).hour
     if 12 <= h < 16:
         return 1.0   # London/NY overlap
@@ -842,7 +811,7 @@ class Candidate:
     sl: float
     tp1: float
     tp2: float
-    entry_kind: str          # "market" | "pending"   (Sec 12 mandatory abstraction)
+    entry_kind: str          # "market" | "pending"
     timeframe: str
     confidence_raw: float    # 0..1, pre-calibration
     regime_fit: list[str]    # regimes this setup is documented as best-suited for
@@ -856,7 +825,7 @@ class Candidate:
     pending_expiry_bars: int = 8
     entry_filled: bool = False
     score: float = 0.0
-    tier: str = "B"          # A+/A/B conviction tier (Sec 14)
+    tier: str = "B"          # A+/A/B conviction tier
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -875,7 +844,7 @@ def _rr(entry: float, sl: float, target: float, direction: str) -> float:
 # ═══════════════════════════════════════════════════════════════════════
 
 def adaptive_sl_buffer(view: TFView, state: dict, asset: str) -> float:
-    """Sec 10: SL buffer = Nth percentile of recent adverse-wick excursions
+    """SL buffer = Nth percentile of recent adverse-wick excursions
     beyond structure, N itself a bounded adaptive parameter."""
     params = state["tier1"]["adaptive_params"]["sl_buffer_percentile"]
     cfg = params.get(asset, params["default"])
@@ -892,14 +861,12 @@ def adaptive_sl_buffer(view: TFView, state: dict, asset: str) -> float:
     idx = clamp(int(pct * len(wicks)), 0, len(wicks) - 1)
     buf = wicks[idx]
     # floor/ceiling relative to ATR so buffer never collapses to ~0 or balloons unreasonably
-    # DECISION (v1.1.0): raised floor 0.15x/1.2x -> 0.4x/2.0x ATR — old floor let the
-    # buffer (and the whole SL) collapse to near-nothing on quiet candles.
     return clamp(buf, 0.4 * view.atr[-1], 2.0 * view.atr[-1])
 
 
 def clip_target_to_liquidity_wall(direction: str, entry: float, raw_target: float,
                                    view: TFView) -> float:
-    """Sec 10: never project a TP through a closer, obvious liquidity wall
+    """never project a TP through a closer, obvious liquidity wall
     (prior swing high/low). Clip to just in front of the nearest such wall
     that sits inside the natural path to raw_target."""
     walls = [p.price for p in view.pivots if
@@ -931,19 +898,13 @@ def _farthest_structural_level(direction: str, entry: float, view: TFView) -> Op
 def extend_tp2(direction: str, entry: float, sl: float, risk: float, rr1: float,
                view: TFView) -> tuple[float, float]:
     """Build a TP2 that sits strictly beyond the caller's own tp1/rr1, wall-clipped
-    like TP1, and bounded by real visible structure rather than a bare RR projection.
-
-    DECISION (v1.1.0 bugfix): extracted so every engine calls this AFTER its own
-    final tp1/rr1 is decided. mean_reversion and range_trading build their own tp1
-    (BB mean / range target) independent of build_risk_plan's internal tp1, so
-    taking build_risk_plan's tp2 as-is could put tp2 nearer to entry than the
-    engine's real tp1. Calling this uniformly makes that structurally impossible.
-
-    DECISION (v1.1.0): TP2 is capped at the furthest real pivot this view has
-    printed in the trade's direction (_farthest_structural_level), so a wider
-    RR_TP2_EXTENSION only reaches prices with actual chart backing. If bounding
-    erases the extension's edge over TP1 (rr2 <= rr1), step down to a smaller
-    extension rather than shipping tp2 <= tp1.
+    like TP1, and capped at the furthest real pivot this view has printed in the
+    trade's direction so a wider RR_TP2_EXTENSION only reaches prices with actual
+    chart backing. Every engine must call this AFTER its own final tp1/rr1 is
+    decided, since mean_reversion/range_trading build tp1 independently of
+    build_risk_plan's internal tp1. If bounding erases the extension's edge over
+    TP1 (rr2 <= rr1), steps down to a smaller extension rather than shipping
+    tp2 <= tp1.
     """
     ceiling = _farthest_structural_level(direction, entry, view)
     wall_buffer = view.atr[-1] * 0.08
@@ -963,9 +924,8 @@ def extend_tp2(direction: str, entry: float, sl: float, risk: float, rr1: float,
     if rr2 <= rr1:
         tp2, rr2 = _attempt(RR_TP2_FALLBACK_EXTENSION)
     if rr2 <= rr1:
-        # DECISION: no confirmed level beyond TP1 in this view. Rather than fabricate
-        # a further price or violate tp2>tp1, take a small honest step past TP1 and
-        # let the trade's tier reflect the thinner setup.
+        # no confirmed level beyond TP1 — take a small honest step past it
+        # rather than fabricate a further price or violate tp2 > tp1
         tp2 = entry + risk * (rr1 + 0.2) if direction == "long" else entry - risk * (rr1 + 0.2)
         rr2 = _rr(entry, sl, tp2, direction)
     return tp2, rr2
@@ -998,8 +958,7 @@ def build_risk_plan(direction: str, entry: float, structural_sl: float, view: TF
     tp1 = clip_target_to_liquidity_wall(direction, entry, raw_tp1, view)
     rr1 = _rr(entry, sl, tp1, direction)
     if rr1 < RR_TP1_FLOOR:
-        # DECISION: clipping must never be used to justify shrinking below the
-        # floor — if clipping pushed RR under the floor, reject the candidate (Sec 10).
+        # clipping must never justify shrinking below the floor — reject instead
         return None
 
     tp2, rr2 = extend_tp2(direction, entry, sl, risk, rr1, view)
@@ -1024,7 +983,7 @@ def passes_entry_placement_rules(entry: float, sl: float, tp1: float, atr_val: f
 # SECTION 8 — 13 SPECIALIZED ENGINES
 # ═══════════════════════════════════════════════════════════════════════
 # Each engine follows the mandatory zone-selection sequence where applicable
-# (HTF bias -> POI -> SFP purity -> MSS -> breaker, Sec 8) and emits
+# (HTF bias -> POI -> SFP purity -> MSS -> breaker) and emits
 # Candidates carrying entry_kind, regime_fit, and independent confluences.
 # Every engine consumes the shared TFView/Zone primitives from Section 4
 # rather than duplicating zone/structure discovery.
@@ -1052,7 +1011,7 @@ def engine_smc(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
         return out
     strictness = state["tier1"]["adaptive_params"]["filter_thresholds"]["sfp_mss_strictness"]["value"]
     if sweep["purity"] < strictness:
-        return out  # impure SFP discounted to rejection at the gate, per Sec 8
+        return out  # impure SFP discounted to rejection at the gate
 
     mss = ltf.structure
     mss_ok = (direction == "long" and mss["event"] in ("bos_up", "choch_up")) or \
@@ -1374,9 +1333,8 @@ def engine_mean_reversion(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
     rr_tp1 = _rr(entry, plan["sl"], mean, direction)
     if rr_tp1 < RR_TP1_FLOOR:
         return out
-    # BUGFIX (v1.1.0): tp1 here is the BB mean, NOT plan["tp1"] -- so tp2 must
-    # be rebuilt relative to rr_tp1/mean, not taken as plan["tp2"] (which was
-    # only ever guaranteed to beat plan's own internal tp1). See extend_tp2().
+    # tp1 here is the BB mean, not plan["tp1"] — rebuild tp2 relative to
+    # rr_tp1/mean rather than taking plan["tp2"] as-is.
     tp2, rr_tp2 = extend_tp2(direction, entry, plan["sl"], plan["risk"], rr_tp1, v)
     cand = Candidate(
         id=_new_id(snap.symbol, "mean_reversion"), symbol=snap.symbol, engine="mean_reversion", direction=direction,
@@ -1418,8 +1376,8 @@ def engine_range_trading(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
     rr1 = _rr(entry, plan["sl"], target, direction)
     if rr1 < RR_TP1_FLOOR:
         return out
-    # BUGFIX (v1.1.0): tp1 here is the range interior target, NOT plan["tp1"]
-    # -- rebuild tp2 relative to rr1/target instead of taking plan["tp2"] as-is.
+    # tp1 here is the range interior target, not plan["tp1"] — rebuild tp2
+    # relative to rr1/target rather than taking plan["tp2"] as-is.
     tp2, rr2 = extend_tp2(direction, entry, plan["sl"], plan["risk"], rr1, v)
     cand = Candidate(
         id=_new_id(snap.symbol, "range_trading"), symbol=snap.symbol, engine="range_trading", direction=direction,
@@ -1507,19 +1465,17 @@ def run_ensemble(snap: SymbolSnapshot, state: dict) -> list[Candidate]:
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 9 — DECISION ENGINE: continuous bounded blend + mandatory vetoes
 # ═══════════════════════════════════════════════════════════════════════
-# DECISION: exactly 7 terms in the blend (regime fit, MTF alignment, confluence
-# strength, historical segment performance, EV, RR, liquidity context) — a small,
-# auditable set per Sec 4. Session weight and volatility percentile fold into
-# "regime fit" rather than being added separately, since they're already
-# components of the Regime Vector that regime_fit_score consumes — adding them
-# again would be the correlated double-counting Sec 4 warns against.
+# 7-term blend: regime fit, MTF alignment, confluence strength, historical
+# segment performance, EV, RR, liquidity context. Session weight and vol
+# percentile fold into regime fit rather than being added separately, since
+# they're already components of the Regime Vector that regime_fit_score
+# consumes.
 
 def confluence_strength(cand: Candidate) -> float:
     if not cand.confluences:
         return 0.0
     vals = list(cand.confluences.values())
-    # DECISION: mean rather than sum, bounded 0..1, so one missing confluence
-    # lowers the average instead of zeroing the score.
+    # mean, not sum — one missing confluence lowers the average, not zeroes it
     return clamp(sum(vals) / len(vals), 0.0, 1.0)
 
 
@@ -1528,18 +1484,10 @@ def regime_fit_score(cand: Candidate, regime: RegimeVector, state: dict) -> tupl
     veto_table = state["tier1"]["adaptive_params"]["regime_fit"].get(cand.engine, {})
     mult = veto_table.get(label, 1.0)
     matches = label in cand.regime_fit or regime.macro_bias in cand.regime_fit
-    # DECISION (v1.1.3): a regime mismatch is now a HARD veto, not a soft
-    # discount. Previously a mismatch only dropped this one term (weight 0.22
-    # of 7 terms) to 0.15, which a strong confluence/RR/EV elsewhere could
-    # still out-vote into a passable composite score — this is exactly how
-    # momentum/breakout kept firing in low_vol/ranging regimes they were
-    # never designed for (10 of 12 real losses were this pattern, 0 wins).
-    # An engine's regime_fit list is a claim about which conditions it
-    # actually works in; if the current regime isn't on that list, the
-    # signal is rejected outright rather than diluted into a still-tradeable
-    # score. adaptive_params["regime_fit"] mult still applies on TOP of a
-    # match (e.g. a learned partial discount for a regime that nominally
-    # matches but has underperformed) — it no longer rescues a mismatch.
+    # Regime mismatch is a hard veto, not a discount: an engine's regime_fit
+    # list is a claim about the conditions it actually works in, and a strong
+    # RR/confluence/EV elsewhere shouldn't be able to out-vote a mismatch into
+    # a tradeable score. The learned mult still applies on top of a match.
     if not matches:
         return 0.0, True
     score = 1.0 * mult
@@ -1551,14 +1499,14 @@ def historical_segment_score(cand: Candidate, regime: RegimeVector, state: dict)
     key = f"{cand.symbol}|{regime.label()}|{cand.timeframe}|{cand.engine}"
     seg = state["tier1"]["segment_stats"].get(key)
     if not seg or seg.get("n", 0) < MIN_SAMPLE_SIZE:
-        return 0.5  # neutral prior until statistically meaningful (Sec 13)
+        return 0.5  # neutral prior until statistically meaningful
     wr = seg["wins"] / seg["n"] if seg["n"] else 0.5
     return clamp(wr, 0.0, 1.0)
 
 
 def liquidity_sanity_score(cand: Candidate, view: TFView, state: dict) -> tuple[float, bool]:
     if cand.engine == "liquidity_sweep":
-        return 1.0, False  # deliberately trades sweep behavior; exempt per Sec 13
+        return 1.0, False  # deliberately trades sweep behavior; exempt
     threshold = state["tier1"]["adaptive_params"]["filter_thresholds"]["liquidity_sanity_gap_atr"]["value"]
     nearest_wall = None
     for p in view.pivots[-8:]:
@@ -1600,9 +1548,7 @@ def composite_score(cand: Candidate, regime: RegimeVector, view: TFView, state: 
     }
     weight_sum = sum(w for _, w in terms.values())
     linear = sum(v * w for v, w in terms.values()) / weight_sum if weight_sum else 0.0
-    # DECISION: logistic squash centers the blend at 0.5 confluence-of-confluences
-    # and keeps the score continuous/smooth per Sec 4, rather than a raw linear
-    # sum that could exceed sensible bounds.
+    # logistic squash centers the blend at 0.5 and keeps the score continuous
     score = 1 / (1 + math.exp(-6 * (linear - 0.5)))
 
     veto = hard_regime_veto or liq_veto
@@ -1619,17 +1565,8 @@ def calibrate_confidence(cand: Candidate, state: dict) -> float:
 
 
 def assign_tier(score: float, rr1: float) -> str:
-    # DECISION (v1.1.2): this used to read `rr1 >= 1.8` back when RR_TP1_FLOOR
-    # was 1.5, so it genuinely split candidates into "cleared the floor but
-    # thin" (1.5-1.8, capped at tier A) vs. "real RR" (>=1.8, A+ eligible).
-    # With RR_TP1_FLOOR now at the same value as this check, every candidate
-    # that reaches this function already clears the floor by construction
-    # (build_risk_plan/engine_mean_reversion/engine_range_trading all reject
-    # below it), so an equal-valued check here would always be true and the
-    # RR condition on A+ would silently stop discriminating anything. Kept
-    # pinned to RR_TP1_CEIL_SOFT, always held above RR_TP1_FLOOR (currently
-    # 2.2 vs. 2.0 — see those constants), so A+ still requires RR meaningfully
-    # above the bare floor, not just clearing it.
+    # A+ requires RR meaningfully above the bare floor (RR_TP1_CEIL_SOFT > RR_TP1_FLOOR),
+    # not just clearing it — every candidate reaching here already clears the floor.
     if score >= 0.78 and rr1 >= RR_TP1_CEIL_SOFT:
         return "A+"
     if score >= 0.62:
@@ -1668,7 +1605,7 @@ def decision_engine_rank(candidates: list[Candidate], regime: RegimeVector,
 
     scored.sort(key=lambda c: c.score, reverse=True)
 
-    # Sec 14 correlation cap: majors cluster together — cap concurrent majors picks
+    # correlation cap: majors cluster together — cap concurrent majors picks
     selected, majors_taken, seen_symbols = [], 0, set()
     for c in scored:
         if c.symbol in seen_symbols:
@@ -1687,7 +1624,7 @@ def decision_engine_rank(candidates: list[Candidate], regime: RegimeVector,
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 10 — ENTRY-FILL VERIFICATION & LIFECYCLE (Sec 12, mandatory)
+# SECTION 10 — ENTRY-FILL VERIFICATION & LIFECYCLE
 # ═══════════════════════════════════════════════════════════════════════
 
 def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
@@ -1697,23 +1634,6 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
     direction = signal["direction"]
     lo, hi = candle["l"], candle["h"]
 
-    # BUGFIX (v1.1.3): mae was initialized to 0.0 at dispatch and never updated
-    # anywhere, permanently breaking the "structural_invalidation_too_tight"
-    # diagnosis (adverse_excursion <= buf*1.15 was always vacuously true for
-    # any buf > 0). Track the true worst excursion beyond the structural level
-    # (i.e. beyond sl_buffer_used) every candle, not just at resolution, so it
-    # reflects how far price actually ran past structure before SL was hit.
-    if signal["entry_filled"]:
-        buf = signal.get("sl_buffer_used", 0.0)
-        if direction == "long":
-            structural_level = signal["sl"] + buf
-            excursion = structural_level - lo
-        else:
-            structural_level = signal["sl"] - buf
-            excursion = hi - structural_level
-        if excursion > signal.get("mae", 0.0):
-            signal["mae"] = excursion
-
     if not signal["entry_filled"]:
         if signal["entry_kind"] == "market":
             signal["entry_filled"] = True
@@ -1722,14 +1642,20 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
             if not entry_touched:
                 signal["pending_bars_elapsed"] += 1
                 if signal["pending_bars_elapsed"] >= signal["pending_expiry_bars"]:
-                    signal["result"] = "expired"  # Sec 12: distinct, excluded-from-stats outcome
+                    signal["result"] = "expired"  # distinct, excluded-from-stats outcome
                 return signal
             signal["entry_filled"] = True
             # fall through: same candle may also register SL/TP per conservative same-candle handling below
 
-    # DECISION: same-candle SL-vs-TP ambiguity resolved conservatively by checking
-    # SL first — doesn't manufacture a false stop-out, only decides which of two
-    # genuinely co-occurring touches is credited within the same bar.
+    # Track worst excursion beyond the structural level (sl +/- its buffer)
+    # every candle the signal is open, for diagnose_trade's
+    # structural_invalidation_too_tight check.
+    buf = signal.get("sl_buffer_used", 0.0)
+    structural_level = signal["sl"] + buf if direction == "long" else signal["sl"] - buf
+    excursion = max(0.0, structural_level - lo) if direction == "long" else max(0.0, hi - structural_level)
+    signal["mae"] = max(signal.get("mae", 0.0), excursion)
+
+    # same-candle SL-vs-TP ambiguity resolved conservatively: check SL first
     if direction == "long":
         sl_hit = lo <= signal["sl"]
         tp1_hit = hi >= signal["tp1"] and not signal["tp1_hit"]
@@ -1747,7 +1673,7 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
         if tp1_hit:
             signal["tp1_hit"] = True
             signal["tp1_hit_ts"] = candle["t"]
-            # DECISION: no SL repositioning here — Sec 11 mandatory rule.
+            # no SL repositioning after TP1 — mandatory rule
             if tp2_hit:
                 signal["result"] = "win"
                 signal["realized_r"] = signal["rr_tp2"]
@@ -1755,7 +1681,7 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
             return signal  # stays open, original SL unchanged
         return signal
     else:
-        # TP1 already secured; original SL still in place (Sec 11)
+        # TP1 already secured; original SL still in place
         if tp2_hit:
             signal["result"] = "win"
             signal["realized_r"] = signal["rr_tp2"]
@@ -1770,7 +1696,7 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 11 — LOSS/WIN FORENSICS TAXONOMY (Sec 13, closed set, deterministic routing)
+# SECTION 11 — LOSS/WIN FORENSICS TAXONOMY
 # ═══════════════════════════════════════════════════════════════════════
 
 FAILURE_CATEGORIES = [
@@ -1783,7 +1709,7 @@ FAILURE_CATEGORIES = [
 def diagnose_trade(signal: dict, regime_at_entry: dict, state: dict) -> str:
     result = signal["result"]
     if result == "win":
-        return "genuine_variance"  # wins are reinforced (Sec 13.2) via the same route, tag kept simple
+        return "genuine_variance"  # wins are reinforced via the same route, tag kept simple
 
     # loss diagnosis, in priority order — first matching signature wins
     if regime_at_entry.get("label") not in signal.get("regime_fit", []) and \
@@ -1879,16 +1805,15 @@ def _route_category_correction(category: str, signal: dict, state: dict,
 def _adaptive_response_key(category: str, signal: dict) -> str:
     """Slice of state this category's correction lands on — must match what
     _route_category_correction mutates, so both gates below are earned by,
-    and only unlock, that same slice."""
+    and only unlock, that same slice.
+
+    regime_mismatch keys on regime_label rather than engine: the shared
+    cause across engines is the regime, so gate dominance should accrue
+    there even when losses are spread across several different engines.
+    The correction itself still writes to the specific engine+label cell
+    of the trade being resolved.
+    """
     if category == "regime_mismatch":
-        # BUGFIX (v1.1.3): keying by engine meant a systemic, cross-engine
-        # regime_mismatch pattern (e.g. several different engines all firing
-        # in a "low_vol" regime) could never reach fast/slow-gate dominance,
-        # because no single engine individually accumulated enough samples —
-        # even when the category itself was overwhelmingly the #1 loss driver.
-        # The regime label is the actual shared cause, so key on that instead;
-        # _route_category_correction still only nudges the triggering signal's
-        # own engine/label pair once the gate opens, it just now opens in time.
         return signal.get("regime_label", "neutral")
     if category == "structural_invalidation_too_tight":
         return signal["symbol"]
@@ -1965,15 +1890,13 @@ def apply_forensic_adaptive_response(category: str, signal: dict, state: dict) -
 
 
 def reinforce_win(signal: dict, state: dict) -> str:
-    """Sec 13.2: reinforce weights of factors genuinely present & predictive
-    on wins — routed through the same engine-weight and regime-fit tables,
-    symmetric to the loss route but positive-direction and separately gated."""
+    """Reinforce engine weight on wins, symmetric to the loss route but
+    positive-direction and separately gated."""
     params = state["tier1"]["adaptive_params"]
     engine = signal["engine"]
     ew = params["engine_weights"].setdefault(engine, {"weight": 1.0, "min": 0.35, "max": 2.0})
-    # DECISION: only reinforce when the win's dominant confluence terms were
-    # individually strong (>0.7) — a win driven by regime tailwind alone with
-    # weak confluences must not inflate the engine's own weight (Sec 13.2).
+    # only reinforce when dominant confluence terms were individually strong
+    # (>0.7) — a win driven by regime tailwind alone shouldn't inflate weight
     strong_confluences = [v for v in signal.get("confluences", {}).values() if v > 0.7]
     if len(strong_confluences) < max(1, len(signal.get("confluences", {})) // 2):
         return "no_change_win_not_causally_attributable"
@@ -2036,7 +1959,7 @@ def resolve_and_learn(signal: dict, state: dict) -> None:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 12 — LIVE-PERFORMANCE CIRCUIT BREAKER (Sec 5)
+# SECTION 12 — LIVE-PERFORMANCE CIRCUIT BREAKER
 # ═══════════════════════════════════════════════════════════════════════
 
 def evaluate_circuit_breaker(state: dict) -> None:
@@ -2051,8 +1974,7 @@ def evaluate_circuit_breaker(state: dict) -> None:
     pf = gp / gl if gl > 0 else (float("inf") if gp > 0 else 0.0)
 
     if cb["baseline_wr"] is None:
-        # DECISION: first full window becomes the documented pre-deployment
-        # baseline per Sec 13, captured once and never silently overwritten.
+        # first full window becomes the baseline, captured once and never overwritten
         cb["baseline_wr"], cb["baseline_pf"] = wr, pf
         return
 
@@ -2077,12 +1999,9 @@ def evaluate_circuit_breaker(state: dict) -> None:
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 13 — TELEGRAM INTEGRATION
 # ═══════════════════════════════════════════════════════════════════════
-# DECISION: reaction emojis are restricted to Telegram's native quick-reaction
-# set so every emoji sent can also be tapped back as a genuine reaction —
-# 🏆 win, 😭 loss, 👍 TP1 hit, 🤷 expired/no-fill, 🤯 breaker tripped, 👏 recovered.
-# DECISION: underscore-bearing internal identifiers (engine names, forensic
-# category keys) go through _display_name() before reaching Telegram —
-# underscores stay in state.json/code only.
+# Emojis: 🏆 win, 😭 loss, 👍 TP1 hit, 🤷 expired/no-fill, 🤯 breaker tripped, 👏 recovered.
+# Underscore-bearing internal identifiers go through _display_name() before
+# reaching Telegram — underscores stay in state.json/code only.
 
 _ACRONYM_DISPLAY_OVERRIDES = {"smc": "SMC"}
 
@@ -2094,7 +2013,7 @@ def _display_name(identifier: str) -> str:
 
 
 def format_price(price: float) -> str:
-    """Decimal places scale with price magnitude (Sec 17 cap): >= $100 -> 2
+    """Decimal places scale with price magnitude: >= $100 -> 2
     decimals, $1-$100 -> 4, < $1 -> 6. Trailing zeros trimmed, never scientific
     notation."""
     if price == 0:
@@ -2129,9 +2048,8 @@ def send_telegram(text: str, reply_to: Optional[int] = None) -> Optional[int]:
 def format_signal_message(cand: Candidate) -> str:
     dot = "🟢" if cand.direction == "long" else "🔴"
     side = "LONG" if cand.direction == "long" else "SHORT"
-    # DECISION (bugfix): recompute RR1/RR2 fresh from final entry/SL/TP rather than
-    # trusting the candidate's stored rr_tp1/rr_tp2 — keeps displayed price and RR
-    # structurally impossible to desync, even if a future engine sets tp without sl.
+    # recompute RR fresh from final entry/SL/TP rather than trusting stored
+    # rr_tp1/rr_tp2, so displayed price and RR can't desync
     rr1 = _rr(cand.entry, cand.sl, cand.tp1, cand.direction)
     rr2 = _rr(cand.entry, cand.sl, cand.tp2, cand.direction)
     return (
@@ -2156,8 +2074,7 @@ def format_outcome_message(signal: dict) -> str:
     if signal.get("note") == "tp1_secured_then_sl_hit":
         return (f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP1 secured earlier, original SL later hit. "
                 f"Counts as a WIN, {signal['realized_r']:.2f}R credited at TP1.")
-    # DECISION (v1.1.1, safety-net): only "win" reaches here now — anything else
-    # must not silently be reported as a win (see the key-presence bugfix below).
+    # only "win" should reach here — anything else must not be reported as a win
     if signal["result"] != "win":
         raise ValueError(f"format_outcome_message called on unresolved/unrecognized signal result: {signal['result']!r}")
     return f"🏆 *{ENGINE_NAME}* {signal['symbol']} — TP2 hit. WIN ({signal['realized_r']:.2f}R)."
@@ -2208,15 +2125,10 @@ def send_daily_summary(state: dict) -> None:
 
 def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
     """Advances every unresolved active signal through fill-verification and
-    outcome-integrity, one CLOSED LTF candle at a time, then routes resolutions
-    into the forensics/learning loop.
-
-    BUGFIX (v1.0.1): previously fetched 3 candles and evaluated only the last —
-    but hl.candles() ends at now(), so that last candle could be still-forming,
-    and evaluating it risked permanently skipping the real closed range once
-    its watermark got stamped. Any missed scan cycle also silently dropped the
-    candles in between. Fix: only consider fully-closed candles, and walk every
-    closed candle since the last check in chronological order.
+    outcome-integrity, one closed LTF candle at a time, then routes resolutions
+    into the forensics/learning loop. Walks every closed candle since the last
+    check in chronological order, so a missed scan cycle can't silently drop
+    candles in between.
     """
     to_remove = []
     for sig_id, signal in list(state["active_signals"].items()):
@@ -2229,9 +2141,8 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
             continue
 
         closed = [c for c in candles if c["t"] + interval_ms <= now_ms]
-        # DECISION (v1.1.1, defense-in-depth): floor the watermark at the signal's
-        # own creation time too, protecting any signal already in state.json from
-        # a prior run where last_checked_ts was written as 0.
+        # floor the watermark at the signal's own creation time too, protecting
+        # signals from a prior run where last_checked_ts was written as 0
         signal_ts_ms = int(signal.get("signal_ts", 0) * 1000)
         watermark = max(signal.get("last_checked_ts", 0), signal_ts_ms)
         new_candles = [c for c in closed if c["t"] > watermark]
@@ -2246,10 +2157,9 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
             if not was_tp1 and signal["tp1_hit"] and signal.get("result") is None:
                 send_telegram(format_tp1_message(signal), reply_to=signal.get("tg_message_id"))
 
-            # BUGFIX (v1.1.1): "result" is always a key in signal (init to None at
-            # dispatch), so `"result" in signal` was always True — forcing every
-            # signal to force-resolve one scan after dispatch as a false "WIN
-            # (0.00R)". Must check the value, not key presence.
+            # BUGFIX (v1.1.1): must check the value, not key presence — "result"
+            # is always a key (init to None at dispatch), so `"result" in signal`
+            # was always True, force-resolving every signal as a false win.
             if signal.get("result") is not None:
                 # resolved on this candle — any later candles in this batch
                 # are chronologically irrelevant and must not be applied
@@ -2304,9 +2214,8 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
               f"vol_pctile={regime.vol_pctile:.2f} trend={regime.trend_strength:.2f} "
               f"noise={regime.noise_index:.2f} breadth={regime.breadth:.2f}")
 
-    # DECISION: tighten confluence threshold in noisy/chaotic regimes, relax in
-    # clean ones (Sec 9) — a transient scan-local adjustment, not persisted, so
-    # cold-start quality never depends on it.
+    # tighten confluence threshold in noisy/chaotic regimes, relax in clean
+    # ones — transient scan-local adjustment, not persisted
     base_threshold = state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"]
     if regime.noise_index > 0.65 or regime.vol_pctile > 0.85:
         state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"] = \
@@ -2336,8 +2245,8 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
         signal = cand.to_dict()
         signal.update({
             "tp1_hit": False, "tp1_hit_ts": None, "entry_filled": (cand.entry_kind == "market"),
-            # BUGFIX: floored at signal-creation time (not 0/epoch) so monitor_active_signals()
-            # can't replay pre-existing candles from before this signal existed.
+            # last_checked_ts floored at signal-creation time so monitor_active_signals()
+            # can't replay pre-existing candles from before this signal existed
             "result": None, "realized_r": 0.0, "signal_ts": time.time(),
             "last_checked_ts": int(time.time() * 1000),
             "sl_buffer_used": adaptive_sl_buffer(view, state, cand.symbol),
