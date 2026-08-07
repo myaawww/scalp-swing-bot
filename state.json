@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-07T07:15:26.676028+00:00"
+    "last_run_ts": "2026-08-07T07:30:29.349698+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -390,12 +390,17 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "NEARUSDT|low_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "regime_mismatch": {
-        "n": 9,
-        "n_since_last_gate": 9,
+        "n": 10,
+        "n_since_last_gate": 10,
         "by_key": {
           "range_trading": {
             "n": 1,
@@ -422,9 +427,9 @@
             "fast_gate_ever_fired": false
           },
           "breakout": {
-            "n": 2,
-            "n_since_last_gate": 2,
-            "n_since_last_fast_gate": 2,
+            "n": 3,
+            "n_since_last_gate": 3,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": false
           }
         }
@@ -470,19 +475,19 @@
         "wins": 0
       },
       "calib|breakout|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 0
       }
     },
     "totals": {
-      "signals": 11,
+      "signals": 12,
       "wins": 0,
-      "losses": 11,
+      "losses": 12,
       "expired": 4,
-      "sum_r": -11.0,
+      "sum_r": -12.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 11.0,
-      "sum_hold_minutes": 12779.087601204712
+      "gross_loss_r": 12.0,
+      "sum_hold_minutes": 12987.96165079673
     }
   },
   "tier2": {
@@ -607,6 +612,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786060839.214139,
         "signal_ts": 1785980717.3905494
+      },
+      {
+        "id": "NEARUSDT:breakout:1786075293281",
+        "symbol": "NEARUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "regime_mismatch",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786087825.727713,
+        "signal_ts": 1786075293.2847376
       }
     ]
   },
@@ -850,54 +866,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5341
-    },
-    "NEARUSDT:breakout:1786075293281": {
-      "id": "NEARUSDT:breakout:1786075293281",
-      "symbol": "NEARUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 1.6374,
-      "sl": 1.6461349086648231,
-      "tp1": 1.6181832009373889,
-      "tp2": 1.5963459292753308,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.600000000000005,
-      "rr_tp1": 2.20000000000001,
-      "rr_tp2": 4.700000000000023,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.5556772342765703,
-      "tier": "B",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786075293.2847376,
-      "last_checked_ts": 1786086000000,
-      "sl_buffer_used": 0.0028999999999999027,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5471
     },
     "XRPUSDT:momentum:1786075293283": {
       "id": "XRPUSDT:momentum:1786075293283",
