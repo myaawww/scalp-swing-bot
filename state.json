@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.1.1",
-    "last_run_ts": "2026-08-07T07:45:28.816179+00:00"
+    "last_run_ts": "2026-08-07T08:01:29.791022+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -663,7 +663,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785718841.5444841,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.0015999999999999903,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -711,7 +711,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785765641.6964943,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.0009999097191923602,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -759,7 +759,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785780930.936216,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.0016999999999999238,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -807,7 +807,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785852040.0905528,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.00039000000000000146,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -855,7 +855,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1785870041.5971284,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.6848185425179132,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -903,7 +903,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786075294.3749352,
-      "last_checked_ts": 1786082400000,
+      "last_checked_ts": 1786086000000,
       "sl_buffer_used": 0.0025999999999999357,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -914,7 +914,55 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5472
+    },
+    "BNBUSDT:momentum:1786089688763": {
+      "id": "BNBUSDT:momentum:1786089688763",
+      "symbol": "BNBUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 585.38,
+      "sl": 595.3000000000001,
+      "tp1": 563.5559999999998,
+      "tp2": 538.7559999999996,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.4441639974183502,
+        "adx_strength": 0.6308568249237099
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000012,
+      "rr_tp1": 2.2000000000000024,
+      "rr_tp2": 4.700000000000002,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.4302336985449568,
+      "tier": "B",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786089688.766073,
+      "last_checked_ts": 1786089688766,
+      "sl_buffer_used": 0.9400000000000546,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5485
     }
   },
-  "daily_summary_date": "2026-08-06"
+  "daily_summary_date": "2026-08-07"
 }
