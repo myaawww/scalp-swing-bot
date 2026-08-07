@@ -28,7 +28,7 @@ from typing import Optional, Any
 import requests
 
 ENGINE_NAME = "ORACLE"
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -1686,6 +1686,23 @@ def check_fill_and_resolve(signal: dict, candle: dict) -> dict:
     direction = signal["direction"]
     lo, hi = candle["l"], candle["h"]
 
+    # BUGFIX (v1.1.3): mae was initialized to 0.0 at dispatch and never updated
+    # anywhere, permanently breaking the "structural_invalidation_too_tight"
+    # diagnosis (adverse_excursion <= buf*1.15 was always vacuously true for
+    # any buf > 0). Track the true worst excursion beyond the structural level
+    # (i.e. beyond sl_buffer_used) every candle, not just at resolution, so it
+    # reflects how far price actually ran past structure before SL was hit.
+    if signal["entry_filled"]:
+        buf = signal.get("sl_buffer_used", 0.0)
+        if direction == "long":
+            structural_level = signal["sl"] + buf
+            excursion = structural_level - lo
+        else:
+            structural_level = signal["sl"] - buf
+            excursion = hi - structural_level
+        if excursion > signal.get("mae", 0.0):
+            signal["mae"] = excursion
+
     if not signal["entry_filled"]:
         if signal["entry_kind"] == "market":
             signal["entry_filled"] = True
@@ -1853,7 +1870,15 @@ def _adaptive_response_key(category: str, signal: dict) -> str:
     _route_category_correction mutates, so both gates below are earned by,
     and only unlock, that same slice."""
     if category == "regime_mismatch":
-        return signal["engine"]
+        # BUGFIX (v1.1.3): keying by engine meant a systemic, cross-engine
+        # regime_mismatch pattern (e.g. several different engines all firing
+        # in a "low_vol" regime) could never reach fast/slow-gate dominance,
+        # because no single engine individually accumulated enough samples —
+        # even when the category itself was overwhelmingly the #1 loss driver.
+        # The regime label is the actual shared cause, so key on that instead;
+        # _route_category_correction still only nudges the triggering signal's
+        # own engine/label pair once the gate opens, it just now opens in time.
+        return signal.get("regime_label", "neutral")
     if category == "structural_invalidation_too_tight":
         return signal["symbol"]
     if category == "confidence_miscalibration":
