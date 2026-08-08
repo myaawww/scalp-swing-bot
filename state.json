@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-08T19:45:21.181469+00:00"
+    "last_run_ts": "2026-08-08T20:01:32.056082+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -388,6 +388,54 @@
       }
     ]
   },
-  "active_signals": {},
+  "active_signals": {
+    "LTCUSDT:range_trading:1786219291410": {
+      "id": "LTCUSDT:range_trading:1786219291410",
+      "symbol": "LTCUSDT",
+      "engine": "range_trading",
+      "direction": "short",
+      "entry": 45.955,
+      "sl": 46.15555383413208,
+      "tp1": 44.8882,
+      "tp2": 44.84808923317358,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.5046439628482788
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 2.1596350167442604,
+      "rr_tp1": 5.319270033488521,
+      "rr_tp2": 5.51927003348852,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8223482609091294,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786219291.411646,
+      "last_checked_ts": 1786219291411,
+      "sl_buffer_used": 0.08299999999999841,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5562
+    }
+  },
   "daily_summary_date": "2026-08-08"
 }
