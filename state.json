@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-08T00:45:20.703297+00:00"
+    "last_run_ts": "2026-08-08T01:00:36.794372+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -335,71 +335,59 @@
         "baseline_avg_rr": null
       }
     },
-    "segment_stats": {},
-    "category_stats": {},
-    "calibration": {},
+    "segment_stats": {
+      "APTUSDT|low_vol|1h|range_trading": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      }
+    },
+    "category_stats": {
+      "genuine_variance": {
+        "n": 1,
+        "n_since_last_gate": 1,
+        "by_key": {
+          "global": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          }
+        }
+      }
+    },
+    "calibration": {
+      "calib|range_trading|low": {
+        "n": 1,
+        "wins": 0
+      }
+    },
     "totals": {
-      "signals": 0,
+      "signals": 1,
       "wins": 0,
-      "losses": 0,
+      "losses": 1,
       "expired": 0,
-      "sum_r": 0.0,
+      "sum_r": -1.0,
       "gross_profit_r": 0.0,
-      "gross_loss_r": 0.0,
-      "sum_hold_minutes": 0.0
+      "gross_loss_r": 1.0,
+      "sum_hold_minutes": 239.84384965499243
     }
   },
   "tier2": {
-    "trades": []
+    "trades": [
+      {
+        "id": "APTUSDT:range_trading:1786136441373",
+        "symbol": "APTUSDT",
+        "engine": "range_trading",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786150832.005545,
+        "signal_ts": 1786136441.3745656
+      }
+    ]
   },
-  "active_signals": {
-    "APTUSDT:range_trading:1786136441373": {
-      "id": "APTUSDT:range_trading:1786136441373",
-      "symbol": "APTUSDT",
-      "engine": "range_trading",
-      "direction": "long",
-      "entry": 0.581,
-      "sl": 0.5770681766810756,
-      "tp1": 0.59446,
-      "tp2": 0.5952463646637849,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.4715447154471666
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.2116740641950083,
-      "rr_tp1": 3.4233481283900167,
-      "rr_tp2": 3.6233481283900226,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7803474701686115,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786136441.3745656,
-      "last_checked_ts": 1786143600000,
-      "sl_buffer_used": 0.0020000000000000018,
-      "mae": 0.0007681766810755386,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5518
-    }
-  },
+  "active_signals": {},
   "daily_summary_date": "2026-08-07"
 }
