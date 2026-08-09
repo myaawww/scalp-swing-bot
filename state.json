@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-09T03:45:22.543508+00:00"
+    "last_run_ts": "2026-08-09T04:01:30.516438+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -424,7 +424,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786219291.411646,
-      "last_checked_ts": 1786240800000,
+      "last_checked_ts": 1786244400000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.07144616586791841,
       "sfp_purity": 1.0,
@@ -435,6 +435,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5562
+    },
+    "TAOUSDT:pullback:1786248089986": {
+      "id": "TAOUSDT:pullback:1786248089986",
+      "symbol": "TAOUSDT",
+      "engine": "pullback",
+      "direction": "short",
+      "entry": 207.11,
+      "sl": 211.27914191299664,
+      "tp1": 198.74,
+      "tp2": 197.90617161740067,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.7342773795897833
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5038036812692668,
+      "rr_tp1": 2.0076073625385336,
+      "rr_tp2": 2.2076073625385364,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.702516441358859,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786248089.9882784,
+      "last_checked_ts": 1786248089988,
+      "sl_buffer_used": 0.9391419129966225,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5572
     }
   },
   "daily_summary_date": "2026-08-08"
