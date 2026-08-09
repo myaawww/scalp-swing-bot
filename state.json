@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-09T22:45:17.797461+00:00"
+    "last_run_ts": "2026-08-09T23:00:33.766718+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -440,7 +440,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786309200000,
+      "last_checked_ts": 1786312800000,
       "sl_buffer_used": 0.9391419129966225,
       "mae": 0.3299999999999841,
       "sfp_purity": 1.0,
@@ -487,7 +487,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786273231.756758,
-      "last_checked_ts": 1786309200000,
+      "last_checked_ts": 1786312800000,
       "sl_buffer_used": 1.6913068065174297,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -529,12 +529,12 @@
       "entry_filled": true,
       "score": 0.8072031461643604,
       "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1786312800000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786291293.1562126,
-      "last_checked_ts": 1786309200000,
+      "last_checked_ts": 1786312800000,
       "sl_buffer_used": 0.3499999999999943,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -545,6 +545,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5609
+    },
+    "BNBUSDT:trend_continuation:1786316433003": {
+      "id": "BNBUSDT:trend_continuation:1786316433003",
+      "symbol": "BNBUSDT",
+      "engine": "trend_continuation",
+      "direction": "long",
+      "entry": 605.38,
+      "sl": 602.5855953187518,
+      "tp1": 611.46,
+      "tp2": 612.0188809362497,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5878882433885977,
+      "rr_tp1": 2.1757764867771954,
+      "rr_tp2": 2.375776486777212,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.812492871203604,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786316433.0065186,
+      "last_checked_ts": 1786316433006,
+      "sl_buffer_used": 0.9044046812482778,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5638
     }
   },
   "daily_summary_date": "2026-08-09"
