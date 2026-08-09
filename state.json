@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-09T10:45:22.567007+00:00"
+    "last_run_ts": "2026-08-09T11:00:32.280519+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -440,7 +440,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786266000000,
+      "last_checked_ts": 1786269600000,
       "sl_buffer_used": 0.9391419129966225,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -451,6 +451,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5572
+    },
+    "ZECUSDT:mean_reversion:1786273231749": {
+      "id": "ZECUSDT:mean_reversion:1786273231749",
+      "symbol": "ZECUSDT",
+      "engine": "mean_reversion",
+      "direction": "short",
+      "entry": 525.11,
+      "sl": 530.3113068065175,
+      "tp1": 511.0335000000001,
+      "tp2": 509.99323863869665,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "z_score_extreme": 0.5942524729356794
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8531695517712494,
+      "rr_tp1": 2.706339103542499,
+      "rr_tp2": 2.9063391035424946,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.740692158792857,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786273231.756758,
+      "last_checked_ts": 1786273231756,
+      "sl_buffer_used": 1.6913068065174297,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5588
     }
   },
   "daily_summary_date": "2026-08-09"
