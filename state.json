@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-09T15:45:19.158747+00:00"
+    "last_run_ts": "2026-08-09T16:01:34.057227+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -440,9 +440,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786284000000,
+      "last_checked_ts": 1786287600000,
       "sl_buffer_used": 0.9391419129966225,
-      "mae": 0.0,
+      "mae": 0.3299999999999841,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "low_vol",
@@ -487,7 +487,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786273231.756758,
-      "last_checked_ts": 1786284000000,
+      "last_checked_ts": 1786287600000,
       "sl_buffer_used": 1.6913068065174297,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -498,6 +498,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5588
+    },
+    "BCHUSDT:range_trading:1786291293154": {
+      "id": "BCHUSDT:range_trading:1786291293154",
+      "symbol": "BCHUSDT",
+      "engine": "range_trading",
+      "direction": "short",
+      "entry": 218.34,
+      "sl": 219.11658275271932,
+      "tp1": 214.98700000000002,
+      "tp2": 214.83168344945616,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.4922194922194876
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.6588169375761614,
+      "rr_tp1": 4.317633875152323,
+      "rr_tp2": 4.517633875152316,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8072031461643604,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786291293.1562126,
+      "last_checked_ts": 1786291293156,
+      "sl_buffer_used": 0.3499999999999943,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5609
     }
   },
   "daily_summary_date": "2026-08-09"
