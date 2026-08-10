@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-10T00:45:24.800514+00:00"
+    "last_run_ts": "2026-08-10T01:00:33.789129+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -355,17 +355,22 @@
         "n": 1,
         "wins": 1,
         "sum_r": 4.517633875152316
+      },
+      "BNBUSDT|low_vol|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 4,
-        "n_since_last_gate": 2,
+        "n": 5,
+        "n_since_last_gate": 3,
         "by_key": {
           "global": {
-            "n": 2,
-            "n_since_last_gate": 2,
-            "n_since_last_fast_gate": 2,
+            "n": 3,
+            "n_since_last_gate": 3,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": false
           }
         }
@@ -379,17 +384,21 @@
       "calib|mean_reversion|low": {
         "n": 1,
         "wins": 1
+      },
+      "calib|trend_continuation|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 4,
+      "signals": 5,
       "wins": 2,
-      "losses": 2,
+      "losses": 3,
       "expired": 0,
-      "sum_r": 5.4239729786948105,
+      "sum_r": 4.4239729786948105,
       "gross_profit_r": 7.4239729786948105,
-      "gross_loss_r": 2.0,
-      "sum_hold_minutes": 2217.7667867620785
+      "gross_loss_r": 3.0,
+      "sum_hold_minutes": 2337.698738582929
     }
   },
   "tier2": {
@@ -437,6 +446,17 @@
         "adaptive_delta": "no_change_win_not_causally_attributable",
         "resolved_ts": 1786320030.3134232,
         "signal_ts": 1786291293.1562126
+      },
+      {
+        "id": "BNBUSDT:trend_continuation:1786316433003",
+        "symbol": "BNBUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786323628.9236279,
+        "signal_ts": 1786316433.0065186
       }
     ]
   },
@@ -476,7 +496,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786316400000,
+      "last_checked_ts": 1786320000000,
       "sl_buffer_used": 0.9391419129966225,
       "mae": 0.3299999999999841,
       "sfp_purity": 1.0,
@@ -487,54 +507,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5572
-    },
-    "BNBUSDT:trend_continuation:1786316433003": {
-      "id": "BNBUSDT:trend_continuation:1786316433003",
-      "symbol": "BNBUSDT",
-      "engine": "trend_continuation",
-      "direction": "long",
-      "entry": 605.38,
-      "sl": 602.5855953187518,
-      "tp1": 611.46,
-      "tp2": 612.0188809362497,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5878882433885977,
-      "rr_tp1": 2.1757764867771954,
-      "rr_tp2": 2.375776486777212,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.812492871203604,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786316433.0065186,
-      "last_checked_ts": 1786316433006,
-      "sl_buffer_used": 0.9044046812482778,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5638
     }
   },
   "daily_summary_date": "2026-08-09"
