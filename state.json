@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-09T23:45:22.015070+00:00"
+    "last_run_ts": "2026-08-10T00:01:34.343815+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -345,11 +345,21 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ZECUSDT|low_vol|1h|mean_reversion": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.9063391035424946
+      },
+      "BCHUSDT|low_vol|1h|range_trading": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.517633875152316
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 2,
+        "n": 4,
         "n_since_last_gate": 2,
         "by_key": {
           "global": {
@@ -363,19 +373,23 @@
     },
     "calibration": {
       "calib|range_trading|low": {
-        "n": 2,
-        "wins": 0
+        "n": 3,
+        "wins": 1
+      },
+      "calib|mean_reversion|low": {
+        "n": 1,
+        "wins": 1
       }
     },
     "totals": {
-      "signals": 2,
-      "wins": 0,
+      "signals": 4,
+      "wins": 2,
       "losses": 2,
       "expired": 0,
-      "sum_r": -2.0,
-      "gross_profit_r": 0.0,
+      "sum_r": 5.4239729786948105,
+      "gross_profit_r": 7.4239729786948105,
       "gross_loss_r": 2.0,
-      "sum_hold_minutes": 958.8550708532334
+      "sum_hold_minutes": 2217.7667867620785
     }
   },
   "tier2": {
@@ -401,6 +415,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786262432.0849178,
         "signal_ts": 1786219291.411646
+      },
+      {
+        "id": "ZECUSDT:mean_reversion:1786273231749",
+        "symbol": "ZECUSDT",
+        "engine": "mean_reversion",
+        "result": "win",
+        "realized_r": 2.9063391035424946,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_win_not_causally_attributable",
+        "resolved_ts": 1786320029.302502,
+        "signal_ts": 1786273231.756758
+      },
+      {
+        "id": "BCHUSDT:range_trading:1786291293154",
+        "symbol": "BCHUSDT",
+        "engine": "range_trading",
+        "result": "win",
+        "realized_r": 4.517633875152316,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_win_not_causally_attributable",
+        "resolved_ts": 1786320030.3134232,
+        "signal_ts": 1786291293.1562126
       }
     ]
   },
@@ -440,7 +476,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786312800000,
+      "last_checked_ts": 1786316400000,
       "sl_buffer_used": 0.9391419129966225,
       "mae": 0.3299999999999841,
       "sfp_purity": 1.0,
@@ -451,100 +487,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5572
-    },
-    "ZECUSDT:mean_reversion:1786273231749": {
-      "id": "ZECUSDT:mean_reversion:1786273231749",
-      "symbol": "ZECUSDT",
-      "engine": "mean_reversion",
-      "direction": "short",
-      "entry": 525.11,
-      "sl": 530.3113068065175,
-      "tp1": 511.0335000000001,
-      "tp2": 509.99323863869665,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "z_score_extreme": 0.5942524729356794
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.8531695517712494,
-      "rr_tp1": 2.706339103542499,
-      "rr_tp2": 2.9063391035424946,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.740692158792857,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786273231.756758,
-      "last_checked_ts": 1786312800000,
-      "sl_buffer_used": 1.6913068065174297,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5588
-    },
-    "BCHUSDT:range_trading:1786291293154": {
-      "id": "BCHUSDT:range_trading:1786291293154",
-      "symbol": "BCHUSDT",
-      "engine": "range_trading",
-      "direction": "short",
-      "entry": 218.34,
-      "sl": 219.11658275271932,
-      "tp1": 214.98700000000002,
-      "tp2": 214.83168344945616,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.4922194922194876
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.6588169375761614,
-      "rr_tp1": 4.317633875152323,
-      "rr_tp2": 4.517633875152316,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8072031461643604,
-      "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1786312800000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786291293.1562126,
-      "last_checked_ts": 1786312800000,
-      "sl_buffer_used": 0.3499999999999943,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5609
     },
     "BNBUSDT:trend_continuation:1786316433003": {
       "id": "BNBUSDT:trend_continuation:1786316433003",
