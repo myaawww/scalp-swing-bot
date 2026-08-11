@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-11T22:45:20.116455+00:00"
+    "last_run_ts": "2026-08-11T23:00:40.885962+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -480,6 +480,55 @@
       }
     ]
   },
-  "active_signals": {},
+  "active_signals": {
+    "ZECUSDT:trend_continuation:1786489240191": {
+      "id": "ZECUSDT:trend_continuation:1786489240191",
+      "symbol": "ZECUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 480.29,
+      "sl": 486.71,
+      "tp1": 466.8,
+      "tp2": 465.516,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5506230529595089,
+      "rr_tp1": 2.1012461059190177,
+      "rr_tp2": 2.301246105919018,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8068549784424205,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786489240.195502,
+      "last_checked_ts": 1786489240195,
+      "sl_buffer_used": 2.2099999999999795,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 5766
+    }
+  },
   "daily_summary_date": "2026-08-11"
 }
