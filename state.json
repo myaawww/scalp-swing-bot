@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-11T15:45:24.338273+00:00"
+    "last_run_ts": "2026-08-11T16:01:36.495114+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -23,7 +23,7 @@
           "max": 2.0
         },
         "pullback": {
-          "weight": 1.0,
+          "weight": 1.03,
           "min": 0.35,
           "max": 2.0
         },
@@ -360,11 +360,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "TAOUSDT|low_vol|1h|pullback": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.2076073625385364
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 5,
+        "n": 6,
         "n_since_last_gate": 3,
         "by_key": {
           "global": {
@@ -388,17 +393,21 @@
       "calib|trend_continuation|mid": {
         "n": 1,
         "wins": 0
+      },
+      "calib|pullback|mid": {
+        "n": 1,
+        "wins": 1
       }
     },
     "totals": {
-      "signals": 5,
-      "wins": 2,
+      "signals": 6,
+      "wins": 3,
       "losses": 3,
       "expired": 0,
-      "sum_r": 4.4239729786948105,
-      "gross_profit_r": 7.4239729786948105,
+      "sum_r": 6.631580341233347,
+      "gross_profit_r": 9.631580341233347,
       "gross_loss_r": 3.0,
-      "sum_hold_minutes": 2337.698738582929
+      "sum_hold_minutes": 5936.771452478568
     }
   },
   "tier2": {
@@ -457,57 +466,20 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786323628.9236279,
         "signal_ts": 1786316433.0065186
+      },
+      {
+        "id": "TAOUSDT:pullback:1786248089986",
+        "symbol": "TAOUSDT",
+        "engine": "pullback",
+        "result": "win",
+        "realized_r": 2.2076073625385364,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[pullback] += step",
+        "resolved_ts": 1786464034.3511121,
+        "signal_ts": 1786248089.9882784
       }
     ]
   },
-  "active_signals": {
-    "TAOUSDT:pullback:1786248089986": {
-      "id": "TAOUSDT:pullback:1786248089986",
-      "symbol": "TAOUSDT",
-      "engine": "pullback",
-      "direction": "short",
-      "entry": 207.11,
-      "sl": 211.27914191299664,
-      "tp1": 198.74,
-      "tp2": 197.90617161740067,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.7342773795897833
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5038036812692668,
-      "rr_tp1": 2.0076073625385336,
-      "rr_tp2": 2.2076073625385364,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.702516441358859,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1786399200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786248089.9882784,
-      "last_checked_ts": 1786456800000,
-      "sl_buffer_used": 0.9391419129966225,
-      "mae": 0.3299999999999841,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5572
-    }
-  },
+  "active_signals": {},
   "daily_summary_date": "2026-08-11"
 }
