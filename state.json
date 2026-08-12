@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T12:45:19.579282+00:00"
+    "last_run_ts": "2026-08-12T13:00:39.740128+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -370,17 +370,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "DOTUSDT|bear|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 6,
-        "n_since_last_gate": 3,
+        "n": 7,
+        "n_since_last_gate": 4,
         "by_key": {
           "global": {
-            "n": 3,
-            "n_since_last_gate": 3,
-            "n_since_last_fast_gate": 3,
+            "n": 4,
+            "n_since_last_gate": 4,
+            "n_since_last_fast_gate": 4,
             "fast_gate_ever_fired": false
           }
         }
@@ -408,7 +413,7 @@
         "wins": 1
       },
       "calib|trend_continuation|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 0
       },
       "calib|pullback|mid": {
@@ -417,14 +422,14 @@
       }
     },
     "totals": {
-      "signals": 7,
+      "signals": 8,
       "wins": 3,
-      "losses": 4,
+      "losses": 5,
       "expired": 0,
-      "sum_r": 5.631580341233347,
+      "sum_r": 4.631580341233347,
       "gross_profit_r": 9.631580341233347,
-      "gross_loss_r": 4.0,
-      "sum_hold_minutes": 6716.653205486139
+      "gross_loss_r": 5.0,
+      "sum_hold_minutes": 7316.649075373014
     }
   },
   "tier2": {
@@ -505,58 +510,20 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786536033.1006825,
         "signal_ts": 1786489240.195502
+      },
+      {
+        "id": "DOTUSDT:trend_continuation:1786503634630",
+        "symbol": "DOTUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786539634.3849933,
+        "signal_ts": 1786503634.6328
       }
     ]
   },
-  "active_signals": {
-    "DOTUSDT:trend_continuation:1786503634630": {
-      "id": "DOTUSDT:trend_continuation:1786503634630",
-      "symbol": "DOTUSDT",
-      "engine": "trend_continuation",
-      "direction": "short",
-      "entry": 0.79254,
-      "sl": 0.79758,
-      "tp1": 0.77755,
-      "tp2": 0.776542,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.9871031746032002,
-      "rr_tp1": 2.9742063492064004,
-      "rr_tp2": 3.1742063492064045,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8650924619559985,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786503634.6328,
-      "last_checked_ts": 1786532400000,
-      "sl_buffer_used": 0.0019799999999999818,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5775
-    }
-  },
+  "active_signals": {},
   "daily_summary_date": "2026-08-12"
 }
