@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T11:45:20.229454+00:00"
+    "last_run_ts": "2026-08-12T12:01:34.995249+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -365,6 +365,11 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.2076073625385364
+      },
+      "ZECUSDT|bear|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -376,6 +381,18 @@
             "n": 3,
             "n_since_last_gate": 3,
             "n_since_last_fast_gate": 3,
+            "fast_gate_ever_fired": false
+          }
+        }
+      },
+      "correct_read_poor_rr": {
+        "n": 1,
+        "n_since_last_gate": 1,
+        "by_key": {
+          "global": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": false
           }
         }
@@ -391,7 +408,7 @@
         "wins": 1
       },
       "calib|trend_continuation|mid": {
-        "n": 1,
+        "n": 2,
         "wins": 0
       },
       "calib|pullback|mid": {
@@ -400,14 +417,14 @@
       }
     },
     "totals": {
-      "signals": 6,
+      "signals": 7,
       "wins": 3,
-      "losses": 3,
+      "losses": 4,
       "expired": 0,
-      "sum_r": 6.631580341233347,
+      "sum_r": 5.631580341233347,
       "gross_profit_r": 9.631580341233347,
-      "gross_loss_r": 3.0,
-      "sum_hold_minutes": 5936.771452478568
+      "gross_loss_r": 4.0,
+      "sum_hold_minutes": 6716.653205486139
     }
   },
   "tier2": {
@@ -477,58 +494,21 @@
         "adaptive_delta": "engine_weights[pullback] += step",
         "resolved_ts": 1786464034.3511121,
         "signal_ts": 1786248089.9882784
+      },
+      {
+        "id": "ZECUSDT:trend_continuation:1786489240191",
+        "symbol": "ZECUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "correct_read_poor_rr",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786536033.1006825,
+        "signal_ts": 1786489240.195502
       }
     ]
   },
   "active_signals": {
-    "ZECUSDT:trend_continuation:1786489240191": {
-      "id": "ZECUSDT:trend_continuation:1786489240191",
-      "symbol": "ZECUSDT",
-      "engine": "trend_continuation",
-      "direction": "short",
-      "entry": 480.29,
-      "sl": 486.71,
-      "tp1": 466.8,
-      "tp2": 465.516,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5506230529595089,
-      "rr_tp1": 2.1012461059190177,
-      "rr_tp2": 2.301246105919018,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8068549784424205,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786489240.195502,
-      "last_checked_ts": 1786528800000,
-      "sl_buffer_used": 2.2099999999999795,
-      "mae": 1.5,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5766
-    },
     "DOTUSDT:trend_continuation:1786503634630": {
       "id": "DOTUSDT:trend_continuation:1786503634630",
       "symbol": "DOTUSDT",
@@ -565,7 +545,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786503634.6328,
-      "last_checked_ts": 1786528800000,
+      "last_checked_ts": 1786532400000,
       "sl_buffer_used": 0.0019799999999999818,
       "mae": 0.0,
       "sfp_purity": 1.0,
