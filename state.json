@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T21:30:30.947559+00:00"
+    "last_run_ts": "2026-08-12T21:45:29.078824+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -784,6 +784,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5837
+    },
+    "PENGUUSDT:liquidity_sweep:1786571128288": {
+      "id": "PENGUUSDT:liquidity_sweep:1786571128288",
+      "symbol": "PENGUUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "long",
+      "entry": 0.006286,
+      "sl": 0.006248154,
+      "tp1": 0.006368,
+      "tp2": 0.0063755692,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.713318520164439,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.6665926008221951
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5833377371452726,
+      "rr_tp1": 2.166675474290545,
+      "rr_tp2": 2.3666754742905405,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7034038800445075,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786571128.291635,
+      "last_checked_ts": 1786571128291,
+      "sl_buffer_used": 1.5000000000000256e-05,
+      "mae": 0.0,
+      "sfp_purity": 0.6665926008221951,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 5840
     }
   },
   "daily_summary_date": "2026-08-12"
