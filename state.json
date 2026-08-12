@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T07:45:21.855764+00:00"
+    "last_run_ts": "2026-08-12T08:01:35.989623+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -517,7 +517,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786489240.195502,
-      "last_checked_ts": 1786514400000,
+      "last_checked_ts": 1786518000000,
       "sl_buffer_used": 2.2099999999999795,
       "mae": 1.3199999999999932,
       "sfp_purity": 1.0,
@@ -565,7 +565,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786503634.6328,
-      "last_checked_ts": 1786514400000,
+      "last_checked_ts": 1786518000000,
       "sl_buffer_used": 0.0019799999999999818,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -578,5 +578,5 @@
       "tg_message_id": 5775
     }
   },
-  "daily_summary_date": "2026-08-11"
+  "daily_summary_date": "2026-08-12"
 }
