@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T02:45:21.899008+00:00"
+    "last_run_ts": "2026-08-12T03:00:35.209830+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -517,7 +517,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786489240.195502,
-      "last_checked_ts": 1786496400000,
+      "last_checked_ts": 1786500000000,
       "sl_buffer_used": 2.2099999999999795,
       "mae": 0.12000000000000455,
       "sfp_purity": 1.0,
@@ -528,6 +528,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5766
+    },
+    "DOTUSDT:trend_continuation:1786503634630": {
+      "id": "DOTUSDT:trend_continuation:1786503634630",
+      "symbol": "DOTUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 0.79254,
+      "sl": 0.79758,
+      "tp1": 0.77755,
+      "tp2": 0.776542,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.9871031746032002,
+      "rr_tp1": 2.9742063492064004,
+      "rr_tp2": 3.1742063492064045,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8650924619559985,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786503634.6328,
+      "last_checked_ts": 1786503634632,
+      "sl_buffer_used": 0.0019799999999999818,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 5775
     }
   },
   "daily_summary_date": "2026-08-11"
