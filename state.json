@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-12T22:00:36.447376+00:00"
+    "last_run_ts": "2026-08-12T22:15:26.422039+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -380,17 +380,27 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ADAUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      },
+      "PENGUUSDT|high_vol|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 8,
-        "n_since_last_gate": 5,
+        "n": 10,
+        "n_since_last_gate": 7,
         "by_key": {
           "global": {
-            "n": 5,
-            "n_since_last_gate": 5,
-            "n_since_last_fast_gate": 0,
+            "n": 7,
+            "n_since_last_gate": 7,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": true
           }
         }
@@ -426,19 +436,23 @@
         "wins": 1
       },
       "calib|breakout|mid": {
+        "n": 2,
+        "wins": 0
+      },
+      "calib|liquidity_sweep|high": {
         "n": 1,
         "wins": 0
       }
     },
     "totals": {
-      "signals": 9,
+      "signals": 11,
       "wins": 3,
-      "losses": 6,
+      "losses": 8,
       "expired": 0,
-      "sum_r": 3.631580341233347,
+      "sum_r": 1.631580341233347,
       "gross_profit_r": 9.631580341233347,
-      "gross_loss_r": 6.0,
-      "sum_hold_minutes": 7361.644826638699
+      "gross_loss_r": 8.0,
+      "sum_hold_minutes": 7436.41932529211
     }
   },
   "tier2": {
@@ -541,6 +555,28 @@
         "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 5/8 of genuine_variance; category 8/6 of all losses)",
         "resolved_ts": 1786570224.9988186,
         "signal_ts": 1786567525.2537427
+      },
+      {
+        "id": "ADAUSDT:breakout:1786570228308",
+        "symbol": "ADAUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786572921.545055,
+        "signal_ts": 1786570229.4473908
+      },
+      {
+        "id": "PENGUUSDT:liquidity_sweep:1786571128288",
+        "symbol": "PENGUUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786572922.6638901,
+        "signal_ts": 1786571128.291635
       }
     ]
   },
@@ -629,7 +665,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.3123739,
-      "last_checked_ts": 1786571100000,
+      "last_checked_ts": 1786572000000,
       "sl_buffer_used": 0.0006610260932104506,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -677,7 +713,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786571100000,
+      "last_checked_ts": 1786572000000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -688,54 +724,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5834
-    },
-    "ADAUSDT:breakout:1786570228308": {
-      "id": "ADAUSDT:breakout:1786570228308",
-      "symbol": "ADAUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 0.1811,
-      "sl": 0.18190351160156576,
-      "tp1": 0.17933227447655536,
-      "tp2": 0.17732349547264098,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000001,
-      "rr_tp1": 2.2,
-      "rr_tp2": 4.700000000000017,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7761963416717937,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786570229.4473908,
-      "last_checked_ts": 1786571100000,
-      "sl_buffer_used": 0.00034000000000000696,
-      "mae": 0.00010648839843424573,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5836
     },
     "APTUSDT:breakout:1786570228311": {
       "id": "APTUSDT:breakout:1786570228311",
@@ -773,7 +761,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570230.0110924,
-      "last_checked_ts": 1786571100000,
+      "last_checked_ts": 1786572000000,
       "sl_buffer_used": 0.0007999999999999119,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -785,52 +773,52 @@
       "thin_margin_pass": false,
       "tg_message_id": 5837
     },
-    "PENGUUSDT:liquidity_sweep:1786571128288": {
-      "id": "PENGUUSDT:liquidity_sweep:1786571128288",
-      "symbol": "PENGUUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "long",
-      "entry": 0.006286,
-      "sl": 0.006248154,
-      "tp1": 0.006368,
-      "tp2": 0.0063755692,
+    "ADAUSDT:volatility_expansion:1786572925768": {
+      "id": "ADAUSDT:volatility_expansion:1786572925768",
+      "symbol": "ADAUSDT",
+      "engine": "volatility_expansion",
+      "direction": "short",
+      "entry": 0.1809,
+      "sl": 0.18398814918545353,
+      "tp1": 0.17410607179200224,
+      "tp2": 0.16638569882836843,
       "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.713318520164439,
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
       "regime_fit": [
-        "reversal",
-        "ranging",
+        "expansion",
         "high_vol"
       ],
       "confluences": {
-        "sweep_purity": 0.6665926008221951
+        "vol_pctile": 0.81,
+        "displacement_body": 0.38648386273012947
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.5833377371452726,
-      "rr_tp1": 2.166675474290545,
-      "rr_tp2": 2.3666754742905405,
+      "ev_estimate": 0.600000000000001,
+      "rr_tp1": 2.200000000000002,
+      "rr_tp2": 4.700000000000002,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.7034038800445075,
+      "score": 0.6911187652959591,
       "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1786571128.291635,
-      "last_checked_ts": 1786571128291,
-      "sl_buffer_used": 1.5000000000000256e-05,
+      "signal_ts": 1786572925.7709246,
+      "last_checked_ts": 1786572925770,
+      "sl_buffer_used": 0.0005481491854535369,
       "mae": 0.0,
-      "sfp_purity": 0.6665926008221951,
+      "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
         "macro_bias": "bear"
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 5840
+      "tg_message_id": 5843
     }
   },
   "daily_summary_date": "2026-08-12"
