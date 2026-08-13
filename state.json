@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-13T03:00:38.101780+00:00"
+    "last_run_ts": "2026-08-13T03:15:22.417944+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -395,17 +395,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "APTUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 11,
-        "n_since_last_gate": 8,
+        "n": 12,
+        "n_since_last_gate": 9,
         "by_key": {
           "global": {
-            "n": 8,
-            "n_since_last_gate": 8,
-            "n_since_last_fast_gate": 3,
+            "n": 9,
+            "n_since_last_gate": 9,
+            "n_since_last_fast_gate": 4,
             "fast_gate_ever_fired": true
           }
         }
@@ -441,7 +446,7 @@
         "wins": 1
       },
       "calib|breakout|mid": {
-        "n": 3,
+        "n": 4,
         "wins": 0
       },
       "calib|liquidity_sweep|high": {
@@ -450,14 +455,14 @@
       }
     },
     "totals": {
-      "signals": 12,
+      "signals": 13,
       "wins": 3,
-      "losses": 9,
+      "losses": 10,
       "expired": 0,
-      "sum_r": 0.6315803412333469,
+      "sum_r": -0.36841965876665306,
       "gross_profit_r": 9.631580341233347,
-      "gross_loss_r": 9.0,
-      "sum_hold_minutes": 7586.439328384399
+      "gross_loss_r": 10.0,
+      "sum_hold_minutes": 7931.254215927918
     }
   },
   "tier2": {
@@ -593,6 +598,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786579229.5125594,
         "signal_ts": 1786570228.3123739
+      },
+      {
+        "id": "APTUSDT:breakout:1786570228311",
+        "symbol": "APTUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786590918.904345,
+        "signal_ts": 1786570230.0110924
       }
     ]
   },
@@ -681,7 +697,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786589100000,
+      "last_checked_ts": 1786590000000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -692,54 +708,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5834
-    },
-    "APTUSDT:breakout:1786570228311": {
-      "id": "APTUSDT:breakout:1786570228311",
-      "symbol": "APTUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 0.5589,
-      "sl": 0.5635801409863374,
-      "tp1": 0.5486036898300577,
-      "tp2": 0.5369033373642141,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999976,
-      "rr_tp1": 2.1999999999999953,
-      "rr_tp2": 4.700000000000007,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7761963416717933,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786570230.0110924,
-      "last_checked_ts": 1786589100000,
-      "sl_buffer_used": 0.0007999999999999119,
-      "mae": 0.0006198590136625715,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5837
     },
     "ADAUSDT:volatility_expansion:1786572925768": {
       "id": "ADAUSDT:volatility_expansion:1786572925768",
