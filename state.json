@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-13T03:45:24.467474+00:00"
+    "last_run_ts": "2026-08-13T04:01:32.598151+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -400,17 +400,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ADAUSDT|high_vol|1h|volatility_expansion": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 12,
-        "n_since_last_gate": 9,
+        "n": 13,
+        "n_since_last_gate": 10,
         "by_key": {
           "global": {
-            "n": 9,
-            "n_since_last_gate": 9,
-            "n_since_last_fast_gate": 4,
+            "n": 10,
+            "n_since_last_gate": 10,
+            "n_since_last_fast_gate": 0,
             "fast_gate_ever_fired": true
           }
         }
@@ -452,17 +457,21 @@
       "calib|liquidity_sweep|high": {
         "n": 1,
         "wins": 0
+      },
+      "calib|volatility_expansion|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 13,
+      "signals": 14,
       "wins": 3,
-      "losses": 10,
+      "losses": 11,
       "expired": 0,
-      "sum_r": -0.36841965876665306,
+      "sum_r": -1.368419658766653,
       "gross_profit_r": 9.631580341233347,
-      "gross_loss_r": 10.0,
-      "sum_hold_minutes": 7931.254215927918
+      "gross_loss_r": 11.0,
+      "sum_hold_minutes": 8276.337619161606
     }
   },
   "tier2": {
@@ -609,6 +618,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786590918.904345,
         "signal_ts": 1786570230.0110924
+      },
+      {
+        "id": "ADAUSDT:volatility_expansion:1786572925768",
+        "symbol": "ADAUSDT",
+        "engine": "volatility_expansion",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 10/13 of genuine_variance; category 13/11 of all losses)",
+        "resolved_ts": 1786593630.7751186,
+        "signal_ts": 1786572925.7709246
       }
     ]
   },
@@ -649,7 +669,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786586400000,
+      "last_checked_ts": 1786590000000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -697,7 +717,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786591800000,
+      "last_checked_ts": 1786592700000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -708,53 +728,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5834
-    },
-    "ADAUSDT:volatility_expansion:1786572925768": {
-      "id": "ADAUSDT:volatility_expansion:1786572925768",
-      "symbol": "ADAUSDT",
-      "engine": "volatility_expansion",
-      "direction": "short",
-      "entry": 0.1809,
-      "sl": 0.18398814918545353,
-      "tp1": 0.17410607179200224,
-      "tp2": 0.16638569882836843,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "vol_pctile": 0.81,
-        "displacement_body": 0.38648386273012947
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.600000000000001,
-      "rr_tp1": 2.200000000000002,
-      "rr_tp2": 4.700000000000002,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.6911187652959591,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786572925.7709246,
-      "last_checked_ts": 1786586400000,
-      "sl_buffer_used": 0.0005481491854535369,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 5843
     }
   },
   "daily_summary_date": "2026-08-12"
