@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-14T17:45:24.304390+00:00"
+    "last_run_ts": "2026-08-14T18:00:36.238150+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -669,7 +669,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786723200000,
+      "last_checked_ts": 1786726800000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -717,7 +717,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786728600000,
+      "last_checked_ts": 1786729500000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -728,6 +728,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 5834
+    },
+    "BCHUSDT:pullback:1786730435471": {
+      "id": "BCHUSDT:pullback:1786730435471",
+      "symbol": "BCHUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 200.85500000000002,
+      "sl": 198.7548771353634,
+      "tp1": 205.51,
+      "tp2": 205.93002457292732,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.5867295893859666
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6082684919021137,
+      "rr_tp1": 2.2165369838042275,
+      "rr_tp2": 2.41653698380423,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.710875075174603,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786730435.476789,
+      "last_checked_ts": 1786730435476,
+      "sl_buffer_used": 0.5751228646366277,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 5945
     }
   },
   "daily_summary_date": "2026-08-14"
