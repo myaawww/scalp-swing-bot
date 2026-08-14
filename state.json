@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-14T19:00:35.647779+00:00"
+    "last_run_ts": "2026-08-14T19:15:21.970803+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -717,7 +717,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786733100000,
+      "last_checked_ts": 1786734000000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -775,6 +775,53 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5945
+    },
+    "AAVEUSDT:pullback:1786734921381": {
+      "id": "AAVEUSDT:pullback:1786734921381",
+      "symbol": "AAVEUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 85.41499999999999,
+      "sl": 84.77392210643626,
+      "tp1": 86.883,
+      "tp2": 87.01121557871274,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.7813454066731359
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.644946670863533,
+      "rr_tp1": 2.289893341727066,
+      "rr_tp2": 2.489893341727057,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.7628465211225337,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786734921.3831851,
+      "last_checked_ts": 1786734921383,
+      "sl_buffer_used": 0.2590778935637434,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 5948
     }
   },
   "daily_summary_date": "2026-08-14"
