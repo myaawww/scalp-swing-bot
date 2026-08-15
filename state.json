@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-15T04:45:21.417342+00:00"
+    "last_run_ts": "2026-08-15T05:00:37.959567+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -23,7 +23,7 @@
           "max": 2.0
         },
         "pullback": {
-          "weight": 1.03,
+          "weight": 1.06,
           "min": 0.35,
           "max": 2.0
         },
@@ -405,11 +405,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AAVEUSDT|bear|1h|pullback": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.489893341727057
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 13,
+        "n": 14,
         "n_since_last_gate": 10,
         "by_key": {
           "global": {
@@ -447,8 +452,8 @@
         "wins": 0
       },
       "calib|pullback|mid": {
-        "n": 1,
-        "wins": 1
+        "n": 2,
+        "wins": 2
       },
       "calib|breakout|mid": {
         "n": 4,
@@ -464,14 +469,14 @@
       }
     },
     "totals": {
-      "signals": 14,
-      "wins": 3,
+      "signals": 15,
+      "wins": 4,
       "losses": 11,
-      "expired": 0,
-      "sum_r": -1.368419658766653,
-      "gross_profit_r": 9.631580341233347,
+      "expired": 1,
+      "sum_r": 1.1214736829604037,
+      "gross_profit_r": 12.121473682960403,
       "gross_loss_r": 11.0,
-      "sum_hold_minutes": 8276.337619161606
+      "sum_hold_minutes": 8861.521969485284
     }
   },
   "tier2": {
@@ -629,6 +634,17 @@
         "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 10/13 of genuine_variance; category 13/11 of all losses)",
         "resolved_ts": 1786593630.7751186,
         "signal_ts": 1786572925.7709246
+      },
+      {
+        "id": "AAVEUSDT:pullback:1786734921381",
+        "symbol": "AAVEUSDT",
+        "engine": "pullback",
+        "result": "win",
+        "realized_r": 2.489893341727057,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[pullback] += step",
+        "resolved_ts": 1786770032.4442046,
+        "signal_ts": 1786734921.3831851
       }
     ]
   },
@@ -669,7 +685,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786762800000,
+      "last_checked_ts": 1786766400000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -717,7 +733,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786768200000,
+      "last_checked_ts": 1786769100000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -729,15 +745,15 @@
       "thin_margin_pass": false,
       "tg_message_id": 5834
     },
-    "BCHUSDT:pullback:1786730435471": {
-      "id": "BCHUSDT:pullback:1786730435471",
-      "symbol": "BCHUSDT",
+    "LINKUSDT:pullback:1786770037297": {
+      "id": "LINKUSDT:pullback:1786770037297",
+      "symbol": "LINKUSDT",
       "engine": "pullback",
-      "direction": "long",
-      "entry": 200.85500000000002,
-      "sl": 198.7548771353634,
-      "tp1": 205.51,
-      "tp2": 205.93002457292732,
+      "direction": "short",
+      "entry": 9.52095,
+      "sl": 9.772712127910319,
+      "tp1": 8.923,
+      "tp2": 8.872647574417936,
       "entry_kind": "pending",
       "timeframe": "1h",
       "confidence_raw": 0.55,
@@ -747,25 +763,25 @@
         "bear"
       ],
       "confluences": {
-        "ob_retest": 0.5867295893859666
+        "ob_retest": 0.6409164679219107
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.6082684919021137,
-      "rr_tp1": 2.2165369838042275,
-      "rr_tp2": 2.41653698380423,
-      "pending_bars_elapsed": 9,
+      "ev_estimate": 0.6875296832035727,
+      "rr_tp1": 2.3750593664071453,
+      "rr_tp2": 2.575059366407145,
+      "pending_bars_elapsed": 0,
       "pending_expiry_bars": 10,
       "entry_filled": false,
-      "score": 0.710875075174603,
+      "score": 0.7617844530094072,
       "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1786730435.476789,
-      "last_checked_ts": 1786762800000,
-      "sl_buffer_used": 0.5751228646366277,
+      "signal_ts": 1786770037.2998178,
+      "last_checked_ts": 1786770037299,
+      "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -774,54 +790,7 @@
       },
       "regime_label": "bear",
       "thin_margin_pass": false,
-      "tg_message_id": 5945
-    },
-    "AAVEUSDT:pullback:1786734921381": {
-      "id": "AAVEUSDT:pullback:1786734921381",
-      "symbol": "AAVEUSDT",
-      "engine": "pullback",
-      "direction": "long",
-      "entry": 85.41499999999999,
-      "sl": 84.77392210643626,
-      "tp1": 86.883,
-      "tp2": 87.01121557871274,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.7813454066731359
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.644946670863533,
-      "rr_tp1": 2.289893341727066,
-      "rr_tp2": 2.489893341727057,
-      "pending_bars_elapsed": 1,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7628465211225337,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786734921.3831851,
-      "last_checked_ts": 1786762800000,
-      "sl_buffer_used": 0.2590778935637434,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5948
+      "tg_message_id": 5973
     }
   },
   "daily_summary_date": "2026-08-14"
