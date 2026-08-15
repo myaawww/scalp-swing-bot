@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-15T05:45:21.057661+00:00"
+    "last_run_ts": "2026-08-15T06:00:34.192250+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -685,7 +685,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786766400000,
+      "last_checked_ts": 1786770000000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -733,7 +733,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786570228.8788273,
-      "last_checked_ts": 1786771800000,
+      "last_checked_ts": 1786772700000,
       "sl_buffer_used": 0.0010700000000000154,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -791,6 +791,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
+    },
+    "UNIUSDT:trend_continuation:1786773633605": {
+      "id": "UNIUSDT:trend_continuation:1786773633605",
+      "symbol": "UNIUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 3.2824,
+      "sl": 3.32747211328618,
+      "tp1": 3.1799,
+      "tp2": 3.170885577342764,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6370667196054025,
+      "rr_tp1": 2.274133439210805,
+      "rr_tp2": 2.474133439210803,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8197381726773343,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786773633.6061318,
+      "last_checked_ts": 1786773633606,
+      "sl_buffer_used": 0.014672113286180004,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 5974
     }
   },
   "daily_summary_date": "2026-08-14"
