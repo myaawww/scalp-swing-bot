@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-16T15:45:23.723701+00:00"
+    "last_run_ts": "2026-08-16T16:01:34.360699+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -420,17 +420,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "UNIUSDT|bear|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 15,
-        "n_since_last_gate": 10,
+        "n": 16,
+        "n_since_last_gate": 11,
         "by_key": {
           "global": {
-            "n": 10,
-            "n_since_last_gate": 10,
-            "n_since_last_fast_gate": 0,
+            "n": 11,
+            "n_since_last_gate": 11,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": true
           }
         }
@@ -458,7 +463,7 @@
         "wins": 1
       },
       "calib|trend_continuation|mid": {
-        "n": 3,
+        "n": 4,
         "wins": 0
       },
       "calib|pullback|mid": {
@@ -479,14 +484,14 @@
       }
     },
     "totals": {
-      "signals": 17,
+      "signals": 18,
       "wins": 5,
-      "losses": 12,
+      "losses": 13,
       "expired": 1,
-      "sum_r": 2.321473682960407,
+      "sum_r": 1.321473682960407,
       "gross_profit_r": 14.321473682960406,
-      "gross_loss_r": 12.0,
-      "sum_hold_minutes": 13031.556461787226
+      "gross_loss_r": 13.0,
+      "sum_hold_minutes": 15071.539391922954
     }
   },
   "tier2": {
@@ -677,6 +682,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1786849236.3230727,
         "signal_ts": 1786817722.962996
+      },
+      {
+        "id": "UNIUSDT:trend_continuation:1786773633605",
+        "symbol": "UNIUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786896032.58194,
+        "signal_ts": 1786773633.6061318
       }
     ]
   },
@@ -717,7 +733,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786888800000,
+      "last_checked_ts": 1786892400000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -764,7 +780,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1786888800000,
+      "last_checked_ts": 1786892400000,
       "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -775,54 +791,6 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
-    },
-    "UNIUSDT:trend_continuation:1786773633605": {
-      "id": "UNIUSDT:trend_continuation:1786773633605",
-      "symbol": "UNIUSDT",
-      "engine": "trend_continuation",
-      "direction": "short",
-      "entry": 3.2824,
-      "sl": 3.32747211328618,
-      "tp1": 3.1799,
-      "tp2": 3.170885577342764,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6370667196054025,
-      "rr_tp1": 2.274133439210805,
-      "rr_tp2": 2.474133439210803,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8197381726773343,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786773633.6061318,
-      "last_checked_ts": 1786888800000,
-      "sl_buffer_used": 0.014672113286180004,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5974
     }
   },
   "daily_summary_date": "2026-08-16"
