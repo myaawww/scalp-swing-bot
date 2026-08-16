@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-16T02:45:20.751353+00:00"
+    "last_run_ts": "2026-08-16T03:00:41.371284+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -415,6 +415,11 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.2000000000000033
+      },
+      "APTUSDT|bear|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -431,13 +436,13 @@
         }
       },
       "correct_read_poor_rr": {
-        "n": 1,
-        "n_since_last_gate": 1,
+        "n": 2,
+        "n_since_last_gate": 2,
         "by_key": {
           "global": {
-            "n": 1,
-            "n_since_last_gate": 1,
-            "n_since_last_fast_gate": 1,
+            "n": 2,
+            "n_since_last_gate": 2,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": false
           }
         }
@@ -457,7 +462,7 @@
         "wins": 0
       },
       "calib|pullback|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 2
       },
       "calib|breakout|mid": {
@@ -474,14 +479,14 @@
       }
     },
     "totals": {
-      "signals": 16,
+      "signals": 17,
       "wins": 5,
-      "losses": 11,
+      "losses": 12,
       "expired": 1,
-      "sum_r": 3.321473682960407,
+      "sum_r": 2.321473682960407,
       "gross_profit_r": 14.321473682960406,
-      "gross_loss_r": 11.0,
-      "sum_hold_minutes": 12506.333793842794
+      "gross_loss_r": 12.0,
+      "sum_hold_minutes": 13031.556461787226
     }
   },
   "tier2": {
@@ -661,6 +666,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1786788917.5882888,
         "signal_ts": 1786570228.8788273
+      },
+      {
+        "id": "APTUSDT:pullback:1786817722962",
+        "symbol": "APTUSDT",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "correct_read_poor_rr",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1786849236.3230727,
+        "signal_ts": 1786817722.962996
       }
     ]
   },
@@ -701,7 +717,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786842000000,
+      "last_checked_ts": 1786845600000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -748,7 +764,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1786842000000,
+      "last_checked_ts": 1786845600000,
       "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -796,7 +812,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786773633.6061318,
-      "last_checked_ts": 1786842000000,
+      "last_checked_ts": 1786845600000,
       "sl_buffer_used": 0.014672113286180004,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -807,53 +823,6 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5974
-    },
-    "APTUSDT:pullback:1786817722962": {
-      "id": "APTUSDT:pullback:1786817722962",
-      "symbol": "APTUSDT",
-      "engine": "pullback",
-      "direction": "long",
-      "entry": 0.5347999999999999,
-      "sl": 0.5308999999999999,
-      "tp1": 0.5428,
-      "tp2": 0.54358,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.7249149069045945
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5256410256410227,
-      "rr_tp1": 2.0512820512820453,
-      "rr_tp2": 2.2512820512820455,
-      "pending_bars_elapsed": 6,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7471487686550752,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786817722.962996,
-      "last_checked_ts": 1786842000000,
-      "sl_buffer_used": 0.0018000000000000238,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5986
     }
   },
   "daily_summary_date": "2026-08-15"
