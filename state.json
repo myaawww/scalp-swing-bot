@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-17T15:45:22.629465+00:00"
+    "last_run_ts": "2026-08-17T16:01:36.597213+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -733,7 +733,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1786975200000,
+      "last_checked_ts": 1786978800000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -780,7 +780,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1786975200000,
+      "last_checked_ts": 1786978800000,
       "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -791,6 +791,53 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
+    },
+    "AAVEUSDT:range_trading:1786982495660": {
+      "id": "AAVEUSDT:range_trading:1786982495660",
+      "symbol": "AAVEUSDT",
+      "engine": "range_trading",
+      "direction": "short",
+      "entry": 88.081,
+      "sl": 88.65781020117919,
+      "tp1": 85.5813,
+      "tp2": 85.46593795976416,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.4229309035687351
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.6668306098694288,
+      "rr_tp1": 4.3336612197388575,
+      "rr_tp2": 4.533661219738858,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7954980028062123,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1786982495.6617432,
+      "last_checked_ts": 1786982495661,
+      "sl_buffer_used": 0.22604378267577874,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": true,
+      "tg_message_id": 6063
     }
   },
   "daily_summary_date": "2026-08-17"
