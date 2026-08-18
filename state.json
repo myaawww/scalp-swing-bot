@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-18T21:45:22.634493+00:00"
+    "last_run_ts": "2026-08-18T22:00:37.547224+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -761,7 +761,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1787083200000,
+      "last_checked_ts": 1787086800000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -808,7 +808,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1787083200000,
+      "last_checked_ts": 1787086800000,
       "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -819,6 +819,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
+    },
+    "DOTUSDT:trend_continuation:1787090436993": {
+      "id": "DOTUSDT:trend_continuation:1787090436993",
+      "symbol": "DOTUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 0.74974,
+      "sl": 0.7562072096681428,
+      "tp1": 0.73499,
+      "tp2": 0.7336965580663715,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6403681616089929,
+      "rr_tp1": 2.280736323217986,
+      "rr_tp2": 2.480736323217986,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8202166522701431,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787090436.9955347,
+      "last_checked_ts": 1787090436995,
+      "sl_buffer_used": 0.0023072096681428403,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6120
     }
   },
   "daily_summary_date": "2026-08-18"
