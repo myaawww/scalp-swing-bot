@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T00:01:34.685718+00:00"
+    "last_run_ts": "2026-08-19T00:15:27.027651+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -835,6 +835,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
+    },
+    "NEARUSDT:breakout:1787098526246": {
+      "id": "NEARUSDT:breakout:1787098526246",
+      "symbol": "NEARUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 1.5697,
+      "sl": 1.5889084453913982,
+      "tp1": 1.5274414201389244,
+      "tp2": 1.4794203066604292,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999976,
+      "rr_tp1": 2.1999999999999953,
+      "rr_tp2": 4.6999999999999895,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7994822319219471,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787098526.2501595,
+      "last_checked_ts": 1787098526250,
+      "sl_buffer_used": 0.0024867563131185065,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6128
     }
   },
   "daily_summary_date": "2026-08-18"
