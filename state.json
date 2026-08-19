@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T01:45:19.052230+00:00"
+    "last_run_ts": "2026-08-19T02:00:38.474865+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -435,6 +435,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "NEARUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -473,6 +478,18 @@
             "fast_gate_ever_fired": false
           }
         }
+      },
+      "structural_invalidation_too_tight": {
+        "n": 1,
+        "n_since_last_gate": 1,
+        "by_key": {
+          "NEARUSDT": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          }
+        }
       }
     },
     "calibration": {
@@ -493,7 +510,7 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 5,
+        "n": 6,
         "wins": 1
       },
       "calib|liquidity_sweep|high": {
@@ -506,14 +523,14 @@
       }
     },
     "totals": {
-      "signals": 20,
+      "signals": 21,
       "wins": 5,
-      "losses": 15,
+      "losses": 16,
       "expired": 1,
-      "sum_r": -0.678526317039593,
+      "sum_r": -1.678526317039593,
       "gross_profit_r": 14.321473682960406,
-      "gross_loss_r": 15.0,
-      "sum_hold_minutes": 15550.321614595257
+      "gross_loss_r": 16.0,
+      "sum_hold_minutes": 15655.439858071013
     }
   },
   "tier2": {
@@ -737,6 +754,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787097630.7704234,
         "signal_ts": 1787090436.9955347
+      },
+      {
+        "id": "NEARUSDT:breakout:1787098526246",
+        "symbol": "NEARUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787104833.344768,
+        "signal_ts": 1787098526.2501595
       }
     ]
   },
@@ -777,7 +805,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1787097600000,
+      "last_checked_ts": 1787101200000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -824,7 +852,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1787097600000,
+      "last_checked_ts": 1787101200000,
       "sl_buffer_used": 0.0460121279103192,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -835,54 +863,6 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 5973
-    },
-    "NEARUSDT:breakout:1787098526246": {
-      "id": "NEARUSDT:breakout:1787098526246",
-      "symbol": "NEARUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 1.5697,
-      "sl": 1.5889084453913982,
-      "tp1": 1.5274414201389244,
-      "tp2": 1.4794203066604292,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999976,
-      "rr_tp1": 2.1999999999999953,
-      "rr_tp2": 4.6999999999999895,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7994822319219471,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787098526.2501595,
-      "last_checked_ts": 1787103000000,
-      "sl_buffer_used": 0.0024867563131185065,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6128
     }
   },
   "daily_summary_date": "2026-08-18"
