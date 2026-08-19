@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T14:45:27.908377+00:00"
+    "last_run_ts": "2026-08-19T15:00:43.767528+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.06,
+          "weight": 1.12,
           "min": 0.35,
           "max": 2.0
         },
@@ -442,9 +442,9 @@
         "sum_r": -2.0
       },
       "SOLUSDT|high_vol|15m|breakout": {
-        "n": 1,
-        "wins": 0,
-        "sum_r": -1.0
+        "n": 2,
+        "wins": 1,
+        "sum_r": 3.699999999999992
       },
       "HYPEUSDT|high_vol|15m|breakout": {
         "n": 2,
@@ -470,11 +470,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "XRPUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.699999999999991
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 26,
+        "n": 28,
         "n_since_last_gate": 20,
         "by_key": {
           "global": {
@@ -540,8 +545,8 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 14,
-        "wins": 2
+        "n": 16,
+        "wins": 4
       },
       "calib|liquidity_sweep|high": {
         "n": 1,
@@ -553,14 +558,14 @@
       }
     },
     "totals": {
-      "signals": 30,
-      "wins": 6,
+      "signals": 32,
+      "wins": 8,
       "losses": 24,
       "expired": 1,
-      "sum_r": -7.478526317039599,
-      "gross_profit_r": 16.521473682960398,
+      "sum_r": 1.921473682960385,
+      "gross_profit_r": 25.921473682960382,
       "gross_loss_r": 24.0,
-      "sum_hold_minutes": 22268.553976416595
+      "sum_hold_minutes": 22508.992507668343
     }
   },
   "tier2": {
@@ -894,6 +899,28 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1787148032.7432117,
         "signal_ts": 1787139921.0422812
+      },
+      {
+        "id": "SOLUSDT:breakout:1787143522392",
+        "symbol": "SOLUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.699999999999992,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1787151634.6447866,
+        "signal_ts": 1787143522.3955555
+      },
+      {
+        "id": "XRPUSDT:breakout:1787145321620",
+        "symbol": "XRPUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.699999999999991,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1787151635.6844206,
+        "signal_ts": 1787145321.6217766
       }
     ]
   },
@@ -934,7 +961,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1787144400000,
+      "last_checked_ts": 1787148000000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -982,7 +1009,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787136321.3509977,
-      "last_checked_ts": 1787149800000,
+      "last_checked_ts": 1787150700000,
       "sl_buffer_used": 0.0009324170380124596,
       "mae": 2.689574049685728e-05,
       "sfp_purity": 1.0,
@@ -1030,7 +1057,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787139026.7475936,
-      "last_checked_ts": 1787149800000,
+      "last_checked_ts": 1787150700000,
       "sl_buffer_used": 0.007146149435020287,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1041,102 +1068,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6172
-    },
-    "SOLUSDT:breakout:1787143522392": {
-      "id": "SOLUSDT:breakout:1787143522392",
-      "symbol": "SOLUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 78.048,
-      "sl": 77.48518955007542,
-      "tp1": 79.28618298983409,
-      "tp2": 80.69320911464554,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000025,
-      "rr_tp1": 2.200000000000005,
-      "rr_tp2": 4.699999999999992,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.799482231921948,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787143522.3955555,
-      "last_checked_ts": 1787149800000,
-      "sl_buffer_used": 0.06784835993966636,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6176
-    },
-    "XRPUSDT:breakout:1787145321620": {
-      "id": "XRPUSDT:breakout:1787145321620",
-      "symbol": "XRPUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.0132,
-      "sl": 1.0107052465987496,
-      "tp1": 1.0186884574827513,
-      "tp2": 1.0249253409858774,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000179,
-      "rr_tp1": 2.2000000000000357,
-      "rr_tp2": 4.699999999999991,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7994822319219509,
-      "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1787146200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787145321.6217766,
-      "last_checked_ts": 1787149800000,
-      "sl_buffer_used": 0.0007999999999999119,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6182
     },
     "BTCUSDT:breakout:1787148922929": {
       "id": "BTCUSDT:breakout:1787148922929",
@@ -1169,12 +1100,12 @@
       "entry_filled": true,
       "score": 0.8227681221721032,
       "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1787150700000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787148922.9338555,
-      "last_checked_ts": 1787149800000,
+      "last_checked_ts": 1787150700000,
       "sl_buffer_used": 62.40791478862646,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1233,6 +1164,150 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6196
+    },
+    "BNBUSDT:breakout:1787151641636": {
+      "id": "BNBUSDT:breakout:1787151641636",
+      "symbol": "BNBUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 608.64,
+      "sl": 606.5623288439642,
+      "tp1": 613.2108765432787,
+      "tp2": 618.4050544333682,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000054,
+      "rr_tp1": 2.200000000000011,
+      "rr_tp2": 4.700000000000038,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8693399026724103,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787151641.639811,
+      "last_checked_ts": 1787151641639,
+      "sl_buffer_used": 0.37413692482852623,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6200
+    },
+    "TAOUSDT:breakout:1787151641637": {
+      "id": "TAOUSDT:breakout:1787151641637",
+      "symbol": "TAOUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 195.19,
+      "sl": 193.77611486190386,
+      "tp1": 198.3005473038115,
+      "tp2": 201.83526014905183,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000021,
+      "rr_tp1": 2.200000000000004,
+      "rr_tp2": 4.700000000000004,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8693399026724096,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787151642.3329825,
+      "last_checked_ts": 1787151642332,
+      "sl_buffer_used": 0.2671081104769158,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6201
+    },
+    "AAVEUSDT:breakout:1787151641638": {
+      "id": "AAVEUSDT:breakout:1787151641638",
+      "symbol": "AAVEUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 91.108,
+      "sl": 89.8403254312486,
+      "tp1": 93.8968840512531,
+      "tp2": 97.0660704731316,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000023,
+      "rr_tp1": 2.2000000000000046,
+      "rr_tp2": 4.700000000000005,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8693399026724096,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787151643.009349,
+      "last_checked_ts": 1787151643009,
+      "sl_buffer_used": 0.15733965500112032,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6202
     }
   },
   "daily_summary_date": "2026-08-19"
