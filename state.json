@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T08:30:30.418847+00:00"
+    "last_run_ts": "2026-08-19T08:46:45.253592+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -948,7 +948,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787122836.69725,
-      "last_checked_ts": 1787127300000,
+      "last_checked_ts": 1787128200000,
       "sl_buffer_used": 0.0026789596799424976,
       "mae": 0.00203026008001439,
       "sfp_purity": 1.0,
@@ -959,6 +959,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6150
+    },
+    "ETHUSDT:breakout:1787129204606": {
+      "id": "ETHUSDT:breakout:1787129204606",
+      "symbol": "ETHUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 1922.9,
+      "sl": 1918.3405028246673,
+      "tp1": 1932.9308937857322,
+      "tp2": 1944.3296367240641,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.599999999999995,
+      "rr_tp1": 2.19999999999999,
+      "rr_tp2": 4.699999999999965,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7994822319219468,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787129204.6135929,
+      "last_checked_ts": 1787129204613,
+      "sl_buffer_used": 1.647597740266402,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6161
     }
   },
   "daily_summary_date": "2026-08-19"
