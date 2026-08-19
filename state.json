@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T11:00:35.855934+00:00"
+    "last_run_ts": "2026-08-19T11:15:26.998338+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -939,12 +939,12 @@
       "entry_filled": true,
       "score": 0.799482231921947,
       "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1787137200000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787136321.3509977,
-      "last_checked_ts": 1787136321350,
+      "last_checked_ts": 1787137200000,
       "sl_buffer_used": 0.0009324170380124596,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -955,6 +955,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6166
+    },
+    "PENGUUSDT:breakout:1787138126366": {
+      "id": "PENGUUSDT:breakout:1787138126366",
+      "symbol": "PENGUUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 0.006219,
+      "sl": 0.006196054586393561,
+      "tp1": 0.006269479909934165,
+      "tp2": 0.006326843443950262,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999925,
+      "rr_tp1": 2.199999999999985,
+      "rr_tp2": 4.699999999999985,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7994822319219463,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787138126.3698676,
+      "last_checked_ts": 1787138126369,
+      "sl_buffer_used": 8.000000000000194e-06,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6170
     }
   },
   "daily_summary_date": "2026-08-19"
