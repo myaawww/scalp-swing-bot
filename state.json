@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T22:00:39.150357+00:00"
+    "last_run_ts": "2026-08-19T22:15:29.681460+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -392,9 +392,9 @@
         "sum_r": -1.0
       },
       "ONDOUSDT|high_vol|15m|breakout": {
-        "n": 1,
+        "n": 2,
         "wins": 0,
-        "sum_r": -1.0
+        "sum_r": -2.0
       },
       "APTUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -519,13 +519,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 38,
-        "n_since_last_gate": 21,
+        "n": 39,
+        "n_since_last_gate": 22,
         "by_key": {
           "global": {
-            "n": 21,
-            "n_since_last_gate": 1,
-            "n_since_last_fast_gate": 1,
+            "n": 22,
+            "n_since_last_gate": 2,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": true
           }
         }
@@ -597,7 +597,7 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 27,
+        "n": 28,
         "wins": 13
       },
       "calib|liquidity_sweep|high": {
@@ -614,14 +614,14 @@
       }
     },
     "totals": {
-      "signals": 44,
+      "signals": 45,
       "wins": 17,
-      "losses": 27,
+      "losses": 28,
       "expired": 1,
-      "sum_r": 41.22147368296039,
+      "sum_r": 40.22147368296039,
       "gross_profit_r": 68.2214736829604,
-      "gross_loss_r": 27.0,
-      "sum_hold_minutes": 34508.056116155785
+      "gross_loss_r": 28.0,
+      "sum_hold_minutes": 34567.95469886462
     }
   },
   "tier2": {
@@ -1109,6 +1109,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787175920.1918774,
         "signal_ts": 1787174130.8698385
+      },
+      {
+        "id": "ONDOUSDT:breakout:1787174130865",
+        "symbol": "ONDOUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787177726.0284092,
+        "signal_ts": 1787174132.1134467
       }
     ]
   },
@@ -1149,7 +1160,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787152528.6971638,
-      "last_checked_ts": 1787175900000,
+      "last_checked_ts": 1787176800000,
       "sl_buffer_used": 0.0003267769740144423,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1386,7 +1397,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787174131.507107,
-      "last_checked_ts": 1787175900000,
+      "last_checked_ts": 1787176800000,
       "sl_buffer_used": 0.0055501047743517105,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1397,54 +1408,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6284
-    },
-    "ONDOUSDT:breakout:1787174130865": {
-      "id": "ONDOUSDT:breakout:1787174130865",
-      "symbol": "ONDOUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 0.35214,
-      "sl": 0.34855911563325415,
-      "tp1": 0.3600179456068409,
-      "tp2": 0.3689701565237056,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000016,
-      "rr_tp1": 2.2000000000000033,
-      "rr_tp2": 4.700000000000003,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787174132.1134467,
-      "last_checked_ts": 1787175900000,
-      "sl_buffer_used": 0.0011367074933966912,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6285
     },
     "BNBUSDT:breakout:1787175923148": {
       "id": "BNBUSDT:breakout:1787175923148",
@@ -1482,7 +1445,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787175923.150922,
-      "last_checked_ts": 1787175923150,
+      "last_checked_ts": 1787176800000,
       "sl_buffer_used": 1.0306530386261517,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1493,6 +1456,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6290
+    },
+    "XRPUSDT:volatility_expansion:1787177729128": {
+      "id": "XRPUSDT:volatility_expansion:1787177729128",
+      "symbol": "XRPUSDT",
+      "engine": "volatility_expansion",
+      "direction": "long",
+      "entry": 1.1323,
+      "sl": 1.0624730893394465,
+      "tp1": 1.285919203453218,
+      "tp2": 1.460486480104602,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "vol_pctile": 1.0,
+        "displacement_body": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.600000000000001,
+      "rr_tp1": 2.200000000000002,
+      "rr_tp2": 4.700000000000002,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7761963416717941,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787177729.1290138,
+      "last_checked_ts": 1787177729129,
+      "sl_buffer_used": 0.005026910660553384,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6298
     }
   },
   "daily_summary_date": "2026-08-19"
