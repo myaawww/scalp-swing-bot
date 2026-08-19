@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T09:30:28.656709+00:00"
+    "last_run_ts": "2026-08-19T09:45:26.945593+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -460,17 +460,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ETHUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 22,
-        "n_since_last_gate": 17,
+        "n": 23,
+        "n_since_last_gate": 18,
         "by_key": {
           "global": {
-            "n": 17,
-            "n_since_last_gate": 17,
-            "n_since_last_fast_gate": 2,
+            "n": 18,
+            "n_since_last_gate": 18,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": true
           }
         }
@@ -530,7 +535,7 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 10,
+        "n": 11,
         "wins": 1
       },
       "calib|liquidity_sweep|high": {
@@ -543,14 +548,14 @@
       }
     },
     "totals": {
-      "signals": 26,
+      "signals": 27,
       "wins": 5,
-      "losses": 21,
+      "losses": 22,
       "expired": 1,
-      "sum_r": -6.6785263170395925,
+      "sum_r": -7.6785263170395925,
       "gross_profit_r": 14.321473682960406,
-      "gross_loss_r": 21.0,
-      "sum_hold_minutes": 21880.046294232216
+      "gross_loss_r": 22.0,
+      "sum_hold_minutes": 21938.695822699872
     }
   },
   "tier2": {
@@ -840,6 +845,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787130923.1246731,
         "signal_ts": 1787122836.69725
+      },
+      {
+        "id": "ETHUSDT:breakout:1787129204606",
+        "symbol": "ETHUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787132723.585301,
+        "signal_ts": 1787129204.6135929
       }
     ]
   },
@@ -891,54 +907,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 5829
-    },
-    "ETHUSDT:breakout:1787129204606": {
-      "id": "ETHUSDT:breakout:1787129204606",
-      "symbol": "ETHUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1922.9,
-      "sl": 1918.3405028246673,
-      "tp1": 1932.9308937857322,
-      "tp2": 1944.3296367240641,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.599999999999995,
-      "rr_tp1": 2.19999999999999,
-      "rr_tp2": 4.699999999999965,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7994822319219468,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787129204.6135929,
-      "last_checked_ts": 1787130900000,
-      "sl_buffer_used": 1.647597740266402,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6161
     }
   },
   "daily_summary_date": "2026-08-19"
