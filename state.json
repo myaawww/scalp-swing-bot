@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T08:46:45.253592+00:00"
+    "last_run_ts": "2026-08-19T09:00:38.771583+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -455,17 +455,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "LINKUSDT|bear|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 20,
-        "n_since_last_gate": 15,
+        "n": 21,
+        "n_since_last_gate": 16,
         "by_key": {
           "global": {
-            "n": 15,
-            "n_since_last_gate": 15,
-            "n_since_last_fast_gate": 0,
+            "n": 16,
+            "n_since_last_gate": 16,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": true
           }
         }
@@ -521,7 +526,7 @@
         "wins": 0
       },
       "calib|pullback|mid": {
-        "n": 3,
+        "n": 4,
         "wins": 2
       },
       "calib|breakout|mid": {
@@ -538,14 +543,14 @@
       }
     },
     "totals": {
-      "signals": 24,
+      "signals": 25,
       "wins": 5,
-      "losses": 19,
+      "losses": 20,
       "expired": 1,
-      "sum_r": -4.6785263170395925,
+      "sum_r": -5.6785263170395925,
       "gross_profit_r": 14.321473682960406,
-      "gross_loss_r": 19.0,
-      "sum_hold_minutes": 15745.341776986921
+      "gross_loss_r": 20.0,
+      "sum_hold_minutes": 21745.272503844903
     }
   },
   "tier2": {
@@ -813,6 +818,17 @@
         "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 15/20 of genuine_variance; category 20/19 of all losses)",
         "resolved_ts": 1787121921.273535,
         "signal_ts": 1787120122.808264
+      },
+      {
+        "id": "LINKUSDT:pullback:1786770037297",
+        "symbol": "LINKUSDT",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787130033.1434293,
+        "signal_ts": 1786770037.2998178
       }
     ]
   },
@@ -853,7 +869,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1786568434.292486,
-      "last_checked_ts": 1787122800000,
+      "last_checked_ts": 1787126400000,
       "sl_buffer_used": 0.08299999999999841,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -864,53 +880,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 5829
-    },
-    "LINKUSDT:pullback:1786770037297": {
-      "id": "LINKUSDT:pullback:1786770037297",
-      "symbol": "LINKUSDT",
-      "engine": "pullback",
-      "direction": "short",
-      "entry": 9.52095,
-      "sl": 9.772712127910319,
-      "tp1": 8.923,
-      "tp2": 8.872647574417936,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.6409164679219107
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6875296832035727,
-      "rr_tp1": 2.3750593664071453,
-      "rr_tp2": 2.575059366407145,
-      "pending_bars_elapsed": 8,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7617844530094072,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1786770037.2998178,
-      "last_checked_ts": 1787122800000,
-      "sl_buffer_used": 0.0460121279103192,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 5973
     },
     "NEARUSDT:breakout:1787122836693": {
       "id": "NEARUSDT:breakout:1787122836693",
@@ -948,7 +917,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787122836.69725,
-      "last_checked_ts": 1787128200000,
+      "last_checked_ts": 1787129100000,
       "sl_buffer_used": 0.0026789596799424976,
       "mae": 0.00203026008001439,
       "sfp_purity": 1.0,
