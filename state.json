@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T15:15:29.275877+00:00"
+    "last_run_ts": "2026-08-19T15:30:38.197439+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.1800000000000002,
+          "weight": 1.2400000000000002,
           "min": 0.35,
           "max": 2.0
         },
@@ -412,9 +412,9 @@
         "sum_r": 2.489893341727057
       },
       "DOTUSDT|high_vol|15m|breakout": {
-        "n": 1,
-        "wins": 1,
-        "sum_r": 2.2000000000000033
+        "n": 2,
+        "wins": 2,
+        "sum_r": 6.899999999999995
       },
       "APTUSDT|bear|1h|pullback": {
         "n": 1,
@@ -480,11 +480,16 @@
         "n": 1,
         "wins": 1,
         "sum_r": 4.700000000000003
+      },
+      "BNBUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.700000000000038
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 30,
+        "n": 32,
         "n_since_last_gate": 20,
         "by_key": {
           "global": {
@@ -550,8 +555,8 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 18,
-        "wins": 6
+        "n": 20,
+        "wins": 8
       },
       "calib|liquidity_sweep|high": {
         "n": 1,
@@ -563,14 +568,14 @@
       }
     },
     "totals": {
-      "signals": 34,
-      "wins": 10,
+      "signals": 36,
+      "wins": 12,
       "losses": 24,
       "expired": 1,
-      "sum_r": 11.321473682960368,
-      "gross_profit_r": 35.32147368296037,
+      "sum_r": 20.7214736829604,
+      "gross_profit_r": 44.7214736829604,
       "gross_loss_r": 24.0,
-      "sum_hold_minutes": 22793.939348375803
+      "sum_hold_minutes": 23108.919974458222
     }
   },
   "tier2": {
@@ -948,6 +953,28 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1787152523.7450016,
         "signal_ts": 1787148922.9338555
+      },
+      {
+        "id": "DOTUSDT:breakout:1787136321348",
+        "symbol": "DOTUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.699999999999992,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1787153430.1140537,
+        "signal_ts": 1787136321.3509977
+      },
+      {
+        "id": "BNBUSDT:breakout:1787151641636",
+        "symbol": "BNBUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.700000000000038,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1787153431.71432,
+        "signal_ts": 1787151641.639811
       }
     ]
   },
@@ -1000,54 +1027,6 @@
       "thin_margin_pass": true,
       "tg_message_id": 5829
     },
-    "DOTUSDT:breakout:1787136321348": {
-      "id": "DOTUSDT:breakout:1787136321348",
-      "symbol": "DOTUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 0.77036,
-      "sl": 0.7676044787024844,
-      "tp1": 0.7764221468545345,
-      "tp2": 0.7833109500983236,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999959,
-      "rr_tp1": 2.1999999999999917,
-      "rr_tp2": 4.699999999999992,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.799482231921947,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1787137200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787136321.3509977,
-      "last_checked_ts": 1787151600000,
-      "sl_buffer_used": 0.0009324170380124596,
-      "mae": 2.689574049685728e-05,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6166
-    },
     "ZECUSDT:breakout:1787150726647": {
       "id": "ZECUSDT:breakout:1787150726647",
       "symbol": "ZECUSDT",
@@ -1084,7 +1063,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787150726.6511137,
-      "last_checked_ts": 1787151600000,
+      "last_checked_ts": 1787152500000,
       "sl_buffer_used": 1.1420334908596024,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1095,54 +1074,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6196
-    },
-    "BNBUSDT:breakout:1787151641636": {
-      "id": "BNBUSDT:breakout:1787151641636",
-      "symbol": "BNBUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 608.64,
-      "sl": 606.5623288439642,
-      "tp1": 613.2108765432787,
-      "tp2": 618.4050544333682,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000054,
-      "rr_tp1": 2.200000000000011,
-      "rr_tp2": 4.700000000000038,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8693399026724103,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787151641.639811,
-      "last_checked_ts": 1787151641639,
-      "sl_buffer_used": 0.37413692482852623,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6200
     },
     "TAOUSDT:breakout:1787151641637": {
       "id": "TAOUSDT:breakout:1787151641637",
@@ -1175,12 +1106,12 @@
       "entry_filled": true,
       "score": 0.8693399026724096,
       "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1787152500000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787151642.3329825,
-      "last_checked_ts": 1787151642332,
+      "last_checked_ts": 1787152500000,
       "sl_buffer_used": 0.2671081104769158,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1223,12 +1154,12 @@
       "entry_filled": true,
       "score": 0.8693399026724096,
       "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1787152500000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787151643.009349,
-      "last_checked_ts": 1787151643009,
+      "last_checked_ts": 1787152500000,
       "sl_buffer_used": 0.15733965500112032,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1335,6 +1266,102 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6219
+    },
+    "SUIUSDT:breakout:1787153436747": {
+      "id": "SUIUSDT:breakout:1787153436747",
+      "symbol": "SUIUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 0.6994,
+      "sl": 0.6810300558542206,
+      "tp1": 0.7398138771207148,
+      "tp2": 0.7857387374851633,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000012,
+      "rr_tp1": 2.2000000000000024,
+      "rr_tp2": 4.700000000000003,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.9624834636730248,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787153436.7511642,
+      "last_checked_ts": 1787153436751,
+      "sl_buffer_used": 0.0019599553166235123,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6229
+    },
+    "LINKUSDT:breakout:1787153436750": {
+      "id": "LINKUSDT:breakout:1787153436750",
+      "symbol": "LINKUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 9.9642,
+      "sl": 9.80034193542998,
+      "tp1": 10.324687742054044,
+      "tp2": 10.734332903479093,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.600000000000001,
+      "rr_tp1": 2.200000000000002,
+      "rr_tp2": 4.699999999999997,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.9624834636730248,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787153437.470296,
+      "last_checked_ts": 1787153437470,
+      "sl_buffer_used": 0.029566451656016166,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6230
     }
   },
   "daily_summary_date": "2026-08-19"
