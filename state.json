@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-19T22:15:29.681460+00:00"
+    "last_run_ts": "2026-08-19T22:30:26.356363+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1160,7 +1160,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787152528.6971638,
-      "last_checked_ts": 1787176800000,
+      "last_checked_ts": 1787177700000,
       "sl_buffer_used": 0.0003267769740144423,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1397,9 +1397,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787174131.507107,
-      "last_checked_ts": 1787176800000,
+      "last_checked_ts": 1787177700000,
       "sl_buffer_used": 0.0055501047743517105,
-      "mae": 0.0,
+      "mae": 0.0032124738064123193,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
@@ -1445,9 +1445,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787175923.150922,
-      "last_checked_ts": 1787176800000,
+      "last_checked_ts": 1787177700000,
       "sl_buffer_used": 1.0306530386261517,
-      "mae": 0.0,
+      "mae": 0.2123367403434031,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
