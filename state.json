@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-21T23:45:20.319559+00:00"
+    "last_run_ts": "2026-08-22T00:01:39.095033+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -68,7 +68,7 @@
           "max": 2.0
         },
         "volatility_expansion": {
-          "weight": 1.03,
+          "weight": 1.06,
           "min": 0.35,
           "max": 2.0
         }
@@ -530,11 +530,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "XRPUSDT|high_vol|1h|volatility_expansion": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.700000000000002
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 44,
+        "n": 45,
         "n_since_last_gate": 25,
         "by_key": {
           "global": {
@@ -620,8 +625,8 @@
         "wins": 0
       },
       "calib|volatility_expansion|mid": {
-        "n": 2,
-        "wins": 1
+        "n": 3,
+        "wins": 2
       },
       "calib|momentum|mid": {
         "n": 1,
@@ -629,14 +634,14 @@
       }
     },
     "totals": {
-      "signals": 50,
-      "wins": 19,
+      "signals": 51,
+      "wins": 20,
       "losses": 31,
       "expired": 1,
-      "sum_r": 46.6214736829604,
-      "gross_profit_r": 77.6214736829604,
+      "sum_r": 51.3214736829604,
+      "gross_profit_r": 82.3214736829604,
       "gross_loss_r": 31.0,
-      "sum_hold_minutes": 37942.620198396835
+      "sum_hold_minutes": 40927.71735134919
     }
   },
   "tier2": {
@@ -1190,6 +1195,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787346033.7347167,
         "signal_ts": 1787320846.2512019
+      },
+      {
+        "id": "XRPUSDT:volatility_expansion:1787177729128",
+        "symbol": "XRPUSDT",
+        "engine": "volatility_expansion",
+        "result": "win",
+        "realized_r": 4.700000000000002,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[volatility_expansion] += step",
+        "resolved_ts": 1787356834.958191,
+        "signal_ts": 1787177729.1290138
       }
     ]
   },
@@ -1229,7 +1245,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1276,7 +1292,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155298.3177865,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 0.01576038729482723,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1324,7 +1340,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1371,7 +1387,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1382,53 +1398,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6267
-    },
-    "XRPUSDT:volatility_expansion:1787177729128": {
-      "id": "XRPUSDT:volatility_expansion:1787177729128",
-      "symbol": "XRPUSDT",
-      "engine": "volatility_expansion",
-      "direction": "long",
-      "entry": 1.1323,
-      "sl": 1.0624730893394465,
-      "tp1": 1.285919203453218,
-      "tp2": 1.460486480104602,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "vol_pctile": 1.0,
-        "displacement_body": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.600000000000001,
-      "rr_tp1": 2.200000000000002,
-      "rr_tp2": 4.700000000000002,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7761963416717941,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1787241600000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787177729.1290138,
-      "last_checked_ts": 1787349600000,
-      "sl_buffer_used": 0.005026910660553384,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6298
     },
     "NEARUSDT:volatility_expansion:1787179523708": {
       "id": "NEARUSDT:volatility_expansion:1787179523708",
@@ -1465,7 +1434,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787179523.7124262,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 0.009127847233590924,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1512,7 +1481,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787179524.375422,
-      "last_checked_ts": 1787349600000,
+      "last_checked_ts": 1787353200000,
       "sl_buffer_used": 0.003610822423919452,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1560,7 +1529,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787346038.1630664,
-      "last_checked_ts": 1787355000000,
+      "last_checked_ts": 1787355900000,
       "sl_buffer_used": 0.5381237213122445,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1571,6 +1540,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6502
+    },
+    "TAOUSDT:order_block:1787356898333": {
+      "id": "TAOUSDT:order_block:1787356898333",
+      "symbol": "TAOUSDT",
+      "engine": "order_block",
+      "direction": "short",
+      "entry": 230.045,
+      "sl": 236.9083032853716,
+      "tp1": 211.52,
+      "tp2": 210.14733934292568,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
+      ],
+      "confluences": {
+        "htf_ob_quality": 0.7128649695272996
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8495688030779582,
+      "rr_tp1": 2.6991376061559165,
+      "rr_tp2": 2.8991376061559184,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.7641249914191578,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787356898.335615,
+      "last_checked_ts": 1787356898335,
+      "sl_buffer_used": 2.518303285371621,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6515
     }
   },
   "daily_summary_date": "2026-08-21"
