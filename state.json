@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-22T05:00:35.022770+00:00"
+    "last_run_ts": "2026-08-22T05:15:25.757142+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.4200000000000004,
+          "weight": 1.4500000000000004,
           "min": 0.35,
           "max": 2.0
         },
@@ -497,14 +497,14 @@
         "sum_r": -1.0
       },
       "ZECUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 3.6999999999999886
+        "sum_r": 2.6999999999999886
       },
       "AAVEUSDT|high_vol|15m|breakout": {
-        "n": 1,
-        "wins": 1,
-        "sum_r": 4.700000000000005
+        "n": 2,
+        "wins": 2,
+        "sum_r": 6.900000000000004
       },
       "DOGEUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -554,13 +554,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 48,
-        "n_since_last_gate": 26,
+        "n": 50,
+        "n_since_last_gate": 27,
         "by_key": {
           "global": {
-            "n": 26,
-            "n_since_last_gate": 6,
-            "n_since_last_fast_gate": 6,
+            "n": 27,
+            "n_since_last_gate": 7,
+            "n_since_last_fast_gate": 7,
             "fast_gate_ever_fired": true
           }
         }
@@ -632,8 +632,8 @@
         "wins": 2
       },
       "calib|breakout|mid": {
-        "n": 32,
-        "wins": 14
+        "n": 34,
+        "wins": 15
       },
       "calib|liquidity_sweep|high": {
         "n": 1,
@@ -649,14 +649,14 @@
       }
     },
     "totals": {
-      "signals": 54,
-      "wins": 22,
-      "losses": 32,
+      "signals": 56,
+      "wins": 23,
+      "losses": 33,
       "expired": 1,
-      "sum_r": 59.72147368296041,
-      "gross_profit_r": 91.72147368296041,
-      "gross_loss_r": 32.0,
-      "sum_hold_minutes": 47481.68474047978
+      "sum_r": 60.9214736829604,
+      "gross_profit_r": 93.92147368296041,
+      "gross_loss_r": 33.0,
+      "sum_hold_minutes": 48171.11012998421
     }
   },
   "tier2": {
@@ -1254,6 +1254,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787364033.593754,
         "signal_ts": 1787360435.3810139
+      },
+      {
+        "id": "AAVEUSDT:breakout:1787346038162",
+        "symbol": "AAVEUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 2.199999999999999,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1787375720.4543371,
+        "signal_ts": 1787346038.1630664
+      },
+      {
+        "id": "ZECUSDT:breakout:1787364038186",
+        "symbol": "ZECUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787375721.4219294,
+        "signal_ts": 1787364038.1898298
       }
     ]
   },
@@ -1447,54 +1469,6 @@
       "thin_margin_pass": false,
       "tg_message_id": 6304
     },
-    "AAVEUSDT:breakout:1787346038162": {
-      "id": "AAVEUSDT:breakout:1787346038162",
-      "symbol": "AAVEUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 117.09,
-      "sl": 112.7273453483597,
-      "tp1": 126.68784023360865,
-      "tp2": 137.5944768627094,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999994,
-      "rr_tp1": 2.199999999999999,
-      "rr_tp2": 4.699999999999998,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1787367600000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787346038.1630664,
-      "last_checked_ts": 1787373900000,
-      "sl_buffer_used": 0.5381237213122445,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6502
-    },
     "TAOUSDT:order_block:1787356898333": {
       "id": "TAOUSDT:order_block:1787356898333",
       "symbol": "TAOUSDT",
@@ -1543,54 +1517,6 @@
       "thin_margin_pass": false,
       "tg_message_id": 6515
     },
-    "ZECUSDT:breakout:1787364038186": {
-      "id": "ZECUSDT:breakout:1787364038186",
-      "symbol": "ZECUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 812.0,
-      "sl": 758.9983445667809,
-      "tp1": 928.6036419530819,
-      "tp2": 1061.1077805361297,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999999,
-      "rr_tp1": 2.1999999999999997,
-      "rr_tp2": 4.700000000000001,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787364038.1898298,
-      "last_checked_ts": 1787373900000,
-      "sl_buffer_used": 6.361324346575272,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6529
-    },
     "DOTUSDT:momentum:1787364038188": {
       "id": "DOTUSDT:momentum:1787364038188",
       "symbol": "DOTUSDT",
@@ -1638,6 +1564,101 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6530
+    },
+    "ZECUSDT:momentum:1787375724620": {
+      "id": "ZECUSDT:momentum:1787375724620",
+      "symbol": "ZECUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 823.69,
+      "sl": 696.2210821165705,
+      "tp1": 1104.121619343545,
+      "tp2": 1422.793914052119,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.705031465950421,
+        "adx_strength": 1
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.700000000000001,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7470129909390573,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787375724.625649,
+      "last_checked_ts": 1787375724625,
+      "sl_buffer_used": 11.198917883429443,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6559
+    },
+    "TRXUSDT:liquidity_sweep:1787375724622": {
+      "id": "TRXUSDT:liquidity_sweep:1787375724622",
+      "symbol": "TRXUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "long",
+      "entry": 0.34719,
+      "sl": 0.34153315594322525,
+      "tp1": 0.35963505692490444,
+      "tp2": 0.3737771670668413,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.6900938837917974,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.5504694189589869
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.699999999999995,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.679884130772329,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787375725.161434,
+      "last_checked_ts": 1787375725161,
+      "sl_buffer_used": 0.000617304056774753,
+      "mae": 0.0,
+      "sfp_purity": 0.5504694189589869,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6560
     }
   },
   "daily_summary_date": "2026-08-21"
