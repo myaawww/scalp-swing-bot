@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-22T07:45:21.403577+00:00"
+    "last_run_ts": "2026-08-22T08:01:35.016293+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -555,17 +555,22 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.200000000000001
+      },
+      "TAOUSDT|high_vol|4h|order_block": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 51,
-        "n_since_last_gate": 27,
+        "n": 52,
+        "n_since_last_gate": 28,
         "by_key": {
           "global": {
-            "n": 27,
-            "n_since_last_gate": 7,
-            "n_since_last_fast_gate": 7,
+            "n": 28,
+            "n_since_last_gate": 8,
+            "n_since_last_fast_gate": 8,
             "fast_gate_ever_fired": true
           }
         }
@@ -651,17 +656,21 @@
       "calib|momentum|mid": {
         "n": 1,
         "wins": 0
+      },
+      "calib|order_block|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 57,
+      "signals": 58,
       "wins": 24,
-      "losses": 33,
+      "losses": 34,
       "expired": 1,
-      "sum_r": 63.121473682960406,
+      "sum_r": 62.121473682960406,
       "gross_profit_r": 96.12147368296041,
-      "gross_loss_r": 33.0,
-      "sum_hold_minutes": 51486.19884323676
+      "gross_loss_r": 34.0,
+      "sum_hold_minutes": 51965.109339237206
     }
   },
   "tier2": {
@@ -1292,6 +1301,17 @@
         "adaptive_delta": "engine_weights[volatility_expansion] += step",
         "resolved_ts": 1787378429.0352213,
         "signal_ts": 1787179523.7124262
+      },
+      {
+        "id": "TAOUSDT:order_block:1787356898333",
+        "symbol": "TAOUSDT",
+        "engine": "order_block",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1787385632.965375,
+        "signal_ts": 1787356898.335615
       }
     ]
   },
@@ -1331,7 +1351,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1787378400000,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1379,7 +1399,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1787378400000,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1426,7 +1446,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1787378400000,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1437,54 +1457,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6267
-    },
-    "TAOUSDT:order_block:1787356898333": {
-      "id": "TAOUSDT:order_block:1787356898333",
-      "symbol": "TAOUSDT",
-      "engine": "order_block",
-      "direction": "short",
-      "entry": 230.045,
-      "sl": 236.9083032853716,
-      "tp1": 211.52,
-      "tp2": 210.14733934292568,
-      "entry_kind": "pending",
-      "timeframe": "4h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear",
-        "expansion"
-      ],
-      "confluences": {
-        "htf_ob_quality": 0.7128649695272996
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.8495688030779582,
-      "rr_tp1": 2.6991376061559165,
-      "rr_tp2": 2.8991376061559184,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 12,
-      "entry_filled": false,
-      "score": 0.7641249914191578,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787356898.335615,
-      "last_checked_ts": 1787356898335,
-      "sl_buffer_used": 2.518303285371621,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6515
     },
     "DOTUSDT:momentum:1787364038188": {
       "id": "DOTUSDT:momentum:1787364038188",
@@ -1522,7 +1494,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787364038.7587724,
-      "last_checked_ts": 1787378400000,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 0.006735697482662483,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1570,7 +1542,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1787378400000,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1617,7 +1589,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375725.161434,
-      "last_checked_ts": 1787383800000,
+      "last_checked_ts": 1787384700000,
       "sl_buffer_used": 0.000617304056774753,
       "mae": 0.0,
       "sfp_purity": 0.5504694189589869,
@@ -1665,7 +1637,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1787378434499,
+      "last_checked_ts": 1787382000000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1678,5 +1650,5 @@
       "tg_message_id": 6566
     }
   },
-  "daily_summary_date": "2026-08-21"
+  "daily_summary_date": "2026-08-22"
 }
