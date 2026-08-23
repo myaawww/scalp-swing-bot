@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-23T05:00:35.416911+00:00"
+    "last_run_ts": "2026-08-23T05:15:22.800630+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1546,7 +1546,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375725.161434,
-      "last_checked_ts": 1787460300000,
+      "last_checked_ts": 1787461200000,
       "sl_buffer_used": 0.000617304056774753,
       "mae": 3.0460000000009924e-05,
       "sfp_purity": 0.5504694189589869,
@@ -1653,6 +1653,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6583
+    },
+    "LINKUSDT:breakout:1787462122230": {
+      "id": "LINKUSDT:breakout:1787462122230",
+      "symbol": "LINKUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 11.196,
+      "sl": 11.296928492195647,
+      "tp1": 10.95,
+      "tp2": 10.929814301560869,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.7186846085203338,
+      "rr_tp1": 2.4373692170406676,
+      "rr_tp2": 2.637369217040675,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1787462122.2315717,
+      "last_checked_ts": 1787462122231,
+      "sl_buffer_used": 0.033542793756516524,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 6603
     }
   },
   "daily_summary_date": "2026-08-22"
