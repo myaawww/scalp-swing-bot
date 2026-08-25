@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-25T07:45:20.175846+00:00"
+    "last_run_ts": "2026-08-25T08:01:36.322763+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1323,7 +1323,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1371,7 +1371,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1418,7 +1418,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1466,7 +1466,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1513,7 +1513,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375725.161434,
-      "last_checked_ts": 1787643000000,
+      "last_checked_ts": 1787643900000,
       "sl_buffer_used": 0.000617304056774753,
       "mae": 0.0001504599999999634,
       "sfp_purity": 0.5504694189589869,
@@ -1561,7 +1561,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1609,7 +1609,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787396433.7579613,
-      "last_checked_ts": 1787637600000,
+      "last_checked_ts": 1787641200000,
       "sl_buffer_used": 0.002847523021115508,
       "mae": 0.0002600000000000102,
       "sfp_purity": 1.0,
@@ -1647,7 +1647,7 @@
       "ev_estimate": 0.8369630803129138,
       "rr_tp1": 2.6739261606258276,
       "rr_tp2": 2.8739261606258273,
-      "pending_bars_elapsed": 10,
+      "pending_bars_elapsed": 11,
       "pending_expiry_bars": 12,
       "entry_filled": false,
       "score": 0.7883747102347552,
@@ -1657,7 +1657,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787481027.0045836,
-      "last_checked_ts": 1787616000000,
+      "last_checked_ts": 1787630400000,
       "sl_buffer_used": 0.5734316933062747,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1670,5 +1670,5 @@
       "tg_message_id": 6611
     }
   },
-  "daily_summary_date": "2026-08-24"
+  "daily_summary_date": "2026-08-25"
 }
