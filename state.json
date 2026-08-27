@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-27T22:00:44.576389+00:00"
+    "last_run_ts": "2026-08-27T22:15:27.588895+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,28 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "ADAUSDT:breakout:1786570228308",
-        "symbol": "ADAUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1786572921.545055,
-        "signal_ts": 1786570229.4473908
-      },
-      {
-        "id": "PENGUUSDT:liquidity_sweep:1786571128288",
-        "symbol": "PENGUUSDT",
-        "engine": "liquidity_sweep",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1786572922.6638901,
-        "signal_ts": 1786571128.291635
-      },
       {
         "id": "ONDOUSDT:breakout:1786570228305",
         "symbol": "ONDOUSDT",
