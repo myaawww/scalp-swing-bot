@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-27T21:15:25.441277+00:00"
+    "last_run_ts": "2026-08-27T21:30:28.101027+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,17 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "UNIUSDT:breakout:1786567525252",
-        "symbol": "UNIUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 5/8 of genuine_variance; category 8/6 of all losses)",
-        "resolved_ts": 1786570224.9988186,
-        "signal_ts": 1786567525.2537427
-      },
       {
         "id": "ADAUSDT:breakout:1786570228308",
         "symbol": "ADAUSDT",
