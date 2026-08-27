@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-27T11:45:20.191040+00:00"
+    "last_run_ts": "2026-08-27T12:01:35.497463+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -696,17 +696,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "ZECUSDT:trend_continuation:1786489240191",
-        "symbol": "ZECUSDT",
-        "engine": "trend_continuation",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1786536033.1006825,
-        "signal_ts": 1786489240.195502
-      },
-      {
         "id": "DOTUSDT:trend_continuation:1786503634630",
         "symbol": "DOTUSDT",
         "engine": "trend_continuation",
@@ -1360,7 +1349,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1787824800000,
+      "last_checked_ts": 1787828400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1408,7 +1397,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1787824800000,
+      "last_checked_ts": 1787828400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1455,7 +1444,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1787824800000,
+      "last_checked_ts": 1787828400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1503,7 +1492,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1787824800000,
+      "last_checked_ts": 1787828400000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1551,7 +1540,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1787824800000,
+      "last_checked_ts": 1787828400000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
