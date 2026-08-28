@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-28T03:00:40.029889+00:00"
+    "last_run_ts": "2026-08-28T03:30:29.397054+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,17 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "APTUSDT:breakout:1786570228311",
-        "symbol": "APTUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1786590918.904345,
-        "signal_ts": 1786570230.0110924
-      },
       {
         "id": "ADAUSDT:volatility_expansion:1786572925768",
         "symbol": "ADAUSDT",
