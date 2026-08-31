@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-08-31T03:00:33.566552+00:00"
+    "last_run_ts": "2026-08-31T03:15:22.693371+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,17 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "APTUSDT:pullback:1786817722962",
-        "symbol": "APTUSDT",
-        "engine": "pullback",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1786849236.3230727,
-        "signal_ts": 1786817722.962996
-      },
       {
         "id": "UNIUSDT:trend_continuation:1786773633605",
         "symbol": "UNIUSDT",
