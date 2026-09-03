@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T06:30:27.859218+00:00"
+    "last_run_ts": "2026-09-03T06:45:23.440219+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,39 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "SOLUSDT:breakout:1787120121739",
-        "symbol": "SOLUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787121919.2759745,
-        "signal_ts": 1787120121.7427518
-      },
-      {
-        "id": "HYPEUSDT:breakout:1787120121737",
-        "symbol": "HYPEUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787121920.4001334,
-        "signal_ts": 1787120122.283492
-      },
-      {
-        "id": "TAOUSDT:breakout:1787120121740",
-        "symbol": "TAOUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 15/20 of genuine_variance; category 20/19 of all losses)",
-        "resolved_ts": 1787121921.273535,
-        "signal_ts": 1787120122.808264
-      },
       {
         "id": "LINKUSDT:pullback:1786770037297",
         "symbol": "LINKUSDT",
