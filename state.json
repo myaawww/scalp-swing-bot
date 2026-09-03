@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T15:45:21.935922+00:00"
+    "last_run_ts": "2026-09-03T16:01:36.014540+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -701,28 +701,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "LTCUSDT:momentum:1786568434291",
-        "symbol": "LTCUSDT",
-        "engine": "momentum",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "filter_over_permissiveness",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787155234.8622825,
-        "signal_ts": 1786568434.292486
-      },
-      {
-        "id": "SUIUSDT:breakout:1787153436747",
-        "symbol": "SUIUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "confidence_miscalibration",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787155236.8462086,
-        "signal_ts": 1787153436.7511642
-      },
-      {
         "id": "ZECUSDT:breakout:1787150726647",
         "symbol": "ZECUSDT",
         "engine": "breakout",
@@ -1046,7 +1024,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788444000000,
+      "last_checked_ts": 1788447600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1094,7 +1072,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788444000000,
+      "last_checked_ts": 1788447600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1141,7 +1119,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788444000000,
+      "last_checked_ts": 1788447600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1189,7 +1167,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788444000000,
+      "last_checked_ts": 1788447600000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1237,7 +1215,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788444000000,
+      "last_checked_ts": 1788447600000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1285,7 +1263,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1788364894.8717682,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788436800000,
       "sl_buffer_used": 0.10616874684455256,
       "mae": 0.0,
       "sfp_purity": 1.0,
