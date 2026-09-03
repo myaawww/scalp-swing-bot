@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T22:30:24.747794+00:00"
+    "last_run_ts": "2026-09-03T22:45:21.985791+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,28 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "NEARUSDT:breakout:1787174130865",
-        "symbol": "NEARUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787179519.515489,
-        "signal_ts": 1787174131.507107
-      },
-      {
-        "id": "BNBUSDT:breakout:1787175923148",
-        "symbol": "BNBUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787179520.602915,
-        "signal_ts": 1787175923.150922
-      },
       {
         "id": "XLMUSDT:breakout:1787152528120",
         "symbol": "XLMUSDT",
