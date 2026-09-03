@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T15:30:28.400086+00:00"
+    "last_run_ts": "2026-09-03T15:45:21.935922+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,28 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "DOTUSDT:breakout:1787136321348",
-        "symbol": "DOTUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.699999999999992,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787153430.1140537,
-        "signal_ts": 1787136321.3509977
-      },
-      {
-        "id": "BNBUSDT:breakout:1787151641636",
-        "symbol": "BNBUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.700000000000038,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787153431.71432,
-        "signal_ts": 1787151641.639811
-      },
       {
         "id": "LTCUSDT:momentum:1786568434291",
         "symbol": "LTCUSDT",
