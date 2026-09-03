@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T09:00:37.830108+00:00"
+    "last_run_ts": "2026-09-03T09:15:25.210702+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -695,17 +695,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "NEARUSDT:breakout:1787122836693",
-        "symbol": "NEARUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787130923.1246731,
-        "signal_ts": 1787122836.69725
-      },
       {
         "id": "ETHUSDT:breakout:1787129204606",
         "symbol": "ETHUSDT",
