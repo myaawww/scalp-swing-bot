@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T21:00:38.867934+00:00"
+    "last_run_ts": "2026-09-03T21:15:30.285726+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,39 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "AAVEUSDT:breakout:1787151641638",
-        "symbol": "AAVEUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.700000000000005,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787174124.7054849,
-        "signal_ts": 1787151643.009349
-      },
-      {
-        "id": "DOGEUSDT:breakout:1787152528119",
-        "symbol": "DOGEUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.699999999999993,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787174125.967212,
-        "signal_ts": 1787152528.1216357
-      },
-      {
-        "id": "LINKUSDT:breakout:1787153436750",
-        "symbol": "LINKUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.699999999999997,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787174127.8744085,
-        "signal_ts": 1787153437.470296
-      },
       {
         "id": "ZECUSDT:breakout:1787174130865",
         "symbol": "ZECUSDT",
