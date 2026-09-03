@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T21:30:43.188832+00:00"
+    "last_run_ts": "2026-09-03T21:45:26.201412+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,17 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "ZECUSDT:breakout:1787174130865",
-        "symbol": "ZECUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787175920.1918774,
-        "signal_ts": 1787174130.8698385
-      },
       {
         "id": "ONDOUSDT:breakout:1787174130865",
         "symbol": "ONDOUSDT",
