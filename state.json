@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T15:00:49.109295+00:00"
+    "last_run_ts": "2026-09-03T15:15:24.571573+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,28 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "UNIUSDT:breakout:1787139026746",
-        "symbol": "UNIUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.699999999999981,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787152522.74689,
-        "signal_ts": 1787139026.7475936
-      },
-      {
-        "id": "BTCUSDT:breakout:1787148922929",
-        "symbol": "BTCUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.700000000000003,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787152523.7450016,
-        "signal_ts": 1787148922.9338555
-      },
       {
         "id": "DOTUSDT:breakout:1787136321348",
         "symbol": "DOTUSDT",
