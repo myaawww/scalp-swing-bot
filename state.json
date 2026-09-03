@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T09:45:21.503536+00:00"
+    "last_run_ts": "2026-09-03T10:00:34.811482+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -580,6 +580,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "TRXUSDT|low_vol|1h|range_trading": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -608,13 +613,13 @@
         }
       },
       "filter_over_permissiveness": {
-        "n": 2,
-        "n_since_last_gate": 2,
+        "n": 3,
+        "n_since_last_gate": 3,
         "by_key": {
           "global": {
-            "n": 2,
-            "n_since_last_gate": 2,
-            "n_since_last_fast_gate": 2,
+            "n": 3,
+            "n_since_last_gate": 3,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": false
           }
         }
@@ -646,7 +651,7 @@
     },
     "calibration": {
       "calib|range_trading|low": {
-        "n": 4,
+        "n": 5,
         "wins": 1
       },
       "calib|mean_reversion|low": {
@@ -683,29 +688,18 @@
       }
     },
     "totals": {
-      "signals": 63,
+      "signals": 64,
       "wins": 24,
-      "losses": 39,
+      "losses": 40,
       "expired": 3,
-      "sum_r": 57.121473682960406,
+      "sum_r": 56.121473682960406,
       "gross_profit_r": 96.12147368296041,
-      "gross_loss_r": 39.0,
-      "sum_hold_minutes": 63920.07159963448
+      "gross_loss_r": 40.0,
+      "sum_hold_minutes": 64039.02444943189
     }
   },
   "tier2": {
     "trades": [
-      {
-        "id": "ETHUSDT:breakout:1787129204606",
-        "symbol": "ETHUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787132723.585301,
-        "signal_ts": 1787129204.6135929
-      },
       {
         "id": "PENGUUSDT:breakout:1787138126366",
         "symbol": "PENGUUSDT",
@@ -1101,6 +1095,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1787691638.0064018,
         "signal_ts": 1787662840.067995
+      },
+      {
+        "id": "TRXUSDT:range_trading:1788422493436",
+        "symbol": "TRXUSDT",
+        "engine": "range_trading",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "filter_over_permissiveness",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1788429630.6100655,
+        "signal_ts": 1788422493.4390776
       }
     ]
   },
@@ -1140,7 +1145,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788426000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1188,7 +1193,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788426000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1235,7 +1240,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788426000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1283,7 +1288,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788426000000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1331,7 +1336,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788422400000,
+      "last_checked_ts": 1788426000000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1390,53 +1395,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6813
-    },
-    "TRXUSDT:range_trading:1788422493436": {
-      "id": "TRXUSDT:range_trading:1788422493436",
-      "symbol": "TRXUSDT",
-      "engine": "range_trading",
-      "direction": "short",
-      "entry": 0.32594,
-      "sl": 0.326892142184038,
-      "tp1": 0.321541,
-      "tp2": 0.3213505715631924,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.42082563154655217
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.810054146190649,
-      "rr_tp1": 4.620108292381298,
-      "rr_tp2": 4.82010829238131,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8009991572432476,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1788422493.4390776,
-      "last_checked_ts": 1788422493439,
-      "sl_buffer_used": 0.00037000000000003697,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": true,
-      "tg_message_id": 6826
     }
   },
   "daily_summary_date": "2026-09-03"
