@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-03T22:15:21.894302+00:00"
+    "last_run_ts": "2026-09-03T22:30:24.747794+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -700,17 +700,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "ONDOUSDT:breakout:1787174130865",
-        "symbol": "ONDOUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787177726.0284092,
-        "signal_ts": 1787174132.1134467
-      },
       {
         "id": "NEARUSDT:breakout:1787174130865",
         "symbol": "NEARUSDT",
