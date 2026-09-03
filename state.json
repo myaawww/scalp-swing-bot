@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-02T23:45:23.980752+00:00"
+    "last_run_ts": "2026-09-03T00:01:43.543353+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -696,17 +696,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "DOTUSDT:trend_continuation:1787090436993",
-        "symbol": "DOTUSDT",
-        "engine": "trend_continuation",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787097630.7704234,
-        "signal_ts": 1787090436.9955347
-      },
-      {
         "id": "NEARUSDT:breakout:1787098526246",
         "symbol": "NEARUSDT",
         "engine": "breakout",
@@ -1217,7 +1206,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788386400000,
+      "last_checked_ts": 1788390000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1265,7 +1254,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788386400000,
+      "last_checked_ts": 1788390000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1312,7 +1301,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788386400000,
+      "last_checked_ts": 1788390000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1360,7 +1349,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788386400000,
+      "last_checked_ts": 1788390000000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1408,7 +1397,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788386400000,
+      "last_checked_ts": 1788390000000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1446,7 +1435,7 @@
       "ev_estimate": 0.7094504556774615,
       "rr_tp1": 2.418900911354923,
       "rr_tp2": 2.618900911354922,
-      "pending_bars_elapsed": 0,
+      "pending_bars_elapsed": 1,
       "pending_expiry_bars": 12,
       "entry_filled": false,
       "score": 0.794308885532068,
@@ -1456,7 +1445,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1788364894.8717682,
-      "last_checked_ts": 1788364894871,
+      "last_checked_ts": 1788379200000,
       "sl_buffer_used": 0.10616874684455256,
       "mae": 0.0,
       "sfp_purity": 1.0,
