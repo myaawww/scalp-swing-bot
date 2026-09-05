@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-05T06:30:23.445661+00:00"
+    "last_run_ts": "2026-09-05T06:45:21.148063+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1148,6 +1148,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6566
+    },
+    "LINKUSDT:order_block:1788590720361": {
+      "id": "LINKUSDT:order_block:1788590720361",
+      "symbol": "LINKUSDT",
+      "engine": "order_block",
+      "direction": "short",
+      "entry": 12.0515,
+      "sl": 12.271,
+      "tp1": 11.436,
+      "tp2": 11.3921,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
+      ],
+      "confluences": {
+        "htf_ob_quality": 0.728269780459712
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.9020501138952182,
+      "rr_tp1": 2.8041002277904363,
+      "rr_tp2": 3.0041002277904396,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.7762181121484372,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1788590720.363125,
+      "last_checked_ts": 1788590720363,
+      "sl_buffer_used": 0.0990000000000002,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bull",
+        "macro_bias": "bull"
+      },
+      "regime_label": "bull",
+      "thin_margin_pass": false,
+      "tg_message_id": 6892
     }
   },
   "daily_summary_date": "2026-09-04"
