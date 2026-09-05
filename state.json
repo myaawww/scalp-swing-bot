@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-05T14:00:33.060257+00:00"
+    "last_run_ts": "2026-09-05T14:15:20.075747+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -710,17 +710,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "APTUSDT:volatility_expansion:1787216438605",
-        "symbol": "APTUSDT",
-        "engine": "volatility_expansion",
-        "result": "win",
-        "realized_r": 4.700000000000003,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[volatility_expansion] += step",
-        "resolved_ts": 1787320841.5847142,
-        "signal_ts": 1787216438.6066442
-      },
       {
         "id": "AAVEUSDT:pullback:1787320846250",
         "symbol": "AAVEUSDT",
