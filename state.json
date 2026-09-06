@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-06T01:15:20.318471+00:00"
+    "last_run_ts": "2026-09-06T01:30:23.994388+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1184,6 +1184,53 @@
       "regime_label": "bull",
       "thin_margin_pass": false,
       "tg_message_id": 6892
+    },
+    "APTUSDT:liquidity_sweep:1788658222993": {
+      "id": "APTUSDT:liquidity_sweep:1788658222993",
+      "symbol": "APTUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "short",
+      "entry": 0.6253,
+      "sl": 0.6295179925481366,
+      "tp1": 0.6133,
+      "tp2": 0.6124564014903726,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.6709090495867965,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.4545452479339828
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.9224776197508118,
+      "rr_tp1": 2.8449552395016235,
+      "rr_tp2": 3.0449552395016286,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.724163561820647,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1788658222.9937046,
+      "last_checked_ts": 1788658222993,
+      "sl_buffer_used": 0.001740292548136559,
+      "mae": 0.0,
+      "sfp_purity": 0.4545452479339828,
+      "regime_at_entry": {
+        "label": "ranging",
+        "macro_bias": "bull"
+      },
+      "regime_label": "ranging",
+      "thin_margin_pass": true,
+      "tg_message_id": 6920
     }
   },
   "daily_summary_date": "2026-09-05"
