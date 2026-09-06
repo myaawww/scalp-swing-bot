@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-06T05:00:33.768396+00:00"
+    "last_run_ts": "2026-09-06T05:15:25.288763+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -746,28 +746,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "AAVEUSDT:breakout:1787346038162",
-        "symbol": "AAVEUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 2.199999999999999,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1787375720.4543371,
-        "signal_ts": 1787346038.1630664
-      },
-      {
-        "id": "ZECUSDT:breakout:1787364038186",
-        "symbol": "ZECUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787375721.4219294,
-        "signal_ts": 1787364038.1898298
-      },
       {
         "id": "NEARUSDT:volatility_expansion:1787179523708",
         "symbol": "NEARUSDT",
