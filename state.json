@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-06T11:30:30.241188+00:00"
+    "last_run_ts": "2026-09-06T11:45:21.302160+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1118,6 +1118,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6566
+    },
+    "ONDOUSDT:liquidity_sweep:1788695120649": {
+      "id": "ONDOUSDT:liquidity_sweep:1788695120649",
+      "symbol": "ONDOUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "short",
+      "entry": 0.37993,
+      "sl": 0.38214072000000004,
+      "tp1": 0.37531,
+      "tp2": 0.37486785599999994,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.7022856444082028,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.6114282220410145
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5449084461170792,
+      "rr_tp1": 2.0898168922341585,
+      "rr_tp2": 2.2898168922341684,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.6825791487451286,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1788695120.6537538,
+      "last_checked_ts": 1788695120653,
+      "sl_buffer_used": 0.0007600000000000384,
+      "mae": 0.0,
+      "sfp_purity": 0.6114282220410145,
+      "regime_at_entry": {
+        "label": "ranging",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "ranging",
+      "thin_margin_pass": false,
+      "tg_message_id": 6938
     }
   },
   "daily_summary_date": "2026-09-06"
