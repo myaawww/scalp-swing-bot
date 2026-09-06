@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-06T01:45:24.074300+00:00"
+    "last_run_ts": "2026-09-06T02:00:35.146801+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -605,6 +605,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "APTUSDT|ranging|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -667,6 +672,18 @@
             "fast_gate_ever_fired": false
           }
         }
+      },
+      "sfp_mss_sequence_violated": {
+        "n": 1,
+        "n_since_last_gate": 1,
+        "by_key": {
+          "global": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          }
+        }
       }
     },
     "calibration": {
@@ -705,43 +722,25 @@
       "calib|order_block|mid": {
         "n": 2,
         "wins": 0
+      },
+      "calib|liquidity_sweep|mid": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 68,
+      "signals": 69,
       "wins": 24,
-      "losses": 44,
+      "losses": 45,
       "expired": 3,
-      "sum_r": 52.121473682960406,
+      "sum_r": 51.121473682960406,
       "gross_profit_r": 96.12147368296041,
-      "gross_loss_r": 44.0,
-      "sum_hold_minutes": 66527.95767677228
+      "gross_loss_r": 45.0,
+      "sum_hold_minutes": 66558.08153471151
     }
   },
   "tier2": {
     "trades": [
-      {
-        "id": "SUIUSDT:volatility_expansion:1787179523709",
-        "symbol": "SUIUSDT",
-        "engine": "volatility_expansion",
-        "result": "win",
-        "realized_r": 4.700000000000004,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[volatility_expansion] += step",
-        "resolved_ts": 1787364032.4650402,
-        "signal_ts": 1787179524.375422
-      },
-      {
-        "id": "TRXUSDT:breakout:1787360435375",
-        "symbol": "TRXUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787364033.593754,
-        "signal_ts": 1787360435.3810139
-      },
       {
         "id": "AAVEUSDT:breakout:1787346038162",
         "symbol": "AAVEUSDT",
@@ -895,6 +894,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1788637521.1556666,
         "signal_ts": 1788633026.5285
+      },
+      {
+        "id": "APTUSDT:liquidity_sweep:1788658222993",
+        "symbol": "APTUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "sfp_mss_sequence_violated",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1788660030.425181,
+        "signal_ts": 1788658222.9937046
       }
     ]
   },
@@ -934,7 +944,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788652800000,
+      "last_checked_ts": 1788656400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -982,7 +992,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788652800000,
+      "last_checked_ts": 1788656400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1029,7 +1039,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788652800000,
+      "last_checked_ts": 1788656400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1077,7 +1087,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788652800000,
+      "last_checked_ts": 1788656400000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1120,12 +1130,12 @@
       "entry_filled": true,
       "score": 0.8142977979998559,
       "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1788656400000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788652800000,
+      "last_checked_ts": 1788656400000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1184,53 +1194,6 @@
       "regime_label": "bull",
       "thin_margin_pass": false,
       "tg_message_id": 6892
-    },
-    "APTUSDT:liquidity_sweep:1788658222993": {
-      "id": "APTUSDT:liquidity_sweep:1788658222993",
-      "symbol": "APTUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 0.6253,
-      "sl": 0.6295179925481366,
-      "tp1": 0.6133,
-      "tp2": 0.6124564014903726,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.6709090495867965,
-      "regime_fit": [
-        "reversal",
-        "ranging",
-        "high_vol"
-      ],
-      "confluences": {
-        "sweep_purity": 0.4545452479339828
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.9224776197508118,
-      "rr_tp1": 2.8449552395016235,
-      "rr_tp2": 3.0449552395016286,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.724163561820647,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1788658222.9937046,
-      "last_checked_ts": 1788658222993,
-      "sl_buffer_used": 0.001740292548136559,
-      "mae": 0.0,
-      "sfp_purity": 0.4545452479339828,
-      "regime_at_entry": {
-        "label": "ranging",
-        "macro_bias": "bull"
-      },
-      "regime_label": "ranging",
-      "thin_margin_pass": true,
-      "tg_message_id": 6920
     }
   },
   "daily_summary_date": "2026-09-05"
