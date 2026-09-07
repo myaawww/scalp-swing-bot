@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-07T12:45:24.602212+00:00"
+    "last_run_ts": "2026-09-07T13:00:35.166811+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -13,7 +13,7 @@
           "max": 2.0
         },
         "trend_continuation": {
-          "weight": 1.0,
+          "weight": 1.03,
           "min": 0.35,
           "max": 2.0
         },
@@ -625,11 +625,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AVAXUSDT|ranging|1h|trend_continuation": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.330991654580351
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 60,
+        "n": 61,
         "n_since_last_gate": 36,
         "by_key": {
           "global": {
@@ -711,8 +716,8 @@
         "wins": 1
       },
       "calib|trend_continuation|mid": {
-        "n": 8,
-        "wins": 0
+        "n": 9,
+        "wins": 1
       },
       "calib|pullback|mid": {
         "n": 6,
@@ -744,14 +749,14 @@
       }
     },
     "totals": {
-      "signals": 72,
-      "wins": 24,
+      "signals": 73,
+      "wins": 25,
       "losses": 48,
       "expired": 3,
-      "sum_r": 48.121473682960406,
-      "gross_profit_r": 96.12147368296041,
+      "sum_r": 50.45246533754076,
+      "gross_profit_r": 98.45246533754076,
       "gross_loss_r": 48.0,
-      "sum_hold_minutes": 68013.44584215083
+      "sum_hold_minutes": 68552.47271577913
     }
   },
   "tier2": {
@@ -887,6 +892,17 @@
         "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 36/60 of genuine_variance; category 60/48 of all losses)",
         "resolved_ts": 1788739229.873246,
         "signal_ts": 1788731121.3208098
+      },
+      {
+        "id": "AVAXUSDT:trend_continuation:1788753688825",
+        "symbol": "AVAXUSDT",
+        "engine": "trend_continuation",
+        "result": "win",
+        "realized_r": 2.330991654580351,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[trend_continuation] += step",
+        "resolved_ts": 1788786030.4389372,
+        "signal_ts": 1788753688.8265195
       }
     ]
   },
@@ -926,7 +942,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -974,7 +990,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1021,7 +1037,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1069,7 +1085,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1117,7 +1133,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1212,7 +1228,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1788750033.8046618,
-      "last_checked_ts": 1788778800000,
+      "last_checked_ts": 1788782400000,
       "sl_buffer_used": 0.0022119680380323363,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1223,54 +1239,6 @@
       "regime_label": "ranging",
       "thin_margin_pass": false,
       "tg_message_id": 6972
-    },
-    "AVAXUSDT:trend_continuation:1788753688825": {
-      "id": "AVAXUSDT:trend_continuation:1788753688825",
-      "symbol": "AVAXUSDT",
-      "engine": "trend_continuation",
-      "direction": "long",
-      "entry": 7.7735,
-      "sl": 7.683401101870899,
-      "tp1": 7.9655,
-      "tp2": 7.98351977962582,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5654958272901736,
-      "rr_tp1": 2.130991654580347,
-      "rr_tp2": 2.330991654580351,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.809120419330423,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1788757200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1788753688.8265195,
-      "last_checked_ts": 1788778800000,
-      "sl_buffer_used": 0.03459889812910089,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "ranging",
-        "macro_bias": "bear"
-      },
-      "regime_label": "ranging",
-      "thin_margin_pass": false,
-      "tg_message_id": 6974
     }
   },
   "daily_summary_date": "2026-09-07"
