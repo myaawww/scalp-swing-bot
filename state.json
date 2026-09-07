@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-06T23:45:19.170260+00:00"
+    "last_run_ts": "2026-09-07T00:01:33.317555+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -620,17 +620,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AVAXUSDT|ranging|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 59,
-        "n_since_last_gate": 35,
+        "n": 60,
+        "n_since_last_gate": 36,
         "by_key": {
           "global": {
-            "n": 35,
-            "n_since_last_gate": 15,
-            "n_since_last_fast_gate": 15,
+            "n": 36,
+            "n_since_last_gate": 16,
+            "n_since_last_fast_gate": 0,
             "fast_gate_ever_fired": true
           }
         }
@@ -718,7 +723,7 @@
         "wins": 15
       },
       "calib|liquidity_sweep|high": {
-        "n": 4,
+        "n": 5,
         "wins": 0
       },
       "calib|volatility_expansion|mid": {
@@ -739,14 +744,14 @@
       }
     },
     "totals": {
-      "signals": 71,
+      "signals": 72,
       "wins": 24,
-      "losses": 47,
+      "losses": 48,
       "expired": 3,
-      "sum_r": 49.121473682960406,
+      "sum_r": 48.121473682960406,
       "gross_profit_r": 96.12147368296041,
-      "gross_loss_r": 47.0,
-      "sum_hold_minutes": 67878.30330154895
+      "gross_loss_r": 48.0,
+      "sum_hold_minutes": 68013.44584215083
     }
   },
   "tier2": {
@@ -893,6 +898,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1788697825.8976088,
         "signal_ts": 1788695120.6537538
+      },
+      {
+        "id": "AVAXUSDT:liquidity_sweep:1788731121318",
+        "symbol": "AVAXUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 36/60 of genuine_variance; category 60/48 of all losses)",
+        "resolved_ts": 1788739229.873246,
+        "signal_ts": 1788731121.3208098
       }
     ]
   },
@@ -932,7 +948,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788732000000,
+      "last_checked_ts": 1788735600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -980,7 +996,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788732000000,
+      "last_checked_ts": 1788735600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1027,7 +1043,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788732000000,
+      "last_checked_ts": 1788735600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1075,7 +1091,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788732000000,
+      "last_checked_ts": 1788735600000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1123,7 +1139,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788732000000,
+      "last_checked_ts": 1788735600000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1135,52 +1151,53 @@
       "thin_margin_pass": false,
       "tg_message_id": 6566
     },
-    "AVAXUSDT:liquidity_sweep:1788731121318": {
-      "id": "AVAXUSDT:liquidity_sweep:1788731121318",
-      "symbol": "AVAXUSDT",
-      "engine": "liquidity_sweep",
+    "DOTUSDT:order_block:1788739292649": {
+      "id": "DOTUSDT:order_block:1788739292649",
+      "symbol": "DOTUSDT",
+      "engine": "order_block",
       "direction": "short",
-      "entry": 7.8305,
-      "sl": 7.879340838490035,
-      "tp1": 7.654,
-      "tp2": 7.644231832301993,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.7699999954761927,
+      "entry": 0.966175,
+      "sl": 0.9998055760306968,
+      "tp1": 0.8922,
+      "tp2": 0.8854738847938607,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
       "regime_fit": [
-        "reversal",
-        "ranging",
-        "high_vol"
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
       ],
       "confluences": {
-        "sweep_purity": 0.9499999773809635
+        "htf_ob_quality": 0.6082194270167038
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 1.3068895360591664,
-      "rr_tp1": 3.6137790721183327,
-      "rr_tp2": 3.8137790721183293,
+      "ev_estimate": 0.5998176173443828,
+      "rr_tp1": 2.1996352346887655,
+      "rr_tp2": 2.3996352346887644,
       "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8631559795410774,
-      "tier": "A+",
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.6933994135538465,
+      "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1788731121.3208098,
-      "last_checked_ts": 1788737400000,
-      "sl_buffer_used": 0.013012438490035414,
-      "mae": 0.01077160000000088,
-      "sfp_purity": 0.9499999773809635,
+      "signal_ts": 1788739292.6516933,
+      "last_checked_ts": 1788739292651,
+      "sl_buffer_used": 0.009805576030696754,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "ranging",
-        "macro_bias": "neutral"
+        "macro_bias": "bull"
       },
       "regime_label": "ranging",
       "thin_margin_pass": false,
-      "tg_message_id": 6961
+      "tg_message_id": 6965
     }
   },
   "daily_summary_date": "2026-09-06"
