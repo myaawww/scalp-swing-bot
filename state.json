@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-07T06:30:26.498662+00:00"
+    "last_run_ts": "2026-09-07T06:45:21.615769+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -756,17 +756,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "LINKUSDT:breakout:1787462122230",
-        "symbol": "LINKUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1787467518.4501565,
-        "signal_ts": 1787462122.2315717
-      },
       {
         "id": "TRXUSDT:liquidity_sweep:1787375724622",
         "symbol": "TRXUSDT",
