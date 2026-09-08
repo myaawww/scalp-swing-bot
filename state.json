@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-08T15:45:20.786461+00:00"
+    "last_run_ts": "2026-09-08T16:01:36.005645+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -974,7 +974,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1022,7 +1022,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1069,7 +1069,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1117,7 +1117,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1165,7 +1165,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1212,7 +1212,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1788861638.4935973,
-      "last_checked_ts": 1788876000000,
+      "last_checked_ts": 1788879600000,
       "sl_buffer_used": 0.0049000000000000155,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1223,6 +1223,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": true,
       "tg_message_id": 7033
+    },
+    "ADAUSDT:range_trading:1788883295248": {
+      "id": "ADAUSDT:range_trading:1788883295248",
+      "symbol": "ADAUSDT",
+      "engine": "range_trading",
+      "direction": "short",
+      "entry": 0.22921,
+      "sl": 0.23240107988757167,
+      "tp1": 0.216446,
+      "tp2": 0.21580778402248565,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.4338016177096651
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.4999499306977677,
+      "rr_tp1": 3.9998998613955354,
+      "rr_tp2": 4.199899861395539,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7904716662009875,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1788883295.251174,
+      "last_checked_ts": 1788883295251,
+      "sl_buffer_used": 0.0013535126455066796,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": true,
+      "tg_message_id": 7053
     }
   },
   "daily_summary_date": "2026-09-08"
