@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-10T14:45:20.653846+00:00"
+    "last_run_ts": "2026-09-10T15:00:38.859096+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -968,7 +968,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789045200000,
+      "last_checked_ts": 1789048800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1016,7 +1016,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789045200000,
+      "last_checked_ts": 1789048800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1063,7 +1063,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789045200000,
+      "last_checked_ts": 1789048800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1111,7 +1111,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1789045200000,
+      "last_checked_ts": 1789048800000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1159,7 +1159,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1789045200000,
+      "last_checked_ts": 1789048800000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1170,6 +1170,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6566
+    },
+    "LTCUSDT:pullback:1789052438328": {
+      "id": "LTCUSDT:pullback:1789052438328",
+      "symbol": "LTCUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 51.980999999999995,
+      "sl": 51.524357460784536,
+      "tp1": 53.401,
+      "tp2": 53.4923285078431,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.615313352695563
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.0548266730029805,
+      "rr_tp1": 3.109653346005961,
+      "rr_tp2": 3.3096533460059674,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.8276844308069238,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789052438.3288066,
+      "last_checked_ts": 1789052438328,
+      "sl_buffer_used": 0.19564253921545988,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7120
     }
   },
   "daily_summary_date": "2026-09-10"
