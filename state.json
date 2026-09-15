@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-15T00:45:24.774791+00:00"
+    "last_run_ts": "2026-09-15T01:00:38.881310+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -650,6 +650,11 @@
         "n": 1,
         "wins": 1,
         "sum_r": 3.3096533460059674
+      },
+      "DOTUSDT|low_vol|1h|range_trading": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -678,13 +683,13 @@
         }
       },
       "filter_over_permissiveness": {
-        "n": 4,
-        "n_since_last_gate": 4,
+        "n": 5,
+        "n_since_last_gate": 5,
         "by_key": {
           "global": {
-            "n": 4,
-            "n_since_last_gate": 4,
-            "n_since_last_fast_gate": 4,
+            "n": 5,
+            "n_since_last_gate": 5,
+            "n_since_last_fast_gate": 5,
             "fast_gate_ever_fired": false
           }
         }
@@ -728,7 +733,7 @@
     },
     "calibration": {
       "calib|range_trading|low": {
-        "n": 7,
+        "n": 8,
         "wins": 2
       },
       "calib|mean_reversion|low": {
@@ -769,14 +774,14 @@
       }
     },
     "totals": {
-      "signals": 78,
+      "signals": 79,
       "wins": 28,
-      "losses": 50,
+      "losses": 51,
       "expired": 3,
-      "sum_r": 58.22910946517942,
+      "sum_r": 57.22910946517942,
       "gross_profit_r": 108.22910946517943,
-      "gross_loss_r": 50.0,
-      "sum_hold_minutes": 74790.17499807675
+      "gross_loss_r": 51.0,
+      "sum_hold_minutes": 76350.10647877851
     }
   },
   "tier2": {
@@ -945,6 +950,17 @@
         "adaptive_delta": "no_change_win_not_causally_attributable",
         "resolved_ts": 1789135231.253897,
         "signal_ts": 1789052438.3288066
+      },
+      {
+        "id": "DOTUSDT:range_trading:1789340438020",
+        "symbol": "DOTUSDT",
+        "engine": "range_trading",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "filter_over_permissiveness",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1789434033.9117217,
+        "signal_ts": 1789340438.0228796
       }
     ]
   },
@@ -984,7 +1000,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789426800000,
+      "last_checked_ts": 1789430400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1032,7 +1048,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789426800000,
+      "last_checked_ts": 1789430400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1079,7 +1095,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789426800000,
+      "last_checked_ts": 1789430400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1127,7 +1143,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1789426800000,
+      "last_checked_ts": 1789430400000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1175,7 +1191,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1789426800000,
+      "last_checked_ts": 1789430400000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1186,53 +1202,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6566
-    },
-    "DOTUSDT:range_trading:1789340438020": {
-      "id": "DOTUSDT:range_trading:1789340438020",
-      "symbol": "DOTUSDT",
-      "engine": "range_trading",
-      "direction": "long",
-      "entry": 0.99907,
-      "sl": 0.9898718481304147,
-      "tp1": 1.038495,
-      "tp2": 1.040334630373917,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.46999653139090514
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.6430935561285476,
-      "rr_tp1": 4.286187112257095,
-      "rr_tp2": 4.486187112257087,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8027692195921436,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1789340438.0228796,
-      "last_checked_ts": 1789426800000,
-      "sl_buffer_used": 0.00391138317788019,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": true,
-      "tg_message_id": 7210
     }
   },
   "daily_summary_date": "2026-09-14"
