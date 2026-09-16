@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-16T13:00:36.341960+00:00"
+    "last_run_ts": "2026-09-16T13:15:21.462428+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1320,6 +1320,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7267
+    },
+    "ADAUSDT:breakout:1789564520890": {
+      "id": "ADAUSDT:breakout:1789564520890",
+      "symbol": "ADAUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 0.1921,
+      "sl": 0.19293265053835223,
+      "tp1": 0.19026816881562506,
+      "tp2": 0.18818654246974445,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000034,
+      "rr_tp1": 2.200000000000007,
+      "rr_tp2": 4.700000000000006,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789564520.8932617,
+      "last_checked_ts": 1789564520893,
+      "sl_buffer_used": 0.00037999999999999146,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7272
     }
   },
   "daily_summary_date": "2026-09-16"
