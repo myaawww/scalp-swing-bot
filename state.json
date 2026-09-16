@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-16T13:45:21.667217+00:00"
+    "last_run_ts": "2026-09-16T14:00:39.159873+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -382,9 +382,9 @@
         "sum_r": 3.6999999999999806
       },
       "ADAUSDT|high_vol|15m|breakout": {
-        "n": 1,
+        "n": 2,
         "wins": 0,
-        "sum_r": -1.0
+        "sum_r": -2.0
       },
       "PENGUUSDT|high_vol|15m|liquidity_sweep": {
         "n": 1,
@@ -659,13 +659,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 67,
-        "n_since_last_gate": 39,
+        "n": 68,
+        "n_since_last_gate": 40,
         "by_key": {
           "global": {
-            "n": 39,
-            "n_since_last_gate": 19,
-            "n_since_last_fast_gate": 3,
+            "n": 40,
+            "n_since_last_gate": 0,
+            "n_since_last_fast_gate": 0,
             "fast_gate_ever_fired": true
           }
         }
@@ -749,7 +749,7 @@
         "wins": 4
       },
       "calib|breakout|mid": {
-        "n": 37,
+        "n": 38,
         "wins": 15
       },
       "calib|liquidity_sweep|high": {
@@ -774,14 +774,14 @@
       }
     },
     "totals": {
-      "signals": 81,
+      "signals": 82,
       "wins": 28,
-      "losses": 53,
+      "losses": 54,
       "expired": 3,
-      "sum_r": 55.22910946517942,
+      "sum_r": 54.22910946517942,
       "gross_profit_r": 108.22910946517943,
-      "gross_loss_r": 53.0,
-      "sum_hold_minutes": 76515.07069156964
+      "gross_loss_r": 54.0,
+      "sum_hold_minutes": 76560.29776699144
     }
   },
   "tier2": {
@@ -983,6 +983,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1789552833.527154,
         "signal_ts": 1789546525.9543796
+      },
+      {
+        "id": "ADAUSDT:breakout:1789564520890",
+        "symbol": "ADAUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance",
+        "resolved_ts": 1789567234.517787,
+        "signal_ts": 1789564520.8932617
       }
     ]
   },
@@ -1022,7 +1033,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1070,7 +1081,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1117,7 +1128,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1165,7 +1176,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1213,7 +1224,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1261,7 +1272,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789545688.115779,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 0.0032311310272250143,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1309,7 +1320,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789550120.3951294,
-      "last_checked_ts": 1789560000000,
+      "last_checked_ts": 1789563600000,
       "sl_buffer_used": 0.6607422348644042,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1320,54 +1331,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7267
-    },
-    "ADAUSDT:breakout:1789564520890": {
-      "id": "ADAUSDT:breakout:1789564520890",
-      "symbol": "ADAUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 0.1921,
-      "sl": 0.19293265053835223,
-      "tp1": 0.19026816881562506,
-      "tp2": 0.18818654246974445,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000034,
-      "rr_tp1": 2.200000000000007,
-      "rr_tp2": 4.700000000000006,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1789564520.8932617,
-      "last_checked_ts": 1789565400000,
-      "sl_buffer_used": 0.00037999999999999146,
-      "mae": 0.0002573494616477656,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 7272
     }
   },
   "daily_summary_date": "2026-09-16"
