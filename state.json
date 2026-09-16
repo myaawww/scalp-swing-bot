@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-16T07:45:19.568865+00:00"
+    "last_run_ts": "2026-09-16T08:01:29.723100+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1000,7 +1000,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789538400000,
+      "last_checked_ts": 1789542000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1048,7 +1048,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789538400000,
+      "last_checked_ts": 1789542000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1095,7 +1095,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789538400000,
+      "last_checked_ts": 1789542000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1143,7 +1143,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1789538400000,
+      "last_checked_ts": 1789542000000,
       "sl_buffer_used": 11.198917883429443,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1191,7 +1191,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1789538400000,
+      "last_checked_ts": 1789542000000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1202,7 +1202,55 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6566
+    },
+    "APTUSDT:momentum:1789545688115": {
+      "id": "APTUSDT:momentum:1789545688115",
+      "symbol": "APTUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 0.5332,
+      "sl": 0.553931131027225,
+      "tp1": 0.48759151174010495,
+      "tp2": 0.4357636841720424,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.48739482150937535,
+        "adx_strength": 1
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000005,
+      "rr_tp1": 2.200000000000001,
+      "rr_tp2": 4.700000000000001,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7239286595931432,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789545688.115779,
+      "last_checked_ts": 1789545688115,
+      "sl_buffer_used": 0.0032311310272250143,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7258
     }
   },
-  "daily_summary_date": "2026-09-15"
+  "daily_summary_date": "2026-09-16"
 }
