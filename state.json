@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-16T09:00:35.758686+00:00"
+    "last_run_ts": "2026-09-16T09:15:20.961294+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -512,9 +512,9 @@
         "sum_r": 4.699999999999993
       },
       "LINKUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 3.6999999999999966
+        "sum_r": 2.6999999999999966
       },
       "XLMUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -659,13 +659,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 65,
-        "n_since_last_gate": 37,
+        "n": 66,
+        "n_since_last_gate": 38,
         "by_key": {
           "global": {
-            "n": 37,
-            "n_since_last_gate": 17,
-            "n_since_last_fast_gate": 1,
+            "n": 38,
+            "n_since_last_gate": 18,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": true
           }
         }
@@ -749,7 +749,7 @@
         "wins": 4
       },
       "calib|breakout|mid": {
-        "n": 35,
+        "n": 36,
         "wins": 15
       },
       "calib|liquidity_sweep|high": {
@@ -774,14 +774,14 @@
       }
     },
     "totals": {
-      "signals": 79,
+      "signals": 80,
       "wins": 28,
-      "losses": 51,
+      "losses": 52,
       "expired": 3,
-      "sum_r": 57.22910946517942,
+      "sum_r": 56.22910946517942,
       "gross_profit_r": 108.22910946517943,
-      "gross_loss_r": 51.0,
-      "sum_hold_minutes": 76350.10647877851
+      "gross_loss_r": 52.0,
+      "sum_hold_minutes": 76409.9444786628
     }
   },
   "tier2": {
@@ -961,6 +961,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1789434033.9117217,
         "signal_ts": 1789340438.0228796
+      },
+      {
+        "id": "LINKUSDT:breakout:1789546525952",
+        "symbol": "LINKUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1789550117.0131755,
+        "signal_ts": 1789546526.7331824
       }
     ]
   },
@@ -1287,7 +1298,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789546525.9543796,
-      "last_checked_ts": 1789548300000,
+      "last_checked_ts": 1789549200000,
       "sl_buffer_used": 0.45999999999997954,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1299,45 +1310,45 @@
       "thin_margin_pass": false,
       "tg_message_id": 7263
     },
-    "LINKUSDT:breakout:1789546525952": {
-      "id": "LINKUSDT:breakout:1789546525952",
-      "symbol": "LINKUSDT",
-      "engine": "breakout",
+    "AAVEUSDT:momentum:1789550120394": {
+      "id": "AAVEUSDT:momentum:1789550120394",
+      "symbol": "AAVEUSDT",
+      "engine": "momentum",
       "direction": "short",
-      "entry": 10.714,
-      "sl": 10.771899043056587,
-      "tp1": 10.58662210527551,
-      "tp2": 10.441874497634043,
+      "entry": 118.54,
+      "sl": 123.2307422348644,
+      "tp1": 108.22036708329836,
+      "tp2": 96.49351149613739,
       "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
       "regime_fit": [
-        "expansion",
         "trending",
+        "expansion",
         "high_vol"
       ],
       "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
+        "rsi_momentum": 0.39102600928122855,
+        "adx_strength": 0.9367368950706688
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.600000000000003,
-      "rr_tp1": 2.200000000000006,
-      "rr_tp2": 4.700000000000006,
+      "ev_estimate": 0.5999999999999996,
+      "rr_tp1": 2.1999999999999993,
+      "rr_tp2": 4.699999999999999,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
+      "score": 0.7061921912541688,
+      "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1789546526.7331824,
-      "last_checked_ts": 1789548300000,
-      "sl_buffer_used": 0.022999999999999687,
-      "mae": 0.0051009569434121715,
+      "signal_ts": 1789550120.3951294,
+      "last_checked_ts": 1789550120395,
+      "sl_buffer_used": 0.6607422348644042,
+      "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
@@ -1345,7 +1356,7 @@
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 7264
+      "tg_message_id": 7267
     }
   },
   "daily_summary_date": "2026-09-16"
