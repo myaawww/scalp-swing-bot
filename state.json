@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-17T14:45:22.563985+00:00"
+    "last_run_ts": "2026-09-17T15:00:41.218656+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -48,7 +48,7 @@
           "max": 2.0
         },
         "momentum": {
-          "weight": 1.0,
+          "weight": 1.03,
           "min": 0.35,
           "max": 2.0
         },
@@ -675,11 +675,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ZECUSDT|high_vol|1h|momentum": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.700000000000001
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 72,
+        "n": 73,
         "n_since_last_gate": 43,
         "by_key": {
           "global": {
@@ -781,8 +786,8 @@
         "wins": 5
       },
       "calib|momentum|mid": {
-        "n": 5,
-        "wins": 0
+        "n": 6,
+        "wins": 1
       },
       "calib|order_block|mid": {
         "n": 4,
@@ -794,14 +799,14 @@
       }
     },
     "totals": {
-      "signals": 87,
-      "wins": 29,
+      "signals": 88,
+      "wins": 30,
       "losses": 58,
       "expired": 3,
-      "sum_r": 52.44635029108573,
-      "gross_profit_r": 110.44635029108575,
+      "sum_r": 57.14635029108573,
+      "gross_profit_r": 115.14635029108575,
       "gross_loss_r": 58.0,
-      "sum_hold_minutes": 79332.614798216
+      "sum_hold_minutes": 117357.7945828676
     }
   },
   "tier2": {
@@ -1069,6 +1074,17 @@
         "adaptive_delta": "engine_weights[liquidity_sweep] += step",
         "resolved_ts": 1789641037.918638,
         "signal_ts": 1789632091.8585057
+      },
+      {
+        "id": "ZECUSDT:momentum:1787375724620",
+        "symbol": "ZECUSDT",
+        "engine": "momentum",
+        "result": "win",
+        "realized_r": 4.700000000000001,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[momentum] += step",
+        "resolved_ts": 1789657235.412728,
+        "signal_ts": 1787375724.625649
       }
     ]
   },
@@ -1108,7 +1124,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789650000000,
+      "last_checked_ts": 1789653600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1156,7 +1172,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789650000000,
+      "last_checked_ts": 1789653600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1203,7 +1219,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789650000000,
+      "last_checked_ts": 1789653600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1214,54 +1230,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 6267
-    },
-    "ZECUSDT:momentum:1787375724620": {
-      "id": "ZECUSDT:momentum:1787375724620",
-      "symbol": "ZECUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 823.69,
-      "sl": 696.2210821165705,
-      "tp1": 1104.121619343545,
-      "tp2": 1422.793914052119,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.705031465950421,
-        "adx_strength": 1
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000001,
-      "rr_tp1": 2.2,
-      "rr_tp2": 4.700000000000001,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7470129909390573,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1788667200000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1787375724.625649,
-      "last_checked_ts": 1789650000000,
-      "sl_buffer_used": 11.198917883429443,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 6559
     },
     "PENDLEUSDT:trend_continuation:1787378434498": {
       "id": "PENDLEUSDT:trend_continuation:1787378434498",
@@ -1299,7 +1267,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787378434.4997318,
-      "last_checked_ts": 1789650000000,
+      "last_checked_ts": 1789653600000,
       "sl_buffer_used": 0.019712303572379335,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1347,7 +1315,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789602321.1214108,
-      "last_checked_ts": 1789655400000,
+      "last_checked_ts": 1789656300000,
       "sl_buffer_used": 0.1039999999999992,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1395,7 +1363,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789604180.700428,
-      "last_checked_ts": 1789655400000,
+      "last_checked_ts": 1789656300000,
       "sl_buffer_used": 0.710000000000008,
       "mae": 0.424422210503991,
       "sfp_purity": 1.0,
@@ -1443,7 +1411,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789641041.0206387,
-      "last_checked_ts": 1789650000000,
+      "last_checked_ts": 1789653600000,
       "sl_buffer_used": 0.025617196577204487,
       "mae": 0.0,
       "sfp_purity": 1.0,
