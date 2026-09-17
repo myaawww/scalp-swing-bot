@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-17T10:15:20.533193+00:00"
+    "last_run_ts": "2026-09-17T10:30:41.735111+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -28,7 +28,7 @@
           "max": 2.0
         },
         "liquidity_sweep": {
-          "weight": 1.0,
+          "weight": 1.03,
           "min": 0.35,
           "max": 2.0
         },
@@ -387,9 +387,9 @@
         "sum_r": -2.0
       },
       "PENGUUSDT|high_vol|15m|liquidity_sweep": {
-        "n": 1,
-        "wins": 0,
-        "sum_r": -1.0
+        "n": 2,
+        "wins": 1,
+        "sum_r": 1.2172408259063117
       },
       "ONDOUSDT|high_vol|15m|breakout": {
         "n": 2,
@@ -679,7 +679,7 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 71,
+        "n": 72,
         "n_since_last_gate": 43,
         "by_key": {
           "global": {
@@ -773,8 +773,8 @@
         "wins": 15
       },
       "calib|liquidity_sweep|high": {
-        "n": 5,
-        "wins": 0
+        "n": 6,
+        "wins": 1
       },
       "calib|volatility_expansion|mid": {
         "n": 6,
@@ -794,14 +794,14 @@
       }
     },
     "totals": {
-      "signals": 86,
-      "wins": 28,
+      "signals": 87,
+      "wins": 29,
       "losses": 58,
       "expired": 3,
-      "sum_r": 50.22910946517942,
-      "gross_profit_r": 108.22910946517943,
+      "sum_r": 52.44635029108573,
+      "gross_profit_r": 110.44635029108575,
       "gross_loss_r": 58.0,
-      "sum_hold_minutes": 79183.51379601158
+      "sum_hold_minutes": 79332.614798216
     }
   },
   "tier2": {
@@ -1058,6 +1058,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1789632030.8865845,
         "signal_ts": 1789550120.3951294
+      },
+      {
+        "id": "PENGUUSDT:liquidity_sweep:1789632091855",
+        "symbol": "PENGUUSDT",
+        "engine": "liquidity_sweep",
+        "result": "win",
+        "realized_r": 2.2172408259063117,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[liquidity_sweep] += step",
+        "resolved_ts": 1789641037.918638,
+        "signal_ts": 1789632091.8585057
       }
     ]
   },
@@ -1336,7 +1347,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789602321.1214108,
-      "last_checked_ts": 1789639200000,
+      "last_checked_ts": 1789640100000,
       "sl_buffer_used": 0.1039999999999992,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1384,7 +1395,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789604180.700428,
-      "last_checked_ts": 1789639200000,
+      "last_checked_ts": 1789640100000,
       "sl_buffer_used": 0.710000000000008,
       "mae": 0.424422210503991,
       "sfp_purity": 1.0,
@@ -1396,52 +1407,53 @@
       "thin_margin_pass": false,
       "tg_message_id": 7293
     },
-    "PENGUUSDT:liquidity_sweep:1789632091855": {
-      "id": "PENGUUSDT:liquidity_sweep:1789632091855",
-      "symbol": "PENGUUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 0.00729,
-      "sl": 0.007336102576750208,
-      "tp1": 0.007197,
-      "tp2": 0.007187779484649958,
+    "NEARUSDT:momentum:1789641041016": {
+      "id": "NEARUSDT:momentum:1789641041016",
+      "symbol": "NEARUSDT",
+      "engine": "momentum",
+      "direction": "long",
+      "entry": 2.8062,
+      "sl": 2.5643828034227956,
+      "tp1": 3.33819783246985,
+      "tp2": 3.942740823912861,
       "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.7285671837947509,
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
       "regime_fit": [
-        "reversal",
-        "ranging",
+        "trending",
+        "expansion",
         "high_vol"
       ],
       "confluences": {
-        "sweep_purity": 0.7428359189737549
+        "rsi_momentum": 0.5365774587351811,
+        "adx_strength": 1
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.5086204129531522,
-      "rr_tp1": 2.0172408259063044,
-      "rr_tp2": 2.2172408259063117,
+      "ev_estimate": 0.6000000000000003,
+      "rr_tp1": 2.2000000000000006,
+      "rr_tp2": 4.700000000000001,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.7054476022373349,
+      "score": 0.7292578402834867,
       "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1789639200000,
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1789632091.8585057,
-      "last_checked_ts": 1789639200000,
-      "sl_buffer_used": 1.821457675020789e-05,
+      "signal_ts": 1789641041.0206387,
+      "last_checked_ts": 1789641041020,
+      "sl_buffer_used": 0.025617196577204487,
       "mae": 0.0,
-      "sfp_purity": 0.7428359189737549,
+      "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
         "macro_bias": "neutral"
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 7310
+      "tg_message_id": 7320
     }
   },
   "daily_summary_date": "2026-09-17"
