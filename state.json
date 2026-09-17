@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-17T12:30:32.878243+00:00"
+    "last_run_ts": "2026-09-17T12:45:20.171205+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1347,7 +1347,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789602321.1214108,
-      "last_checked_ts": 1789647300000,
+      "last_checked_ts": 1789648200000,
       "sl_buffer_used": 0.1039999999999992,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1390,12 +1390,12 @@
       "entry_filled": true,
       "score": 1.0,
       "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1789648200000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789604180.700428,
-      "last_checked_ts": 1789647300000,
+      "last_checked_ts": 1789648200000,
       "sl_buffer_used": 0.710000000000008,
       "mae": 0.424422210503991,
       "sfp_purity": 1.0,
