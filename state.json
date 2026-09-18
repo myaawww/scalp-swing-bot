@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-18T09:45:24.501244+00:00"
+    "last_run_ts": "2026-09-18T10:00:42.991857+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -817,17 +817,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "TRXUSDT:range_trading:1788422493436",
-        "symbol": "TRXUSDT",
-        "engine": "range_trading",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "filter_over_permissiveness",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1788429630.6100655,
-        "signal_ts": 1788422493.4390776
-      },
-      {
         "id": "UNIUSDT:order_block:1788364894870",
         "symbol": "UNIUSDT",
         "engine": "order_block",
@@ -1173,7 +1162,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789718400000,
+      "last_checked_ts": 1789722000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1221,7 +1210,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789718400000,
+      "last_checked_ts": 1789722000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1268,7 +1257,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789718400000,
+      "last_checked_ts": 1789722000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1316,7 +1305,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789641041.0206387,
-      "last_checked_ts": 1789718400000,
+      "last_checked_ts": 1789722000000,
       "sl_buffer_used": 0.025617196577204487,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1364,7 +1353,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789660893.6228545,
-      "last_checked_ts": 1789723800000,
+      "last_checked_ts": 1789724700000,
       "sl_buffer_used": 8.131008358979356,
       "mae": 2.867247910254946,
       "sfp_purity": 1.0,
