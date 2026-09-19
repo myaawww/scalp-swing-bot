@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-19T05:45:19.874221+00:00"
+    "last_run_ts": "2026-09-19T06:00:35.343910+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -817,17 +817,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "LTCUSDT:trend_continuation:1788490834777",
-        "symbol": "LTCUSDT",
-        "engine": "trend_continuation",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1788501631.0551956,
-        "signal_ts": 1788490834.7778265
-      },
-      {
         "id": "LTCUSDT:pullback:1788612318712",
         "symbol": "LTCUSDT",
         "engine": "pullback",
@@ -1162,7 +1151,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1210,7 +1199,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1257,7 +1246,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1305,7 +1294,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789641041.0206387,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 0.025617196577204487,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1352,9 +1341,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789761691.328965,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 0.5286864978843142,
-      "mae": 0.0,
+      "mae": 0.2400000000000091,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
@@ -1400,7 +1389,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789761691.906729,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 0.23400000000000176,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1448,7 +1437,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789761692.448085,
-      "last_checked_ts": 1789790400000,
+      "last_checked_ts": 1789794000000,
       "sl_buffer_used": 0.03637918699848857,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1496,7 +1485,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789763425.6673148,
-      "last_checked_ts": 1789795800000,
+      "last_checked_ts": 1789796700000,
       "sl_buffer_used": 0.0035000000000000586,
       "mae": 0.0010503110793866899,
       "sfp_purity": 1.0,
