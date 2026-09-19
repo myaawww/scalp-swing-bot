@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-19T06:15:22.155237+00:00"
+    "last_run_ts": "2026-09-19T06:30:28.343009+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1459,6 +1459,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7411
+    },
+    "DOTUSDT:breakout:1789799427564": {
+      "id": "DOTUSDT:breakout:1789799427564",
+      "symbol": "DOTUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 1.113,
+      "sl": 1.1233258764340823,
+      "tp1": 1.0768,
+      "tp2": 1.0747348247131836,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.2528778419483921,
+      "rr_tp1": 3.5057556838967843,
+      "rr_tp2": 3.7057556838967756,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789799427.5669415,
+      "last_checked_ts": 1789799427566,
+      "sl_buffer_used": 0.0029999999999998916,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7463
     }
   },
   "daily_summary_date": "2026-09-18"
