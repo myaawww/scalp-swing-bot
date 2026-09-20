@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-19T23:45:17.000779+00:00"
+    "last_run_ts": "2026-09-20T00:01:35.732679+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -48,7 +48,7 @@
           "max": 2.0
         },
         "momentum": {
-          "weight": 1.03,
+          "weight": 1.06,
           "min": 0.35,
           "max": 2.0
         },
@@ -690,11 +690,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AVAXUSDT|high_vol|1h|momentum": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 4.699999999999996
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 81,
+        "n": 82,
         "n_since_last_gate": 45,
         "by_key": {
           "global": {
@@ -802,8 +807,8 @@
         "wins": 5
       },
       "calib|momentum|mid": {
-        "n": 6,
-        "wins": 1
+        "n": 7,
+        "wins": 2
       },
       "calib|order_block|mid": {
         "n": 4,
@@ -815,14 +820,14 @@
       }
     },
     "totals": {
-      "signals": 97,
-      "wins": 36,
+      "signals": 98,
+      "wins": 37,
       "losses": 61,
       "expired": 3,
-      "sum_r": 79.84635029108574,
-      "gross_profit_r": 140.84635029108574,
+      "sum_r": 84.54635029108573,
+      "gross_profit_r": 145.54635029108573,
       "gross_loss_r": 61.0,
-      "sum_hold_minutes": 162325.13463949756
+      "sum_hold_minutes": 164004.13124409114
     }
   },
   "tier2": {
@@ -1167,6 +1172,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1789816516.5435903,
         "signal_ts": 1789812033.7066393
+      },
+      {
+        "id": "AVAXUSDT:momentum:1789761691327",
+        "symbol": "AVAXUSDT",
+        "engine": "momentum",
+        "result": "win",
+        "realized_r": 4.699999999999996,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[momentum] += step",
+        "resolved_ts": 1789862432.2443607,
+        "signal_ts": 1789761692.448085
       }
     ]
   },
@@ -1206,7 +1222,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1254,7 +1270,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1301,7 +1317,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1349,7 +1365,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789641041.0206387,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 0.025617196577204487,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1397,7 +1413,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789761691.906729,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 0.23400000000000176,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1408,54 +1424,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7410
-    },
-    "AVAXUSDT:momentum:1789761691327": {
-      "id": "AVAXUSDT:momentum:1789761691327",
-      "symbol": "AVAXUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 8.2789,
-      "sl": 7.9036208130015115,
-      "tp1": 9.104514211396674,
-      "tp2": 10.042712178892895,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.5791726222275909,
-        "adx_strength": 1
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.599999999999999,
-      "rr_tp1": 2.199999999999998,
-      "rr_tp2": 4.699999999999996,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7558352362173965,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1789812000000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1789761692.448085,
-      "last_checked_ts": 1789855200000,
-      "sl_buffer_used": 0.03637918699848857,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 7411
     },
     "ADAUSDT:trend_continuation:1789808434837": {
       "id": "ADAUSDT:trend_continuation:1789808434837",
@@ -1493,7 +1461,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789808434.8382947,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 0.0013687279929259519,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1541,7 +1509,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1789816520.0498204,
-      "last_checked_ts": 1789855200000,
+      "last_checked_ts": 1789858800000,
       "sl_buffer_used": 0.00517156804855809,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1552,6 +1520,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7491
+    },
+    "ONDOUSDT:pullback:1789862495011": {
+      "id": "ONDOUSDT:pullback:1789862495011",
+      "symbol": "ONDOUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 0.422145,
+      "sl": 0.41398,
+      "tp1": 0.44383,
+      "tp2": 0.445463,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.6254142013507044
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8279240661359504,
+      "rr_tp1": 2.6558481322719008,
+      "rr_tp2": 2.8558481322719005,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.7870042259636605,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789862495.0146217,
+      "last_checked_ts": 1789862495014,
+      "sl_buffer_used": 0.003689999999999971,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7533
     }
   },
   "daily_summary_date": "2026-09-19"
