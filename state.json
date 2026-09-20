@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-20T17:15:21.579043+00:00"
+    "last_run_ts": "2026-09-20T17:30:27.937957+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -412,9 +412,9 @@
         "sum_r": 2.489893341727057
       },
       "DOTUSDT|high_vol|15m|breakout": {
-        "n": 4,
+        "n": 5,
         "wins": 3,
-        "sum_r": 10.599999999999993
+        "sum_r": 9.599999999999993
       },
       "APTUSDT|bear|1h|pullback": {
         "n": 1,
@@ -750,8 +750,8 @@
         }
       },
       "structural_invalidation_too_tight": {
-        "n": 2,
-        "n_since_last_gate": 2,
+        "n": 3,
+        "n_since_last_gate": 3,
         "by_key": {
           "NEARUSDT": {
             "n": 1,
@@ -760,9 +760,9 @@
             "fast_gate_ever_fired": false
           },
           "DOTUSDT": {
-            "n": 1,
-            "n_since_last_gate": 1,
-            "n_since_last_fast_gate": 1,
+            "n": 2,
+            "n_since_last_gate": 2,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": false
           }
         }
@@ -810,7 +810,7 @@
         "wins": 4
       },
       "calib|breakout|mid": {
-        "n": 48,
+        "n": 49,
         "wins": 21
       },
       "calib|liquidity_sweep|high": {
@@ -835,14 +835,14 @@
       }
     },
     "totals": {
-      "signals": 102,
+      "signals": 103,
       "wins": 39,
-      "losses": 63,
+      "losses": 64,
       "expired": 4,
-      "sum_r": 91.94635029108579,
+      "sum_r": 90.94635029108579,
       "gross_profit_r": 154.9463502910858,
-      "gross_loss_r": 63.0,
-      "sum_hold_minutes": 169988.62501616077
+      "gross_loss_r": 64.0,
+      "sum_hold_minutes": 170018.4738921364
     }
   },
   "tier2": {
@@ -1242,6 +1242,17 @@
         "adaptive_delta": "engine_weights[momentum] += step",
         "resolved_ts": 1789923628.7038789,
         "signal_ts": 1789641041.0206387
+      },
+      {
+        "id": "DOTUSDT:breakout:1789923634025",
+        "symbol": "DOTUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1789925424.9606664,
+        "signal_ts": 1789923634.028108
       }
     ]
   },
@@ -1578,54 +1589,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7561
-    },
-    "DOTUSDT:breakout:1789923634025": {
-      "id": "DOTUSDT:breakout:1789923634025",
-      "symbol": "DOTUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.1673,
-      "sl": 1.1492290469674014,
-      "tp1": 1.207056096671717,
-      "tp2": 1.2522334792532135,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999988,
-      "rr_tp1": 2.1999999999999975,
-      "rr_tp2": 4.699999999999991,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1789923634.028108,
-      "last_checked_ts": 1789923634028,
-      "sl_buffer_used": 0.003816762426078811,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 7575
     }
   },
   "daily_summary_date": "2026-09-20"
