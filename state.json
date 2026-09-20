@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-20T19:30:26.786776+00:00"
+    "last_run_ts": "2026-09-20T19:45:56.456128+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -847,17 +847,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "SUIUSDT:liquidity_sweep:1788633026525",
-        "symbol": "SUIUSDT",
-        "engine": "liquidity_sweep",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1788637521.1556666,
-        "signal_ts": 1788633026.5285
-      },
       {
         "id": "APTUSDT:liquidity_sweep:1788658222993",
         "symbol": "APTUSDT",
