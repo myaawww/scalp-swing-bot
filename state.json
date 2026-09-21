@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-21T11:15:20.530157+00:00"
+    "last_run_ts": "2026-09-21T11:30:27.896273+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.6600000000000006,
+          "weight": 1.6900000000000006,
           "min": 0.35,
           "max": 2.0
         },
@@ -452,9 +452,9 @@
         "sum_r": 1.1999999999999935
       },
       "TAOUSDT|high_vol|15m|breakout": {
-        "n": 4,
-        "wins": 2,
-        "sum_r": 7.4000000000000075
+        "n": 5,
+        "wins": 3,
+        "sum_r": 12.100000000000003
       },
       "LINKUSDT|bear|1h|pullback": {
         "n": 1,
@@ -714,7 +714,7 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 87,
+        "n": 88,
         "n_since_last_gate": 47,
         "by_key": {
           "global": {
@@ -810,8 +810,8 @@
         "wins": 4
       },
       "calib|breakout|mid": {
-        "n": 50,
-        "wins": 22
+        "n": 51,
+        "wins": 23
       },
       "calib|liquidity_sweep|high": {
         "n": 6,
@@ -835,14 +835,14 @@
       }
     },
     "totals": {
-      "signals": 104,
-      "wins": 40,
+      "signals": 105,
+      "wins": 41,
       "losses": 64,
       "expired": 4,
-      "sum_r": 93.14635029108578,
-      "gross_profit_r": 157.14635029108578,
+      "sum_r": 97.84635029108577,
+      "gross_profit_r": 161.84635029108577,
       "gross_loss_r": 64.0,
-      "sum_hold_minutes": 170558.49079828657
+      "sum_hold_minutes": 170753.5168324987
     }
   },
   "tier2": {
@@ -1220,6 +1220,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1789976720.7325706,
         "signal_ts": 1789944319.7182016
+      },
+      {
+        "id": "TAOUSDT:breakout:1789978522435",
+        "symbol": "TAOUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.699999999999996,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1789990223.9992526,
+        "signal_ts": 1789978522.4371998
       }
     ]
   },
@@ -1557,44 +1568,43 @@
       "thin_margin_pass": false,
       "tg_message_id": 7561
     },
-    "TAOUSDT:breakout:1789978522435": {
-      "id": "TAOUSDT:breakout:1789978522435",
-      "symbol": "TAOUSDT",
-      "engine": "breakout",
+    "XLMUSDT:volatility_expansion:1789990227242": {
+      "id": "XLMUSDT:volatility_expansion:1789990227242",
+      "symbol": "XLMUSDT",
+      "engine": "volatility_expansion",
       "direction": "long",
-      "entry": 274.42,
-      "sl": 271.7138922314372,
-      "tp1": 280.37343709083814,
-      "tp2": 287.1387065122451,
+      "entry": 0.2133,
+      "sl": 0.20456351093954425,
+      "tp1": 0.23252027593300262,
+      "tp2": 0.254361498584142,
       "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
       "regime_fit": [
         "expansion",
-        "trending",
         "high_vol"
       ],
       "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
+        "vol_pctile": 0.88,
+        "displacement_body": 0.9141822561955633
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999979,
-      "rr_tp1": 2.1999999999999957,
-      "rr_tp2": 4.699999999999996,
+      "ev_estimate": 0.6000000000000003,
+      "rr_tp1": 2.2000000000000006,
+      "rr_tp2": 4.700000000000002,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1789979400000,
+      "score": 0.869505838780369,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1789978522.4371998,
-      "last_checked_ts": 1789988400000,
-      "sl_buffer_used": 1.2000000000000455,
+      "signal_ts": 1789990227.2432644,
+      "last_checked_ts": 1789990227243,
+      "sl_buffer_used": 0.0013164890604557685,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -1603,7 +1613,7 @@
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 7625
+      "tg_message_id": 7632
     }
   },
   "daily_summary_date": "2026-09-21"
