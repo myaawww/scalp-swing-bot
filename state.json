@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-21T08:01:33.794984+00:00"
+    "last_run_ts": "2026-09-21T08:15:23.279193+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1556,6 +1556,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7561
+    },
+    "TAOUSDT:breakout:1789978522435": {
+      "id": "TAOUSDT:breakout:1789978522435",
+      "symbol": "TAOUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 274.42,
+      "sl": 271.7138922314372,
+      "tp1": 280.37343709083814,
+      "tp2": 287.1387065122451,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999979,
+      "rr_tp1": 2.1999999999999957,
+      "rr_tp2": 4.699999999999996,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1789978522.4371998,
+      "last_checked_ts": 1789978522437,
+      "sl_buffer_used": 1.2000000000000455,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7625
     }
   },
   "daily_summary_date": "2026-09-21"
