@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-21T12:15:26.229227+00:00"
+    "last_run_ts": "2026-09-21T12:30:31.614638+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -847,17 +847,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "ONDOUSDT:liquidity_sweep:1788695120649",
-        "symbol": "ONDOUSDT",
-        "engine": "liquidity_sweep",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1788697825.8976088,
-        "signal_ts": 1788695120.6537538
-      },
       {
         "id": "AVAXUSDT:liquidity_sweep:1788731121318",
         "symbol": "AVAXUSDT",
