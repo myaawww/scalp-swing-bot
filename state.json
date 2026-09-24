@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-24T05:30:26.934298+00:00"
+    "last_run_ts": "2026-09-24T05:45:18.757537+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1460,7 +1460,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790226900000,
+      "last_checked_ts": 1790227800000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1602,7 +1602,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790226922.8552015,
-      "last_checked_ts": 1790226922855,
+      "last_checked_ts": 1790227800000,
       "sl_buffer_used": 0.3709240097198753,
       "mae": 0.0,
       "sfp_purity": 0.7269565211069984,
