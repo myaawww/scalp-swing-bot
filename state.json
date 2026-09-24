@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-24T05:00:35.541815+00:00"
+    "last_run_ts": "2026-09-24T05:15:23.611240+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1460,7 +1460,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790225100000,
+      "last_checked_ts": 1790226000000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1566,6 +1566,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7816
+    },
+    "LTCUSDT:liquidity_sweep:1790226922854": {
+      "id": "LTCUSDT:liquidity_sweep:1790226922854",
+      "symbol": "LTCUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "short",
+      "entry": 68.23,
+      "sl": 69.46659100971986,
+      "tp1": 63.811,
+      "tp2": 63.56368179805603,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.7253913042213996,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.7269565211069984
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.2867669929935428,
+      "rr_tp1": 3.5735339859870856,
+      "rr_tp2": 3.7735339859870836,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8560139341338502,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1790226922.8552015,
+      "last_checked_ts": 1790226922855,
+      "sl_buffer_used": 0.3709240097198753,
+      "mae": 0.0,
+      "sfp_purity": 0.7269565211069984,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7842
     }
   },
   "daily_summary_date": "2026-09-23"
