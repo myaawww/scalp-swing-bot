@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-27T08:45:18.636347+00:00"
+    "last_run_ts": "2026-09-27T09:00:33.901445+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1268,7 +1268,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1790492400000,
+      "last_checked_ts": 1790496000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1316,7 +1316,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1790492400000,
+      "last_checked_ts": 1790496000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1363,7 +1363,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1790492400000,
+      "last_checked_ts": 1790496000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1411,7 +1411,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790497800000,
+      "last_checked_ts": 1790498700000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1458,7 +1458,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790108142.7925136,
-      "last_checked_ts": 1790492400000,
+      "last_checked_ts": 1790496000000,
       "sl_buffer_used": 0.0001205793391629102,
       "mae": 0.00011899999999999931,
       "sfp_purity": 1.0,
@@ -1506,7 +1506,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1790492400000,
+      "last_checked_ts": 1790496000000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1565,6 +1565,53 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 7880
+    },
+    "SOLUSDT:mean_reversion:1790499633279": {
+      "id": "SOLUSDT:mean_reversion:1790499633279",
+      "symbol": "SOLUSDT",
+      "engine": "mean_reversion",
+      "direction": "short",
+      "entry": 124.12,
+      "sl": 125.37004213485301,
+      "tp1": 121.381,
+      "tp2": 120.90400842697059,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "z_score_extreme": 0.47858796721794883
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5955630708888429,
+      "rr_tp1": 2.1911261417776857,
+      "rr_tp2": 2.572706537934092,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.6616077157914366,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1790499633.2822466,
+      "last_checked_ts": 1790499633282,
+      "sl_buffer_used": 0.4200421348530056,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bull"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 7926
     }
   },
   "daily_summary_date": "2026-09-27"
