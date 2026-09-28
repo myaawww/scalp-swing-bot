@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-28T07:45:19.466321+00:00"
+    "last_run_ts": "2026-09-28T08:01:33.245517+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1284,7 +1284,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1790575200000,
+      "last_checked_ts": 1790578800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1332,7 +1332,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1790575200000,
+      "last_checked_ts": 1790578800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1379,7 +1379,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1790575200000,
+      "last_checked_ts": 1790578800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1427,7 +1427,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790580600000,
+      "last_checked_ts": 1790581500000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1474,7 +1474,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790108142.7925136,
-      "last_checked_ts": 1790575200000,
+      "last_checked_ts": 1790578800000,
       "sl_buffer_used": 0.0001205793391629102,
       "mae": 0.00011899999999999931,
       "sfp_purity": 1.0,
@@ -1522,7 +1522,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1790575200000,
+      "last_checked_ts": 1790578800000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1535,5 +1535,5 @@
       "tg_message_id": 7816
     }
   },
-  "daily_summary_date": "2026-09-27"
+  "daily_summary_date": "2026-09-28"
 }
