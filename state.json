@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-09-29T11:30:37.163950+00:00"
+    "last_run_ts": "2026-09-29T11:45:31.411456+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -740,17 +740,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "XLMUSDT|ranging|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 96,
-        "n_since_last_gate": 51,
+        "n": 97,
+        "n_since_last_gate": 52,
         "by_key": {
           "global": {
-            "n": 51,
-            "n_since_last_gate": 11,
-            "n_since_last_fast_gate": 11,
+            "n": 52,
+            "n_since_last_gate": 12,
+            "n_since_last_fast_gate": 12,
             "fast_gate_ever_fired": true
           }
         }
@@ -844,7 +849,7 @@
         "wins": 24
       },
       "calib|liquidity_sweep|high": {
-        "n": 7,
+        "n": 8,
         "wins": 1
       },
       "calib|volatility_expansion|mid": {
@@ -865,14 +870,14 @@
       }
     },
     "totals": {
-      "signals": 113,
+      "signals": 114,
       "wins": 45,
-      "losses": 68,
+      "losses": 69,
       "expired": 7,
-      "sum_r": 110.51905682901986,
+      "sum_r": 109.51905682901986,
       "gross_profit_r": 178.51905682901983,
-      "gross_loss_r": 68.0,
-      "sum_hold_minutes": 202957.75910000005
+      "gross_loss_r": 69.0,
+      "sum_hold_minutes": 203152.79770059584
     }
   },
   "tier2": {
@@ -1261,6 +1266,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1790611234.1893778,
         "signal_ts": 1790108142.7925136
+      },
+      {
+        "id": "XLMUSDT:liquidity_sweep:1790670625941",
+        "symbol": "XLMUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1790682328.257924,
+        "signal_ts": 1790670625.9418883
       }
     ]
   },
@@ -1443,7 +1459,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790680500000,
+      "last_checked_ts": 1790681400000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1597,53 +1613,6 @@
       "regime_label": "consolidation",
       "thin_margin_pass": false,
       "tg_message_id": 7999
-    },
-    "XLMUSDT:liquidity_sweep:1790670625941": {
-      "id": "XLMUSDT:liquidity_sweep:1790670625941",
-      "symbol": "XLMUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 0.23149,
-      "sl": 0.23368602999999996,
-      "tp1": 0.22566,
-      "tp2": 0.225220794,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.7042423928680823,
-      "regime_fit": [
-        "reversal",
-        "ranging",
-        "high_vol"
-      ],
-      "confluences": {
-        "sweep_purity": 0.6212119643404119
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.8273953452366563,
-      "rr_tp1": 2.6547906904733125,
-      "rr_tp2": 2.854790690473315,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7637241646450514,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1790670625.9418883,
-      "last_checked_ts": 1790680500000,
-      "sl_buffer_used": 0.0009799999999999809,
-      "mae": 0.0,
-      "sfp_purity": 0.6212119643404119,
-      "regime_at_entry": {
-        "label": "ranging",
-        "macro_bias": "bear"
-      },
-      "regime_label": "ranging",
-      "thin_margin_pass": false,
-      "tg_message_id": 8016
     }
   },
   "daily_summary_date": "2026-09-29"
