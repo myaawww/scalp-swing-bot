@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-02T07:45:22.420479+00:00"
+    "last_run_ts": "2026-10-02T08:01:38.729967+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "AAVEUSDT:momentum:1789550120394",
-        "symbol": "AAVEUSDT",
-        "engine": "momentum",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1789632030.8865845,
-        "signal_ts": 1789550120.3951294
-      },
-      {
         "id": "PENGUUSDT:liquidity_sweep:1789632091855",
         "symbol": "PENGUUSDT",
         "engine": "liquidity_sweep",
@@ -1266,7 +1255,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1790920800000,
+      "last_checked_ts": 1790924400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1314,7 +1303,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1790920800000,
+      "last_checked_ts": 1790924400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1361,7 +1350,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1790920800000,
+      "last_checked_ts": 1790924400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1409,7 +1398,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790926200000,
+      "last_checked_ts": 1790927100000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1457,7 +1446,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1790920800000,
+      "last_checked_ts": 1790924400000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1505,7 +1494,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790640096.822622,
-      "last_checked_ts": 1790899200000,
+      "last_checked_ts": 1790913600000,
       "sl_buffer_used": 0.8930000000000007,
       "mae": 0.21099999999999852,
       "sfp_purity": 1.0,
@@ -1565,5 +1554,5 @@
       "tg_message_id": 8112
     }
   },
-  "daily_summary_date": "2026-10-01"
+  "daily_summary_date": "2026-10-02"
 }
