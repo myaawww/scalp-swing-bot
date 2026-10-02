@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-02T00:01:33.332279+00:00"
+    "last_run_ts": "2026-10-02T00:15:27.144210+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "APTUSDT:momentum:1789545688115",
-        "symbol": "APTUSDT",
-        "engine": "momentum",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1789604117.7838798,
-        "signal_ts": 1789545688.115779
-      },
-      {
         "id": "AAVEUSDT:momentum:1789550120394",
         "symbol": "AAVEUSDT",
         "engine": "momentum",
@@ -1420,7 +1409,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790898300000,
+      "last_checked_ts": 1790899200000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
