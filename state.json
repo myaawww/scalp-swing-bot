@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-02T10:30:26.071056+00:00"
+    "last_run_ts": "2026-10-02T10:45:18.892863+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "PENGUUSDT:liquidity_sweep:1789632091855",
-        "symbol": "PENGUUSDT",
-        "engine": "liquidity_sweep",
-        "result": "win",
-        "realized_r": 2.2172408259063117,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[liquidity_sweep] += step",
-        "resolved_ts": 1789641037.918638,
-        "signal_ts": 1789632091.8585057
-      },
-      {
         "id": "ZECUSDT:momentum:1787375724620",
         "symbol": "ZECUSDT",
         "engine": "momentum",
@@ -1398,7 +1387,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790936100000,
+      "last_checked_ts": 1790937000000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
