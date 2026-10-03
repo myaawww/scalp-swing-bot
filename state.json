@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-03T04:45:18.737085+00:00"
+    "last_run_ts": "2026-10-03T05:00:35.776869+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,28 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "PENDLEUSDT:trend_continuation:1787378434498",
-        "symbol": "PENDLEUSDT",
-        "engine": "trend_continuation",
-        "result": "win",
-        "realized_r": 4.699999999999999,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[trend_continuation] += step",
-        "resolved_ts": 1789707628.4777782,
-        "signal_ts": 1787378434.4997318
-      },
-      {
-        "id": "DOTUSDT:breakout:1789659921170",
-        "symbol": "DOTUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.6999999999999975,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1789707629.6733158,
-        "signal_ts": 1789659921.1716692
-      },
-      {
         "id": "ZECUSDT:breakout:1789660893619",
         "symbol": "ZECUSDT",
         "engine": "breakout",
@@ -1211,7 +1189,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1790996400000,
+      "last_checked_ts": 1791000000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1259,7 +1237,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1790996400000,
+      "last_checked_ts": 1791000000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1306,7 +1284,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1790996400000,
+      "last_checked_ts": 1791000000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1354,7 +1332,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791001800000,
+      "last_checked_ts": 1791002700000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1402,7 +1380,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1790996400000,
+      "last_checked_ts": 1791000000000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1497,7 +1475,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1790996400000,
+      "last_checked_ts": 1791000000000,
       "sl_buffer_used": 1.6784945280965093,
       "mae": 0.0,
       "sfp_purity": 1.0,
