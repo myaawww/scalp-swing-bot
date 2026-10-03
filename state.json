@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-03T14:00:31.691419+00:00"
+    "last_run_ts": "2026-10-03T14:15:20.712778+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "ZECUSDT:breakout:1789660893619",
-        "symbol": "ZECUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1789740034.7567027,
-        "signal_ts": 1789660893.6228545
-      },
-      {
         "id": "APTUSDT:breakout:1789763425666",
         "symbol": "APTUSDT",
         "engine": "breakout",
@@ -1332,7 +1321,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791035100000,
+      "last_checked_ts": 1791036000000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
