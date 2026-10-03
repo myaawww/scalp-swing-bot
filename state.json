@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-03T01:30:29.136049+00:00"
+    "last_run_ts": "2026-10-03T01:45:26.522793+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "TAOUSDT:breakout:1789604180699",
-        "symbol": "TAOUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.700000000000004,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1789695917.2443676,
-        "signal_ts": 1789604180.700428
-      },
-      {
         "id": "PENDLEUSDT:trend_continuation:1787378434498",
         "symbol": "PENDLEUSDT",
         "engine": "trend_continuation",
@@ -1365,7 +1354,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1790990100000,
+      "last_checked_ts": 1790991000000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
