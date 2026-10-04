@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-04T07:00:43.044382+00:00"
+    "last_run_ts": "2026-10-04T07:15:21.133460+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "SOLUSDT:volatility_expansion:1789761691326",
-        "symbol": "SOLUSDT",
-        "engine": "volatility_expansion",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1789801264.0253296,
-        "signal_ts": 1789761691.328965
-      },
-      {
         "id": "DOTUSDT:breakout:1789799427564",
         "symbol": "DOTUSDT",
         "engine": "breakout",
@@ -1310,7 +1299,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791096300000,
+      "last_checked_ts": 1791097200000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
