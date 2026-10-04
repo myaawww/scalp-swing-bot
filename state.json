@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-04T09:45:18.238915+00:00"
+    "last_run_ts": "2026-10-04T10:00:35.720939+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -888,17 +888,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "DOTUSDT:breakout:1789799427564",
-        "symbol": "DOTUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "structural_invalidation_too_tight",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1789812028.8736925,
-        "signal_ts": 1789799427.5669415
-      },
-      {
         "id": "SUIUSDT:breakout:1789812033705",
         "symbol": "SUIUSDT",
         "engine": "breakout",
@@ -1156,7 +1145,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791100800000,
+      "last_checked_ts": 1791104400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1204,7 +1193,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791100800000,
+      "last_checked_ts": 1791104400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1251,7 +1240,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791100800000,
+      "last_checked_ts": 1791104400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1299,7 +1288,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791106200000,
+      "last_checked_ts": 1791107100000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1347,7 +1336,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791100800000,
+      "last_checked_ts": 1791104400000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1442,7 +1431,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1791100800000,
+      "last_checked_ts": 1791104400000,
       "sl_buffer_used": 1.6784945280965093,
       "mae": 0.0,
       "sfp_purity": 1.0,
