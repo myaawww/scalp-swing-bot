@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-05T16:45:23.051015+00:00"
+    "last_run_ts": "2026-10-05T17:00:39.706252+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -755,17 +755,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "ADAUSDT|trending|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 99,
-        "n_since_last_gate": 54,
+        "n": 100,
+        "n_since_last_gate": 55,
         "by_key": {
           "global": {
-            "n": 54,
-            "n_since_last_gate": 14,
-            "n_since_last_fast_gate": 14,
+            "n": 55,
+            "n_since_last_gate": 15,
+            "n_since_last_fast_gate": 15,
             "fast_gate_ever_fired": true
           }
         }
@@ -867,7 +872,7 @@
         "wins": 5
       },
       "calib|momentum|mid": {
-        "n": 10,
+        "n": 11,
         "wins": 5
       },
       "calib|order_block|mid": {
@@ -880,29 +885,18 @@
       }
     },
     "totals": {
-      "signals": 117,
+      "signals": 118,
       "wins": 45,
-      "losses": 72,
+      "losses": 73,
       "expired": 8,
-      "sum_r": 106.51905682901986,
+      "sum_r": 105.51905682901986,
       "gross_profit_r": 178.51905682901983,
-      "gross_loss_r": 72.0,
-      "sum_hold_minutes": 205672.72989489234
+      "gross_loss_r": 73.0,
+      "sum_hold_minutes": 206032.69252382912
     }
   },
   "tier2": {
     "trades": [
-      {
-        "id": "NEARUSDT:momentum:1789641041016",
-        "symbol": "NEARUSDT",
-        "engine": "momentum",
-        "result": "win",
-        "realized_r": 4.700000000000001,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[momentum] += step",
-        "resolved_ts": 1789923628.7038789,
-        "signal_ts": 1789641041.0206387
-      },
       {
         "id": "DOTUSDT:breakout:1789923634025",
         "symbol": "DOTUSDT",
@@ -1067,6 +1061,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1791189919.6670866,
         "signal_ts": 1791185429.3224893
+      },
+      {
+        "id": "ADAUSDT:momentum:1791198036935",
+        "symbol": "ADAUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1791219634.6949213,
+        "signal_ts": 1791198036.937185
       }
     ]
   },
@@ -1106,7 +1111,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791212400000,
+      "last_checked_ts": 1791216000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1154,7 +1159,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791212400000,
+      "last_checked_ts": 1791216000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1201,7 +1206,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791212400000,
+      "last_checked_ts": 1791216000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1249,7 +1254,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791217800000,
+      "last_checked_ts": 1791218700000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1297,7 +1302,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791212400000,
+      "last_checked_ts": 1791216000000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1392,7 +1397,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1791212400000,
+      "last_checked_ts": 1791216000000,
       "sl_buffer_used": 1.6784945280965093,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1403,54 +1408,6 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8112
-    },
-    "ADAUSDT:momentum:1791198036935": {
-      "id": "ADAUSDT:momentum:1791198036935",
-      "symbol": "ADAUSDT",
-      "engine": "momentum",
-      "direction": "long",
-      "entry": 0.27521,
-      "sl": 0.2623003559636046,
-      "tp1": 0.30361121688006987,
-      "tp2": 0.33588532697105833,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
-      "regime_fit": [
-        "trending",
-        "expansion",
-        "high_vol"
-      ],
-      "confluences": {
-        "rsi_momentum": 0.5834825333600037,
-        "adx_strength": 1
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000005,
-      "rr_tp1": 2.200000000000001,
-      "rr_tp2": 4.700000000000001,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8444214870071026,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1791198036.937185,
-      "last_checked_ts": 1791212400000,
-      "sl_buffer_used": 0.0016296440363953463,
-      "mae": 0.0012300000000000089,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "trending",
-        "macro_bias": "bull"
-      },
-      "regime_label": "trending",
-      "thin_margin_pass": false,
-      "tg_message_id": 8173
     }
   },
   "daily_summary_date": "2026-10-05"
