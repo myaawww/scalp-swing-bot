@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-06T07:30:25.700927+00:00"
+    "last_run_ts": "2026-10-06T07:45:30.535021+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -898,17 +898,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "BNBUSDT:breakout:1789944319713",
-        "symbol": "BNBUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 2.1999999999999895,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1789976720.7325706,
-        "signal_ts": 1789944319.7182016
-      },
-      {
         "id": "TAOUSDT:breakout:1789978522435",
         "symbol": "TAOUSDT",
         "engine": "breakout",
@@ -1243,7 +1232,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791270900000,
+      "last_checked_ts": 1791271800000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
