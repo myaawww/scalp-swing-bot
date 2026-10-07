@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-06T23:45:19.431330+00:00"
+    "last_run_ts": "2026-10-07T00:01:34.017525+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1078,7 +1078,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791324000000,
+      "last_checked_ts": 1791327600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1126,7 +1126,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791324000000,
+      "last_checked_ts": 1791327600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1173,7 +1173,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791324000000,
+      "last_checked_ts": 1791327600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1221,7 +1221,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791329400000,
+      "last_checked_ts": 1791330300000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1269,7 +1269,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791324000000,
+      "last_checked_ts": 1791327600000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1317,7 +1317,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790640096.822622,
-      "last_checked_ts": 1791302400000,
+      "last_checked_ts": 1791316800000,
       "sl_buffer_used": 0.8930000000000007,
       "mae": 0.21099999999999852,
       "sfp_purity": 1.0,
@@ -1364,7 +1364,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1791324000000,
+      "last_checked_ts": 1791327600000,
       "sl_buffer_used": 1.6784945280965093,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1375,6 +1375,53 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8112
+    },
+    "XLMUSDT:range_trading:1791331293366": {
+      "id": "XLMUSDT:range_trading:1791331293366",
+      "symbol": "XLMUSDT",
+      "engine": "range_trading",
+      "direction": "long",
+      "entry": 0.21194,
+      "sl": 0.21065713437648134,
+      "tp1": 0.216364,
+      "tp2": 0.21662057312470373,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.45,
+      "regime_fit": [
+        "ranging",
+        "consolidation",
+        "low_vol"
+      ],
+      "confluences": {
+        "range_edge_proximity": 0.5024875621890753
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.2242647705633625,
+      "rr_tp1": 3.448529541126725,
+      "rr_tp2": 3.6485295411267247,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7881500124218289,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1791331293.3672051,
+      "last_checked_ts": 1791331293367,
+      "sl_buffer_used": 0.0006799999999999862,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8224
     }
   },
   "daily_summary_date": "2026-10-06"
