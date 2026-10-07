@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-07T07:45:23.742351+00:00"
+    "last_run_ts": "2026-10-07T08:01:34.695159+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1094,7 +1094,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791352800000,
+      "last_checked_ts": 1791356400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1142,7 +1142,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791352800000,
+      "last_checked_ts": 1791356400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1189,7 +1189,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791352800000,
+      "last_checked_ts": 1791356400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1237,7 +1237,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791358200000,
+      "last_checked_ts": 1791359100000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1285,7 +1285,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791352800000,
+      "last_checked_ts": 1791356400000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1333,7 +1333,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790640096.822622,
-      "last_checked_ts": 1791331200000,
+      "last_checked_ts": 1791345600000,
       "sl_buffer_used": 0.8930000000000007,
       "mae": 0.21099999999999852,
       "sfp_purity": 1.0,
@@ -1380,7 +1380,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1791352800000,
+      "last_checked_ts": 1791356400000,
       "sl_buffer_used": 1.6784945280965093,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1391,7 +1391,55 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8112
+    },
+    "AVAXUSDT:order_block:1791360093227": {
+      "id": "AVAXUSDT:order_block:1791360093227",
+      "symbol": "AVAXUSDT",
+      "engine": "order_block",
+      "direction": "short",
+      "entry": 11.599499999999999,
+      "sl": 11.850794851943101,
+      "tp1": 11.038,
+      "tp2": 10.98774102961138,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
+      ],
+      "confluences": {
+        "htf_ob_quality": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6172134957367377,
+      "rr_tp1": 2.2344269914734753,
+      "rr_tp2": 2.4344269914734755,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.7791185159939378,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1791360093.2287903,
+      "last_checked_ts": 1791360093228,
+      "sl_buffer_used": 0.11079485194310146,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 8235
     }
   },
-  "daily_summary_date": "2026-10-06"
+  "daily_summary_date": "2026-10-07"
 }
