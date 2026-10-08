@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-08T17:45:21.986287+00:00"
+    "last_run_ts": "2026-10-08T18:00:40.656812+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -770,11 +770,16 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AAVEUSDT|low_vol|1h|pullback": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.689438750705633
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 101,
+        "n": 102,
         "n_since_last_gate": 56,
         "by_key": {
           "global": {
@@ -866,8 +871,8 @@
         "wins": 2
       },
       "calib|pullback|mid": {
-        "n": 8,
-        "wins": 4
+        "n": 9,
+        "wins": 5
       },
       "calib|breakout|mid": {
         "n": 53,
@@ -895,14 +900,14 @@
       }
     },
     "totals": {
-      "signals": 120,
-      "wins": 45,
+      "signals": 121,
+      "wins": 46,
       "losses": 75,
       "expired": 8,
-      "sum_r": 103.51905682901986,
-      "gross_profit_r": 178.51905682901983,
+      "sum_r": 106.2084955797255,
+      "gross_profit_r": 181.20849557972545,
       "gross_loss_r": 75.0,
-      "sum_hold_minutes": 219590.6009710272
+      "sum_hold_minutes": 228890.60764482018
     }
   },
   "tier2": {
@@ -1038,6 +1043,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1791446433.7588255,
         "signal_ts": 1790640096.822622
+      },
+      {
+        "id": "AAVEUSDT:pullback:1790924434563",
+        "symbol": "AAVEUSDT",
+        "engine": "pullback",
+        "result": "win",
+        "realized_r": 2.689438750705633,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_win_not_causally_attributable",
+        "resolved_ts": 1791482434.9650848,
+        "signal_ts": 1790924434.5646572
       }
     ]
   },
@@ -1077,7 +1093,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791475200000,
+      "last_checked_ts": 1791478800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1125,7 +1141,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791475200000,
+      "last_checked_ts": 1791478800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1172,7 +1188,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791475200000,
+      "last_checked_ts": 1791478800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1220,7 +1236,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790081123.944451,
-      "last_checked_ts": 1791480600000,
+      "last_checked_ts": 1791481500000,
       "sl_buffer_used": 1.8338758705095832,
       "mae": 0.7915310323726317,
       "sfp_purity": 1.0,
@@ -1268,7 +1284,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791475200000,
+      "last_checked_ts": 1791478800000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1279,53 +1295,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 7816
-    },
-    "AAVEUSDT:pullback:1790924434563": {
-      "id": "AAVEUSDT:pullback:1790924434563",
-      "symbol": "AAVEUSDT",
-      "engine": "pullback",
-      "direction": "short",
-      "entry": 182.19,
-      "sl": 189.4084945280965,
-      "tp1": 164.22,
-      "tp2": 162.7763010943807,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.5874366869556923
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.7447193753528165,
-      "rr_tp1": 2.489438750705633,
-      "rr_tp2": 2.689438750705633,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7613145095889605,
-      "tier": "A",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1791471600000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1790924434.5646572,
-      "last_checked_ts": 1791475200000,
-      "sl_buffer_used": 1.6784945280965093,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8112
     },
     "AVAXUSDT:order_block:1791360093227": {
       "id": "AVAXUSDT:order_block:1791360093227",
@@ -1411,7 +1380,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1791475200000,
+      "last_checked_ts": 1791478800000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1422,6 +1391,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8274
+    },
+    "SOLUSDT:momentum:1791482440021": {
+      "id": "SOLUSDT:momentum:1791482440021",
+      "symbol": "SOLUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 106.29,
+      "sl": 115.7186654152766,
+      "tp1": 85.5469360863915,
+      "tp2": 61.9752725482,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.7620217827490657,
+        "adx_strength": 1
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999996,
+      "rr_tp1": 2.1999999999999993,
+      "rr_tp2": 4.699999999999999,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.865768833483008,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1791482440.0239148,
+      "last_checked_ts": 1791482440023,
+      "sl_buffer_used": 0.5086654152766054,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8312
     }
   },
   "daily_summary_date": "2026-10-08"
