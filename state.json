@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-09T02:45:20.838005+00:00"
+    "last_run_ts": "2026-10-09T03:00:41.189362+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -775,6 +775,11 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.689438750705633
+      },
+      "XLMUSDT|high_vol|1h|momentum": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -815,8 +820,8 @@
         }
       },
       "structural_invalidation_too_tight": {
-        "n": 3,
-        "n_since_last_gate": 3,
+        "n": 4,
+        "n_since_last_gate": 4,
         "by_key": {
           "NEARUSDT": {
             "n": 1,
@@ -828,6 +833,12 @@
             "n": 2,
             "n_since_last_gate": 2,
             "n_since_last_fast_gate": 2,
+            "fast_gate_ever_fired": false
+          },
+          "XLMUSDT": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": false
           }
         }
@@ -887,7 +898,7 @@
         "wins": 5
       },
       "calib|momentum|mid": {
-        "n": 11,
+        "n": 12,
         "wins": 5
       },
       "calib|order_block|mid": {
@@ -900,14 +911,14 @@
       }
     },
     "totals": {
-      "signals": 122,
+      "signals": 123,
       "wins": 47,
-      "losses": 75,
+      "losses": 76,
       "expired": 8,
-      "sum_r": 108.4084955797255,
+      "sum_r": 107.4084955797255,
       "gross_profit_r": 183.40849557972544,
-      "gross_loss_r": 75.0,
-      "sum_hold_minutes": 252605.8160530249
+      "gross_loss_r": 76.0,
+      "sum_hold_minutes": 252784.73611067134
     }
   },
   "tier2": {
@@ -1065,6 +1076,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1791504036.4489434,
         "signal_ts": 1790081123.944451
+      },
+      {
+        "id": "XLMUSDT:momentum:1791504100733",
+        "symbol": "XLMUSDT",
+        "engine": "momentum",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1791514835.9382732,
+        "signal_ts": 1791504100.7348144
       }
     ]
   },
@@ -1104,7 +1126,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1152,7 +1174,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1199,7 +1221,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1247,7 +1269,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1343,7 +1365,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1391,7 +1413,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1791507600000,
+      "last_checked_ts": 1791511200000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1403,45 +1425,45 @@
       "thin_margin_pass": false,
       "tg_message_id": 8312
     },
-    "XLMUSDT:momentum:1791504100733": {
-      "id": "XLMUSDT:momentum:1791504100733",
-      "symbol": "XLMUSDT",
-      "engine": "momentum",
-      "direction": "short",
-      "entry": 0.19198,
-      "sl": 0.19419886810752654,
-      "tp1": 0.18511,
-      "tp2": 0.1846662263784947,
+    "BNBUSDT:breakout:1791514840650": {
+      "id": "BNBUSDT:breakout:1791514840650",
+      "symbol": "BNBUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 739.61,
+      "sl": 736.6634121242377,
+      "tp1": 759.16,
+      "tp2": 759.7493175751524,
       "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.5,
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
       "regime_fit": [
-        "trending",
         "expansion",
+        "trending",
         "high_vol"
       ],
       "confluences": {
-        "rsi_momentum": 0.21024195263726894,
-        "adx_strength": 0.9216022331831799
+        "range_break": 1.0,
+        "volume_confirm": 1.0
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 1.0480866070174653,
-      "rr_tp1": 3.0961732140349305,
-      "rr_tp2": 3.296173214034928,
+      "ev_estimate": 2.817396396152252,
+      "rr_tp1": 6.634792792304504,
+      "rr_tp2": 6.834792792304496,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.8858511992834143,
+      "score": 1.0,
       "tier": "A+",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1791504100.7348144,
-      "last_checked_ts": 1791507600000,
-      "sl_buffer_used": 0.0009388681075265413,
-      "mae": 0.0006700000000000039,
+      "signal_ts": 1791514840.6520278,
+      "last_checked_ts": 1791514840652,
+      "sl_buffer_used": 1.1100000000000136,
+      "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
@@ -1449,7 +1471,7 @@
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 8320
+      "tg_message_id": 8325
     }
   },
   "daily_summary_date": "2026-10-08"
