@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-09T08:15:20.753995+00:00"
+    "last_run_ts": "2026-10-09T08:30:29.755827+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -924,17 +924,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "LTCUSDT:liquidity_sweep:1790226922854",
-        "symbol": "LTCUSDT",
-        "engine": "liquidity_sweep",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1790237725.1600559,
-        "signal_ts": 1790226922.8552015
-      },
-      {
         "id": "SUIUSDT:momentum:1789816520046",
         "symbol": "SUIUSDT",
         "engine": "momentum",
@@ -1450,7 +1439,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791514840.6520278,
-      "last_checked_ts": 1791532800000,
+      "last_checked_ts": 1791533700000,
       "sl_buffer_used": 1.1100000000000136,
       "mae": 0.4634121242377205,
       "sfp_purity": 1.0,
