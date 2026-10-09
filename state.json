@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-09T14:00:39.315587+00:00"
+    "last_run_ts": "2026-10-09T14:15:23.722196+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -482,9 +482,9 @@
         "sum_r": 4.700000000000003
       },
       "BNBUSDT|high_vol|15m|breakout": {
-        "n": 3,
+        "n": 4,
         "wins": 2,
-        "sum_r": 5.900000000000028
+        "sum_r": 4.900000000000028
       },
       "LTCUSDT|high_vol|1h|momentum": {
         "n": 2,
@@ -784,13 +784,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 103,
-        "n_since_last_gate": 56,
+        "n": 104,
+        "n_since_last_gate": 57,
         "by_key": {
           "global": {
-            "n": 56,
-            "n_since_last_gate": 16,
-            "n_since_last_fast_gate": 16,
+            "n": 57,
+            "n_since_last_gate": 17,
+            "n_since_last_fast_gate": 17,
             "fast_gate_ever_fired": true
           }
         }
@@ -886,7 +886,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 54,
+        "n": 55,
         "wins": 25
       },
       "calib|liquidity_sweep|high": {
@@ -911,14 +911,14 @@
       }
     },
     "totals": {
-      "signals": 123,
+      "signals": 124,
       "wins": 47,
-      "losses": 76,
+      "losses": 77,
       "expired": 9,
-      "sum_r": 107.4084955797255,
+      "sum_r": 106.4084955797255,
       "gross_profit_r": 183.40849557972544,
-      "gross_loss_r": 76.0,
-      "sum_hold_minutes": 252784.73611067134
+      "gross_loss_r": 77.0,
+      "sum_hold_minutes": 253459.39297473032
     }
   },
   "tier2": {
@@ -1065,6 +1065,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1791514835.9382732,
         "signal_ts": 1791504100.7348144
+      },
+      {
+        "id": "BNBUSDT:breakout:1791514840650",
+        "symbol": "BNBUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1791555320.0638714,
+        "signal_ts": 1791514840.6520278
       }
     ]
   },
@@ -1354,54 +1365,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "BNBUSDT:breakout:1791514840650": {
-      "id": "BNBUSDT:breakout:1791514840650",
-      "symbol": "BNBUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 739.61,
-      "sl": 736.6634121242377,
-      "tp1": 759.16,
-      "tp2": 759.7493175751524,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 2.817396396152252,
-      "rr_tp1": 6.634792792304504,
-      "rr_tp2": 6.834792792304496,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1791514840.6520278,
-      "last_checked_ts": 1791553500000,
-      "sl_buffer_used": 1.1100000000000136,
-      "mae": 0.5234121242376659,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8325
     },
     "SUIUSDT:trend_continuation:1791547296023": {
       "id": "SUIUSDT:trend_continuation:1791547296023",
