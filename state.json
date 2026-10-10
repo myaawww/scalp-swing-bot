@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-10T04:45:24.795064+00:00"
+    "last_run_ts": "2026-10-10T05:00:36.020397+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1164,7 +1164,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1212,7 +1212,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1259,7 +1259,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1307,7 +1307,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1355,7 +1355,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1403,7 +1403,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1791601200000,
+      "last_checked_ts": 1791604800000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1414,6 +1414,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
+    },
+    "AVAXUSDT:breakout:1791608435400": {
+      "id": "AVAXUSDT:breakout:1791608435400",
+      "symbol": "AVAXUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 10.515,
+      "sl": 10.463161340126359,
+      "tp1": 10.659,
+      "tp2": 10.669367731974729,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8889247942655505,
+      "rr_tp1": 2.777849588531101,
+      "rr_tp2": 2.977849588531101,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1791608435.402611,
+      "last_checked_ts": 1791608435402,
+      "sl_buffer_used": 0.018270927898913884,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8345
     }
   },
   "daily_summary_date": "2026-10-09"
