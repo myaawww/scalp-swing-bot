@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-10T02:15:20.775396+00:00"
+    "last_run_ts": "2026-10-10T02:30:28.438931+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1440,7 +1440,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791597635.4916902,
-      "last_checked_ts": 1791597635491,
+      "last_checked_ts": 1791598500000,
       "sl_buffer_used": 0.0025999999999999357,
       "mae": 0.0,
       "sfp_purity": 1.0,
