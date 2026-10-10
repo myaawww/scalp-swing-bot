@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-10T03:15:21.746700+00:00"
+    "last_run_ts": "2026-10-10T03:30:31.304117+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -492,9 +492,9 @@
         "sum_r": 3.6999999999999993
       },
       "SUIUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 3.700000000000009
+        "sum_r": 2.700000000000009
       },
       "ZECUSDT|high_vol|15m|breakout": {
         "n": 4,
@@ -801,13 +801,13 @@
         }
       },
       "correct_read_poor_rr": {
-        "n": 7,
-        "n_since_last_gate": 7,
+        "n": 8,
+        "n_since_last_gate": 8,
         "by_key": {
           "global": {
-            "n": 7,
-            "n_since_last_gate": 7,
-            "n_since_last_fast_gate": 7,
+            "n": 8,
+            "n_since_last_gate": 8,
+            "n_since_last_fast_gate": 8,
             "fast_gate_ever_fired": false
           }
         }
@@ -891,7 +891,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 57,
+        "n": 58,
         "wins": 27
       },
       "calib|liquidity_sweep|high": {
@@ -916,14 +916,14 @@
       }
     },
     "totals": {
-      "signals": 127,
+      "signals": 128,
       "wins": 49,
-      "losses": 78,
+      "losses": 79,
       "expired": 9,
-      "sum_r": 114.96180282059318,
+      "sum_r": 113.96180282059318,
       "gross_profit_r": 192.96180282059314,
-      "gross_loss_r": 78.0,
-      "sum_hold_minutes": 254508.17027731342
+      "gross_loss_r": 79.0,
+      "sum_hold_minutes": 254598.04536418917
     }
   },
   "tier2": {
@@ -1114,6 +1114,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1791598517.131588,
         "signal_ts": 1791596721.4552014
+      },
+      {
+        "id": "SUIUSDT:breakout:1791597635489",
+        "symbol": "SUIUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "correct_read_poor_rr",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1791603027.9969027,
+        "signal_ts": 1791597635.4916902
       }
     ]
   },
@@ -1403,54 +1414,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "SUIUSDT:breakout:1791597635489": {
-      "id": "SUIUSDT:breakout:1791597635489",
-      "symbol": "SUIUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.0903,
-      "sl": 1.0820148525204933,
-      "tp1": 1.1072,
-      "tp2": 1.1088570294959013,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5198973549838448,
-      "rr_tp1": 2.0397947099676896,
-      "rr_tp2": 2.2397947099676845,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1791597635.4916902,
-      "last_checked_ts": 1791601200000,
-      "sl_buffer_used": 0.0025999999999999357,
-      "mae": 0.001714852520493304,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8342
     }
   },
   "daily_summary_date": "2026-10-09"
