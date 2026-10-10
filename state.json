@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-10T01:30:26.880096+00:00"
+    "last_run_ts": "2026-10-10T01:45:21.992014+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.7500000000000007,
+          "weight": 1.7800000000000007,
           "min": 0.35,
           "max": 2.0
         },
@@ -382,9 +382,9 @@
         "sum_r": 3.6999999999999806
       },
       "ADAUSDT|high_vol|15m|breakout": {
-        "n": 2,
-        "wins": 0,
-        "sum_r": -2.0
+        "n": 3,
+        "wins": 1,
+        "sum_r": 2.85330724086771
       },
       "PENGUUSDT|high_vol|15m|liquidity_sweep": {
         "n": 2,
@@ -784,7 +784,7 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 104,
+        "n": 105,
         "n_since_last_gate": 57,
         "by_key": {
           "global": {
@@ -886,8 +886,8 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 55,
-        "wins": 25
+        "n": 56,
+        "wins": 26
       },
       "calib|liquidity_sweep|high": {
         "n": 8,
@@ -911,14 +911,14 @@
       }
     },
     "totals": {
-      "signals": 124,
-      "wins": 47,
+      "signals": 125,
+      "wins": 48,
       "losses": 77,
       "expired": 9,
-      "sum_r": 106.4084955797255,
-      "gross_profit_r": 183.40849557972544,
+      "sum_r": 111.2618028205932,
+      "gross_profit_r": 188.26180282059315,
       "gross_loss_r": 77.0,
-      "sum_hold_minutes": 253459.39297473032
+      "sum_hold_minutes": 253639.32936079105
     }
   },
   "tier2": {
@@ -1076,6 +1076,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1791555320.0638714,
         "signal_ts": 1791514840.6520278
+      },
+      {
+        "id": "ADAUSDT:breakout:1791585921533",
+        "symbol": "ADAUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.85330724086771,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1791596717.7178679,
+        "signal_ts": 1791585921.5347042
       }
     ]
   },
@@ -1414,15 +1425,15 @@
       "thin_margin_pass": false,
       "tg_message_id": 8334
     },
-    "ADAUSDT:breakout:1791585921533": {
-      "id": "ADAUSDT:breakout:1791585921533",
-      "symbol": "ADAUSDT",
+    "DOTUSDT:breakout:1791596721453": {
+      "id": "DOTUSDT:breakout:1791596721453",
+      "symbol": "DOTUSDT",
       "engine": "breakout",
       "direction": "long",
-      "entry": 0.24207,
-      "sl": 0.2405033723043311,
-      "tp1": 0.24936,
-      "tp2": 0.24967332553913377,
+      "entry": 1.2459,
+      "sl": 1.2369428095774868,
+      "tp1": 1.265605818929529,
+      "tp2": 1.2879987949858118,
       "entry_kind": "market",
       "timeframe": "15m",
       "confidence_raw": 0.55,
@@ -1437,22 +1448,22 @@
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 1.8266536204338584,
-      "rr_tp1": 4.653307240867717,
-      "rr_tp2": 4.85330724086771,
+      "ev_estimate": 0.599999999999995,
+      "rr_tp1": 2.19999999999999,
+      "rr_tp2": 4.699999999999978,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
       "score": 1.0,
-      "tier": "A+",
+      "tier": "A",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1791585921.5347042,
-      "last_checked_ts": 1791594900000,
-      "sl_buffer_used": 0.0005900000000000072,
-      "mae": 0.00047337230433111555,
+      "signal_ts": 1791596721.4552014,
+      "last_checked_ts": 1791596721455,
+      "sl_buffer_used": 0.004899999999999904,
+      "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
@@ -1460,7 +1471,7 @@
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 8337
+      "tg_message_id": 8340
     }
   },
   "daily_summary_date": "2026-10-09"
