@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-15T16:30:32.247081+00:00"
+    "last_run_ts": "2026-10-15T16:45:24.681855+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -472,9 +472,9 @@
         "sum_r": 3.699999999999993
       },
       "XRPUSDT|high_vol|15m|breakout": {
-        "n": 1,
+        "n": 2,
         "wins": 1,
-        "sum_r": 4.699999999999991
+        "sum_r": 3.6999999999999913
       },
       "BTCUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -819,13 +819,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 113,
-        "n_since_last_gate": 62,
+        "n": 114,
+        "n_since_last_gate": 63,
         "by_key": {
           "global": {
-            "n": 62,
-            "n_since_last_gate": 2,
-            "n_since_last_fast_gate": 2,
+            "n": 63,
+            "n_since_last_gate": 3,
+            "n_since_last_fast_gate": 3,
             "fast_gate_ever_fired": true
           }
         }
@@ -921,7 +921,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 60,
+        "n": 61,
         "wins": 29
       },
       "calib|liquidity_sweep|high": {
@@ -946,14 +946,14 @@
       }
     },
     "totals": {
-      "signals": 135,
+      "signals": 136,
       "wins": 51,
-      "losses": 84,
+      "losses": 85,
       "expired": 9,
-      "sum_r": 113.93965240912425,
+      "sum_r": 112.93965240912425,
       "gross_profit_r": 197.9396524091242,
-      "gross_loss_r": 84.0,
-      "sum_hold_minutes": 258858.24310168426
+      "gross_loss_r": 85.0,
+      "sum_hold_minutes": 258933.10214128098
     }
   },
   "tier2": {
@@ -1188,6 +1188,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792076442.176794,
         "signal_ts": 1792047639.879716
+      },
+      {
+        "id": "XRPUSDT:breakout:1792078229702",
+        "symbol": "XRPUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792082721.245662,
+        "signal_ts": 1792078229.7032862
       }
     ]
   },
@@ -1477,54 +1488,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "XRPUSDT:breakout:1792078229702": {
-      "id": "XRPUSDT:breakout:1792078229702",
-      "symbol": "XRPUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.3407,
-      "sl": 1.3309618274271489,
-      "tp1": 1.366,
-      "tp2": 1.3679476345145702,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.7990116888323309,
-      "rr_tp1": 2.5980233776646617,
-      "rr_tp2": 2.7980233776646526,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792078229.7032862,
-      "last_checked_ts": 1792080900000,
-      "sl_buffer_used": 0.004030538058281021,
-      "mae": 0.0034923654854299713,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8519
     }
   },
   "daily_summary_date": "2026-10-15"
