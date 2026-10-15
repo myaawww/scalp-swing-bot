@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-15T14:45:23.839476+00:00"
+    "last_run_ts": "2026-10-15T15:00:46.995719+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -810,17 +810,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "XLMUSDT|bear|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 112,
-        "n_since_last_gate": 61,
+        "n": 113,
+        "n_since_last_gate": 62,
         "by_key": {
           "global": {
-            "n": 61,
-            "n_since_last_gate": 1,
-            "n_since_last_fast_gate": 1,
+            "n": 62,
+            "n_since_last_gate": 2,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": true
           }
         }
@@ -912,7 +917,7 @@
         "wins": 2
       },
       "calib|pullback|mid": {
-        "n": 11,
+        "n": 12,
         "wins": 5
       },
       "calib|breakout|mid": {
@@ -941,14 +946,14 @@
       }
     },
     "totals": {
-      "signals": 134,
+      "signals": 135,
       "wins": 51,
-      "losses": 83,
+      "losses": 84,
       "expired": 9,
-      "sum_r": 114.93965240912425,
+      "sum_r": 113.93965240912425,
       "gross_profit_r": 197.9396524091242,
-      "gross_loss_r": 83.0,
-      "sum_hold_minutes": 258378.2048170487
+      "gross_loss_r": 84.0,
+      "sum_hold_minutes": 258858.24310168426
     }
   },
   "tier2": {
@@ -1172,6 +1177,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792072840.0856094,
         "signal_ts": 1792044037.3557262
+      },
+      {
+        "id": "XLMUSDT:pullback:1792047639878",
+        "symbol": "XLMUSDT",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792076442.176794,
+        "signal_ts": 1792047639.879716
       }
     ]
   },
@@ -1211,7 +1227,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1259,7 +1275,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1306,7 +1322,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1354,7 +1370,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1402,7 +1418,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1450,7 +1466,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1792069200000,
+      "last_checked_ts": 1792072800000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1461,53 +1477,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "XLMUSDT:pullback:1792047639878": {
-      "id": "XLMUSDT:pullback:1792047639878",
-      "symbol": "XLMUSDT",
-      "engine": "pullback",
-      "direction": "short",
-      "entry": 0.18008000000000002,
-      "sl": 0.1820736097185225,
-      "tp1": 0.17533,
-      "tp2": 0.17493127805629552,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.7859977198669204
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.691306391584102,
-      "rr_tp1": 2.382612783168204,
-      "rr_tp2": 2.5826127831682038,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7952410736927152,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792047639.879716,
-      "last_checked_ts": 1792069200000,
-      "sl_buffer_used": 0.0008636097185224772,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 8489
     }
   },
   "daily_summary_date": "2026-10-15"
