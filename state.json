@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-15T02:45:21.671205+00:00"
+    "last_run_ts": "2026-10-15T03:00:44.106466+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -795,17 +795,27 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "LINKUSDT|low_vol|1h|mean_reversion": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      },
+      "ONDOUSDT|low_vol|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 110,
-        "n_since_last_gate": 59,
+        "n": 112,
+        "n_since_last_gate": 61,
         "by_key": {
           "global": {
-            "n": 59,
-            "n_since_last_gate": 19,
-            "n_since_last_fast_gate": 19,
+            "n": 61,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": true
           }
         }
@@ -889,7 +899,7 @@
         "wins": 2
       },
       "calib|mean_reversion|low": {
-        "n": 3,
+        "n": 4,
         "wins": 2
       },
       "calib|trend_continuation|mid": {
@@ -897,7 +907,7 @@
         "wins": 2
       },
       "calib|pullback|mid": {
-        "n": 9,
+        "n": 10,
         "wins": 5
       },
       "calib|breakout|mid": {
@@ -926,14 +936,14 @@
       }
     },
     "totals": {
-      "signals": 131,
+      "signals": 133,
       "wins": 51,
-      "losses": 80,
+      "losses": 82,
       "expired": 9,
-      "sum_r": 117.93965240912425,
+      "sum_r": 115.93965240912425,
       "gross_profit_r": 197.9396524091242,
-      "gross_loss_r": 80.0,
-      "sum_hold_minutes": 256713.01331352792
+      "gross_loss_r": 82.0,
+      "sum_hold_minutes": 257898.1593189955
     }
   },
   "tier2": {
@@ -1124,6 +1134,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792004437.1135662,
         "signal_ts": 1791990926.2921634
+      },
+      {
+        "id": "LINKUSDT:mean_reversion:1791990926289",
+        "symbol": "LINKUSDT",
+        "engine": "mean_reversion",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance",
+        "resolved_ts": 1792033238.4237554,
+        "signal_ts": 1791990927.4488292
+      },
+      {
+        "id": "ONDOUSDT:pullback:1792004441731",
+        "symbol": "ONDOUSDT",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792033239.5189145,
+        "signal_ts": 1792004441.7335126
       }
     ]
   },
@@ -1163,7 +1195,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1211,7 +1243,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1258,7 +1290,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1306,7 +1338,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1354,7 +1386,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1402,7 +1434,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1792026000000,
+      "last_checked_ts": 1792029600000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1413,100 +1445,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "LINKUSDT:mean_reversion:1791990926289": {
-      "id": "LINKUSDT:mean_reversion:1791990926289",
-      "symbol": "LINKUSDT",
-      "engine": "mean_reversion",
-      "direction": "long",
-      "entry": 12.406,
-      "sl": 12.236999999999998,
-      "tp1": 12.87115,
-      "tp2": 12.904950000000001,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "z_score_extreme": 0.6699937859136188
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.8761834319526429,
-      "rr_tp1": 2.752366863905286,
-      "rr_tp2": 2.95236686390529,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7603850153600555,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1791990927.4488292,
-      "last_checked_ts": 1792026000000,
-      "sl_buffer_used": 0.06500000000000128,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8449
-    },
-    "ONDOUSDT:pullback:1792004441731": {
-      "id": "ONDOUSDT:pullback:1792004441731",
-      "symbol": "ONDOUSDT",
-      "engine": "pullback",
-      "direction": "long",
-      "entry": 0.44445,
-      "sl": 0.4383228086980487,
-      "tp1": 0.46781,
-      "tp2": 0.4690354382603903,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.5764586808641858
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.4062567862505388,
-      "rr_tp1": 3.8125135725010777,
-      "rr_tp2": 4.012513572501081,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.8601512736199083,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792004441.7335126,
-      "last_checked_ts": 1792026000000,
-      "sl_buffer_used": 0.0026171913019512917,
-      "mae": 0.0010800000000000254,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8456
     }
   },
   "daily_summary_date": "2026-10-14"
