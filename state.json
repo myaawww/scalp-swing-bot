@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-15T06:45:20.634452+00:00"
+    "last_run_ts": "2026-10-15T07:00:40.403217+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1195,7 +1195,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1243,7 +1243,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1290,7 +1290,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1338,7 +1338,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1386,7 +1386,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1434,7 +1434,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1792040400000,
+      "last_checked_ts": 1792044000000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1492,6 +1492,53 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 8485
+    },
+    "XLMUSDT:pullback:1792047639878": {
+      "id": "XLMUSDT:pullback:1792047639878",
+      "symbol": "XLMUSDT",
+      "engine": "pullback",
+      "direction": "short",
+      "entry": 0.18008000000000002,
+      "sl": 0.1820736097185225,
+      "tp1": 0.17533,
+      "tp2": 0.17493127805629552,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.7859977198669204
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.691306391584102,
+      "rr_tp1": 2.382612783168204,
+      "rr_tp2": 2.5826127831682038,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.7952410736927152,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792047639.879716,
+      "last_checked_ts": 1792047639879,
+      "sl_buffer_used": 0.0008636097185224772,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 8489
     }
   },
   "daily_summary_date": "2026-10-14"
