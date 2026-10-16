@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-16T12:01:38.531105+00:00"
+    "last_run_ts": "2026-10-16T12:15:24.402213+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -472,9 +472,9 @@
         "sum_r": 3.699999999999993
       },
       "XRPUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 3.6999999999999913
+        "sum_r": 2.6999999999999913
       },
       "BTCUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -702,9 +702,9 @@
         "sum_r": -1.0
       },
       "BCHUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 1.1999999999999997
+        "sum_r": 0.19999999999999973
       },
       "NEARUSDT|high_vol|1h|momentum": {
         "n": 1,
@@ -829,13 +829,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 115,
-        "n_since_last_gate": 64,
+        "n": 117,
+        "n_since_last_gate": 66,
         "by_key": {
           "global": {
-            "n": 64,
-            "n_since_last_gate": 4,
-            "n_since_last_fast_gate": 4,
+            "n": 66,
+            "n_since_last_gate": 6,
+            "n_since_last_fast_gate": 6,
             "fast_gate_ever_fired": true
           }
         }
@@ -937,7 +937,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 61,
+        "n": 63,
         "wins": 29
       },
       "calib|liquidity_sweep|high": {
@@ -962,14 +962,14 @@
       }
     },
     "totals": {
-      "signals": 138,
+      "signals": 140,
       "wins": 51,
-      "losses": 87,
+      "losses": 89,
       "expired": 9,
-      "sum_r": 110.93965240912425,
+      "sum_r": 108.93965240912425,
       "gross_profit_r": 197.9396524091242,
-      "gross_loss_r": 87.0,
-      "sum_hold_minutes": 259038.00933134955
+      "gross_loss_r": 89.0,
+      "sum_hold_minutes": 259307.93297797441
     }
   },
   "tier2": {
@@ -1215,6 +1215,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792140318.2862086,
         "signal_ts": 1792135830.2626061
+      },
+      {
+        "id": "BCHUSDT:breakout:1792140322226",
+        "symbol": "BCHUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792152920.2407196,
+        "signal_ts": 1792140322.2285228
+      },
+      {
+        "id": "XRPUSDT:breakout:1792149323789",
+        "symbol": "XRPUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792152921.196969,
+        "signal_ts": 1792149323.7903683
       }
     ]
   },
@@ -1504,102 +1526,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
-    },
-    "BCHUSDT:breakout:1792140322226": {
-      "id": "BCHUSDT:breakout:1792140322226",
-      "symbol": "BCHUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 283.15,
-      "sl": 280.4829221909316,
-      "tp1": 289.0175711799504,
-      "tp2": 295.6852657026213,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000021,
-      "rr_tp1": 2.200000000000004,
-      "rr_tp2": 4.700000000000005,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792140322.2285228,
-      "last_checked_ts": 1792151100000,
-      "sl_buffer_used": 0.46166224725470234,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8541
-    },
-    "XRPUSDT:breakout:1792149323789": {
-      "id": "XRPUSDT:breakout:1792149323789",
-      "symbol": "XRPUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.3493,
-      "sl": 1.3428336680723858,
-      "tp1": 1.363525930240751,
-      "tp2": 1.3796917600597864,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5999999999999932,
-      "rr_tp1": 2.1999999999999864,
-      "rr_tp2": 4.700000000000004,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792149323.7903683,
-      "last_checked_ts": 1792151100000,
-      "sl_buffer_used": 0.0021999999999999797,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8542
     }
   },
   "daily_summary_date": "2026-10-16"
