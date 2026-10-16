@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-16T04:15:22.150414+00:00"
+    "last_run_ts": "2026-10-16T04:30:29.170685+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1466,6 +1466,53 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
+    },
+    "TAOUSDT:liquidity_sweep:1792125027889": {
+      "id": "TAOUSDT:liquidity_sweep:1792125027889",
+      "symbol": "TAOUSDT",
+      "engine": "liquidity_sweep",
+      "direction": "short",
+      "entry": 285.01,
+      "sl": 286.7777191387399,
+      "tp1": 280.75,
+      "tp2": 280.39645617225204,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.7126086955801046,
+      "regime_fit": [
+        "reversal",
+        "ranging",
+        "high_vol"
+      ],
+      "confluences": {
+        "sweep_purity": 0.6630434779005232
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.7049425462001577,
+      "rr_tp1": 2.4098850924003155,
+      "rr_tp2": 2.6098850924003028,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7487337936754189,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792125027.8914073,
+      "last_checked_ts": 1792125027891,
+      "sl_buffer_used": 0.7822991387399348,
+      "mae": 0.0,
+      "sfp_purity": 0.6630434779005232,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8527
     }
   },
   "daily_summary_date": "2026-10-15"
