@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-16T15:00:43.599091+00:00"
+    "last_run_ts": "2026-10-16T15:15:24.107695+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1526,6 +1526,102 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8312
+    },
+    "BCHUSDT:breakout:1792163722949": {
+      "id": "BCHUSDT:breakout:1792163722949",
+      "symbol": "BCHUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 277.28,
+      "sl": 279.7753685862326,
+      "tp1": 271.79018911028817,
+      "tp2": 265.55176764470656,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999976,
+      "rr_tp1": 2.1999999999999953,
+      "rr_tp2": 4.699999999999996,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792163722.9524179,
+      "last_checked_ts": 1792163722952,
+      "sl_buffer_used": 0.5802948689860771,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8549
+    },
+    "ADAUSDT:breakout:1792163722949": {
+      "id": "ADAUSDT:breakout:1792163722949",
+      "symbol": "ADAUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 0.22544,
+      "sl": 0.22804967560279493,
+      "tp1": 0.22022,
+      "tp2": 0.21969806487944102,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5001243055668387,
+      "rr_tp1": 2.0002486111336775,
+      "rr_tp2": 2.200248611133675,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792163723.6106439,
+      "last_checked_ts": 1792163723610,
+      "sl_buffer_used": 0.000567740482235965,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8550
     }
   },
   "daily_summary_date": "2026-10-16"
