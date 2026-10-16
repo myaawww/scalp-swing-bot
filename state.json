@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-16T08:30:28.074720+00:00"
+    "last_run_ts": "2026-10-16T08:45:22.856038+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -820,17 +820,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "APTUSDT|high_vol|15m|liquidity_sweep": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 114,
-        "n_since_last_gate": 63,
+        "n": 115,
+        "n_since_last_gate": 64,
         "by_key": {
           "global": {
-            "n": 63,
-            "n_since_last_gate": 3,
-            "n_since_last_fast_gate": 3,
+            "n": 64,
+            "n_since_last_gate": 4,
+            "n_since_last_fast_gate": 4,
             "fast_gate_ever_fired": true
           }
         }
@@ -936,7 +941,7 @@
         "wins": 29
       },
       "calib|liquidity_sweep|high": {
-        "n": 9,
+        "n": 10,
         "wins": 1
       },
       "calib|volatility_expansion|mid": {
@@ -957,14 +962,14 @@
       }
     },
     "totals": {
-      "signals": 137,
+      "signals": 138,
       "wins": 51,
-      "losses": 86,
+      "losses": 87,
       "expired": 9,
-      "sum_r": 111.93965240912425,
+      "sum_r": 110.93965240912425,
       "gross_profit_r": 197.9396524091242,
-      "gross_loss_r": 86.0,
-      "sum_hold_minutes": 258963.2089379748
+      "gross_loss_r": 87.0,
+      "sum_hold_minutes": 259038.00933134955
     }
   },
   "tier2": {
@@ -1199,6 +1204,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792126834.2992089,
         "signal_ts": 1792125027.8914073
+      },
+      {
+        "id": "APTUSDT:liquidity_sweep:1792135830262",
+        "symbol": "APTUSDT",
+        "engine": "liquidity_sweep",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792140318.2862086,
+        "signal_ts": 1792135830.2626061
       }
     ]
   },
@@ -1489,52 +1505,53 @@
       "thin_margin_pass": false,
       "tg_message_id": 8312
     },
-    "APTUSDT:liquidity_sweep:1792135830262": {
-      "id": "APTUSDT:liquidity_sweep:1792135830262",
-      "symbol": "APTUSDT",
-      "engine": "liquidity_sweep",
-      "direction": "short",
-      "entry": 0.8624,
-      "sl": 0.8697913999999999,
-      "tp1": 0.8437,
-      "tp2": 0.8422217200000001,
+    "BCHUSDT:breakout:1792140322226": {
+      "id": "BCHUSDT:breakout:1792140322226",
+      "symbol": "BCHUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 283.15,
+      "sl": 280.4829221909316,
+      "tp1": 289.0175711799504,
+      "tp2": 295.6852657026213,
       "entry_kind": "market",
       "timeframe": "15m",
-      "confidence_raw": 0.7327272449586804,
+      "confidence_raw": 0.55,
       "regime_fit": [
-        "reversal",
-        "ranging",
+        "expansion",
+        "trending",
         "high_vol"
       ],
       "confluences": {
-        "sweep_purity": 0.763636224793402
+        "range_break": 1.0,
+        "volume_confirm": 1.0
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.7649836296236499,
-      "rr_tp1": 2.5299672592472997,
-      "rr_tp2": 2.7299672592472968,
+      "ev_estimate": 0.6000000000000021,
+      "rr_tp1": 2.200000000000004,
+      "rr_tp2": 4.700000000000005,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
-      "score": 0.7818762563047315,
+      "score": 1.0,
       "tier": "A+",
       "tp1_hit": false,
       "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1792135830.2626061,
-      "last_checked_ts": 1792138500000,
-      "sl_buffer_used": 0.0033999999999999586,
-      "mae": 0.002508600000000083,
-      "sfp_purity": 0.763636224793402,
+      "signal_ts": 1792140322.2285228,
+      "last_checked_ts": 1792140322228,
+      "sl_buffer_used": 0.46166224725470234,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
         "macro_bias": "bear"
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 8534
+      "tg_message_id": 8541
     }
   },
   "daily_summary_date": "2026-10-16"
