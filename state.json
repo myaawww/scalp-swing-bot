@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-23T19:00:42.744408+00:00"
+    "last_run_ts": "2026-10-23T19:15:22.698398+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1594,6 +1594,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 8748
+    },
+    "SUIUSDT:order_block:1792782921928": {
+      "id": "SUIUSDT:order_block:1792782921928",
+      "symbol": "SUIUSDT",
+      "engine": "order_block",
+      "direction": "long",
+      "entry": 0.94794,
+      "sl": 0.92735,
+      "tp1": 1.0033,
+      "tp2": 1.0074180000000001,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
+      ],
+      "confluences": {
+        "htf_ob_quality": 0.9396032386749872
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8443419135502692,
+      "rr_tp1": 2.6886838271005384,
+      "rr_tp2": 2.8886838271005417,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.8049694825794647,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792782921.931116,
+      "last_checked_ts": 1792782921931,
+      "sl_buffer_used": 0.009499999999999953,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 8749
     }
   },
   "daily_summary_date": "2026-10-23"
