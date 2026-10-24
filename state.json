@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-23T23:45:20.929130+00:00"
+    "last_run_ts": "2026-10-24T00:01:37.841527+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -990,17 +990,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "BCHUSDT:breakout:1790081123941",
-        "symbol": "BCHUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 2.1999999999999997,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1791504036.4489434,
-        "signal_ts": 1790081123.944451
-      },
-      {
         "id": "XLMUSDT:momentum:1791504100733",
         "symbol": "XLMUSDT",
         "engine": "momentum",
@@ -1313,7 +1302,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1361,7 +1350,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1408,7 +1397,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1456,7 +1445,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1504,7 +1493,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1552,7 +1541,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1792792800000,
+      "last_checked_ts": 1792796400000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1592,7 +1581,7 @@
       "rr_tp2": 2.8886838271005417,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 12,
-      "entry_filled": false,
+      "entry_filled": true,
       "score": 0.8049694825794647,
       "tier": "A+",
       "tp1_hit": false,
@@ -1600,7 +1589,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792782921.931116,
-      "last_checked_ts": 1792782921931,
+      "last_checked_ts": 1792785600000,
       "sl_buffer_used": 0.009499999999999953,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1648,7 +1637,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792795522.9743657,
-      "last_checked_ts": 1792798200000,
+      "last_checked_ts": 1792799100000,
       "sl_buffer_used": 0.02210000000000001,
       "mae": 0.0,
       "sfp_purity": 1.0,
