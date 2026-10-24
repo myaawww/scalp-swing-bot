@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-24T14:00:37.908704+00:00"
+    "last_run_ts": "2026-10-24T14:15:26.785216+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -990,17 +990,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "BNBUSDT:breakout:1791514840650",
-        "symbol": "BNBUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1791555320.0638714,
-        "signal_ts": 1791514840.6520278
-      },
-      {
         "id": "ADAUSDT:breakout:1791585921533",
         "symbol": "ADAUSDT",
         "engine": "breakout",
@@ -1626,7 +1615,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792795522.9743657,
-      "last_checked_ts": 1792849500000,
+      "last_checked_ts": 1792850400000,
       "sl_buffer_used": 0.02210000000000001,
       "mae": 0.0,
       "sfp_purity": 1.0,
