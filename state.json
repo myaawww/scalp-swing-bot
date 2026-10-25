@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-25T14:00:37.886844+00:00"
+    "last_run_ts": "2026-10-25T14:15:19.254589+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -994,17 +994,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "AVAXUSDT:breakout:1791608435400",
-        "symbol": "AVAXUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 2.777849588531101,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1791641718.8829038,
-        "signal_ts": 1791608435.402611
-      },
       {
         "id": "BNBUSDT:breakout:1791609321096",
         "symbol": "BNBUSDT",
