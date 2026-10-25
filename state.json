@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-25T07:15:21.552322+00:00"
+    "last_run_ts": "2026-10-25T07:30:27.842748+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -512,9 +512,9 @@
         "sum_r": 4.699999999999993
       },
       "LINKUSDT|high_vol|15m|breakout": {
-        "n": 3,
+        "n": 4,
         "wins": 1,
-        "sum_r": 2.6999999999999966
+        "sum_r": 1.6999999999999966
       },
       "XLMUSDT|high_vol|15m|breakout": {
         "n": 1,
@@ -849,13 +849,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 126,
-        "n_since_last_gate": 70,
+        "n": 127,
+        "n_since_last_gate": 71,
         "by_key": {
           "global": {
-            "n": 70,
-            "n_since_last_gate": 10,
-            "n_since_last_fast_gate": 10,
+            "n": 71,
+            "n_since_last_gate": 11,
+            "n_since_last_fast_gate": 11,
             "fast_gate_ever_fired": true
           }
         }
@@ -957,7 +957,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 69,
+        "n": 70,
         "wins": 34
       },
       "calib|liquidity_sweep|high": {
@@ -982,14 +982,14 @@
       }
     },
     "totals": {
-      "signals": 150,
+      "signals": 151,
       "wins": 56,
-      "losses": 94,
+      "losses": 95,
       "expired": 9,
-      "sum_r": 120.06281196981139,
+      "sum_r": 119.06281196981139,
       "gross_profit_r": 214.06281196981132,
-      "gross_loss_r": 94.0,
-      "sum_hold_minutes": 266267.8540999572
+      "gross_loss_r": 95.0,
+      "sum_hold_minutes": 266297.6329636972
     }
   },
   "tier2": {
@@ -1235,6 +1235,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1792911633.0404072,
         "signal_ts": 1792852230.5757377
+      },
+      {
+        "id": "LINKUSDT:breakout:1792911638105",
+        "symbol": "LINKUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1792913424.8389606,
+        "signal_ts": 1792911638.1071362
       }
     ]
   },
@@ -1572,54 +1583,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8795
-    },
-    "LINKUSDT:breakout:1792911638105": {
-      "id": "LINKUSDT:breakout:1792911638105",
-      "symbol": "LINKUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 11.355,
-      "sl": 11.387558142684428,
-      "tp1": 11.235,
-      "tp2": 11.228488371463113,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.342856964586559,
-      "rr_tp1": 3.685713929173118,
-      "rr_tp2": 3.8857139291731397,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1792911638.1071362,
-      "last_checked_ts": 1792911638107,
-      "sl_buffer_used": 0.012446514147543032,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8809
     }
   },
   "daily_summary_date": "2026-10-24"
