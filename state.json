@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-25T03:15:19.831230+00:00"
+    "last_run_ts": "2026-10-25T03:30:28.948751+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -995,17 +995,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "SUIUSDT:breakout:1791597635489",
-        "symbol": "SUIUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "correct_read_poor_rr",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1791603027.9969027,
-        "signal_ts": 1791597635.4916902
-      },
-      {
         "id": "AVAXUSDT:breakout:1791608435400",
         "symbol": "AVAXUSDT",
         "engine": "breakout",
@@ -1561,7 +1550,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792852230.5757377,
-      "last_checked_ts": 1792897200000,
+      "last_checked_ts": 1792898100000,
       "sl_buffer_used": 0.0022999999999999687,
       "mae": 0.000779158352267606,
       "sfp_purity": 1.0,
