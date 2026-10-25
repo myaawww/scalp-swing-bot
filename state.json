@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-25T01:30:27.350917+00:00"
+    "last_run_ts": "2026-10-25T01:45:21.948215+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -995,17 +995,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "ADAUSDT:breakout:1791585921533",
-        "symbol": "ADAUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.85330724086771,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1791596717.7178679,
-        "signal_ts": 1791585921.5347042
-      },
-      {
         "id": "SUIUSDT:trend_continuation:1791547296023",
         "symbol": "SUIUSDT",
         "engine": "trend_continuation",
@@ -1594,9 +1583,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792852230.5757377,
-      "last_checked_ts": 1792890900000,
+      "last_checked_ts": 1792891800000,
       "sl_buffer_used": 0.0022999999999999687,
-      "mae": 0.000279158352267439,
+      "mae": 0.000779158352267606,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
