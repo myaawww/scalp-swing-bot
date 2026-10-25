@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-25T02:00:37.548313+00:00"
+    "last_run_ts": "2026-10-25T02:15:21.140846+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -995,17 +995,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "DOTUSDT:breakout:1791596721453",
-        "symbol": "DOTUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.699999999999978,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1791598517.131588,
-        "signal_ts": 1791596721.4552014
-      },
-      {
         "id": "SUIUSDT:breakout:1791597635489",
         "symbol": "SUIUSDT",
         "engine": "breakout",
@@ -1572,7 +1561,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792852230.5757377,
-      "last_checked_ts": 1792892700000,
+      "last_checked_ts": 1792893600000,
       "sl_buffer_used": 0.0022999999999999687,
       "mae": 0.000779158352267606,
       "sfp_purity": 1.0,
