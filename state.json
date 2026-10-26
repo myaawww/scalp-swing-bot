@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-26T03:15:20.026384+00:00"
+    "last_run_ts": "2026-10-26T03:30:28.738966+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -994,17 +994,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "BNBUSDT:breakout:1791609321096",
-        "symbol": "BNBUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 2.1999999999999695,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1791689424.874697,
-        "signal_ts": 1791609321.0994322
-      },
       {
         "id": "XRPUSDT:mean_reversion:1791990926290",
         "symbol": "XRPUSDT",
