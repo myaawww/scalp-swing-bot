@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-26T03:45:22.271076+00:00"
+    "last_run_ts": "2026-10-26T04:01:34.029691+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1263,7 +1263,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1311,7 +1311,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1358,7 +1358,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1406,7 +1406,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1454,7 +1454,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1502,7 +1502,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1550,7 +1550,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1792980000000,
+      "last_checked_ts": 1792983600000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1561,6 +1561,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8795
+    },
+    "XRPUSDT:order_block:1792987293379": {
+      "id": "XRPUSDT:order_block:1792987293379",
+      "symbol": "XRPUSDT",
+      "engine": "order_block",
+      "direction": "long",
+      "entry": 1.2643,
+      "sl": 1.2471,
+      "tp1": 1.3102,
+      "tp2": 1.31364,
+      "entry_kind": "pending",
+      "timeframe": "4h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear",
+        "expansion"
+      ],
+      "confluences": {
+        "htf_ob_quality": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.8343023255814059,
+      "rr_tp1": 2.668604651162812,
+      "rr_tp2": 2.8686046511628067,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 12,
+      "entry_filled": false,
+      "score": 0.8136158784364091,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1792987293.381005,
+      "last_checked_ts": 1792987293381,
+      "sl_buffer_used": 0.008299999999999974,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 8850
     }
   },
   "daily_summary_date": "2026-10-25"
