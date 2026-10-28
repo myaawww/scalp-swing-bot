@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-28T19:45:25.141921+00:00"
+    "last_run_ts": "2026-10-28T20:01:39.238112+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -845,6 +845,11 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "XLMUSDT|low_vol|4h|order_block": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -861,13 +866,13 @@
         }
       },
       "correct_read_poor_rr": {
-        "n": 9,
-        "n_since_last_gate": 9,
+        "n": 10,
+        "n_since_last_gate": 10,
         "by_key": {
           "global": {
-            "n": 9,
-            "n_since_last_gate": 9,
-            "n_since_last_fast_gate": 9,
+            "n": 10,
+            "n_since_last_gate": 10,
+            "n_since_last_fast_gate": 10,
             "fast_gate_ever_fired": false
           }
         }
@@ -973,7 +978,7 @@
         "wins": 5
       },
       "calib|order_block|mid": {
-        "n": 6,
+        "n": 7,
         "wins": 0
       },
       "calib|liquidity_sweep|mid": {
@@ -982,14 +987,14 @@
       }
     },
     "totals": {
-      "signals": 151,
+      "signals": 152,
       "wins": 56,
-      "losses": 95,
+      "losses": 96,
       "expired": 10,
-      "sum_r": 119.06281196981139,
+      "sum_r": 118.06281196981139,
       "gross_profit_r": 214.06281196981132,
-      "gross_loss_r": 95.0,
-      "sum_hold_minutes": 266297.6329636972
+      "gross_loss_r": 96.0,
+      "sum_hold_minutes": 267016.6918589036
     }
   },
   "tier2": {
@@ -1224,6 +1229,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1792913424.8389606,
         "signal_ts": 1792911638.1071362
+      },
+      {
+        "id": "XLMUSDT:order_block:1793174495747",
+        "symbol": "XLMUSDT",
+        "engine": "order_block",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "correct_read_poor_rr",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793217639.2817774,
+        "signal_ts": 1793174495.748065
       }
     ]
   },
@@ -1263,7 +1279,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1311,7 +1327,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1358,7 +1374,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1406,7 +1422,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1790175641.423319,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 0.00040188279529307087,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1454,7 +1470,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791446494.784657,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 0.23799999999999955,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1502,7 +1518,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1550,7 +1566,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1793210400000,
+      "last_checked_ts": 1793214000000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1561,54 +1577,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 8795
-    },
-    "XLMUSDT:order_block:1793174495747": {
-      "id": "XLMUSDT:order_block:1793174495747",
-      "symbol": "XLMUSDT",
-      "engine": "order_block",
-      "direction": "long",
-      "entry": 0.173105,
-      "sl": 0.17037,
-      "tp1": 0.17886,
-      "tp2": 0.17940699999999998,
-      "entry_kind": "pending",
-      "timeframe": "4h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear",
-        "expansion"
-      ],
-      "confluences": {
-        "htf_ob_quality": 0.8865821457550974
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5521023765996254,
-      "rr_tp1": 2.1042047531992507,
-      "rr_tp2": 2.3042047531992464,
-      "pending_bars_elapsed": 1,
-      "pending_expiry_bars": 12,
-      "entry_filled": false,
-      "score": 0.7451444233586568,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793174495.748065,
-      "last_checked_ts": 1793188800000,
-      "sl_buffer_used": 0.0011899999999999966,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bull"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 8926
     }
   },
   "daily_summary_date": "2026-10-28"
