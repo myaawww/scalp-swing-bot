@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-30T06:45:22.957739+00:00"
+    "last_run_ts": "2026-10-30T07:00:42.027728+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1273,7 +1273,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1321,7 +1321,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1368,7 +1368,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1416,7 +1416,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1464,7 +1464,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1511,7 +1511,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793331922.4178393,
-      "last_checked_ts": 1793336400000,
+      "last_checked_ts": 1793340000000,
       "sl_buffer_used": 0.0898059669570548,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1522,6 +1522,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 9037
+    },
+    "TRXUSDT:trend_continuation:1793343641377": {
+      "id": "TRXUSDT:trend_continuation:1793343641377",
+      "symbol": "TRXUSDT",
+      "engine": "trend_continuation",
+      "direction": "long",
+      "entry": 0.33857,
+      "sl": 0.33194371041369874,
+      "tp1": 0.36085,
+      "tp2": 0.36217525791726024,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.181182184224204,
+      "rr_tp1": 3.362364368448408,
+      "rr_tp2": 3.562364368448406,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.9389755719099381,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1793343641.379673,
+      "last_checked_ts": 1793343641379,
+      "sl_buffer_used": 0.002696289586301246,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 9042
     }
   },
   "daily_summary_date": "2026-10-29"
