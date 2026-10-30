@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-30T16:30:29.053162+00:00"
+    "last_run_ts": "2026-10-30T16:45:25.230227+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1016,17 +1016,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "XRPUSDT:breakout:1792078229702",
-        "symbol": "XRPUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1792082721.245662,
-        "signal_ts": 1792078229.7032862
-      },
-      {
         "id": "TAOUSDT:liquidity_sweep:1792125027889",
         "symbol": "TAOUSDT",
         "engine": "liquidity_sweep",
@@ -1581,7 +1570,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793373322.2779522,
-      "last_checked_ts": 1793376900000,
+      "last_checked_ts": 1793377800000,
       "sl_buffer_used": 0.00587757767481037,
       "mae": 0.0011306055812974058,
       "sfp_purity": 1.0,
