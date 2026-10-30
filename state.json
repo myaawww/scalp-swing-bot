@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-30T21:00:41.708136+00:00"
+    "last_run_ts": "2026-10-30T21:15:23.559226+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1549,6 +1549,54 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 9037
+    },
+    "PENDLEUSDT:breakout:1793394923001": {
+      "id": "PENDLEUSDT:breakout:1793394923001",
+      "symbol": "PENDLEUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 1.8075,
+      "sl": 1.7914614252038614,
+      "tp1": 1.8427848645515053,
+      "tp2": 1.882881301541852,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000014,
+      "rr_tp1": 2.200000000000003,
+      "rr_tp2": 4.700000000000003,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1793394923.0014553,
+      "last_checked_ts": 1793394923001,
+      "sl_buffer_used": 0.0061108598369107895,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 9097
     }
   },
   "daily_summary_date": "2026-10-30"
