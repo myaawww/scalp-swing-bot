@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-30T08:45:21.582529+00:00"
+    "last_run_ts": "2026-10-30T09:00:43.403630+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -855,6 +855,11 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.2000000000000024
+      },
+      "TRXUSDT|bear|1h|trend_continuation": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
@@ -895,8 +900,8 @@
         }
       },
       "structural_invalidation_too_tight": {
-        "n": 5,
-        "n_since_last_gate": 5,
+        "n": 6,
+        "n_since_last_gate": 6,
         "by_key": {
           "NEARUSDT": {
             "n": 1,
@@ -917,6 +922,12 @@
             "fast_gate_ever_fired": false
           },
           "TAOUSDT": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          },
+          "TRXUSDT": {
             "n": 1,
             "n_since_last_gate": 1,
             "n_since_last_fast_gate": 1,
@@ -959,7 +970,7 @@
         "wins": 2
       },
       "calib|trend_continuation|mid": {
-        "n": 12,
+        "n": 13,
         "wins": 2
       },
       "calib|pullback|mid": {
@@ -992,14 +1003,14 @@
       }
     },
     "totals": {
-      "signals": 154,
+      "signals": 155,
       "wins": 58,
-      "losses": 96,
+      "losses": 97,
       "expired": 10,
-      "sum_r": 124.9628119698114,
+      "sum_r": 123.9628119698114,
       "gross_profit_r": 220.9628119698113,
-      "gross_loss_r": 96.0,
-      "sum_hold_minutes": 350535.5640601039
+      "gross_loss_r": 97.0,
+      "sum_hold_minutes": 350655.51156241895
     }
   },
   "tier2": {
@@ -1234,6 +1245,17 @@
         "adaptive_delta": "engine_weights[momentum] += step",
         "resolved_ts": 1793322034.8123548,
         "signal_ts": 1791446494.784657
+      },
+      {
+        "id": "TRXUSDT:trend_continuation:1793343641377",
+        "symbol": "TRXUSDT",
+        "engine": "trend_continuation",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793350838.229812,
+        "signal_ts": 1793343641.379673
       }
     ]
   },
@@ -1273,7 +1295,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1321,7 +1343,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1368,7 +1390,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1416,7 +1438,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1464,7 +1486,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1511,7 +1533,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793331922.4178393,
-      "last_checked_ts": 1793343600000,
+      "last_checked_ts": 1793347200000,
       "sl_buffer_used": 0.0898059669570548,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1522,54 +1544,6 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 9037
-    },
-    "TRXUSDT:trend_continuation:1793343641377": {
-      "id": "TRXUSDT:trend_continuation:1793343641377",
-      "symbol": "TRXUSDT",
-      "engine": "trend_continuation",
-      "direction": "long",
-      "entry": 0.33857,
-      "sl": 0.33194371041369874,
-      "tp1": 0.36085,
-      "tp2": 0.36217525791726024,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.8
-      },
-      "mtf_alignment": 0.85,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.181182184224204,
-      "rr_tp1": 3.362364368448408,
-      "rr_tp2": 3.562364368448406,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.9389755719099381,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793343641.379673,
-      "last_checked_ts": 1793343641379,
-      "sl_buffer_used": 0.002696289586301246,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 9042
     },
     "DOTUSDT:trend_continuation:1793347296968": {
       "id": "DOTUSDT:trend_continuation:1793347296968",
