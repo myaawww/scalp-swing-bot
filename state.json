@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-31T12:01:47.877434+00:00"
+    "last_run_ts": "2026-10-31T12:15:20.692182+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1021,17 +1021,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "BCHUSDT:breakout:1792140322226",
-        "symbol": "BCHUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1792152920.2407196,
-        "signal_ts": 1792140322.2285228
-      },
-      {
         "id": "XRPUSDT:breakout:1792149323789",
         "symbol": "XRPUSDT",
         "engine": "breakout",
@@ -1550,7 +1539,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793405720.7855237,
-      "last_checked_ts": 1793447100000,
+      "last_checked_ts": 1793448000000,
       "sl_buffer_used": 0.0005920095040460428,
       "mae": 0.0,
       "sfp_purity": 1.0,
