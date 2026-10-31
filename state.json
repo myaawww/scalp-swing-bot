@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-31T08:30:30.571918+00:00"
+    "last_run_ts": "2026-10-31T08:45:23.478579+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1021,17 +1021,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "APTUSDT:liquidity_sweep:1792135830262",
-        "symbol": "APTUSDT",
-        "engine": "liquidity_sweep",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1792140318.2862086,
-        "signal_ts": 1792135830.2626061
-      },
-      {
         "id": "BCHUSDT:breakout:1792140322226",
         "symbol": "BCHUSDT",
         "engine": "breakout",
@@ -1556,12 +1545,12 @@
       "entry_filled": true,
       "score": 1.0,
       "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
+      "tp1_hit": true,
+      "tp1_hit_ts": 1793435400000,
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793405720.7855237,
-      "last_checked_ts": 1793434500000,
+      "last_checked_ts": 1793435400000,
       "sl_buffer_used": 0.0005920095040460428,
       "mae": 0.0,
       "sfp_purity": 1.0,
