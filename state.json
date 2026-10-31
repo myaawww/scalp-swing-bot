@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-31T00:30:28.203718+00:00"
+    "last_run_ts": "2026-10-31T00:45:23.190486+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -862,14 +862,14 @@
         "sum_r": -1.0
       },
       "PENDLEUSDT|high_vol|15m|breakout": {
-        "n": 1,
-        "wins": 0,
-        "sum_r": -1.0
+        "n": 2,
+        "wins": 1,
+        "sum_r": 3.700000000000003
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 133,
+        "n": 134,
         "n_since_last_gate": 74,
         "by_key": {
           "global": {
@@ -983,8 +983,8 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 72,
-        "wins": 35
+        "n": 73,
+        "wins": 36
       },
       "calib|liquidity_sweep|high": {
         "n": 10,
@@ -1008,14 +1008,14 @@
       }
     },
     "totals": {
-      "signals": 159,
-      "wins": 59,
+      "signals": 160,
+      "wins": 60,
       "losses": 100,
       "expired": 10,
-      "sum_r": 123.24031737705934,
-      "gross_profit_r": 223.24031737705926,
+      "sum_r": 127.94031737705934,
+      "gross_profit_r": 227.94031737705927,
       "gross_loss_r": 100.0,
-      "sum_hold_minutes": 352603.8120701909
+      "sum_hold_minutes": 352813.7585317135
     }
   },
   "tier2": {
@@ -1272,6 +1272,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1793404835.214264,
         "signal_ts": 1793331922.4178393
+      },
+      {
+        "id": "PENDLEUSDT:breakout:1793394923001",
+        "symbol": "PENDLEUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.700000000000003,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1793407519.7891467,
+        "signal_ts": 1793394923.0014553
       }
     ]
   },
@@ -1514,54 +1525,6 @@
       "thin_margin_pass": false,
       "tg_message_id": 8795
     },
-    "PENDLEUSDT:breakout:1793394923001": {
-      "id": "PENDLEUSDT:breakout:1793394923001",
-      "symbol": "PENDLEUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 1.8075,
-      "sl": 1.7914614252038614,
-      "tp1": 1.8427848645515053,
-      "tp2": 1.882881301541852,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000014,
-      "rr_tp1": 2.200000000000003,
-      "rr_tp2": 4.700000000000003,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1793403000000,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793394923.0014553,
-      "last_checked_ts": 1793405700000,
-      "sl_buffer_used": 0.0061108598369107895,
-      "mae": 7.228504077216868e-05,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9097
-    },
     "APTUSDT:breakout:1793395827521": {
       "id": "APTUSDT:breakout:1793395827521",
       "symbol": "APTUSDT",
@@ -1598,7 +1561,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793395827.5215397,
-      "last_checked_ts": 1793405700000,
+      "last_checked_ts": 1793406600000,
       "sl_buffer_used": 0.0030000000000000027,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1646,7 +1609,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793405720.7855237,
-      "last_checked_ts": 1793405720785,
+      "last_checked_ts": 1793406600000,
       "sl_buffer_used": 0.0005920095040460428,
       "mae": 0.0,
       "sfp_purity": 1.0,
