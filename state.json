@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-31T15:30:27.951419+00:00"
+    "last_run_ts": "2026-10-31T15:45:25.415646+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -547,9 +547,9 @@
         "sum_r": 4.700000000000004
       },
       "TRXUSDT|high_vol|15m|breakout": {
-        "n": 2,
-        "wins": 1,
-        "sum_r": 3.7000000000000624
+        "n": 3,
+        "wins": 2,
+        "sum_r": 8.40000000000007
       },
       "NEARUSDT|high_vol|1h|volatility_expansion": {
         "n": 1,
@@ -869,7 +869,7 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 135,
+        "n": 136,
         "n_since_last_gate": 75,
         "by_key": {
           "global": {
@@ -983,8 +983,8 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 74,
-        "wins": 36
+        "n": 75,
+        "wins": 37
       },
       "calib|liquidity_sweep|high": {
         "n": 10,
@@ -1008,14 +1008,14 @@
       }
     },
     "totals": {
-      "signals": 161,
-      "wins": 60,
+      "signals": 162,
+      "wins": 61,
       "losses": 101,
       "expired": 10,
-      "sum_r": 126.94031737705934,
-      "gross_profit_r": 227.94031737705927,
+      "sum_r": 131.64031737705935,
+      "gross_profit_r": 232.6403173770593,
       "gross_loss_r": 101.0,
-      "sum_hold_minutes": 353188.64132262074
+      "sum_hold_minutes": 354118.64846567315
     }
   },
   "tier2": {
@@ -1250,6 +1250,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1793418320.4889941,
         "signal_ts": 1793395827.5215397
+      },
+      {
+        "id": "TRXUSDT:breakout:1793405720782",
+        "symbol": "TRXUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 4.700000000000007,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1793461521.2141068,
+        "signal_ts": 1793405720.7855237
       }
     ]
   },
@@ -1492,15 +1503,15 @@
       "thin_margin_pass": false,
       "tg_message_id": 8795
     },
-    "TRXUSDT:breakout:1793405720782": {
-      "id": "TRXUSDT:breakout:1793405720782",
-      "symbol": "TRXUSDT",
+    "AVAXUSDT:breakout:1793461524736": {
+      "id": "AVAXUSDT:breakout:1793461524736",
+      "symbol": "AVAXUSDT",
       "engine": "breakout",
-      "direction": "short",
-      "entry": 0.32657,
-      "sl": 0.3295300118800576,
-      "tp1": 0.32005797386387336,
-      "tp2": 0.31265794416372944,
+      "direction": "long",
+      "entry": 8.5387,
+      "sl": 8.506938854746254,
+      "tp1": 8.6115,
+      "tp2": 8.617852229050749,
       "entry_kind": "market",
       "timeframe": "15m",
       "confidence_raw": 0.55,
@@ -1515,21 +1526,21 @@
       },
       "mtf_alignment": 0.5,
       "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000036,
-      "rr_tp1": 2.2000000000000073,
-      "rr_tp2": 4.700000000000007,
+      "ev_estimate": 0.646054391590495,
+      "rr_tp1": 2.29210878318099,
+      "rr_tp2": 2.492108783181001,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 8,
       "entry_filled": true,
       "score": 1.0,
       "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1793435400000,
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
       "result": null,
       "realized_r": 0.0,
-      "signal_ts": 1793405720.7855237,
-      "last_checked_ts": 1793459700000,
-      "sl_buffer_used": 0.0005920095040460428,
+      "signal_ts": 1793461524.7380736,
+      "last_checked_ts": 1793461524738,
+      "sl_buffer_used": 0.010699999999999932,
       "mae": 0.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
@@ -1538,7 +1549,7 @@
       },
       "regime_label": "high_vol",
       "thin_margin_pass": false,
-      "tg_message_id": 9110
+      "tg_message_id": 9145
     }
   },
   "daily_summary_date": "2026-10-31"
