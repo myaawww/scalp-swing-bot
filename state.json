@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-10-31T03:30:32.413081+00:00"
+    "last_run_ts": "2026-10-31T03:45:24.262481+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -397,9 +397,9 @@
         "sum_r": -2.0
       },
       "APTUSDT|high_vol|15m|breakout": {
-        "n": 3,
+        "n": 4,
         "wins": 2,
-        "sum_r": 3.522910949553495
+        "sum_r": 2.522910949553495
       },
       "ADAUSDT|high_vol|1h|volatility_expansion": {
         "n": 1,
@@ -869,13 +869,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 134,
-        "n_since_last_gate": 74,
+        "n": 135,
+        "n_since_last_gate": 75,
         "by_key": {
           "global": {
-            "n": 74,
-            "n_since_last_gate": 14,
-            "n_since_last_fast_gate": 14,
+            "n": 75,
+            "n_since_last_gate": 15,
+            "n_since_last_fast_gate": 15,
             "fast_gate_ever_fired": true
           }
         }
@@ -983,7 +983,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 73,
+        "n": 74,
         "wins": 36
       },
       "calib|liquidity_sweep|high": {
@@ -1008,14 +1008,14 @@
       }
     },
     "totals": {
-      "signals": 160,
+      "signals": 161,
       "wins": 60,
-      "losses": 100,
+      "losses": 101,
       "expired": 10,
-      "sum_r": 127.94031737705934,
+      "sum_r": 126.94031737705934,
       "gross_profit_r": 227.94031737705927,
-      "gross_loss_r": 100.0,
-      "sum_hold_minutes": 352813.7585317135
+      "gross_loss_r": 101.0,
+      "sum_hold_minutes": 353188.64132262074
     }
   },
   "tier2": {
@@ -1283,6 +1283,17 @@
         "adaptive_delta": "engine_weights[breakout] += step",
         "resolved_ts": 1793407519.7891467,
         "signal_ts": 1793394923.0014553
+      },
+      {
+        "id": "APTUSDT:breakout:1793395827521",
+        "symbol": "APTUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793418320.4889941,
+        "signal_ts": 1793395827.5215397
       }
     ]
   },
@@ -1525,54 +1536,6 @@
       "thin_margin_pass": false,
       "tg_message_id": 8795
     },
-    "APTUSDT:breakout:1793395827521": {
-      "id": "APTUSDT:breakout:1793395827521",
-      "symbol": "APTUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 0.6462,
-      "sl": 0.6394302200465976,
-      "tp1": 0.6674,
-      "tp2": 0.6687539559906804,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.0657820598249301,
-      "rr_tp1": 3.1315641196498603,
-      "rr_tp2": 3.3315641196498538,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793395827.5215397,
-      "last_checked_ts": 1793416500000,
-      "sl_buffer_used": 0.0030000000000000027,
-      "mae": 0.002430220046597542,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9098
-    },
     "TRXUSDT:breakout:1793405720782": {
       "id": "TRXUSDT:breakout:1793405720782",
       "symbol": "TRXUSDT",
@@ -1609,7 +1572,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793405720.7855237,
-      "last_checked_ts": 1793416500000,
+      "last_checked_ts": 1793417400000,
       "sl_buffer_used": 0.0005920095040460428,
       "mae": 0.0,
       "sfp_purity": 1.0,
