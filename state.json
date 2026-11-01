@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-01T13:45:20.832196+00:00"
+    "last_run_ts": "2026-11-01T14:00:40.126374+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1322,7 +1322,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1370,7 +1370,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1417,7 +1417,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1465,7 +1465,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1513,7 +1513,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1561,7 +1561,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793462494.937118,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 0.0021100000000000008,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1609,7 +1609,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793484040.1785247,
-      "last_checked_ts": 1793534400000,
+      "last_checked_ts": 1793538000000,
       "sl_buffer_used": 0.054999999999999716,
       "mae": 0.0030000000000001137,
       "sfp_purity": 1.0,
@@ -1620,6 +1620,54 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 9155
+    },
+    "UNIUSDT:breakout:1793541639313": {
+      "id": "UNIUSDT:breakout:1793541639313",
+      "symbol": "UNIUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 7.3527,
+      "sl": 7.297494749841589,
+      "tp1": 7.5191,
+      "tp2": 7.530141050031682,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 1.0071030338828173,
+      "rr_tp1": 3.0142060677656346,
+      "rr_tp2": 3.214206067765641,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 1.0,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1793541639.314484,
+      "last_checked_ts": 1793541639314,
+      "sl_buffer_used": 0.01839999999999975,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "neutral"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 9196
     }
   },
   "daily_summary_date": "2026-11-01"
