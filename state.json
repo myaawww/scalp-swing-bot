@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-01T14:15:25.332809+00:00"
+    "last_run_ts": "2026-11-01T14:30:30.300451+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -377,9 +377,9 @@
         "sum_r": -1.0
       },
       "UNIUSDT|high_vol|15m|breakout": {
-        "n": 3,
+        "n": 4,
         "wins": 1,
-        "sum_r": 2.6999999999999806
+        "sum_r": 1.6999999999999806
       },
       "ADAUSDT|high_vol|15m|breakout": {
         "n": 4,
@@ -905,8 +905,8 @@
         }
       },
       "structural_invalidation_too_tight": {
-        "n": 6,
-        "n_since_last_gate": 6,
+        "n": 7,
+        "n_since_last_gate": 7,
         "by_key": {
           "NEARUSDT": {
             "n": 1,
@@ -933,6 +933,12 @@
             "fast_gate_ever_fired": false
           },
           "TRXUSDT": {
+            "n": 1,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
+            "fast_gate_ever_fired": false
+          },
+          "UNIUSDT": {
             "n": 1,
             "n_since_last_gate": 1,
             "n_since_last_fast_gate": 1,
@@ -983,7 +989,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 78,
+        "n": 79,
         "wins": 38
       },
       "calib|liquidity_sweep|high": {
@@ -1008,14 +1014,14 @@
       }
     },
     "totals": {
-      "signals": 165,
+      "signals": 166,
       "wins": 62,
-      "losses": 103,
+      "losses": 104,
       "expired": 10,
-      "sum_r": 132.13242616024036,
+      "sum_r": 131.13242616024036,
       "gross_profit_r": 235.1324261602403,
-      "gross_loss_r": 103.0,
-      "sum_hold_minutes": 355168.51854452287
+      "gross_loss_r": 104.0,
+      "sum_hold_minutes": 355198.31588975585
     }
   },
   "tier2": {
@@ -1283,6 +1289,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1793538920.3135781,
         "signal_ts": 1793536226.0754867
+      },
+      {
+        "id": "UNIUSDT:breakout:1793541639313",
+        "symbol": "UNIUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "structural_invalidation_too_tight",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793543427.1551979,
+        "signal_ts": 1793541639.314484
       }
     ]
   },
@@ -1620,54 +1637,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": true,
       "tg_message_id": 9155
-    },
-    "UNIUSDT:breakout:1793541639313": {
-      "id": "UNIUSDT:breakout:1793541639313",
-      "symbol": "UNIUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 7.3527,
-      "sl": 7.297494749841589,
-      "tp1": 7.5191,
-      "tp2": 7.530141050031682,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.0071030338828173,
-      "rr_tp1": 3.0142060677656346,
-      "rr_tp2": 3.214206067765641,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793541639.314484,
-      "last_checked_ts": 1793541639314,
-      "sl_buffer_used": 0.01839999999999975,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9196
     }
   },
   "daily_summary_date": "2026-11-01"
