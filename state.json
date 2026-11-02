@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-02T19:45:29.921295+00:00"
+    "last_run_ts": "2026-11-02T20:01:36.904382+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -870,17 +870,27 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "LINKUSDT|low_vol|1h|range_trading": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
+      },
+      "AVAXUSDT|low_vol|1h|mean_reversion": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 141,
-        "n_since_last_gate": 78,
+        "n": 143,
+        "n_since_last_gate": 80,
         "by_key": {
           "global": {
-            "n": 78,
-            "n_since_last_gate": 18,
-            "n_since_last_fast_gate": 18,
+            "n": 80,
+            "n_since_last_gate": 0,
+            "n_since_last_fast_gate": 0,
             "fast_gate_ever_fired": true
           }
         }
@@ -978,11 +988,11 @@
     },
     "calibration": {
       "calib|range_trading|low": {
-        "n": 12,
+        "n": 13,
         "wins": 2
       },
       "calib|mean_reversion|low": {
-        "n": 5,
+        "n": 6,
         "wins": 2
       },
       "calib|trend_continuation|mid": {
@@ -1019,29 +1029,18 @@
       }
     },
     "totals": {
-      "signals": 169,
+      "signals": 171,
       "wins": 63,
-      "losses": 106,
+      "losses": 108,
       "expired": 10,
-      "sum_r": 131.33242616024037,
+      "sum_r": 129.33242616024037,
       "gross_profit_r": 237.33242616024032,
-      "gross_loss_r": 106.0,
-      "sum_hold_minutes": 357206.0673442324
+      "gross_loss_r": 108.0,
+      "sum_hold_minutes": 357505.89483895304
     }
   },
   "tier2": {
     "trades": [
-      {
-        "id": "PENDLEUSDT:range_trading:1792332036410",
-        "symbol": "PENDLEUSDT",
-        "engine": "range_trading",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1792353632.3369753,
-        "signal_ts": 1792332036.4108264
-      },
       {
         "id": "BNBUSDT:mean_reversion:1792508443611",
         "symbol": "BNBUSDT",
@@ -1327,6 +1326,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1793642435.3545763,
         "signal_ts": 1793635296.0409932
+      },
+      {
+        "id": "LINKUSDT:range_trading:1793638842820",
+        "symbol": "LINKUSDT",
+        "engine": "range_trading",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793649635.7376156,
+        "signal_ts": 1793638842.821623
+      },
+      {
+        "id": "AVAXUSDT:mean_reversion:1793642440146",
+        "symbol": "AVAXUSDT",
+        "engine": "mean_reversion",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance",
+        "resolved_ts": 1793649636.8817823,
+        "signal_ts": 1793642440.1480916
       }
     ]
   },
@@ -1366,7 +1387,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787155297.6519625,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 8.568721498525163,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1414,7 +1435,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787158841.975515,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 224.30118464527388,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1461,7 +1482,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1787172325.3270338,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 0.5856213481892902,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1509,7 +1530,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1791482440.0239148,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 0.5086654152766054,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1557,7 +1578,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1792857694.706989,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 0.6347461961278591,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1605,7 +1626,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793462494.937118,
-      "last_checked_ts": 1793642400000,
+      "last_checked_ts": 1793646000000,
       "sl_buffer_used": 0.0021100000000000008,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1616,100 +1637,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 9146
-    },
-    "LINKUSDT:range_trading:1793638842820": {
-      "id": "LINKUSDT:range_trading:1793638842820",
-      "symbol": "LINKUSDT",
-      "engine": "range_trading",
-      "direction": "long",
-      "entry": 11.182,
-      "sl": 11.082374294945309,
-      "tp1": 11.7454,
-      "tp2": 11.765325141010939,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "range_edge_proximity": 0.639639639639643
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 2.3275835021228186,
-      "rr_tp1": 5.655167004245637,
-      "rr_tp2": 5.855167004245641,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8428524684773584,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793638842.821623,
-      "last_checked_ts": 1793642400000,
-      "sl_buffer_used": 0.04800000000000004,
-      "mae": 0.03237429494530808,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9261
-    },
-    "AVAXUSDT:mean_reversion:1793642440146": {
-      "id": "AVAXUSDT:mean_reversion:1793642440146",
-      "symbol": "AVAXUSDT",
-      "engine": "mean_reversion",
-      "direction": "long",
-      "entry": 8.3795,
-      "sl": 8.2813,
-      "tp1": 8.593095,
-      "tp2": 8.597862227491504,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "z_score_extreme": 0.4792001241549172
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5875509164969406,
-      "rr_tp1": 2.175101832993881,
-      "rr_tp2": 2.2236479377953478,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.6599941859047641,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793642440.1480916,
-      "last_checked_ts": 1793642440148,
-      "sl_buffer_used": 0.043400000000000105,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "low_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "low_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9266
     }
   },
   "daily_summary_date": "2026-11-02"
