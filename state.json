@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-05T14:30:32.729460+00:00"
+    "last_run_ts": "2026-11-05T14:45:23.294029+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -702,9 +702,9 @@
         "sum_r": -1.0
       },
       "BCHUSDT|high_vol|15m|breakout": {
-        "n": 4,
+        "n": 5,
         "wins": 2,
-        "sum_r": 2.399999999999995
+        "sum_r": 1.399999999999995
       },
       "NEARUSDT|high_vol|1h|momentum": {
         "n": 1,
@@ -884,13 +884,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 143,
-        "n_since_last_gate": 80,
+        "n": 144,
+        "n_since_last_gate": 81,
         "by_key": {
           "global": {
-            "n": 80,
-            "n_since_last_gate": 0,
-            "n_since_last_fast_gate": 0,
+            "n": 81,
+            "n_since_last_gate": 1,
+            "n_since_last_fast_gate": 1,
             "fast_gate_ever_fired": true
           }
         }
@@ -1004,7 +1004,7 @@
         "wins": 5
       },
       "calib|breakout|mid": {
-        "n": 80,
+        "n": 81,
         "wins": 39
       },
       "calib|liquidity_sweep|high": {
@@ -1029,14 +1029,14 @@
       }
     },
     "totals": {
-      "signals": 171,
+      "signals": 172,
       "wins": 63,
-      "losses": 108,
+      "losses": 109,
       "expired": 10,
-      "sum_r": 129.33242616024037,
+      "sum_r": 128.33242616024037,
       "gross_profit_r": 237.33242616024032,
-      "gross_loss_r": 108.0,
-      "sum_hold_minutes": 357505.89483895304
+      "gross_loss_r": 109.0,
+      "sum_hold_minutes": 357880.68768157164
     }
   },
   "tier2": {
@@ -1337,6 +1337,17 @@
         "adaptive_delta": "no_change_genuine_variance",
         "resolved_ts": 1793649636.8817823,
         "signal_ts": 1793642440.1480916
+      },
+      {
+        "id": "BCHUSDT:breakout:1793867432548",
+        "symbol": "BCHUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1793889920.1212244,
+        "signal_ts": 1793867432.5506673
       }
     ]
   },
@@ -1626,54 +1637,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 9146
-    },
-    "BCHUSDT:breakout:1793867432548": {
-      "id": "BCHUSDT:breakout:1793867432548",
-      "symbol": "BCHUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 288.21,
-      "sl": 285.14954671800524,
-      "tp1": 294.9429972203884,
-      "tp2": 302.5941304253753,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000001,
-      "rr_tp1": 2.2,
-      "rr_tp2": 4.700000000000009,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 1.0,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1793867432.5506673,
-      "last_checked_ts": 1793888100000,
-      "sl_buffer_used": 0.5283626255958134,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9430
     }
   },
   "daily_summary_date": "2026-11-05"
