@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-08T14:15:23.130860+00:00"
+    "last_run_ts": "2026-11-08T14:30:29.179480+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1042,17 +1042,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "NEARUSDT:breakout:1792795522969",
-        "symbol": "NEARUSDT",
-        "engine": "breakout",
-        "result": "win",
-        "realized_r": 4.6999999999999975,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[breakout] += step",
-        "resolved_ts": 1792852227.1291895,
-        "signal_ts": 1792795522.9743657
-      },
-      {
         "id": "SUIUSDT:order_block:1792782921928",
         "symbol": "SUIUSDT",
         "engine": "order_block",
@@ -1641,7 +1630,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793891723.896035,
-      "last_checked_ts": 1794146400000,
+      "last_checked_ts": 1794147300000,
       "sl_buffer_used": 2.256095994843382e-05,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1689,7 +1678,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793891724.6096928,
-      "last_checked_ts": 1794146400000,
+      "last_checked_ts": 1794147300000,
       "sl_buffer_used": 0.0004384440471934548,
       "mae": 0.0,
       "sfp_purity": 1.0,
