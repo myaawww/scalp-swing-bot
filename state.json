@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-09T07:15:22.635213+00:00"
+    "last_run_ts": "2026-11-09T07:30:30.347727+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1042,17 +1042,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "LINKUSDT:breakout:1792911638105",
-        "symbol": "LINKUSDT",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1792913424.8389606,
-        "signal_ts": 1792911638.1071362
-      },
-      {
         "id": "XLMUSDT:order_block:1793174495747",
         "symbol": "XLMUSDT",
         "engine": "order_block",
@@ -1608,7 +1597,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793891723.896035,
-      "last_checked_ts": 1794207600000,
+      "last_checked_ts": 1794208500000,
       "sl_buffer_used": 2.256095994843382e-05,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1656,7 +1645,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1793891724.6096928,
-      "last_checked_ts": 1794207600000,
+      "last_checked_ts": 1794208500000,
       "sl_buffer_used": 0.0004384440471934548,
       "mae": 0.0,
       "sfp_purity": 1.0,
