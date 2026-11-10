@@ -54,14 +54,82 @@ SCAN_WORKERS = int(os.getenv("SCAN_WORKERS", "4"))
 HL_BASE_URL = "https://api.hyperliquid.xyz/info"
 HL_MIN_INTERVAL_S = float(os.getenv("HL_MIN_INTERVAL_S", "0.15"))
 
-# Watchlist mirrors the reference fleet (Kestrel/Aurelius/Axis/Kairos) — shared infra.
-WATCHLIST = [
-    "BTCUSDT", "ETHUSDT", "HYPEUSDT", "ZECUSDT", "NEARUSDT",
-    "ONDOUSDT", "SUIUSDT", "PENGUUSDT", "BNBUSDT", "SOLUSDT",
-    "TRXUSDT", "BCHUSDT", "DOGEUSDT", "ADAUSDT", "DOTUSDT",
-    "TAOUSDT", "AVAXUSDT", "LINKUSDT", "AAVEUSDT", "XRPUSDT",
-    "XLMUSDT", "UNIUSDT", "LTCUSDT", "APTUSDT", "PENDLEUSDT",
+# ── Instrument registry ────────────────────────────────────────────────
+# Each instrument carries its own asset class and market-data routing; nothing
+# is inferred from a shared "USDT" suffix any more.
+#   id       internal key used in state.json / signals / candle cache. Existing
+#            crypto ids keep the legacy "<COIN>USDT" form so persisted state,
+#            candle cache and open signals stay valid. Non-crypto ids are the
+#            plain Hyperliquid ticker.
+#   hl_coin  coin string sent to Hyperliquid's info API.
+#   hl_dex   "" = Hyperliquid core perp dex (crypto). "xyz" = TradeXYZ HIP-3
+#            dex (indices / metals / commodities): coins are "xyz:<TICKER>"
+#            and need {"dex": "xyz"} on metaAndAssetCtxs.
+#   session  "24x7" = native 24/7 crypto market. "tradfi_ref" = 24/7 perp whose
+#            price references a TradFi underlying (futures/spot) that has its own
+#            sessions, weekend/holiday closures and off-hours price bands.
+#            Informational only — it does not gate any signal logic.
+@dataclass(frozen=True)
+class Instrument:
+    id: str
+    label: str
+    asset_class: str   # "crypto" | "index" | "metal" | "commodity"
+    hl_coin: str
+    hl_dex: str = ""
+    session: str = "24x7"
+
+
+def _crypto(coin: str) -> Instrument:
+    return Instrument(id=f"{coin}USDT", label=f"{coin}USD", asset_class="crypto", hl_coin=coin)
+
+
+def _xyz(ticker: str, label: str, asset_class: str) -> Instrument:
+    return Instrument(id=ticker, label=label, asset_class=asset_class,
+                      hl_coin=f"xyz:{ticker}", hl_dex="xyz", session="tradfi_ref")
+
+
+# Order is significant and preserved exactly as specified.
+MAIN_WATCHLIST_INSTRUMENTS = [
+    _crypto("BTC"), _crypto("ETH"),
+    _xyz("SP500", "S&P500", "index"),
+    _xyz("GOLD", "GOLD", "metal"),
+    _xyz("XYZ100", "XYZ100", "index"),
+    _crypto("SOL"), _crypto("XRP"), _crypto("ZEC"), _crypto("LINK"),
+    _crypto("BNB"), _crypto("NEAR"), _crypto("HYPE"),
 ]
+SECONDARY_WATCHLIST_INSTRUMENTS = [
+    _crypto("AVAX"),
+    _xyz("SILVER", "SILVER", "metal"),
+    _xyz("COPPER", "COPPER", "commodity"),
+    _xyz("BRENTOIL", "BRENTOIL", "commodity"),
+    _crypto("AAVE"), _crypto("LTC"), _crypto("DOGE"), _crypto("TAO"),
+]
+INSTRUMENTS: dict[str, Instrument] = {
+    i.id: i for i in MAIN_WATCHLIST_INSTRUMENTS + SECONDARY_WATCHLIST_INSTRUMENTS
+}
+MAIN_WATCHLIST = [i.id for i in MAIN_WATCHLIST_INSTRUMENTS]
+SECONDARY_WATCHLIST = [i.id for i in SECONDARY_WATCHLIST_INSTRUMENTS]
+WATCHLIST = MAIN_WATCHLIST + SECONDARY_WATCHLIST  # scan order: main first, then secondary
+assert len(MAIN_WATCHLIST) == 12 and len(SECONDARY_WATCHLIST) == 8 and len(set(WATCHLIST)) == 20
+
+
+def asset_class_of(symbol: str) -> str:
+    """Asset class for any symbol, including legacy ids that are no longer on
+    the watchlist but may still have an open signal in state.json."""
+    inst = INSTRUMENTS.get(symbol)
+    if inst:
+        return inst.asset_class
+    return "crypto" if symbol.endswith("USDT") else "unknown"
+
+
+def resolve_hl_coin(symbol: str) -> str:
+    """Coin string for Hyperliquid's info API. Legacy crypto ids that were
+    dropped from the watchlist still resolve exactly as before, so any open
+    signal on them keeps being monitored to resolution."""
+    inst = INSTRUMENTS.get(symbol)
+    return inst.hl_coin if inst else symbol.replace("USDT", "")
+
+
 MACRO_ASSET = "BTCUSDT"  # macro-bias anchor for the Regime Vector
 MAJORS = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT"}
 
@@ -324,6 +392,7 @@ class HyperliquidClient:
         self.session = requests.Session()
         self.limiter = _WeightedRateLimiter()
         self._candle_cache: dict = cache if cache is not None else {}
+        self.dex_fetch_ok: dict[str, bool] = {}  # set by mark_prices(): did each dex universe load?
 
     def _post(self, payload: dict, weight: int = 20, retries: int = 4) -> Any:
         self.limiter.acquire(weight)
@@ -346,7 +415,7 @@ class HyperliquidClient:
         return None
 
     def candles(self, symbol: str, interval: str, n_bars: int) -> list[dict]:
-        coin = symbol.replace("USDT", "")
+        coin = resolve_hl_coin(symbol)  # crypto: unchanged ("BTC"); xyz dex: "xyz:GOLD" etc.
         cache_key = f"{coin}|{interval}"
         end_ms = int(time.time() * 1000)
         interval_ms = _interval_to_ms(interval)
@@ -396,15 +465,42 @@ class HyperliquidClient:
         return closed[-n_bars:]
 
     def mark_prices(self) -> dict[str, float]:
+        # Core perp dex (crypto) — original behaviour, unchanged.
         data = self._post({"type": "metaAndAssetCtxs"}, weight=20)
         out = {}
+        self.dex_fetch_ok = {"": False}
+        if data and len(data) >= 2:
+            self.dex_fetch_ok[""] = True
+            universe = data[0].get("universe", [])
+            ctxs = data[1]
+            for meta, ctx in zip(universe, ctxs):
+                try:
+                    out[meta["name"] + "USDT"] = float(ctx["markPx"])
+                except (KeyError, ValueError, TypeError):
+                    continue
+        # HIP-3 builder dexes (indices / metals / commodities) are separate
+        # universes, only returned when "dex" is passed. One call per dex.
+        for dex in sorted({i.hl_dex for i in INSTRUMENTS.values() if i.hl_dex}):
+            out.update(self._mark_prices_hip3(dex))
+        return out
+
+    def _mark_prices_hip3(self, dex: str) -> dict[str, float]:
+        """Mark prices for one HIP-3 dex, keyed by Oracle instrument id."""
+        by_coin = {i.hl_coin: i.id for i in INSTRUMENTS.values() if i.hl_dex == dex}
+        out: dict[str, float] = {}
+        self.dex_fetch_ok[dex] = False
+        data = self._post({"type": "metaAndAssetCtxs", "dex": dex}, weight=20)
         if not data or len(data) < 2:
             return out
-        universe = data[0].get("universe", [])
-        ctxs = data[1]
-        for meta, ctx in zip(universe, ctxs):
+        self.dex_fetch_ok[dex] = True
+        for meta, ctx in zip(data[0].get("universe", []), data[1]):
+            name = meta.get("name", "")
+            full = name if ":" in name else f"{dex}:{name}"  # tolerate either naming
+            inst_id = by_coin.get(full)
+            if not inst_id:
+                continue
             try:
-                out[meta["name"] + "USDT"] = float(ctx["markPx"])
+                out[inst_id] = float(ctx["markPx"])
             except (KeyError, ValueError, TypeError):
                 continue
         return out
@@ -2181,6 +2277,29 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
         state["active_signals"].pop(sig_id, None)
 
 
+def report_watchlist_support(hl: HyperliquidClient, marks: dict[str, float]) -> list[str]:
+    """Logs every watchlist instrument that Hyperliquid did not list (or whose
+    dex universe could not be loaded this scan). Never substitutes another
+    instrument: an unsupported id simply produces no snapshot and no signal.
+    Returns the unsupported ids."""
+    unsupported = []
+    for sym in WATCHLIST:
+        if sym in marks:
+            continue
+        inst = INSTRUMENTS[sym]
+        if not hl.dex_fetch_ok.get(inst.hl_dex, False):
+            log.warning(f"Watchlist: {inst.label} ({sym}) UNVERIFIED — could not load "
+                        f"Hyperliquid '{inst.hl_dex or 'core'}' universe this scan.")
+        else:
+            log.error(f"Watchlist: {inst.label} ({sym}) NOT LISTED on Hyperliquid "
+                      f"({inst.hl_coin}) — skipped, no substitute used.")
+        unsupported.append(sym)
+    log.info(f"Watchlist: {len(MAIN_WATCHLIST)} main + {len(SECONDARY_WATCHLIST)} secondary = "
+             f"{len(WATCHLIST)} instruments; {len(WATCHLIST) - len(unsupported)} live, "
+             f"{len(unsupported)} unavailable.")
+    return unsupported
+
+
 def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
     state = store.state
     log.info(f"=== {ENGINE_NAME} {__version__} scan start ===")
@@ -2189,6 +2308,7 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
     evaluate_circuit_breaker(state)
 
     marks = hl.mark_prices()
+    report_watchlist_support(hl, marks)
     snaps: dict[str, SymbolSnapshot] = {}
     with ThreadPoolExecutor(max_workers=SCAN_WORKERS) as ex:
         futures = {ex.submit(collect_snapshot, hl, sym, marks.get(sym, 0.0)): sym for sym in WATCHLIST}
@@ -2209,7 +2329,10 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
         log.error("No macro view available — skipping scan (cannot compute Regime Vector safely).")
         store.save()
         return
-    regime = compute_regime_vector(macro_view, snaps)
+    # Breadth is measured against the BTC macro bias, so it stays a crypto-only
+    # participation measure; indices/metals/commodities don't dilute it.
+    regime = compute_regime_vector(
+        macro_view, {s: sn for s, sn in snaps.items() if asset_class_of(s) == "crypto"})
     log.info(f"Regime Vector: label={regime.label()} macro_bias={regime.macro_bias} "
               f"vol_pctile={regime.vol_pctile:.2f} trend={regime.trend_strength:.2f} "
               f"noise={regime.noise_index:.2f} breadth={regime.breadth:.2f}")
