@@ -17,9 +17,10 @@ import math
 import time
 import fcntl
 import logging
+import copy
 import statistics
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, Any
@@ -130,6 +131,125 @@ def resolve_hl_coin(symbol: str) -> str:
     return inst.hl_coin if inst else symbol.replace("USDT", "")
 
 
+# ── Learning books ─────────────────────────────────────────────────────
+# Crypto and non-crypto (index / metal / commodity) instruments learn in
+# SEPARATE books so one asset class's losses can't retune the other's engine
+# weights, regime-fit table, thresholds, calibration or circuit breaker.
+#   crypto book   -> state["tier1"]         (the existing state; untouched)
+#   non-crypto    -> state["tier1_tradfi"]  (fresh defaults, created on load)
+# state_for(state, symbol) returns a shallow view of `state` whose "tier1" is
+# the right book. Everything else (tier2 log, active_signals, ...) is shared by
+# reference, and nested tier1 mutations land in the real book.
+BOOK_CRYPTO, BOOK_TRADFI = "crypto", "tradfi"
+TRADFI_TIER1_KEY = "tier1_tradfi"
+
+
+def book_of(symbol: str) -> str:
+    return BOOK_CRYPTO if asset_class_of(symbol) in ("crypto", "unknown") else BOOK_TRADFI
+
+
+def state_for_book(state: dict, book: str) -> dict:
+    if book == BOOK_CRYPTO:
+        return state
+    return {**state, "tier1": state[TRADFI_TIER1_KEY]}
+
+
+def state_for(state: dict, symbol: str) -> dict:
+    return state_for_book(state, book_of(symbol))
+
+
+# ── Correlation groups ─────────────────────────────────────────────────
+# Near-duplicate exposures may not hold more than MAX_PER_CORR_GROUP active
+# signals at once (checked both within a scan and against already-open
+# signals). Crypto majors keep their existing MAJORS cap, unchanged.
+# COPPER and BRENTOIL are deliberately ungrouped (only loosely correlated).
+CORRELATION_GROUPS = {
+    "us_equity_index": {"SP500", "XYZ100"},
+    "precious_metals": {"GOLD", "SILVER"},
+}
+MAX_PER_CORR_GROUP = int(os.getenv("MAX_PER_CORR_GROUP", "1"))
+
+
+def corr_group_of(symbol: str) -> Optional[str]:
+    for name, members in CORRELATION_GROUPS.items():
+        if symbol in members:
+            return name
+    return None
+
+
+def corr_group_slot_free(symbol: str, occupied_symbols) -> bool:
+    """True if `symbol`'s correlation group still has room given the symbols
+    that already hold a slot. Ungrouped symbols are always free."""
+    grp = corr_group_of(symbol)
+    if not grp:
+        return True
+    return sum(1 for s in occupied_symbols if corr_group_of(s) == grp) < MAX_PER_CORR_GROUP
+
+
+# ── Underlying-market session gate (non-crypto only) ───────────────────
+# The xyz perps trade 24/7, but their oracle follows the underlying
+# futures/spot market only while it is open (Sun 6PM ET -> Fri 5PM ET, with a
+# daily 5-6PM ET maintenance window Mon-Thu). When it is closed, pricing
+# switches to an internal order-book model inside off-hours bands, and the
+# reopen re-anchors to the external price (gaps). New signals on these
+# instruments are suppressed in those windows. Monitoring of already-open
+# signals is never gated. Crypto is never gated.
+TRADFI_SESSION_GATE = os.getenv("TRADFI_SESSION_GATE", "1") != "0"
+TRADFI_WEEKEND_PRECLOSE_BUFFER_MIN = int(os.getenv("TRADFI_WEEKEND_PRECLOSE_BUFFER_MIN", "30"))
+TRADFI_WEEKEND_REOPEN_BUFFER_MIN = int(os.getenv("TRADFI_WEEKEND_REOPEN_BUFFER_MIN", "60"))
+TRADFI_DAILY_REOPEN_BUFFER_MIN = int(os.getenv("TRADFI_DAILY_REOPEN_BUFFER_MIN", "15"))
+# Comma-separated ET dates (YYYY-MM-DD) treated as fully closed. There is no
+# built-in holiday calendar and early closes are not modelled.
+TRADFI_HOLIDAY_DATES = {d.strip() for d in os.getenv("TRADFI_HOLIDAY_DATES", "").split(",") if d.strip()}
+
+
+def _us_dst_active_utc(now_utc: datetime) -> bool:
+    def nth_sunday(year: int, month: int, n: int) -> int:
+        first = datetime(year, month, 1, tzinfo=timezone.utc)
+        return 1 + (6 - first.weekday()) % 7 + 7 * (n - 1)
+    y = now_utc.year
+    start = datetime(y, 3, nth_sunday(y, 3, 2), 7, 0, tzinfo=timezone.utc)   # 2:00 EST
+    end = datetime(y, 11, nth_sunday(y, 11, 1), 6, 0, tzinfo=timezone.utc)   # 2:00 EDT
+    return start <= now_utc < end
+
+
+def _to_eastern(now_utc: datetime) -> datetime:
+    try:
+        from zoneinfo import ZoneInfo
+        return now_utc.astimezone(ZoneInfo("America/New_York"))
+    except Exception:  # no zoneinfo/tzdata on this host: fall back to the US DST rule
+        return now_utc + timedelta(hours=-4 if _us_dst_active_utc(now_utc) else -5)
+
+
+def tradfi_session_status(now_utc: Optional[datetime] = None) -> dict:
+    """{"open": bool, "reason": str}. open=False covers the closure itself and
+    the post-reopen / pre-close buffers."""
+    now_utc = now_utc or datetime.now(timezone.utc)
+    et = _to_eastern(now_utc)
+    if et.date().isoformat() in TRADFI_HOLIDAY_DATES:
+        return {"open": False, "reason": "holiday"}
+    m = ((et.weekday() + 1) % 7) * 1440 + et.hour * 60 + et.minute  # minutes since Sunday 00:00 ET
+    for i in range(5):  # five sessions: Sun-Mon, Mon-Tue, ... Thu-Fri
+        start, end = i * 1440 + 1080, (i + 1) * 1440 + 1020          # 18:00 ET -> next day 17:00 ET
+        if start <= m < end:
+            reopen_buf = TRADFI_WEEKEND_REOPEN_BUFFER_MIN if i == 0 else TRADFI_DAILY_REOPEN_BUFFER_MIN
+            preclose_buf = TRADFI_WEEKEND_PRECLOSE_BUFFER_MIN if i == 4 else 0
+            if m - start < reopen_buf:
+                return {"open": False, "reason": "post_reopen_buffer"}
+            if end - m <= preclose_buf:
+                return {"open": False, "reason": "pre_close_buffer"}
+            return {"open": True, "reason": "open"}
+    return {"open": False, "reason": "market_closed"}
+
+
+def signals_allowed(symbol: str, session: Optional[dict] = None) -> bool:
+    """Whether new signals may be generated for `symbol` right now."""
+    inst = INSTRUMENTS.get(symbol)
+    if not TRADFI_SESSION_GATE or not inst or inst.session != "tradfi_ref":
+        return True
+    return (session or tradfi_session_status())["open"]
+
+
 MACRO_ASSET = "BTCUSDT"  # macro-bias anchor for the Regime Vector
 MAJORS = {"BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT"}
 
@@ -197,7 +317,7 @@ def _default_regime_fit_state() -> dict:
 
 
 def default_state() -> dict:
-    return {
+    state = {
         "meta": {"engine": ENGINE_NAME, "version": __version__, "last_run_ts": None},
         "tier1": {
             "adaptive_params": {
@@ -234,6 +354,10 @@ def default_state() -> dict:
         # candle dicts) is intentionally NOT stored here — see CANDLE_CACHE_FILE /
         # CandleCacheStore below. It's a rebuildable perf cache, not adaptive state.
     }
+    # Non-crypto instruments learn in their own book (see "Learning books" in
+    # Section 0). Cloned from the crypto defaults; the crypto book is untouched.
+    state[TRADFI_TIER1_KEY] = copy.deepcopy(state["tier1"])
+    return state
 
 
 class StateStore:
@@ -1671,7 +1795,8 @@ def assign_tier(score: float, rr1: float) -> str:
 
 
 def decision_engine_rank(candidates: list[Candidate], regime: RegimeVector,
-                          snaps: dict[str, SymbolSnapshot], state: dict) -> list[Candidate]:
+                          snaps: dict[str, SymbolSnapshot], state: dict,
+                          book: str = BOOK_CRYPTO) -> list[Candidate]:
     weights = {
         "regime_fit": 0.22, "mtf_alignment": state["tier1"]["adaptive_params"]["filter_thresholds"]["mtf_alignment_weight"]["value"],
         "confluence": 0.20, "historical_perf": 0.16, "ev": 0.14, "rr": 0.10, "liquidity": 0.10,
@@ -1706,6 +1831,9 @@ def decision_engine_rank(candidates: list[Candidate], regime: RegimeVector,
     for c in scored:
         if c.symbol in seen_symbols:
             continue  # one candidate per symbol per scan, highest score wins
+        # correlation-group cap (indices / metals): best candidate per group wins
+        if not corr_group_slot_free(c.symbol, seen_symbols):
+            continue
         if c.symbol in MAJORS:
             if majors_taken >= MAX_CORRELATED_CONCURRENT:
                 continue
@@ -1713,7 +1841,7 @@ def decision_engine_rank(candidates: list[Candidate], regime: RegimeVector,
         selected.append(c)
         seen_symbols.add(c.symbol)
 
-    log.info(f"Decision Engine: {attrition['total']} candidates -> "
+    log.info(f"Decision Engine[{book}]: {attrition['total']} candidates -> "
              f"{attrition['rejected_veto']} vetoed, {attrition['rejected_confluence']} sub-threshold, "
              f"{len(selected)} selected.")
     return selected
@@ -2058,9 +2186,14 @@ def resolve_and_learn(signal: dict, state: dict) -> None:
 # SECTION 12 — LIVE-PERFORMANCE CIRCUIT BREAKER
 # ═══════════════════════════════════════════════════════════════════════
 
-def evaluate_circuit_breaker(state: dict) -> None:
+def evaluate_circuit_breaker(state: dict, book: str = BOOK_CRYPTO) -> None:
+    """`state` is the book's state view (see state_for_book). The rolling
+    window only counts that book's trades, so crypto and non-crypto results
+    can't trip or mask each other's breaker."""
     cb = state["tier1"]["adaptive_params"]["circuit_breaker"]
-    trades = state["tier2"]["trades"][-CIRCUIT_BREAKER_WINDOW:]
+    tag = "" if book == BOOK_CRYPTO else " [NON-CRYPTO]"
+    trades = [t for t in state["tier2"]["trades"]
+              if book_of(t.get("symbol", "")) == book][-CIRCUIT_BREAKER_WINDOW:]
     if len(trades) < CIRCUIT_BREAKER_WINDOW:
         return
     wins = sum(1 for t in trades if t["result"] == "win")
@@ -2081,7 +2214,7 @@ def evaluate_circuit_breaker(state: dict) -> None:
         cb["tripped"] = True
         cb["tripped_ts"] = time.time()
         send_telegram(
-            f"🤯 *{ENGINE_NAME} CIRCUIT BREAKER TRIPPED*\n"
+            f"🤯 *{ENGINE_NAME} CIRCUIT BREAKER TRIPPED*{tag}\n"
             f"Rolling live win rate/PF has fallen materially below baseline.\n"
             f"Baseline WR: `{cb['baseline_wr']:.2%}` -> Live WR: `{wr:.2%}`\n"
             f"Automatic parameter adaptation is now FROZEN. Signal generation continues."
@@ -2089,7 +2222,7 @@ def evaluate_circuit_breaker(state: dict) -> None:
     elif cb["tripped"] and wr >= cb["baseline_wr"] and pf >= cb["baseline_pf"]:
         cb["tripped"] = False
         cb["tripped_ts"] = None
-        send_telegram(f"👏 *{ENGINE_NAME}* live performance recovered to baseline — adaptation resumed.")
+        send_telegram(f"👏 *{ENGINE_NAME}*{tag} live performance recovered to baseline — adaptation resumed.")
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -2181,7 +2314,9 @@ def format_tp1_message(signal: dict) -> str:
             f"SL unchanged. Move it to entry yourself for breakeven if you want.")
 
 
-def send_daily_summary(state: dict) -> None:
+def send_daily_summary(state: dict, book: str = BOOK_CRYPTO) -> None:
+    """`state` is the book's state view. Crypto output is unchanged; the
+    non-crypto book gets its own clearly-labelled message."""
     totals = state["tier1"]["totals"]
     resolved = totals["wins"] + totals["losses"]
     wr = totals["wins"] / resolved if resolved else 0.0
@@ -2205,7 +2340,8 @@ def send_daily_summary(state: dict) -> None:
         _cat_line(cat, stats) for cat, stats in state["tier1"]["category_stats"].items()
     ) or "  (no resolved trades yet)"
     msg = (
-        f"*{ENGINE_NAME} {__version__} — Daily Summary*\n"
+        f"*{ENGINE_NAME} {__version__} — Daily Summary"
+        f"{'' if book == BOOK_CRYPTO else ' (Indices / Metals / Commodities)'}*\n"
         f"Signals: `{totals['signals']}`  Wins: `{totals['wins']}`  Losses: `{totals['losses']}`  "
         f"Expired: `{totals['expired']}`\n"
         f"Win rate: `{wr:.2%}`  Profit factor: `{pf:.2f}`  Avg RR: `{avg_rr:.2f}`  "
@@ -2263,11 +2399,12 @@ def monitor_active_signals(state: dict, hl: HyperliquidClient) -> None:
 
         if signal.get("result") is not None:
             signal["resolved_ts"] = time.time()
+            book_state = state_for(state, signal["symbol"])  # crypto -> `state` itself
             if signal["result"] == "expired":
-                state["tier1"]["totals"]["expired"] += 1
+                book_state["tier1"]["totals"]["expired"] += 1
                 send_telegram(format_outcome_message(signal), reply_to=signal.get("tg_message_id"))
             else:
-                resolve_and_learn(signal, state)
+                resolve_and_learn(signal, book_state)
                 send_telegram(format_outcome_message(signal), reply_to=signal.get("tg_message_id"))
             to_remove.append(sig_id)
         else:
@@ -2304,8 +2441,12 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
     state = store.state
     log.info(f"=== {ENGINE_NAME} {__version__} scan start ===")
 
+    books = {BOOK_CRYPTO: state_for_book(state, BOOK_CRYPTO),
+             BOOK_TRADFI: state_for_book(state, BOOK_TRADFI)}
+
     monitor_active_signals(state, hl)
-    evaluate_circuit_breaker(state)
+    for book, bstate in books.items():
+        evaluate_circuit_breaker(bstate, book)
 
     marks = hl.mark_prices()
     report_watchlist_support(hl, marks)
@@ -2337,24 +2478,40 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
               f"vol_pctile={regime.vol_pctile:.2f} trend={regime.trend_strength:.2f} "
               f"noise={regime.noise_index:.2f} breadth={regime.breadth:.2f}")
 
-    # tighten confluence threshold in noisy/chaotic regimes, relax in clean
-    # ones — transient scan-local adjustment, not persisted
-    base_threshold = state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"]
-    if regime.noise_index > 0.65 or regime.vol_pctile > 0.85:
-        state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"] = \
-            clamp(base_threshold + 0.08, 0.0, 0.9)
-    elif regime.noise_index < 0.35 and regime.vol_pctile < 0.6:
-        state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"] = \
-            clamp(base_threshold - 0.05, 0.0, 0.9)
+    # Each book (crypto / non-crypto) runs its own ensemble and ranking against
+    # its own learned state. Crypto's path is identical to before.
+    session = tradfi_session_status()
+    gated = [sym for sym in snaps if not signals_allowed(sym, session)]
+    if gated:
+        log.info(f"Session gate: underlying market {session['reason']} — no new signals for "
+                 f"{', '.join(gated)}.")
 
-    all_candidates = []
-    for sym, snap in snaps.items():
-        all_candidates.extend(run_ensemble(snap, state))
+    base_thresholds: dict[str, float] = {}
+    candidates_by_book: dict[str, list] = {b_: [] for b_ in books}
+    for book, bstate in books.items():
+        thr = bstate["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]
+        base_threshold = thr["value"]
+        base_thresholds[book] = base_threshold
+        # tighten confluence threshold in noisy/chaotic regimes, relax in clean
+        # ones — transient scan-local adjustment, not persisted
+        if regime.noise_index > 0.65 or regime.vol_pctile > 0.85:
+            thr["value"] = clamp(base_threshold + 0.08, 0.0, 0.9)
+        elif regime.noise_index < 0.35 and regime.vol_pctile < 0.6:
+            thr["value"] = clamp(base_threshold - 0.05, 0.0, 0.9)
 
-    # restore learned baseline threshold (scan-local routing was transient)
-    state["tier1"]["adaptive_params"]["filter_thresholds"]["min_confluence_score"]["value"] = base_threshold
+        for sym, snap in snaps.items():
+            if book_of(sym) != book or sym in gated:
+                continue
+            candidates_by_book[book].extend(run_ensemble(snap, bstate))
 
-    ranked = decision_engine_rank(all_candidates, regime, snaps, state)
+        # restore learned baseline threshold (scan-local routing was transient)
+        thr["value"] = base_threshold
+
+    ranked = []
+    for book, bstate in books.items():
+        if candidates_by_book[book] or book == BOOK_CRYPTO:
+            ranked.extend(decision_engine_rank(candidates_by_book[book], regime, snaps, bstate, book))
+    ranked.sort(key=lambda c: c.score, reverse=True)  # stable: crypto-only order is unchanged
 
     free_slots = MAX_CONCURRENT_ACTIVE_SIGNALS - len(state["active_signals"])
     active_symbols = {s["symbol"] for s in state["active_signals"].values()}
@@ -2364,6 +2521,8 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
             break
         if cand.symbol in active_symbols:
             continue  # one open signal per symbol at a time
+        if not corr_group_slot_free(cand.symbol, active_symbols):
+            continue  # a correlated instrument (e.g. SP500/XYZ100, GOLD/SILVER) already holds the slot
         view = snaps[cand.symbol].views[cand.timeframe]
         signal = cand.to_dict()
         signal.update({
@@ -2372,11 +2531,11 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
             # can't replay pre-existing candles from before this signal existed
             "result": None, "realized_r": 0.0, "signal_ts": time.time(),
             "last_checked_ts": int(time.time() * 1000),
-            "sl_buffer_used": adaptive_sl_buffer(view, state, cand.symbol),
+            "sl_buffer_used": adaptive_sl_buffer(view, state_for(state, cand.symbol), cand.symbol),
             "mae": 0.0, "sfp_purity": cand.confluences.get("sfp_purity", cand.confluences.get("sweep_purity", 1.0)),
             "regime_at_entry": {"label": regime.label(), "macro_bias": regime.macro_bias},
             "regime_label": regime.label(),
-            "thin_margin_pass": confluence_strength(cand) < base_threshold + 0.05,
+            "thin_margin_pass": confluence_strength(cand) < base_thresholds[book_of(cand.symbol)] + 0.05,
         })
         msg_id = send_telegram(format_signal_message(cand))
         signal["tg_message_id"] = msg_id
@@ -2391,6 +2550,9 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
     hour = datetime.now(timezone.utc).hour
     if hour == 8 and state.get("daily_summary_date") != today:
         send_daily_summary(state)
+        td = books[BOOK_TRADFI]["tier1"]["totals"]
+        if td["signals"] or td["expired"]:  # only once the non-crypto book has any history
+            send_daily_summary(books[BOOK_TRADFI], BOOK_TRADFI)
         state["daily_summary_date"] = today
 
     store.prune_tier2()
