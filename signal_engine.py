@@ -2527,6 +2527,7 @@ def run_scan(hl: HyperliquidClient, store: StateStore) -> None:
         signal = cand.to_dict()
         signal.update({
             "tp1_hit": False, "tp1_hit_ts": None, "entry_filled": (cand.entry_kind == "market"),
+            "asset_class": asset_class_of(cand.symbol),
             # last_checked_ts floored at signal-creation time so monitor_active_signals()
             # can't replay pre-existing candles from before this signal existed
             "result": None, "realized_r": 0.0, "signal_ts": time.time(),
