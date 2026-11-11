@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-11T07:45:20.374367+00:00"
+    "last_run_ts": "2026-11-11T08:01:31.790075+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -389,7 +389,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794339033.0801096,
-      "last_checked_ts": 1794376800000,
+      "last_checked_ts": 1794380400000,
       "sl_buffer_used": 0.0061792986379141795,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -438,9 +438,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794369691.4441693,
-      "last_checked_ts": 1794376800000,
+      "last_checked_ts": 1794380400000,
       "sl_buffer_used": 235.0,
-      "mae": 0.0,
+      "mae": 96.0,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "bear",
@@ -451,7 +451,7 @@
       "tg_message_id": 9762
     }
   },
-  "daily_summary_date": null,
+  "daily_summary_date": "2026-11-11",
   "tier1_tradfi": {
     "adaptive_params": {
       "engine_weights": {
