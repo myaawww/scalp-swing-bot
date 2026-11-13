@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-13T03:45:21.632485+00:00"
+    "last_run_ts": "2026-11-13T04:01:30.513582+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -13,7 +13,7 @@
           "max": 2.0
         },
         "trend_continuation": {
-          "weight": 1.03,
+          "weight": 1.06,
           "min": 0.35,
           "max": 2.0
         },
@@ -345,11 +345,16 @@
         "n": 1,
         "wins": 1,
         "sum_r": 2.6641323890307245
+      },
+      "TAOUSDT|bear|1h|trend_continuation": {
+        "n": 1,
+        "wins": 1,
+        "sum_r": 2.257750759878424
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 2,
+        "n": 3,
         "n_since_last_gate": 1,
         "by_key": {
           "global": {
@@ -363,19 +368,19 @@
     },
     "calibration": {
       "calib|trend_continuation|mid": {
-        "n": 2,
-        "wins": 1
+        "n": 3,
+        "wins": 2
       }
     },
     "totals": {
-      "signals": 2,
-      "wins": 1,
+      "signals": 3,
+      "wins": 2,
       "losses": 1,
       "expired": 1,
-      "sum_r": 1.6641323890307245,
-      "gross_profit_r": 2.6641323890307245,
+      "sum_r": 3.9218831489091484,
+      "gross_profit_r": 4.921883148909148,
       "gross_loss_r": 1.0,
-      "sum_hold_minutes": 3269.0598393917085
+      "sum_hold_minutes": 3448.9888162056604
     }
   },
   "tier2": {
@@ -401,60 +406,21 @@
         "adaptive_delta": "engine_weights[trend_continuation] += step",
         "resolved_ts": 1794492036.2148342,
         "signal_ts": 1794339033.0801096
+      },
+      {
+        "id": "TAOUSDT:trend_continuation:1794531634861",
+        "symbol": "TAOUSDT",
+        "engine": "trend_continuation",
+        "result": "win",
+        "realized_r": 2.257750759878424,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[trend_continuation] += step",
+        "resolved_ts": 1794542430.6007946,
+        "signal_ts": 1794531634.8621857
       }
     ]
   },
-  "active_signals": {
-    "TAOUSDT:trend_continuation:1794531634861": {
-      "id": "TAOUSDT:trend_continuation:1794531634861",
-      "symbol": "TAOUSDT",
-      "engine": "trend_continuation",
-      "direction": "short",
-      "entry": 210.87,
-      "sl": 214.16,
-      "tp1": 204.1,
-      "tp2": 203.442,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.6,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ema_stack_aligned": 1.0,
-        "htf_agreement": 0.4
-      },
-      "mtf_alignment": 0.4,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5288753799392139,
-      "rr_tp1": 2.0577507598784277,
-      "rr_tp2": 2.257750759878424,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.6991837219489947,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794531634.8621857,
-      "last_checked_ts": 1794535200000,
-      "sl_buffer_used": 1.0600000000000023,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 9881
-    }
-  },
+  "active_signals": {},
   "daily_summary_date": "2026-11-12",
   "tier1_tradfi": {
     "adaptive_params": {
