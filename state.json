@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-13T00:45:19.562213+00:00"
+    "last_run_ts": "2026-11-13T01:00:35.451590+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -430,7 +430,7 @@
       "ev_estimate": 4.147766323024067,
       "rr_tp1": 9.295532646048134,
       "rr_tp2": 9.495532646048133,
-      "pending_bars_elapsed": 7,
+      "pending_bars_elapsed": 8,
       "pending_expiry_bars": 10,
       "entry_filled": false,
       "score": 0.8351181199876092,
@@ -441,7 +441,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794499294.8563375,
-      "last_checked_ts": 1794524400000,
+      "last_checked_ts": 1794528000000,
       "sl_buffer_used": 0.6500000000000057,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -452,6 +452,55 @@
       "regime_label": "bear",
       "thin_margin_pass": false,
       "tg_message_id": 9860
+    },
+    "TAOUSDT:trend_continuation:1794531634861": {
+      "id": "TAOUSDT:trend_continuation:1794531634861",
+      "symbol": "TAOUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 210.87,
+      "sl": 214.16,
+      "tp1": 204.1,
+      "tp2": 203.442,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.4
+      },
+      "mtf_alignment": 0.4,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5288753799392139,
+      "rr_tp1": 2.0577507598784277,
+      "rr_tp2": 2.257750759878424,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.6991837219489947,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794531634.8621857,
+      "last_checked_ts": 1794531634862,
+      "sl_buffer_used": 1.0600000000000023,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 9881
     }
   },
   "daily_summary_date": "2026-11-12",
