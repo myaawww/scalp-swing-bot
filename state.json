@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-13T07:45:21.040387+00:00"
+    "last_run_ts": "2026-11-13T08:01:39.329237+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -420,8 +420,106 @@
       }
     ]
   },
-  "active_signals": {},
-  "daily_summary_date": "2026-11-12",
+  "active_signals": {
+    "BTCUSDT:pullback:1794556896214": {
+      "id": "BTCUSDT:pullback:1794556896214",
+      "symbol": "BTCUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 68009.5,
+      "sl": 67188.6887624235,
+      "tp1": 74000.0,
+      "tp2": 74164.1622475153,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.6632441204487702
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 3.1491337628900617,
+      "rr_tp1": 7.2982675257801235,
+      "rr_tp2": 7.49826752578012,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.8462331244739557,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794556896.2170725,
+      "last_checked_ts": 1794556896217,
+      "sl_buffer_used": 285.311237576509,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 9901
+    },
+    "COPPER:breakout:1794556896216": {
+      "id": "COPPER:breakout:1794556896216",
+      "symbol": "COPPER",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 6.235,
+      "sl": 6.243188237079701,
+      "tp1": 6.216985878424659,
+      "tp2": 6.196515285725408,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.7,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.7761963416717937,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "commodity",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794556897.2145748,
+      "last_checked_ts": 1794556897214,
+      "sl_buffer_used": 0.0038000000000000256,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 9902
+    }
+  },
+  "daily_summary_date": "2026-11-13",
   "tier1_tradfi": {
     "adaptive_params": {
       "engine_weights": {
