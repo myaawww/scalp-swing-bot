@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-13T13:45:20.485609+00:00"
+    "last_run_ts": "2026-11-13T14:00:40.255551+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -457,7 +457,7 @@
       "ev_estimate": 3.1491337628900617,
       "rr_tp1": 7.2982675257801235,
       "rr_tp2": 7.49826752578012,
-      "pending_bars_elapsed": 4,
+      "pending_bars_elapsed": 5,
       "pending_expiry_bars": 10,
       "entry_filled": false,
       "score": 0.8462331244739557,
@@ -468,7 +468,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794556896.2170725,
-      "last_checked_ts": 1794571200000,
+      "last_checked_ts": 1794574800000,
       "sl_buffer_used": 285.311237576509,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -505,7 +505,7 @@
       "ev_estimate": 1.586981380048325,
       "rr_tp1": 4.17396276009665,
       "rr_tp2": 4.373962760096644,
-      "pending_bars_elapsed": 4,
+      "pending_bars_elapsed": 5,
       "pending_expiry_bars": 10,
       "entry_filled": false,
       "score": 0.8312227997338799,
@@ -516,7 +516,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794559521.2474005,
-      "last_checked_ts": 1794571200000,
+      "last_checked_ts": 1794574800000,
       "sl_buffer_used": 2.580224234795119,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -527,6 +527,55 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 9910
+    },
+    "ETHUSDT:trend_continuation:1794578439599": {
+      "id": "ETHUSDT:trend_continuation:1794578439599",
+      "symbol": "ETHUSDT",
+      "engine": "trend_continuation",
+      "direction": "short",
+      "entry": 1966.5,
+      "sl": 1996.6000000000001,
+      "tp1": 1894.9,
+      "tp2": 1888.88,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.6,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ema_stack_aligned": 1.0,
+        "htf_agreement": 0.8
+      },
+      "mtf_alignment": 0.85,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6893687707641127,
+      "rr_tp1": 2.3787375415282255,
+      "rr_tp2": 2.578737541528224,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.8768341295284036,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794578439.6034613,
+      "last_checked_ts": 1794578439603,
+      "sl_buffer_used": 8.700000000000045,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 9921
     }
   },
   "daily_summary_date": "2026-11-13",
