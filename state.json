@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-13T02:45:19.933352+00:00"
+    "last_run_ts": "2026-11-13T03:00:38.113091+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -371,7 +371,7 @@
       "signals": 2,
       "wins": 1,
       "losses": 1,
-      "expired": 0,
+      "expired": 1,
       "sum_r": 1.6641323890307245,
       "gross_profit_r": 2.6641323890307245,
       "gross_loss_r": 1.0,
@@ -405,54 +405,6 @@
     ]
   },
   "active_signals": {
-    "AAVEUSDT:pullback:1794499294855": {
-      "id": "AAVEUSDT:pullback:1794499294855",
-      "symbol": "AAVEUSDT",
-      "engine": "pullback",
-      "direction": "long",
-      "entry": 111.51499999999999,
-      "sl": 110.05999999999999,
-      "tp1": 125.04,
-      "tp2": 125.331,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.5871485173278392
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 4.147766323024067,
-      "rr_tp1": 9.295532646048134,
-      "rr_tp2": 9.495532646048133,
-      "pending_bars_elapsed": 9,
-      "pending_expiry_bars": 10,
-      "entry_filled": false,
-      "score": 0.8351181199876092,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794499294.8563375,
-      "last_checked_ts": 1794531600000,
-      "sl_buffer_used": 0.6500000000000057,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 9860
-    },
     "TAOUSDT:trend_continuation:1794531634861": {
       "id": "TAOUSDT:trend_continuation:1794531634861",
       "symbol": "TAOUSDT",
@@ -490,7 +442,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794531634.8621857,
-      "last_checked_ts": 1794531634862,
+      "last_checked_ts": 1794535200000,
       "sl_buffer_used": 1.0600000000000023,
       "mae": 0.0,
       "sfp_purity": 1.0,
