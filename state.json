@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-14T06:00:36.013156+00:00"
+    "last_run_ts": "2026-11-14T06:15:21.570566+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -375,18 +375,23 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "AAVEUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 9,
-        "n_since_last_gate": 5,
+        "n": 10,
+        "n_since_last_gate": 6,
         "by_key": {
           "global": {
-            "n": 5,
-            "n_since_last_gate": 5,
-            "n_since_last_fast_gate": 5,
-            "fast_gate_ever_fired": false
+            "n": 6,
+            "n_since_last_gate": 6,
+            "n_since_last_fast_gate": 0,
+            "fast_gate_ever_fired": true
           }
         }
       }
@@ -397,7 +402,7 @@
         "wins": 3
       },
       "calib|breakout|mid": {
-        "n": 4,
+        "n": 5,
         "wins": 1
       },
       "calib|liquidity_sweep|high": {
@@ -406,14 +411,14 @@
       }
     },
     "totals": {
-      "signals": 9,
+      "signals": 10,
       "wins": 4,
-      "losses": 5,
+      "losses": 6,
       "expired": 3,
-      "sum_r": 7.200620690437377,
+      "sum_r": 6.200620690437377,
       "gross_profit_r": 12.200620690437377,
-      "gross_loss_r": 5.0,
-      "sum_hold_minutes": 4709.284620090326
+      "gross_loss_r": 6.0,
+      "sum_hold_minutes": 4934.078971727689
     }
   },
   "tier2": {
@@ -538,6 +543,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1794634227.9695513,
         "signal_ts": 1794627919.8692434
+      },
+      {
+        "id": "AAVEUSDT:breakout:1794623429533",
+        "symbol": "AAVEUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 6/10 of genuine_variance; category 10/6 of all losses)",
+        "resolved_ts": 1794636918.216877,
+        "signal_ts": 1794623430.5557787
       }
     ]
   },
@@ -579,7 +595,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794583831.2799137,
-      "last_checked_ts": 1794635100000,
+      "last_checked_ts": 1794636000000,
       "sl_buffer_used": 0.08821950045563255,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -628,7 +644,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794623430.0444977,
-      "last_checked_ts": 1794635100000,
+      "last_checked_ts": 1794636000000,
       "sl_buffer_used": 0.021159753960724278,
       "mae": 0.0080100615098182,
       "sfp_purity": 1.0,
@@ -639,55 +655,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 9960
-    },
-    "AAVEUSDT:breakout:1794623429533": {
-      "id": "AAVEUSDT:breakout:1794623429533",
-      "symbol": "AAVEUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 108.66,
-      "sl": 110.40359217846179,
-      "tp1": 104.82409720738404,
-      "tp2": 100.46511676122955,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000008,
-      "rr_tp1": 2.2000000000000015,
-      "rr_tp2": 4.700000000000002,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.7994822319219477,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794623430.5557787,
-      "last_checked_ts": 1794635100000,
-      "sl_buffer_used": 0.2988737427694236,
-      "mae": 0.2152815643076309,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 9961
     },
     "LINKUSDT:breakout:1794623429532": {
       "id": "LINKUSDT:breakout:1794623429532",
@@ -726,7 +693,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794623431.067324,
-      "last_checked_ts": 1794635100000,
+      "last_checked_ts": 1794636000000,
       "sl_buffer_used": 0.024157694433075378,
       "mae": 0.006360576391731598,
       "sfp_purity": 1.0,
@@ -824,9 +791,9 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794627920.420715,
-      "last_checked_ts": 1794635100000,
+      "last_checked_ts": 1794636000000,
       "sl_buffer_used": 0.24464422355945092,
-      "mae": 0.0,
+      "mae": 0.18883894411013102,
       "sfp_purity": 1.0,
       "regime_at_entry": {
         "label": "high_vol",
