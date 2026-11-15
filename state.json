@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-15T00:01:45.096862+00:00"
+    "last_run_ts": "2026-11-15T00:15:22.682533+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.1500000000000001,
+          "weight": 1.1800000000000002,
           "min": 0.35,
           "max": 2.0
         },
@@ -382,9 +382,9 @@
         "sum_r": -1.0
       },
       "HYPEUSDT|high_vol|15m|breakout": {
-        "n": 1,
-        "wins": 0,
-        "sum_r": -1.0
+        "n": 2,
+        "wins": 1,
+        "sum_r": 1.2000000000000024
       },
       "AAVEUSDT|high_vol|15m|liquidity_sweep": {
         "n": 1,
@@ -429,7 +429,7 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 18,
+        "n": 19,
         "n_since_last_gate": 10,
         "by_key": {
           "global": {
@@ -471,8 +471,8 @@
         "wins": 3
       },
       "calib|breakout|mid": {
-        "n": 11,
-        "wins": 5
+        "n": 12,
+        "wins": 6
       },
       "calib|liquidity_sweep|high": {
         "n": 5,
@@ -480,14 +480,14 @@
       }
     },
     "totals": {
-      "signals": 20,
-      "wins": 8,
+      "signals": 21,
+      "wins": 9,
       "losses": 12,
       "expired": 3,
-      "sum_r": 19.00062069043738,
-      "gross_profit_r": 31.00062069043738,
+      "sum_r": 21.200620690437383,
+      "gross_profit_r": 33.20062069043738,
       "gross_loss_r": 12.0,
-      "sum_hold_minutes": 8893.700686828297
+      "sum_hold_minutes": 9103.619338126979
     }
   },
   "tier2": {
@@ -744,6 +744,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1794692719.1800423,
         "signal_ts": 1794689124.5248182
+      },
+      {
+        "id": "HYPEUSDT:breakout:1794689123890",
+        "symbol": "HYPEUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 2.2000000000000024,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1794701719.0108314,
+        "signal_ts": 1794689123.8917534
       }
     ]
   },
@@ -993,55 +1004,6 @@
       "thin_margin_pass": false,
       "tg_message_id": 10049
     },
-    "HYPEUSDT:breakout:1794689123890": {
-      "id": "HYPEUSDT:breakout:1794689123890",
-      "symbol": "HYPEUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 63.476,
-      "sl": 64.69665109008544,
-      "tp1": 60.79056760181203,
-      "tp2": 57.73893987659843,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000012,
-      "rr_tp1": 2.2000000000000024,
-      "rr_tp2": 4.700000000000002,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8926257929225633,
-      "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1794690000000,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794689123.8917534,
-      "last_checked_ts": 1794699900000,
-      "sl_buffer_used": 0.3229999999999933,
-      "mae": 0.21234890991455302,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 10054
-    },
     "AVAXUSDT:momentum:1794689123890": {
       "id": "AVAXUSDT:momentum:1794689123890",
       "symbol": "AVAXUSDT",
@@ -1138,6 +1100,55 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10075
+    },
+    "XRPUSDT:momentum:1794701721924": {
+      "id": "XRPUSDT:momentum:1794701721924",
+      "symbol": "XRPUSDT",
+      "engine": "momentum",
+      "direction": "short",
+      "entry": 0.9135,
+      "sl": 0.9792590792192855,
+      "tp1": 0.768830025717572,
+      "tp2": 0.6044323276693583,
+      "entry_kind": "market",
+      "timeframe": "1h",
+      "confidence_raw": 0.5,
+      "regime_fit": [
+        "trending",
+        "expansion",
+        "high_vol"
+      ],
+      "confluences": {
+        "rsi_momentum": 0.49218530472274635,
+        "adx_strength": 1
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.5999999999999996,
+      "rr_tp1": 2.1999999999999993,
+      "rr_tp2": 4.699999999999999,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.724450575692335,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794701721.9253695,
+      "last_checked_ts": 1794701721925,
+      "sl_buffer_used": 0.006699079219285491,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 10084
     }
   },
   "daily_summary_date": "2026-11-14",
