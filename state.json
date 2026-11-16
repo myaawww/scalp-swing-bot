@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-16T21:30:29.817883+00:00"
+    "last_run_ts": "2026-11-16T21:45:31.040294+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1167,6 +1167,55 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10084
+    },
+    "HYPEUSDT:breakout:1794865530562": {
+      "id": "HYPEUSDT:breakout:1794865530562",
+      "symbol": "HYPEUSDT",
+      "engine": "breakout",
+      "direction": "long",
+      "entry": 69.885,
+      "sl": 68.98042970397127,
+      "tp1": 71.87505465126323,
+      "tp2": 74.13648039133507,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6000000000000001,
+      "rr_tp1": 2.2,
+      "rr_tp2": 4.7,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.9159116831727168,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794865530.5635078,
+      "last_checked_ts": 1794865530563,
+      "sl_buffer_used": 0.23165623682299194,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 10197
     }
   },
   "daily_summary_date": "2026-11-16",
