@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-16T10:15:21.179857+00:00"
+    "last_run_ts": "2026-11-16T10:30:29.162639+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -430,17 +430,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "LTCUSDT|high_vol|15m|breakout": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 20,
-        "n_since_last_gate": 11,
+        "n": 21,
+        "n_since_last_gate": 12,
         "by_key": {
           "global": {
-            "n": 11,
-            "n_since_last_gate": 11,
-            "n_since_last_fast_gate": 5,
+            "n": 12,
+            "n_since_last_gate": 12,
+            "n_since_last_fast_gate": 6,
             "fast_gate_ever_fired": true
           }
         }
@@ -476,7 +481,7 @@
         "wins": 3
       },
       "calib|breakout|mid": {
-        "n": 12,
+        "n": 13,
         "wins": 6
       },
       "calib|liquidity_sweep|high": {
@@ -489,14 +494,14 @@
       }
     },
     "totals": {
-      "signals": 22,
+      "signals": 23,
       "wins": 9,
-      "losses": 13,
+      "losses": 14,
       "expired": 3,
-      "sum_r": 20.200620690437383,
+      "sum_r": 19.200620690437383,
       "gross_profit_r": 33.20062069043738,
-      "gross_loss_r": 13.0,
-      "sum_hold_minutes": 10153.72222993374
+      "gross_loss_r": 14.0,
+      "sum_hold_minutes": 10228.809662004314
     }
   },
   "tier2": {
@@ -786,6 +791,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1794794432.461687,
         "signal_ts": 1794792635.4405136
+      },
+      {
+        "id": "LTCUSDT:breakout:1794820520706",
+        "symbol": "LTCUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1794825025.9538987,
+        "signal_ts": 1794820520.7079744
       }
     ]
   },
@@ -1131,55 +1147,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10084
-    },
-    "LTCUSDT:breakout:1794820520706": {
-      "id": "LTCUSDT:breakout:1794820520706",
-      "symbol": "LTCUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 44.261,
-      "sl": 44.456052754761856,
-      "tp1": 43.68,
-      "tp2": 43.64098944904763,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.9893406676295491,
-      "rr_tp1": 2.978681335259098,
-      "rr_tp2": 3.178681335259091,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.9860161961049205,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794820520.7079744,
-      "last_checked_ts": 1794823200000,
-      "sl_buffer_used": 0.09100000000000108,
-      "mae": 0.05394724523814176,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 10162
     }
   },
   "daily_summary_date": "2026-11-16",
