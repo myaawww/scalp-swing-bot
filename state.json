@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-16T09:00:39.097097+00:00"
+    "last_run_ts": "2026-11-16T09:15:21.347052+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1131,6 +1131,55 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10084
+    },
+    "LTCUSDT:breakout:1794820520706": {
+      "id": "LTCUSDT:breakout:1794820520706",
+      "symbol": "LTCUSDT",
+      "engine": "breakout",
+      "direction": "short",
+      "entry": 44.261,
+      "sl": 44.456052754761856,
+      "tp1": 43.68,
+      "tp2": 43.64098944904763,
+      "entry_kind": "market",
+      "timeframe": "15m",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "expansion",
+        "trending",
+        "high_vol"
+      ],
+      "confluences": {
+        "range_break": 1.0,
+        "volume_confirm": 1.0
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.9893406676295491,
+      "rr_tp1": 2.978681335259098,
+      "rr_tp2": 3.178681335259091,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 8,
+      "entry_filled": true,
+      "score": 0.9860161961049205,
+      "tier": "A+",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1794820520.7079744,
+      "last_checked_ts": 1794820520707,
+      "sl_buffer_used": 0.09100000000000108,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "high_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "high_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 10162
     }
   },
   "daily_summary_date": "2026-11-16",
