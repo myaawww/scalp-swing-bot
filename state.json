@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-17T00:30:30.949575+00:00"
+    "last_run_ts": "2026-11-17T00:45:25.541313+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -382,9 +382,9 @@
         "sum_r": -1.0
       },
       "HYPEUSDT|high_vol|15m|breakout": {
-        "n": 2,
+        "n": 3,
         "wins": 1,
-        "sum_r": 1.2000000000000024
+        "sum_r": 0.2000000000000024
       },
       "AAVEUSDT|high_vol|15m|liquidity_sweep": {
         "n": 1,
@@ -444,13 +444,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 22,
-        "n_since_last_gate": 12,
+        "n": 23,
+        "n_since_last_gate": 13,
         "by_key": {
           "global": {
-            "n": 12,
-            "n_since_last_gate": 12,
-            "n_since_last_fast_gate": 6,
+            "n": 13,
+            "n_since_last_gate": 13,
+            "n_since_last_fast_gate": 7,
             "fast_gate_ever_fired": true
           }
         }
@@ -486,7 +486,7 @@
         "wins": 3
       },
       "calib|breakout|mid": {
-        "n": 13,
+        "n": 14,
         "wins": 6
       },
       "calib|liquidity_sweep|high": {
@@ -503,14 +503,14 @@
       }
     },
     "totals": {
-      "signals": 24,
+      "signals": 25,
       "wins": 10,
-      "losses": 14,
+      "losses": 15,
       "expired": 3,
-      "sum_r": 22.715828063709278,
+      "sum_r": 21.715828063709278,
       "gross_profit_r": 36.71582806370928,
-      "gross_loss_r": 14.0,
-      "sum_hold_minutes": 10648.677361806236
+      "gross_loss_r": 15.0,
+      "sum_hold_minutes": 10828.538897820315
     }
   },
   "tier2": {
@@ -822,6 +822,17 @@
         "adaptive_delta": "engine_weights[pullback] += step",
         "resolved_ts": 1794859236.3063252,
         "signal_ts": 1794834044.244337
+      },
+      {
+        "id": "HYPEUSDT:breakout:1794865530562",
+        "symbol": "HYPEUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1794876322.2556686,
+        "signal_ts": 1794865530.5635078
       }
     ]
   },
@@ -1167,55 +1178,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10084
-    },
-    "HYPEUSDT:breakout:1794865530562": {
-      "id": "HYPEUSDT:breakout:1794865530562",
-      "symbol": "HYPEUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 69.885,
-      "sl": 68.98042970397127,
-      "tp1": 71.87505465126323,
-      "tp2": 74.13648039133507,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000001,
-      "rr_tp1": 2.2,
-      "rr_tp2": 4.7,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.9159116831727168,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1794865530.5635078,
-      "last_checked_ts": 1794874500000,
-      "sl_buffer_used": 0.23165623682299194,
-      "mae": 0.21208594079425325,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 10197
     }
   },
   "daily_summary_date": "2026-11-16",
