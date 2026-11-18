@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-18T14:45:23.454622+00:00"
+    "last_run_ts": "2026-11-18T15:00:42.814216+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -910,7 +910,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795006800000,
+      "last_checked_ts": 1795010400000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -959,7 +959,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795006800000,
+      "last_checked_ts": 1795010400000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1008,7 +1008,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795006800000,
+      "last_checked_ts": 1795010400000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1057,7 +1057,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795006800000,
+      "last_checked_ts": 1795010400000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1106,7 +1106,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795006800000,
+      "last_checked_ts": 1795010400000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1166,6 +1166,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10276
+    },
+    "SILVER:pullback:1795014042237": {
+      "id": "SILVER:pullback:1795014042237",
+      "symbol": "SILVER",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 45.464,
+      "sl": 45.03420726319362,
+      "tp1": 46.456,
+      "tp2": 46.541958547361276,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.7637558297838744
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6540446301758982,
+      "rr_tp1": 2.3080892603517964,
+      "rr_tp2": 2.50808926035179,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.7386526564226931,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "metal",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1795014042.2383895,
+      "last_checked_ts": 1795014042238,
+      "sl_buffer_used": 0.17879273680638028,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "low_vol",
+        "macro_bias": "bear"
+      },
+      "regime_label": "low_vol",
+      "thin_margin_pass": false,
+      "tg_message_id": 10303
     }
   },
   "daily_summary_date": "2026-11-18",
