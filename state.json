@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-18T07:45:21.730418+00:00"
+    "last_run_ts": "2026-11-18T08:01:40.407681+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -910,7 +910,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1794981600000,
+      "last_checked_ts": 1794985200000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -959,7 +959,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1794981600000,
+      "last_checked_ts": 1794985200000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1008,7 +1008,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1794981600000,
+      "last_checked_ts": 1794985200000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1057,7 +1057,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1794981600000,
+      "last_checked_ts": 1794985200000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1106,7 +1106,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1794981600000,
+      "last_checked_ts": 1794985200000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1146,7 +1146,7 @@
       "rr_tp2": 2.5274186734262813,
       "pending_bars_elapsed": 0,
       "pending_expiry_bars": 12,
-      "entry_filled": false,
+      "entry_filled": true,
       "score": 0.7127600710740603,
       "tier": "A",
       "tp1_hit": false,
@@ -1155,7 +1155,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794960099.6584656,
-      "last_checked_ts": 1794960099658,
+      "last_checked_ts": 1794974400000,
       "sl_buffer_used": 0.05730000000000013,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1168,7 +1168,7 @@
       "tg_message_id": 10276
     }
   },
-  "daily_summary_date": "2026-11-17",
+  "daily_summary_date": "2026-11-18",
   "tier1_tradfi": {
     "adaptive_params": {
       "engine_weights": {
