@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-19T01:15:21.139078+00:00"
+    "last_run_ts": "2026-11-19T01:30:39.391527+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1185,6 +1185,54 @@
       "regime_label": "low_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10303
+    },
+    "LINKUSDT:pullback:1795051837504": {
+      "id": "LINKUSDT:pullback:1795051837504",
+      "symbol": "LINKUSDT",
+      "engine": "pullback",
+      "direction": "long",
+      "entry": 8.954699999999999,
+      "sl": 8.8597,
+      "tp1": 9.1669,
+      "tp2": 9.1859,
+      "entry_kind": "pending",
+      "timeframe": "1h",
+      "confidence_raw": 0.55,
+      "regime_fit": [
+        "trending",
+        "bull",
+        "bear"
+      ],
+      "confluences": {
+        "ob_retest": 0.6057085901214395
+      },
+      "mtf_alignment": 0.5,
+      "liquidity_ok": 1.0,
+      "ev_estimate": 0.6168421052631767,
+      "rr_tp1": 2.2336842105263535,
+      "rr_tp2": 2.433684210526357,
+      "pending_bars_elapsed": 0,
+      "pending_expiry_bars": 10,
+      "entry_filled": false,
+      "score": 0.7172534540339945,
+      "tier": "A",
+      "tp1_hit": false,
+      "tp1_hit_ts": null,
+      "asset_class": "crypto",
+      "result": null,
+      "realized_r": 0.0,
+      "signal_ts": 1795051837.5063295,
+      "last_checked_ts": 1795051837506,
+      "sl_buffer_used": 0.0475999999999992,
+      "mae": 0.0,
+      "sfp_purity": 1.0,
+      "regime_at_entry": {
+        "label": "bear",
+        "macro_bias": "bear"
+      },
+      "regime_label": "bear",
+      "thin_margin_pass": false,
+      "tg_message_id": 10332
     }
   },
   "daily_summary_date": "2026-11-18",
