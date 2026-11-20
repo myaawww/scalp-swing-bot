@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-20T19:45:26.082873+00:00"
+    "last_run_ts": "2026-11-20T20:01:38.329910+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -900,6 +900,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1795057234.483739,
         "signal_ts": 1795014042.2383895
+      },
+      {
+        "id": "COPPER:pullback:1795147294861",
+        "symbol": "COPPER",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1795204839.097957,
+        "signal_ts": 1795147294.8624191
       }
     ]
   },
@@ -941,7 +952,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795197600000,
+      "last_checked_ts": 1795201200000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -990,7 +1001,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795197600000,
+      "last_checked_ts": 1795201200000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1039,7 +1050,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795197600000,
+      "last_checked_ts": 1795201200000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1088,7 +1099,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795197600000,
+      "last_checked_ts": 1795201200000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1137,7 +1148,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795197600000,
+      "last_checked_ts": 1795201200000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1148,54 +1159,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10056
-    },
-    "COPPER:pullback:1795147294861": {
-      "id": "COPPER:pullback:1795147294861",
-      "symbol": "COPPER",
-      "engine": "pullback",
-      "direction": "long",
-      "entry": 5.6068999999999996,
-      "sl": 5.5388,
-      "tp1": 5.7773,
-      "tp2": 5.79092,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.77194508742303
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.7511013215859201,
-      "rr_tp1": 2.5022026431718403,
-      "rr_tp2": 2.702202643171835,
-      "pending_bars_elapsed": 1,
-      "pending_expiry_bars": 10,
-      "entry_filled": true,
-      "score": 0.7582672668870826,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "commodity",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1795147294.8624191,
-      "last_checked_ts": 1795197600000,
-      "sl_buffer_used": 0.02090000000000014,
-      "mae": 0.012100000000000222,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bear",
-        "macro_bias": "bear"
-      },
-      "regime_label": "bear",
-      "thin_margin_pass": false,
-      "tg_message_id": 10423
     }
   },
   "daily_summary_date": "2026-11-20",
@@ -1550,17 +1513,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "COPPER|bear|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 5,
-        "n_since_last_gate": 3,
+        "n": 6,
+        "n_since_last_gate": 4,
         "by_key": {
           "global": {
-            "n": 3,
-            "n_since_last_gate": 3,
-            "n_since_last_fast_gate": 3,
+            "n": 4,
+            "n_since_last_gate": 4,
+            "n_since_last_fast_gate": 4,
             "fast_gate_ever_fired": false
           }
         }
@@ -1572,19 +1540,19 @@
         "wins": 2
       },
       "calib|pullback|mid": {
-        "n": 1,
+        "n": 2,
         "wins": 0
       }
     },
     "totals": {
-      "signals": 5,
+      "signals": 6,
       "wins": 2,
-      "losses": 3,
+      "losses": 4,
       "expired": 0,
-      "sum_r": 6.4000000000000234,
+      "sum_r": 5.4000000000000234,
       "gross_profit_r": 9.400000000000023,
-      "gross_loss_r": 3.0,
-      "sum_hold_minutes": 2983.180467096964
+      "gross_loss_r": 4.0,
+      "sum_hold_minutes": 3942.2510593930874
     }
   }
 }
