@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-21T13:00:42.384247+00:00"
+    "last_run_ts": "2026-11-21T13:15:28.690433+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -18,7 +18,7 @@
           "max": 2.0
         },
         "breakout": {
-          "weight": 1.2100000000000002,
+          "weight": 1.2400000000000002,
           "min": 0.35,
           "max": 2.0
         },
@@ -377,14 +377,14 @@
         "sum_r": -1.0
       },
       "AAVEUSDT|high_vol|15m|breakout": {
-        "n": 1,
+        "n": 2,
         "wins": 0,
-        "sum_r": -1.0
+        "sum_r": -2.0
       },
       "HYPEUSDT|high_vol|15m|breakout": {
-        "n": 3,
-        "wins": 1,
-        "sum_r": 0.2000000000000024
+        "n": 4,
+        "wins": 2,
+        "sum_r": 2.4000000000000052
       },
       "AAVEUSDT|high_vol|15m|liquidity_sweep": {
         "n": 1,
@@ -474,13 +474,13 @@
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 30,
-        "n_since_last_gate": 18,
+        "n": 32,
+        "n_since_last_gate": 19,
         "by_key": {
           "global": {
-            "n": 18,
-            "n_since_last_gate": 18,
-            "n_since_last_fast_gate": 3,
+            "n": 19,
+            "n_since_last_gate": 19,
+            "n_since_last_fast_gate": 4,
             "fast_gate_ever_fired": true
           }
         }
@@ -516,8 +516,8 @@
         "wins": 4
       },
       "calib|breakout|mid": {
-        "n": 15,
-        "wins": 7
+        "n": 17,
+        "wins": 8
       },
       "calib|liquidity_sweep|high": {
         "n": 5,
@@ -541,14 +541,14 @@
       }
     },
     "totals": {
-      "signals": 32,
-      "wins": 12,
-      "losses": 20,
+      "signals": 34,
+      "wins": 13,
+      "losses": 21,
       "expired": 5,
-      "sum_r": 21.463477982672,
-      "gross_profit_r": 41.463477982672,
-      "gross_loss_r": 20.0,
-      "sum_hold_minutes": 21822.107235884672
+      "sum_r": 22.663477982672003,
+      "gross_profit_r": 43.663477982672006,
+      "gross_loss_r": 21.0,
+      "sum_hold_minutes": 22482.14781818788
     }
   },
   "tier2": {
@@ -970,6 +970,28 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1795266037.7229664,
         "signal_ts": 1795261528.7482111
+      },
+      {
+        "id": "HYPEUSDT:breakout:1795229125581",
+        "symbol": "HYPEUSDT",
+        "engine": "breakout",
+        "result": "win",
+        "realized_r": 2.200000000000003,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "engine_weights[breakout] += step",
+        "resolved_ts": 1795266924.8304186,
+        "signal_ts": 1795229126.0583959
+      },
+      {
+        "id": "AAVEUSDT:breakout:1795265122202",
+        "symbol": "AAVEUSDT",
+        "engine": "breakout",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1795266925.8663285,
+        "signal_ts": 1795265122.203413
       }
     ]
   },
@@ -1218,104 +1240,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10056
-    },
-    "HYPEUSDT:breakout:1795229125581": {
-      "id": "HYPEUSDT:breakout:1795229125581",
-      "symbol": "HYPEUSDT",
-      "engine": "breakout",
-      "direction": "short",
-      "entry": 59.307,
-      "sl": 60.26116814703681,
-      "tp1": 57.207830076519016,
-      "tp2": 54.82240970892699,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.6000000000000014,
-      "rr_tp1": 2.200000000000003,
-      "rr_tp2": 4.700000000000003,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.9159116831727171,
-      "tier": "A+",
-      "tp1_hit": true,
-      "tp1_hit_ts": 1795231800000,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1795229126.0583959,
-      "last_checked_ts": 1795265100000,
-      "sl_buffer_used": 0.27199999999999847,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 10511
-    },
-    "AAVEUSDT:breakout:1795265122202": {
-      "id": "AAVEUSDT:breakout:1795265122202",
-      "symbol": "AAVEUSDT",
-      "engine": "breakout",
-      "direction": "long",
-      "entry": 100.46,
-      "sl": 99.65422391193067,
-      "tp1": 102.2,
-      "tp2": 102.36115521761387,
-      "entry_kind": "market",
-      "timeframe": "15m",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "expansion",
-        "trending",
-        "high_vol"
-      ],
-      "confluences": {
-        "range_break": 1.0,
-        "volume_confirm": 1.0
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 0.5797044152607778,
-      "rr_tp1": 2.1594088305215555,
-      "rr_tp2": 2.359408830521559,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.9349860508054437,
-      "tier": "A",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "crypto",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1795265122.203413,
-      "last_checked_ts": 1795265122203,
-      "sl_buffer_used": 0.42900000000000205,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "high_vol",
-        "macro_bias": "bear"
-      },
-      "regime_label": "high_vol",
-      "thin_margin_pass": false,
-      "tg_message_id": 10557
     }
   },
   "daily_summary_date": "2026-11-21",
