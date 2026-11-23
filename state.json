@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-23T01:45:22.488346+00:00"
+    "last_run_ts": "2026-11-23T02:00:39.622443+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1025,6 +1025,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1795389323.0007558,
         "signal_ts": 1795386629.6568384
+      },
+      {
+        "id": "SILVER:pullback:1795392104446",
+        "symbol": "SILVER",
+        "engine": "pullback",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_genuine_variance (fast_gate, key global: 5/7 of genuine_variance; category 7/5 of all losses)",
+        "resolved_ts": 1795399235.5170834,
+        "signal_ts": 1795392104.447168
       }
     ]
   },
@@ -1066,7 +1077,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795392000000,
+      "last_checked_ts": 1795395600000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1115,7 +1126,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795392000000,
+      "last_checked_ts": 1795395600000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1164,7 +1175,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795392000000,
+      "last_checked_ts": 1795395600000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1213,7 +1224,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795392000000,
+      "last_checked_ts": 1795395600000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1262,7 +1273,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795392000000,
+      "last_checked_ts": 1795395600000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1360,7 +1371,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1795341644.3564796,
-      "last_checked_ts": 1795397400000,
+      "last_checked_ts": 1795398300000,
       "sl_buffer_used": 0.15636902287867105,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1371,54 +1382,6 @@
       "regime_label": "high_vol",
       "thin_margin_pass": false,
       "tg_message_id": 10611
-    },
-    "SILVER:pullback:1795392104446": {
-      "id": "SILVER:pullback:1795392104446",
-      "symbol": "SILVER",
-      "engine": "pullback",
-      "direction": "short",
-      "entry": 42.325,
-      "sl": 42.57287893083584,
-      "tp1": 41.507,
-      "tp2": 41.45742421383283,
-      "entry_kind": "pending",
-      "timeframe": "1h",
-      "confidence_raw": 0.55,
-      "regime_fit": [
-        "trending",
-        "bull",
-        "bear"
-      ],
-      "confluences": {
-        "ob_retest": 0.5926003321737717
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.1499990484099212,
-      "rr_tp1": 3.2999980968198424,
-      "rr_tp2": 3.499998096819842,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 10,
-      "entry_filled": false,
-      "score": 0.7923582568533604,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "metal",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1795392104.447168,
-      "last_checked_ts": 1795392104447,
-      "sl_buffer_used": 0.0898789308358473,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "bull",
-        "macro_bias": "bull"
-      },
-      "regime_label": "bull",
-      "thin_margin_pass": false,
-      "tg_message_id": 10640
     }
   },
   "daily_summary_date": "2026-11-22",
@@ -1778,18 +1741,23 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "SILVER|bull|1h|pullback": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 6,
-        "n_since_last_gate": 4,
+        "n": 7,
+        "n_since_last_gate": 5,
         "by_key": {
           "global": {
-            "n": 4,
-            "n_since_last_gate": 4,
-            "n_since_last_fast_gate": 4,
-            "fast_gate_ever_fired": false
+            "n": 5,
+            "n_since_last_gate": 5,
+            "n_since_last_fast_gate": 0,
+            "fast_gate_ever_fired": true
           }
         }
       }
@@ -1800,19 +1768,19 @@
         "wins": 2
       },
       "calib|pullback|mid": {
-        "n": 2,
+        "n": 3,
         "wins": 0
       }
     },
     "totals": {
-      "signals": 6,
+      "signals": 7,
       "wins": 2,
-      "losses": 4,
+      "losses": 5,
       "expired": 0,
-      "sum_r": 5.4000000000000234,
+      "sum_r": 4.4000000000000234,
       "gross_profit_r": 9.400000000000023,
-      "gross_loss_r": 4.0,
-      "sum_hold_minutes": 3942.2510593930874
+      "gross_loss_r": 5.0,
+      "sum_hold_minutes": 4061.1022246479984
     }
   }
 }
