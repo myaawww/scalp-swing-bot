@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-26T15:45:22.428218+00:00"
+    "last_run_ts": "2026-11-26T16:01:47.306551+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -554,17 +554,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "BTCUSDT:trend_continuation:1794369691441",
-        "symbol": "BTCUSDT",
-        "engine": "trend_continuation",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1794412831.8998082,
-        "signal_ts": 1794369691.4441693
-      },
-      {
         "id": "XRPUSDT:trend_continuation:1794339033077",
         "symbol": "XRPUSDT",
         "engine": "trend_continuation",
@@ -1110,7 +1099,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795701600000,
+      "last_checked_ts": 1795705200000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1159,7 +1148,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795701600000,
+      "last_checked_ts": 1795705200000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1208,7 +1197,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795701600000,
+      "last_checked_ts": 1795705200000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1257,7 +1246,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795701600000,
+      "last_checked_ts": 1795705200000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1306,7 +1295,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795701600000,
+      "last_checked_ts": 1795705200000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
