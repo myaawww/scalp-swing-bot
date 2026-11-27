@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-27T05:45:32.348483+00:00"
+    "last_run_ts": "2026-11-27T06:00:48.346853+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -1058,6 +1058,17 @@
         "adaptive_delta": "no_change_insufficient_category_samples",
         "resolved_ts": 1795629646.488328,
         "signal_ts": 1795615246.0583327
+      },
+      {
+        "id": "SILVER:mean_reversion:1795748443688",
+        "symbol": "SILVER",
+        "engine": "mean_reversion",
+        "result": "loss",
+        "realized_r": -1.0,
+        "forensic_category": "genuine_variance",
+        "adaptive_delta": "no_change_insufficient_category_samples",
+        "resolved_ts": 1795759244.3846133,
+        "signal_ts": 1795748443.6888373
       }
     ]
   },
@@ -1099,7 +1110,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795752000000,
+      "last_checked_ts": 1795755600000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1148,7 +1159,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795752000000,
+      "last_checked_ts": 1795755600000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1197,7 +1208,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795752000000,
+      "last_checked_ts": 1795755600000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1246,7 +1257,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795752000000,
+      "last_checked_ts": 1795755600000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1295,7 +1306,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795752000000,
+      "last_checked_ts": 1795755600000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1355,54 +1366,6 @@
       "regime_label": "consolidation",
       "thin_margin_pass": false,
       "tg_message_id": 10912
-    },
-    "SILVER:mean_reversion:1795748443688": {
-      "id": "SILVER:mean_reversion:1795748443688",
-      "symbol": "SILVER",
-      "engine": "mean_reversion",
-      "direction": "short",
-      "entry": 43.447,
-      "sl": 43.908365789920836,
-      "tp1": 41.74905,
-      "tp2": 41.54887315798417,
-      "entry_kind": "market",
-      "timeframe": "1h",
-      "confidence_raw": 0.45,
-      "regime_fit": [
-        "ranging",
-        "consolidation",
-        "low_vol"
-      ],
-      "confluences": {
-        "z_score_extreme": 0.9206749829208457
-      },
-      "mtf_alignment": 0.5,
-      "liquidity_ok": 1.0,
-      "ev_estimate": 1.3401342677481138,
-      "rr_tp1": 3.6802685354962277,
-      "rr_tp2": 4.114147350070184,
-      "pending_bars_elapsed": 0,
-      "pending_expiry_bars": 8,
-      "entry_filled": true,
-      "score": 0.8603530129086142,
-      "tier": "A+",
-      "tp1_hit": false,
-      "tp1_hit_ts": null,
-      "asset_class": "metal",
-      "result": null,
-      "realized_r": 0.0,
-      "signal_ts": 1795748443.6888373,
-      "last_checked_ts": 1795752000000,
-      "sl_buffer_used": 0.17936578992083646,
-      "mae": 0.0,
-      "sfp_purity": 1.0,
-      "regime_at_entry": {
-        "label": "consolidation",
-        "macro_bias": "neutral"
-      },
-      "regime_label": "consolidation",
-      "thin_margin_pass": false,
-      "tg_message_id": 10932
     }
   },
   "daily_summary_date": "2026-11-26",
@@ -1777,17 +1740,22 @@
         "n": 1,
         "wins": 0,
         "sum_r": -1.0
+      },
+      "SILVER|consolidation|1h|mean_reversion": {
+        "n": 1,
+        "wins": 0,
+        "sum_r": -1.0
       }
     },
     "category_stats": {
       "genuine_variance": {
-        "n": 8,
-        "n_since_last_gate": 6,
+        "n": 9,
+        "n_since_last_gate": 7,
         "by_key": {
           "global": {
-            "n": 6,
-            "n_since_last_gate": 6,
-            "n_since_last_fast_gate": 1,
+            "n": 7,
+            "n_since_last_gate": 7,
+            "n_since_last_fast_gate": 2,
             "fast_gate_ever_fired": true
           }
         }
@@ -1817,17 +1785,21 @@
       "calib|trend_continuation|mid": {
         "n": 1,
         "wins": 0
+      },
+      "calib|mean_reversion|low": {
+        "n": 1,
+        "wins": 0
       }
     },
     "totals": {
-      "signals": 9,
+      "signals": 10,
       "wins": 2,
-      "losses": 7,
+      "losses": 8,
       "expired": 0,
-      "sum_r": 2.4000000000000234,
+      "sum_r": 1.4000000000000234,
       "gross_profit_r": 9.400000000000023,
-      "gross_loss_r": 7.0,
-      "sum_hold_minutes": 4421.013586862881
+      "gross_loss_r": 8.0,
+      "sum_hold_minutes": 4601.02518312931
     }
   }
 }
