@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-28T09:30:30.336057+00:00"
+    "last_run_ts": "2026-11-28T09:45:23.630872+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -553,17 +553,6 @@
   },
   "tier2": {
     "trades": [
-      {
-        "id": "COPPER:breakout:1794556896216",
-        "symbol": "COPPER",
-        "engine": "breakout",
-        "result": "loss",
-        "realized_r": -1.0,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "no_change_insufficient_category_samples",
-        "resolved_ts": 1794563121.5246158,
-        "signal_ts": 1794556897.2145748
-      },
       {
         "id": "SOLUSDT:breakout:1794584722414",
         "symbol": "SOLUSDT",
