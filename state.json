@@ -2,7 +2,7 @@
   "meta": {
     "engine": "ORACLE",
     "version": "2.2.2",
-    "last_run_ts": "2026-11-28T03:45:24.822095+00:00"
+    "last_run_ts": "2026-11-28T04:01:33.622861+00:00"
   },
   "tier1": {
     "adaptive_params": {
@@ -554,17 +554,6 @@
   "tier2": {
     "trades": [
       {
-        "id": "TAOUSDT:trend_continuation:1794531634861",
-        "symbol": "TAOUSDT",
-        "engine": "trend_continuation",
-        "result": "win",
-        "realized_r": 2.257750759878424,
-        "forensic_category": "genuine_variance",
-        "adaptive_delta": "engine_weights[trend_continuation] += step",
-        "resolved_ts": 1794542430.6007946,
-        "signal_ts": 1794531634.8621857
-      },
-      {
         "id": "COPPER:breakout:1794556896216",
         "symbol": "COPPER",
         "engine": "breakout",
@@ -1099,7 +1088,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794624324.4307663,
-      "last_checked_ts": 1795831200000,
+      "last_checked_ts": 1795834800000,
       "sl_buffer_used": 0.38700000000000045,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1148,7 +1137,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794628890.2727919,
-      "last_checked_ts": 1795831200000,
+      "last_checked_ts": 1795834800000,
       "sl_buffer_used": 307.0,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1197,7 +1186,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794634230.6140053,
-      "last_checked_ts": 1795831200000,
+      "last_checked_ts": 1795834800000,
       "sl_buffer_used": 3.1399999999999864,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1246,7 +1235,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794688230.821566,
-      "last_checked_ts": 1795831200000,
+      "last_checked_ts": 1795834800000,
       "sl_buffer_used": 0.0003449989320313127,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1295,7 +1284,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1794689125.2778814,
-      "last_checked_ts": 1795831200000,
+      "last_checked_ts": 1795834800000,
       "sl_buffer_used": 0.04681980238771608,
       "mae": 0.0,
       "sfp_purity": 1.0,
@@ -1333,7 +1322,7 @@
       "ev_estimate": 0.7230014025245417,
       "rr_tp1": 2.4460028050490834,
       "rr_tp2": 2.646002805049086,
-      "pending_bars_elapsed": 6,
+      "pending_bars_elapsed": 7,
       "pending_expiry_bars": 12,
       "entry_filled": false,
       "score": 0.7412895479832006,
@@ -1344,7 +1333,7 @@
       "result": null,
       "realized_r": 0.0,
       "signal_ts": 1795723301.7248793,
-      "last_checked_ts": 1795809600000,
+      "last_checked_ts": 1795824000000,
       "sl_buffer_used": 0.0354000000000001,
       "mae": 0.0,
       "sfp_purity": 1.0,
